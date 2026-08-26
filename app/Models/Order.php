@@ -2,17 +2,27 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToSite; // <--- ADICIONADO
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    use BelongsToSite; // <--- ADICIONADO
+
     protected $guarded = [];
 
     protected function casts(): array
     {
-        return ['sold_at' => 'datetime', 'total' => 'decimal:2', 'subtotal' => 'decimal:2', 'discount' => 'decimal:2', 'tax' => 'decimal:2', 'shipping' => 'decimal:2'];
+        return [
+            'sold_at' => 'datetime',
+            'total' => 'decimal:2',
+            'subtotal' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'tax' => 'decimal:2',
+            'shipping' => 'decimal:2'
+        ];
     }
 
     public function site(): BelongsTo

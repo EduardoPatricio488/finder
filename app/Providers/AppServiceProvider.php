@@ -27,18 +27,37 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        // --- LÓGICA DE PLANOS SAAS ---
+        // --- LÓGICA DE ACESSO SAAS (GATES) ---
 
-        // Define quem pode ver os Relatórios
+        /**
+         * Gate: access-reports
+         * Verifica se o site atual tem permissão para ver relatórios avançados.
+         */
         Gate::define('access-reports', function ($user, Site $site) {
-            // Verifica se o site tem um plano e se esse plano permite relatórios
-            return $site->plan && $site->plan->has_reports;
+            // Carrega o plano se ele não estiver presente
+            $site->loadMissing('plan');
+
+            // Permite se o site tiver um plano e a funcionalidade 'has_reports' for verdadeira
+            return $site->plan && $site->plan->has_reports === true;
         });
 
-        // Define quem pode usar o Assistente IA
+        /**
+         * Gate: access-ai
+         * Verifica se o site atual tem acesso ao Assistente de IA.
+         */
         Gate::define('access-ai', function ($user, Site $site) {
-            // Verifica se o site tem um plano e se esse plano permite IA
-            return $site->plan && $site->plan->has_ai;
+            $site->loadMissing('plan');
+
+            // Permite se o site tiver um plano e a funcionalidade 'has_ai' for verdadeira
+            return $site->plan && $site->plan->has_ai === true;
+        });
+
+        /**
+         * Gate: manage-site
+         * Verifica se o utilizador é dono do site ou membro da equipa.
+         */
+        Gate::define('manage-site', function ($user, Site $site) {
+            return $user->id === $site->owner_id || $site->members()->where('user_id', $user->id)->exists();
         });
     }
 
