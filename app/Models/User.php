@@ -22,6 +22,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $name
  * @property string $email
  * @property string|null $plan
+ * @property string|null $role
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -31,26 +32,43 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'plan'])]
+#[Fillable(['name', 'email', 'password', 'plan', 'role'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
+    /**
+     * Define quem é Administrador do Sistema
+     */
     public function isAdministrator(): bool
     {
-        return $this->role === 'administrador';
+        // Verifica se o email é o teu admin ou se tem a role explicitamente no banco
+        return in_array($this->email, ['admin@admin.pt'])
+               || $this->role === 'administrador';
     }
 
+    /**
+     * Verifica se o utilizador tem plano Premium
+     */
     public function hasFinderPremium(): bool
     {
-        return $this->plan === 'finder_premium';
+        $normalizedPlan = strtolower($this->plan ?? '');
+
+        return in_array($normalizedPlan, [
+            'finder_premium',
+            'premium',
+            'pro'
+        ]);
     }
 
+    /**
+     * Define se pode criar sites (Admins podem sempre)
+     */
     public function canCreateSites(): bool
     {
-        return $this->hasFinderPremium();
+        return $this->isAdministrator() || $this->hasFinderPremium();
     }
 
     public function orders(): HasMany

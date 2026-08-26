@@ -21,57 +21,48 @@ use App\Livewire\StoreSettings;
 use App\Livewire\UserManager;
 use App\Livewire\CreateSite;
 use App\Livewire\PlanSelection;
+use App\Livewire\UpgradeSelection;
 use Illuminate\Support\Facades\Route;
 
-// --- PORTAL PÚBLICO (DIRETÓRIO) ---
+// --- PORTAL PÚBLICO ---
 Route::get('/', SiteDirectory::class)->name('home');
+Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 
-// --- ACESSO ÀS LOJAS DOS CLIENTES ---
-Route::get('sites/{site:slug}', SiteWorkspace::class)->name('sites.show');
-Route::scopeBindings()->group(function (): void {
-    Route::view('sites/{site:slug}/loja', 'landing')->name('sites.store');
-    Route::get('sites/{site:slug}/produtos', ProductCatalog::class)->name('sites.products');
-    Route::get('sites/{site:slug}/produtos/{product:slug}', ProductDetail::class)->name('sites.products.show');
-});
-
-// --- ÁREA DO CLIENTE (COMPRADOR) ---
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('minhas-encomendas', OrderTracking::class)->name('orders.tracking');
-    Route::get('minha-conta', CustomerAccount::class)->name('account');
-    Route::get('minha-conta/{section}', CustomerAccount::class)->name('account.section');
-});
-
-// --- ROTA DE ENTRADA (SEMPRE HUB) ---
+// --- ROTA DE ENTRADA INTELIGENTE ---
 Route::middleware(['auth', 'verified'])->get('entrada', function () {
+    $user = auth()->user();
+
+    // SE FOR ADMIN GLOBAL (admin@admin.pt) -> VAI PARA O DASHBOARD MESTRE
+    if ($user->isAdministrator()) {
+        return redirect()->route('dashboard');
+    }
+
+    // SE FOR UTILIZADOR COMUM -> VAI PARA O HUB DE SITES
     return redirect()->route('home');
 })->name('entry');
+
+// --- PAINEL ADMINISTRATIVO MESTRE (SÓ PARA TI) ---
+Route::middleware(['auth', 'verified', 'admin'])->group(function () {
+    Route::get('dashboard', AdminDashboard::class)->name('dashboard');
+    Route::get('admin/utilizadores', UserManager::class)->name('admin.users');
+    Route::get('admin/config-global', StoreSettings::class)->name('admin.config');
+});
 
 // --- CRIAR NOVA LOJA ---
 Route::middleware(['auth', 'verified'])->get('criar-loja', CreateSite::class)->name('site.create');
 
-// --- ADMINISTRAÇÃO MESTRE ---
-Route::middleware(['auth', 'verified', 'admin'])->group(function () {
-    Route::get('dashboard', AdminDashboard::class)->name('dashboard');
-    Route::get('admin/utilizadores', UserManager::class)->name('admin.users');
-});
-
-// --- PAINEL DO LOJISTA (SaaS) ---
+// --- PAINEL DO LOJISTA (ISOLADO POR SITE) ---
 Route::middleware(['auth', 'verified', 'site.access'])
     ->prefix('admin/sites/{site:slug}')
     ->name('admin.site.')
     ->group(function () {
-
         Route::get('dashboard', AdminDashboard::class)->name('dashboard');
         Route::get('config', StoreSettings::class)->name('config');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('produtos', ProductManager::class)->name('products');
         Route::get('categorias', CategoryManager::class)->name('categories');
-        Route::get('stock/movements', StockMovementManager::class)->name('stock');
         Route::get('encomendas', OrderManager::class)->name('orders');
-        Route::get('clientes', CustomerManager::class)->name('customers');
-        Route::get('promocoes', PromotionManager::class)->name('promotions');
-        Route::get('vendas', SalesManager::class)->name('sales');
-        Route::get('pagamentos', PaymentManager::class)->name('payments');
+        Route::get('utilizadores', UserManager::class)->name('users');
 
         // PREMIUM
         Route::get('relatorios', Reports::class)->middleware('can:access-reports,site')->name('reports');
