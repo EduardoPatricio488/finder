@@ -33,6 +33,7 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'plan' => 'finder_free',
         ];
     }
 
@@ -43,6 +44,21 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function administrator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'administrador',
+            'plan' => 'finder_premium',
+        ]);
+    }
+
+    public function finderPremium(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'plan' => 'finder_premium',
         ]);
     }
 

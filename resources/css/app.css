@@ -47,6 +47,37 @@
     }
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
+@keyframes store-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.store-reveal {
+    animation: store-rise 650ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.store-card {
+    transition: transform 280ms cubic-bezier(.22, 1, .36, 1), box-shadow 280ms ease, border-color 280ms ease;
+}
+
+.store-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 40px rgba(41, 37, 36, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .store-reveal,
+    .store-card,
+    .store-card:hover {
+        animation: none;
+        transform: none;
+    }
+}
+
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
 }

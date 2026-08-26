@@ -4,13 +4,21 @@ use App\Models\User;
 use Laravel\Fortify\Features;
 
 test('login screen can be rendered', function () {
-    $response = $this->get(route('login'));
+    $this->get(route('login'))->assertOk();
+});
 
-    $response->assertOk();
+test('login screen presents the Finder identity', function () {
+    $this->get(route('login'))
+        ->assertSee('Finder')
+        ->assertSee('Gestão de sites')
+        ->assertSee('Entrar na sua conta')
+        ->assertSee('Os seus sites, num só lugar.')
+        ->assertSee('Voltar aos sites')
+        ->assertDontSee('Log in to your account');
 });
 
 test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->administrator()->create();
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -19,9 +27,18 @@ test('users can authenticate using the login screen', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect(route('dashboard', absolute: false));
+        ->assertRedirect(route('entry', absolute: false));
 
     $this->assertAuthenticated();
+});
+
+test('regular users are sent to the public sales page after login', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    $this->get(route('entry'))
+        ->assertRedirect(route('sales'));
 });
 
 test('users can not authenticate with invalid password', function () {

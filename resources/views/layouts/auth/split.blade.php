@@ -1,41 +1,42 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white antialiased dark:bg-linear-to-b dark:from-neutral-950 dark:to-neutral-900">
-        <div class="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div class="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-e dark:border-neutral-800">
-                <div class="absolute inset-0 bg-neutral-900"></div>
-                <a href="{{ route('home') }}" class="relative z-20 flex items-center text-lg font-medium" wire:navigate>
-                    <span class="flex h-10 w-10 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="me-2 h-7 fill-current text-white" />
-                    </span>
-                    {{ config('app.name', 'Laravel') }}
-                </a>
+    <body class="min-h-screen bg-[#f4f1ea] text-stone-950 antialiased">
+        <div class="grid min-h-svh lg:grid-cols-2">
+            <aside class="relative hidden overflow-hidden bg-stone-950 px-12 py-12 text-white lg:flex lg:flex-col">
+                <div class="pointer-events-none absolute -right-16 top-24 size-72 rounded-full bg-amber-400/20 blur-3xl"></div>
+                <div class="pointer-events-none absolute bottom-10 left-10 size-56 rounded-full bg-amber-200/10 blur-3xl"></div>
 
-                @php
-                    [$message, $author] = str(Illuminate\Foundation\Inspiring::quotes()->random())->explode('-');
-                @endphp
+                <x-finder-mark inverted />
 
-                <div class="relative z-20 mt-auto">
-                    <blockquote class="space-y-2">
-                        <flux:heading size="lg">&ldquo;{{ trim($message) }}&rdquo;</flux:heading>
-                        <footer><flux:heading>{{ trim($author) }}</flux:heading></footer>
-                    </blockquote>
+                <div class="relative z-10 mt-auto max-w-md">
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-amber-300">Página principal</p>
+                    <h1 class="mt-4 text-4xl font-semibold tracking-tight">Os seus sites, num só lugar.</h1>
+                    <p class="mt-5 text-base leading-7 text-white/70">
+                        Entre para gerir a coleção Finder. A Casa &amp; Co. e os restantes projetos ficam todos aqui.
+                    </p>
                 </div>
-            </div>
-            <div class="w-full lg:p-8">
-                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden" wire:navigate>
-                        <span class="flex h-9 w-9 items-center justify-center rounded-md">
-                            <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
-                        </span>
+            </aside>
 
-                        <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
+            <div class="flex flex-col">
+                <header class="flex h-[4.75rem] items-center justify-between gap-3 border-b border-stone-900/10 px-6 lg:px-12">
+                    <x-finder-mark class="lg:hidden" />
+                    <a
+                        href="{{ route('home') }}"
+                        wire:navigate
+                        class="ms-auto text-sm font-semibold text-stone-600 transition hover:text-stone-950"
+                    >
+                        Voltar aos sites
                     </a>
-                    {{ $slot }}
-                </div>
+                </header>
+
+                <main class="flex flex-1 items-center justify-center px-6 py-10">
+                    <div class="w-full max-w-md rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+                        {{ $slot }}
+                    </div>
+                </main>
             </div>
         </div>
 

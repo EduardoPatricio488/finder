@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureSiteAccess;
+use App\Http\Middleware\EnsureUserIsAdministrator;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'admin' => EnsureUserIsAdministrator::class,
+            'site.access' => EnsureSiteAccess::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
