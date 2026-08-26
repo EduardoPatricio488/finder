@@ -17,33 +17,16 @@ use Illuminate\Support\Facades\Route;
 /**
  * @property int $id
  * @property int|null $owner_id
+ * @property int|null $plan_id
  * @property string $name
  * @property string $slug
- * @property string|null $tagline
- * @property string|null $description
- * @property string|null $logo
- * @property string|null $favicon
- * @property string $category_label
- * @property string $accent
- * @property string $primary_color
- * @property string $secondary_color
- * @property string $status
- * @property string $type
- * @property string|null $subdomain
- * @property string|null $custom_domain
- * @property array<string, mixed>|null $homepage
- * @property array<string, mixed>|null $social_links
- * @property string|null $contact_email
- * @property string|null $phone
- * @property string|null $address
- * @property string|null $home_route
- * @property bool $is_published
- * @property int $sort_order
+ * ... (resto das propriedades)
  */
 #[Fillable([
     'name',
     'slug',
     'owner_id',
+    'plan_id', // ADICIONADO PARA O SAAS
     'tagline',
     'description',
     'category_label',
@@ -96,9 +79,27 @@ class Site extends Model
         ];
     }
 
+    // --- RELAÇÕES DO SISTEMA ---
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * Relação com o Plano SaaS
+     */
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    /**
+     * Alias para members() para evitar erros no Seeder e standard Laravel
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->members();
     }
 
     public function members(): BelongsToMany
@@ -145,6 +146,8 @@ class Site extends Model
     {
         return $this->hasOne(StoreConfig::class);
     }
+
+    // --- LÓGICA E SCOPES ---
 
     #[Scope]
     protected function published(Builder $query): Builder

@@ -82,3 +82,5 @@ Route::middleware(['auth', 'verified', 'site.access'])
     });
 
 require __DIR__.'/settings.php';
+
+Route::middleware(['auth', 'verified'])->get('criar-loja', \App\Livewire\CreateSite::class)->name('site.create');
