@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
@@ -38,18 +37,35 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return true;
     }
 
-    public function orders(): HasMany { return $this->hasMany(Order::class, 'seller_id'); }
-    public function ownedSites(): HasMany { return $this->hasMany(Site::class, 'owner_id'); }
-    public function sites(): BelongsToMany { return $this->belongsToMany(Site::class)->withPivot('role')->withTimestamps(); }
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'seller_id');
+    }
+
+    public function ownedSites(): HasMany
+    {
+        return $this->hasMany(Site::class, 'owner_id');
+    }
+
+    public function sites(): BelongsToMany
+    {
+        return $this->belongsToMany(Site::class)->withPivot('role')->withTimestamps();
+    }
 
     protected function casts(): array
     {
-        return ['email_verified_at'=>'datetime','password'=>'hashed'];
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
     public function initials(): string
     {
         $initials = Str::initials($this->name, true);
-        return Str::length($initials) > 1 ? Str::substr($initials, 0, 1).Str::substr($initials, -1) : $initials;
+
+        return Str::length($initials) > 1
+            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
+            : $initials;
     }
 }
