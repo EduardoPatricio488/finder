@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\PublicSite;
+use App\Livewire\SiteSubmissions;
 use App\Models\Site;
 use App\Models\SitePage;
 use App\Models\SiteSubmission;
@@ -17,10 +18,13 @@ it('records public contact submissions only for published websites', function ()
         'status' => 'published',
     ]);
 
-    $page = SitePage::factory()->create([
+    SitePage::create([
         'site_id' => $site->id,
-        'is_homepage' => true,
+        'name' => 'Home',
+        'slug' => 'home',
         'status' => 'published',
+        'is_homepage' => true,
+        'sort_order' => 0,
     ]);
 
     Livewire::test(PublicSite::class, ['site' => $site])
@@ -47,7 +51,7 @@ it('isolates website submissions between websites', function () {
     ]);
 
     $this->actingAs($owner);
-    Livewire::test(\App\Livewire\SiteSubmissions::class, ['site' => $secondSite])
+    Livewire::test(SiteSubmissions::class, ['site' => $secondSite])
         ->assertSee('Ainda não existem submissões.')
         ->assertDontSee('first@example.com');
 });
