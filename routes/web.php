@@ -6,6 +6,7 @@ use App\Livewire\BuilderEditor;
 use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
 use App\Livewire\LandingPage;
+use App\Livewire\MenuManager;
 use App\Livewire\OrderManager;
 use App\Livewire\PlanSelection;
 use App\Livewire\PlatformAdminDashboard;
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('dashboard', AdminDashboard::class)->name('dashboard');
         Route::get('config', StoreSettings::class)->name('config');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
+        Route::get('menus', MenuManager::class)->name('menus');
         Route::get('produtos', ProductManager::class)->name('products');
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('encomendas', OrderManager::class)->name('orders');
