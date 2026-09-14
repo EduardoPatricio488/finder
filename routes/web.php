@@ -6,6 +6,7 @@ use App\Livewire\BuilderEditor;
 use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
 use App\Livewire\LandingPage;
+use App\Livewire\MediaLibrary;
 use App\Livewire\MenuManager;
 use App\Livewire\OrderManager;
 use App\Livewire\PlanSelection;
@@ -14,6 +15,7 @@ use App\Livewire\PlatformWebsites;
 use App\Livewire\ProductManager;
 use App\Livewire\PublicSite;
 use App\Livewire\Reports;
+use App\Livewire\SiteAnalytics;
 use App\Livewire\SiteSettings;
 use App\Livewire\StoreSettings;
 use App\Livewire\UpgradeSelection;
@@ -52,9 +54,7 @@ Route::middleware(['auth', 'verified', 'admin'])
                 'user_agent' => request()->userAgent(),
                 'metadata' => ['source' => 'platform_admin'],
             ]);
-
             session(['platform_admin_site_id' => $site->id]);
-
             return redirect()->route('admin.site.dashboard', $site);
         })->name('websites.access');
         Route::post('websites/exit-access', function () {
@@ -69,9 +69,7 @@ Route::middleware(['auth', 'verified', 'admin'])
                     'metadata' => ['source' => 'platform_admin'],
                 ]);
             }
-
             session()->forget('platform_admin_site_id');
-
             return redirect()->route('admin.websites');
         })->name('websites.exit-access');
     });
@@ -83,6 +81,10 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('dashboard', AdminDashboard::class)->name('dashboard');
         Route::get('config', StoreSettings::class)->name('config');
         Route::get('definicoes', SiteSettings::class)->name('settings');
+        Route::get('media', MediaLibrary::class)->name('media');
+        Route::get('analytics', SiteAnalytics::class)
+            ->middleware('can:access-reports,site')
+            ->name('analytics');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
         Route::get('produtos', ProductManager::class)->name('products');
