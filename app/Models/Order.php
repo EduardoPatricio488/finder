@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use App\Traits\BelongsToSite; // <--- ADICIONADO
+use App\Traits\BelongsToSite;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    use BelongsToSite; // <--- ADICIONADO
+    use BelongsToSite;
 
     protected $guarded = [];
 
@@ -21,7 +21,7 @@ class Order extends Model
             'subtotal' => 'decimal:2',
             'discount' => 'decimal:2',
             'tax' => 'decimal:2',
-            'shipping' => 'decimal:2'
+            'shipping' => 'decimal:2',
         ];
     }
 
