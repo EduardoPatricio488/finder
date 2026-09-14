@@ -60,13 +60,16 @@
                     @if($hasSite)
                         <flux:sidebar.item icon="home" :href="$siteRoute('dashboard')" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>
                     @endif
+                    @if(auth()->user()?->isAdministrator())
+                        <flux:sidebar.item icon="building-office-2" :href="route('admin.websites')" :current="request()->routeIs('admin.websites')" wire:navigate>Admin — Websites</flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
 
                 @if($hasSite)
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="pencil-square" :href="route('builder.edit', $currentSite)" :current="request()->routeIs('builder.edit')" wire:navigate>Editor visual</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
-                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('config')" :current="request()->routeIs('admin.site.config')" wire:navigate>Definições</flux:sidebar.item>
+                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>Definições do website</flux:sidebar.item>
                     </flux:sidebar.group>
 
                     <flux:sidebar.group heading="Catálogo" class="grid">
