@@ -171,7 +171,8 @@ class BuilderEditor extends Component
         $allowed = [
             'hero', 'text', 'image', 'button', 'feature_grid', 'card',
             'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid',
-            'video', 'newsletter', 'cta',
+            'product_card', 'pricing', 'blog_posts', 'social_links', 'video',
+            'map', 'newsletter', 'cta',
         ];
         abort_unless(in_array($type, $allowed, true), 422);
 
@@ -238,10 +239,12 @@ class BuilderEditor extends Component
     public function save(): void
     {
         $page = $this->site->pages()->findOrFail($this->pageId);
+        $slug = Str::slug($this->pageSlug ?: $this->pageName);
+
         $page->update([
-            'name' => $this->pageName,
-            'slug' => Str::slug($this->pageSlug ?: $this->pageName),
-            'status' => $this->pageStatus,
+            'name' => trim($this->pageName) ?: 'Sem título',
+            'slug' => $slug ?: 'pagina',
+            'status' => in_array($this->pageStatus, ['draft', 'published'], true) ? $this->pageStatus : 'draft',
         ]);
 
         $keepIds = [];
@@ -284,6 +287,18 @@ class BuilderEditor extends Component
         ]);
         $this->site->refresh();
         $this->dispatch('builder-published');
+    }
+
+    public function unpublish(): void
+    {
+        $this->save();
+        $this->site->update([
+            'is_published' => false,
+            'status' => 'draft',
+            'published_at' => null,
+        ]);
+        $this->site->refresh();
+        $this->dispatch('builder-unpublished');
     }
 
     private function checkpoint(): void
@@ -368,7 +383,8 @@ class BuilderEditor extends Component
                 'title' => 'Uma secção de conteúdo',
                 'body' => 'Escreve aqui a mensagem que queres mostrar aos teus visitantes.',
             ],
-            'button' => ['label' => 'Começar agora', 'url' => '#'],
+            'image' => ['url' => '', 'alt' => '', 'caption' => ''],
+            'button' => ['label' => 'Começar agora', 'url' => '#', 'target' => '_self'],
             'feature_grid' => [
                 'title' => 'Tudo o que precisas',
                 'items' => [
@@ -377,10 +393,24 @@ class BuilderEditor extends Component
                     ['title' => 'Rápido', 'description' => 'Publica em poucos minutos.'],
                 ],
             ],
+            'card' => ['title' => 'Título do cartão', 'description' => 'Descrição do cartão.'],
+            'testimonials' => ['title' => 'O que dizem', 'items' => [['name' => 'Cliente', 'quote' => 'Excelente experiência.']]],
+            'faq' => ['title' => 'Perguntas frequentes', 'items' => [['question' => 'Como funciona?', 'answer' => 'Personaliza esta resposta.']]],
+            'gallery' => ['items' => [['url' => '', 'alt' => '']]],
+            'contact_form' => ['title' => 'Contacta-nos', 'description' => 'Envia-nos uma mensagem.'],
+            'product_grid' => ['title' => 'Produtos'],
+            'product_card' => ['title' => 'Produto', 'description' => 'Descrição do produto.'],
+            'pricing' => ['title' => 'Planos', 'items' => [['name' => 'Plano', 'price' => '49 €', 'description' => 'Descrição.']]],
+            'blog_posts' => ['title' => 'Artigos', 'items' => [['title' => 'Novo artigo', 'excerpt' => 'Resumo do artigo.']]],
+            'social_links' => ['items' => [['label' => 'Instagram', 'url' => '#']]],
+            'video' => ['title' => 'Vídeo', 'url' => ''],
+            'map' => ['address' => '', 'embed_url' => ''],
+            'newsletter' => ['title' => 'Recebe novidades'],
             'cta' => [
                 'title' => 'Pronto para começar?',
                 'description' => 'Publica o teu website quando estiveres satisfeito.',
                 'button_label' => 'Começar',
+                'button_url' => '#',
             ],
             default => [
                 'title' => Str::headline($type),
@@ -389,7 +419,7 @@ class BuilderEditor extends Component
         };
     }
 
-    public function render()
+    public function render(): mixed
     {
         return view('livewire.builder-editor');
     }
