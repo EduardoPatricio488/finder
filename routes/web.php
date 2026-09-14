@@ -5,13 +5,18 @@ use App\Livewire\AdminDashboard;
 use App\Livewire\BuilderEditor;
 use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
+use App\Livewire\CustomerAccount;
+use App\Livewire\CustomerAssistant;
 use App\Livewire\LandingPage;
 use App\Livewire\MediaLibrary;
 use App\Livewire\MenuManager;
 use App\Livewire\OrderManager;
+use App\Livewire\OrderTracking;
 use App\Livewire\PlanSelection;
 use App\Livewire\PlatformAdminDashboard;
 use App\Livewire\PlatformWebsites;
+use App\Livewire\ProductCatalog;
+use App\Livewire\ProductDetail;
 use App\Livewire\ProductManager;
 use App\Livewire\PublicSite;
 use App\Livewire\Reports;
@@ -27,6 +32,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->name('home');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
+Route::get('vendas', ProductCatalog::class)->name('sales');
+Route::get('produtos', ProductCatalog::class)->name('products');
+Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
+
 Route::middleware(['auth', 'verified'])
     ->get('entrada', fn () => redirect()->route('dashboard'))
     ->name('entry');
@@ -35,7 +44,13 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', UserDashboard::class)->name('dashboard');
     Route::get('websites/create', CreateSite::class)->name('site.create');
     Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
+    Route::get('conta/{section?}', CustomerAccount::class)->name('account');
+    Route::get('conta/favoritos', fn () => redirect()->route('account', ['section' => 'favorites']))->name('account.favorites');
+    Route::get('encomendas/acompanhamento', OrderTracking::class)->name('orders.tracking');
+    Route::get('assistente', CustomerAssistant::class)->name('customer.assistant');
 });
+
+Route::get('site/{site:slug}/{pageSlug?}', PublicSite::class)->name('site.public');
 
 Route::middleware(['auth', 'verified', 'admin'])
     ->prefix('admin')
@@ -100,7 +115,5 @@ Route::middleware(['auth', 'verified', 'site.access'])
             ->middleware('can:access-ai,site')
             ->name('assistant');
     });
-
-Route::get('site/{site:slug}/{pageSlug?}', PublicSite::class)->name('site.public');
 
 require __DIR__.'/settings.php';
