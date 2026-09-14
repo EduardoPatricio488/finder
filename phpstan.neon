@@ -11,13 +11,3 @@ parameters:
         - routes/
 
     level: 3
-
-    # The existing application relies heavily on dynamic Eloquent relations,
-    # aggregate aliases and Livewire's runtime properties. Keep CI focused on
-    # executable correctness while those legacy dynamic types are migrated to
-    # explicit PHPDoc/generics incrementally.
-    ignoreErrors:
-        - identifier: property.notFound
-        - identifier: method.notFound
-        - identifier: return.type
-        - identifier: assign.propertyType
