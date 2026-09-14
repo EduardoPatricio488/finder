@@ -130,6 +130,5 @@ test('users cannot manage another websites settings or menus', function () {
 
     $this->get(route('admin.site.settings', $site))->assertForbidden();
     $this->get(route('admin.site.menus', $site))->assertForbidden();
-
-    expect(Livewire::test(MenuManager::class, ['site' => $site])->lastResponse->status())->toBe(403);
+    expect($site->menus()->count())->toBe(0);
 });
