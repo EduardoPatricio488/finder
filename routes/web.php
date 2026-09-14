@@ -14,6 +14,7 @@ use App\Livewire\PlatformWebsites;
 use App\Livewire\ProductManager;
 use App\Livewire\PublicSite;
 use App\Livewire\Reports;
+use App\Livewire\SiteSettings;
 use App\Livewire\StoreSettings;
 use App\Livewire\UpgradeSelection;
 use App\Livewire\UserDashboard;
@@ -64,6 +65,7 @@ Route::middleware(['auth', 'verified', 'site.access'])
     ->group(function (): void {
         Route::get('dashboard', AdminDashboard::class)->name('dashboard');
         Route::get('config', StoreSettings::class)->name('config');
+        Route::get('definicoes', SiteSettings::class)->name('settings');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
         Route::get('produtos', ProductManager::class)->name('products');
