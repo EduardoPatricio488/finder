@@ -20,7 +20,9 @@ class PlatformAdminDashboard extends Component
             'usersCount' => User::query()->count(),
             'sitesCount' => Site::query()->count(),
             'publishedCount' => Site::query()->where('is_published', true)->where('status', 'published')->count(),
-            'draftCount' => Site::query()->where('is_published', false)->orWhere('status', 'draft')->count(),
+            'draftCount' => Site::query()->where(function ($query): void {
+                $query->where('is_published', false)->orWhere('status', 'draft');
+            })->count(),
             'newUsers' => User::query()->latest()->limit(8)->get(),
             'recentSites' => Site::query()->with('owner')->latest()->limit(8)->get(),
         ]);
