@@ -13,6 +13,7 @@ use Livewire\Component;
 class PublicSite extends Component
 {
     public Site $site;
+
     public SitePage $page;
 
     public function mount(Site $site, ?string $pageSlug = null): void
@@ -39,9 +40,18 @@ class PublicSite extends Component
 
     private function deviceType(?string $userAgent): string
     {
-        if (! $userAgent) return 'unknown';
-        if (preg_match('/mobile|android|iphone/i', $userAgent)) return 'mobile';
-        if (preg_match('/tablet|ipad/i', $userAgent)) return 'tablet';
+        if (! $userAgent) {
+            return 'unknown';
+        }
+
+        if (preg_match('/mobile|android|iphone/i', $userAgent)) {
+            return 'mobile';
+        }
+
+        if (preg_match('/tablet|ipad/i', $userAgent)) {
+            return 'tablet';
+        }
+
         return 'desktop';
     }
 
