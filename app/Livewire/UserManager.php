@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Site;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -10,6 +11,8 @@ use Livewire\Component;
 #[Layout('layouts.admin')]
 class UserManager extends Component
 {
+    public ?Site $site = null;
+
     public ?int $editingUserId = null;
 
     public string $name = '';
@@ -22,7 +25,7 @@ class UserManager extends Component
 
     public function edit(int $userId): void
     {
-        $user = User::query()->findOrFail($userId);
+        $user = $this->usersQuery()->findOrFail($userId);
 
         $this->editingUserId = $user->id;
         $this->name = $user->name;
@@ -38,7 +41,8 @@ class UserManager extends Component
             'role' => ['required', 'in:administrador,gestor,vendedor'],
         ]);
 
-        User::query()->findOrFail($this->editingUserId)->update($validated);
+        $user = $this->usersQuery()->findOrFail($this->editingUserId);
+        $user->update($validated);
 
         $this->resetForm();
         session()->flash('status', 'Utilizador atualizado com sucesso.');
@@ -48,11 +52,10 @@ class UserManager extends Component
     {
         if ($userId === auth()->id()) {
             session()->flash('error', 'Não pode excluir a sua própria conta.');
-
             return;
         }
 
-        User::query()->findOrFail($userId)->delete();
+        $this->usersQuery()->findOrFail($userId)->delete();
         session()->flash('status', 'Utilizador excluído com sucesso.');
     }
 
@@ -65,7 +68,7 @@ class UserManager extends Component
 
     public function render(): mixed
     {
-        $users = User::query()
+        $users = $this->usersQuery()
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($query): void {
                     $query->where('name', 'like', '%'.$this->search.'%')
@@ -76,5 +79,17 @@ class UserManager extends Component
             ->get();
 
         return view('livewire.user-manager', ['users' => $users]);
+    }
+
+    private function usersQuery()
+    {
+        if (! $this->site) {
+            abort_unless(auth()->user()?->isAdministrator(), 403);
+            return User::query();
+        }
+
+        abort_unless($this->site->isManageableBy(auth()->user()), 403);
+
+        return User::query()->whereHas('sites', fn ($query) => $query->whereKey($this->site->id));
     }
 }
