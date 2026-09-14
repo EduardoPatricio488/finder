@@ -11,9 +11,18 @@ class SiteAnalyticsEvent extends Model
 {
     protected function casts(): array
     {
-        return ['occurred_at' => 'datetime'];
+        return [
+            'occurred_at' => 'datetime',
+        ];
     }
 
-    public function site(): BelongsTo { return $this->belongsTo(Site::class); }
-    public function page(): BelongsTo { return $this->belongsTo(SitePage::class, 'page_id'); }
+    public function site(): BelongsTo
+    {
+        return $this->belongsTo(Site::class);
+    }
+
+    public function page(): BelongsTo
+    {
+        return $this->belongsTo(SitePage::class, 'page_id');
+    }
 }
