@@ -15,33 +15,26 @@ use App\Livewire\StoreSettings;
 use App\Livewire\UpgradeSelection;
 use App\Livewire\UserDashboard;
 use App\Livewire\UserManager;
+use App\Livewire\PlatformAdminDashboard;
 use Illuminate\Support\Facades\Route;
 
-// --- LANDING PAGE ---
 Route::get('/', LandingPage::class)->name('home');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 
-// --- ENTRADA APÓS LOGIN ---
-Route::middleware(['auth', 'verified'])->get('entrada', function () {
-    return redirect()->route('dashboard');
-})->name('entry');
+Route::middleware(['auth', 'verified'])->get('entrada', fn () => redirect()->route('dashboard'))->name('entry');
 
-// --- DASHBOARD DA PLATAFORMA ---
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', UserDashboard::class)->name('dashboard');
     Route::get('websites/create', CreateSite::class)->name('site.create');
     Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
 });
 
-// --- ADMIN GLOBAL DA PLATAFORMA ---
-Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('platform.admin.')->group(function (): void {
-    Route::get('/', AdminDashboard::class)->name('dashboard');
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function (): void {
+    Route::get('/', PlatformAdminDashboard::class)->name('dashboard');
     Route::get('utilizadores', UserManager::class)->name('users');
-    Route::get('websites', UserManager::class)->name('websites');
-    Route::get('configuracoes', StoreSettings::class)->name('settings');
+    Route::get('configuracoes', StoreSettings::class)->name('config');
 });
 
-// --- ADMIN DO WEBSITE ---
 Route::middleware(['auth', 'verified', 'site.access'])
     ->prefix('admin/sites/{site:slug}')
     ->name('admin.site.')
@@ -57,7 +50,6 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('assistente', AdminAssistant::class)->middleware('can:access-ai,site')->name('assistant');
     });
 
-// --- WEBSITE PÚBLICO ---
 Route::get('site/{site:slug}/{pageSlug?}', PublicSite::class)->name('site.public');
 
 require __DIR__.'/settings.php';
