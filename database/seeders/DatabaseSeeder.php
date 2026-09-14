@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Eduardo Admin',
             'email' => 'admin@admin.com',
             'password' => bcrypt('password'),
+            'role' => 'administrador',
         ]);
 
         $site = Site::create([
