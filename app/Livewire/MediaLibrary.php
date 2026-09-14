@@ -13,8 +13,11 @@ class MediaLibrary extends Component
     use WithFileUploads;
 
     public Site $site;
+
     public $upload = null;
+
     public string $altText = '';
+
     public string $search = '';
 
     public function mount(Site $site): void
