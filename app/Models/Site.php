@@ -14,89 +14,50 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Route;
 
-/**
- * @property int $id
- * @property int|null $owner_id
- * @property int|null $plan_id
- * @property string $name
- * @property string $slug
- * ... (resto das propriedades)
- */
 #[Fillable([
-    'name',
-    'slug',
-    'owner_id',
-    'plan_id', // ADICIONADO PARA O SAAS
-    'tagline',
-    'description',
-    'category_label',
-    'accent',
-    'logo',
-    'favicon',
-    'primary_color',
-    'secondary_color',
-    'status',
-    'type',
-    'subdomain',
-    'custom_domain',
-    'homepage',
-    'social_links',
-    'contact_email',
-    'phone',
-    'address',
-    'home_route',
-    'is_published',
-    'sort_order',
+    'name', 'slug', 'owner_id', 'plan_id', 'tagline', 'description', 'category_label',
+    'accent', 'logo', 'favicon', 'primary_color', 'secondary_color', 'status', 'type',
+    'subdomain', 'custom_domain', 'homepage', 'social_links', 'theme', 'settings', 'seo',
+    'contact_email', 'phone', 'address', 'home_route', 'is_published', 'published_at', 'sort_order',
 ])]
 class Site extends Model
 {
-    /** @use HasFactory<SiteFactory> */
     use HasFactory;
 
-    /**
-     * @var array<string, mixed>
-     */
     protected $attributes = [
         'category_label' => 'Site',
-        'accent' => 'amber',
-        'primary_color' => '#f59e0b',
-        'secondary_color' => '#1c1917',
-        'status' => 'online',
-        'type' => 'online_store',
-        'is_published' => true,
+        'accent' => 'indigo',
+        'primary_color' => '#635bff',
+        'secondary_color' => '#111827',
+        'status' => 'draft',
+        'type' => 'business',
+        'is_published' => false,
         'sort_order' => 0,
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'is_published' => 'boolean',
             'homepage' => 'array',
             'social_links' => 'array',
+            'theme' => 'array',
+            'settings' => 'array',
+            'seo' => 'array',
+            'published_at' => 'datetime',
         ];
     }
-
-    // --- RELAÇÕES DO SISTEMA ---
 
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    /**
-     * Relação com o Plano SaaS
-     */
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
     }
 
-    /**
-     * Alias para members() para evitar erros no Seeder e standard Laravel
-     */
     public function users(): BelongsToMany
     {
         return $this->members();
@@ -147,12 +108,35 @@ class Site extends Model
         return $this->hasOne(StoreConfig::class);
     }
 
-    // --- LÓGICA E SCOPES ---
+    public function pages(): HasMany
+    {
+        return $this->hasMany(SitePage::class)->orderBy('sort_order');
+    }
+
+    public function menus(): HasMany
+    {
+        return $this->hasMany(SiteMenu::class);
+    }
+
+    public function media(): HasMany
+    {
+        return $this->hasMany(SiteMedia::class);
+    }
+
+    public function analyticsEvents(): HasMany
+    {
+        return $this->hasMany(SiteAnalyticsEvent::class);
+    }
+
+    public function adminAuditLogs(): HasMany
+    {
+        return $this->hasMany(SiteAdminAuditLog::class);
+    }
 
     #[Scope]
     protected function published(Builder $query): Builder
     {
-        return $query->where('is_published', true);
+        return $query->where('is_published', true)->where('status', 'published');
     }
 
     public function isProtected(): bool
@@ -162,7 +146,7 @@ class Site extends Model
 
     public function isVisibleTo(?User $user): bool
     {
-        return $this->is_published || $user?->isAdministrator() === true;
+        return $this->is_published && $this->status === 'published' || $user?->isAdministrator() === true;
     }
 
     public function isManageableBy(?User $user): bool
@@ -180,7 +164,11 @@ class Site extends Model
 
     public function statusLabel(): string
     {
-        return $this->status === 'online' ? 'Online' : 'Offline';
+        return match ($this->status) {
+            'published', 'online' => 'Publicado',
+            'draft' => 'Rascunho',
+            default => 'Despublicado',
+        };
     }
 
     public function hasDedicatedHome(): bool
