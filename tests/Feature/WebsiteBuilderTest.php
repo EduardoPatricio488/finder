@@ -69,7 +69,7 @@ test('website owners can preview unpublished websites without analytics tracking
     $site = Site::factory()->create(['owner_id' => $owner->id, 'is_published' => false, 'status' => 'draft']);
     $this->actingAs($owner);
 
-    $this->get(route('site.public', [$site, 'preview' => 1]))->assertOk();
+    $this->get(route('site.public', $site).'?preview=1')->assertOk();
 
     expect($site->analyticsEvents()->count())->toBe(0);
 });
@@ -80,7 +80,7 @@ test('website preview is forbidden to unrelated users', function () {
     $site = Site::factory()->create(['owner_id' => $owner->id, 'is_published' => false, 'status' => 'draft']);
     $this->actingAs($other);
 
-    $this->get(route('site.public', [$site, 'preview' => 1]))->assertForbidden();
+    $this->get(route('site.public', $site).'?preview=1')->assertForbidden();
 });
 
 test('builder undo and redo restore section order', function () {
