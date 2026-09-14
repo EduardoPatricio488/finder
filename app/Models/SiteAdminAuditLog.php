@@ -11,9 +11,18 @@ class SiteAdminAuditLog extends Model
 {
     protected function casts(): array
     {
-        return ['metadata' => 'array'];
+        return [
+            'metadata' => 'array',
+        ];
     }
 
-    public function site(): BelongsTo { return $this->belongsTo(Site::class); }
-    public function actor(): BelongsTo { return $this->belongsTo(User::class, 'actor_id'); }
+    public function site(): BelongsTo
+    {
+        return $this->belongsTo(Site::class);
+    }
+
+    public function actor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'actor_id');
+    }
 }
