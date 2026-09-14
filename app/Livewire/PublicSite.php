@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Site;
 use App\Models\SiteAnalyticsEvent;
 use App\Models\SitePage;
+use App\Models\SiteSubmission;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -19,6 +21,14 @@ class PublicSite extends Component
     public SitePage $page;
 
     public bool $preview = false;
+
+    public string $contactName = '';
+
+    public string $contactEmail = '';
+
+    public string $contactMessage = '';
+
+    public string $newsletterEmail = '';
 
     public function mount(Site $site, ?string $pageSlug = null): void
     {
@@ -50,18 +60,70 @@ class PublicSite extends Component
         }
     }
 
+    public function submitContact(): void
+    {
+        $this->ensurePublicSubmissionAllowed('contact');
+
+        $validated = $this->validate([
+            'contactName' => ['required', 'string', 'max:120'],
+            'contactEmail' => ['required', 'email:rfc', 'max:255'],
+            'contactMessage' => ['required', 'string', 'max:5000'],
+        ]);
+
+        SiteSubmission::create([
+            'site_id' => $this->site->id,
+            'form_type' => 'contact',
+            'name' => $validated['contactName'],
+            'email' => $validated['contactEmail'],
+            'message' => $validated['contactMessage'],
+            'status' => 'new',
+        ]);
+
+        $this->reset(['contactName', 'contactEmail', 'contactMessage']);
+        session()->flash('site_form_success', 'A tua mensagem foi enviada com sucesso.');
+    }
+
+    public function subscribeNewsletter(): void
+    {
+        $this->ensurePublicSubmissionAllowed('newsletter');
+
+        $validated = $this->validate([
+            'newsletterEmail' => ['required', 'email:rfc', 'max:255'],
+        ]);
+
+        SiteSubmission::create([
+            'site_id' => $this->site->id,
+            'form_type' => 'newsletter',
+            'email' => $validated['newsletterEmail'],
+            'payload' => ['source' => 'newsletter'],
+            'status' => 'new',
+        ]);
+
+        $this->reset('newsletterEmail');
+        session()->flash('site_newsletter_success', 'Subscrição concluída com sucesso.');
+    }
+
+    private function ensurePublicSubmissionAllowed(string $type): void
+    {
+        abort_if($this->preview, 404);
+
+        $key = sprintf('site-submission:%s:%s:%s', $this->site->id, $type, request()->ip());
+        abort_if(RateLimiter::tooManyAttempts($key, 5), 429);
+        RateLimiter::hit($key, 60);
+    }
+
     private function deviceType(?string $userAgent): string
     {
         if (! $userAgent) {
             return 'unknown';
         }
 
-        if (preg_match('/mobile|android|iphone/i', $userAgent)) {
-            return 'mobile';
-        }
-
         if (preg_match('/tablet|ipad/i', $userAgent)) {
             return 'tablet';
+        }
+
+        if (preg_match('/mobile|android|iphone/i', $userAgent)) {
+            return 'mobile';
         }
 
         return 'desktop';
