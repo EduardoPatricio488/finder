@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Models\Site;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
