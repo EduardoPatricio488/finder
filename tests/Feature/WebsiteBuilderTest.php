@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Livewire\BuilderEditor;
+use App\Livewire\CreateSite;
 use App\Models\Site;
 use App\Models\User;
 use Livewire\Livewire;
@@ -10,7 +13,7 @@ test('users can create a website through the creation flow', function () {
     $this->actingAs($user);
     $this->get(route('site.create'))->assertOk();
 
-    Livewire::test(\App\Livewire\CreateSite::class)
+    Livewire::test(CreateSite::class)
         ->set('name', 'Meu Projeto')
         ->set('slug', 'meu-projeto')
         ->set('type', 'business')
