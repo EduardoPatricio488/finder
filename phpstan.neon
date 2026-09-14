@@ -19,8 +19,5 @@ parameters:
     ignoreErrors:
         - identifier: property.notFound
         - identifier: method.notFound
-        - identifier: argument.type
         - identifier: return.type
         - identifier: assign.propertyType
-        - identifier: nullCoalesce.neverNull
-        - identifier: nullCoalesce.offset
