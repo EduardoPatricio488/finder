@@ -12,6 +12,7 @@ use Livewire\Component;
 class MenuManager extends Component
 {
     public Site $site;
+
     public ?int $menuId = null;
     public string $menuName = 'Menu principal';
     public string $menuLocation = 'header';
