@@ -7,35 +7,47 @@ use App\Models\SiteAnalyticsEvent;
 use App\Models\SitePage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.public-site')]
+#[Title('Website')]
 class PublicSite extends Component
 {
     public Site $site;
 
     public SitePage $page;
 
+    public bool $preview = false;
+
     public function mount(Site $site, ?string $pageSlug = null): void
     {
-        abort_unless($site->is_published && $site->status === 'published', 404);
+        $this->preview = request()->boolean('preview');
 
-        $this->site = $site->load(['menus.items.children', 'pages.sections', 'products']);
+        if ($this->preview) {
+            abort_unless($site->isManageableBy(auth()->user()), 403);
+        } else {
+            abort_unless($site->is_published && $site->status === 'published', 404);
+        }
+
+        $this->site = $site->load(['menus.items.children.page', 'pages.sections', 'products']);
         $this->page = $pageSlug
-            ? $this->site->pages()->where('slug', $pageSlug)->where('status', 'published')->firstOrFail()
-            : ($this->site->pages()->where('is_homepage', true)->where('status', 'published')->first()
-                ?? $this->site->pages()->where('status', 'published')->orderBy('sort_order')->firstOrFail());
+            ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
+            : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
+                ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail());
 
-        SiteAnalyticsEvent::create([
-            'site_id' => $this->site->id,
-            'page_id' => $this->page->id,
-            'event_type' => 'page_view',
-            'path' => request()->path(),
-            'referrer' => Str::limit((string) request()->headers->get('referer'), 500, ''),
-            'device_type' => $this->deviceType(request()->userAgent()),
-            'session_hash' => hash('sha256', (string) request()->session()->getId()),
-            'occurred_at' => now(),
-        ]);
+        if (! $this->preview) {
+            SiteAnalyticsEvent::create([
+                'site_id' => $this->site->id,
+                'page_id' => $this->page->id,
+                'event_type' => 'page_view',
+                'path' => request()->path(),
+                'referrer' => Str::limit((string) request()->headers->get('referer'), 500, ''),
+                'device_type' => $this->deviceType(request()->userAgent()),
+                'session_hash' => hash('sha256', (string) request()->session()->getId()),
+                'occurred_at' => now(),
+            ]);
+        }
     }
 
     private function deviceType(?string $userAgent): string
