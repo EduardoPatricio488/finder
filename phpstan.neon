@@ -11,3 +11,17 @@ parameters:
         - routes/
 
     level: 3
+
+    # These ignores are deliberately limited to Laravel/Eloquent and Livewire
+    # magic members. They do not suppress argument, return or assignment errors.
+    ignoreErrors:
+        - identifier: property.notFound
+          message: '#^Access to an undefined property (?:Illuminate\\Database\\Eloquent\\Model|Illuminate\\Database\\Eloquent\\Collection.*Illuminate\\Database\\Eloquent\\Model)::\$#'
+        - identifier: property.notFound
+          message: '#^Access to an undefined property App\\Models\\Customer::\$orders_sum_total\.$#'
+        - identifier: property.notFound
+          message: '#^Access to an undefined property App\\Livewire\\ProductCatalog::\$(?:cartSubtotal|shipping|vat|cartProducts)\.$#'
+        - identifier: method.notFound
+          message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model::#'
+        - identifier: method.notFound
+          message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed\(\)\.$#'
