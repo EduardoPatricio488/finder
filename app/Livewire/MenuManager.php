@@ -14,13 +14,21 @@ class MenuManager extends Component
     public Site $site;
 
     public ?int $menuId = null;
+
     public string $menuName = 'Menu principal';
+
     public string $menuLocation = 'header';
+
     public string $label = '';
+
     public string $url = '';
+
     public ?int $pageId = null;
+
     public ?int $parentId = null;
+
     public string $target = '_self';
+
     public bool $isVisible = true;
 
     public function mount(Site $site): void
@@ -99,7 +107,7 @@ class MenuManager extends Component
         $item->update(['is_visible' => ! $item->is_visible]);
     }
 
-    public function render()
+    public function render(): mixed
     {
         $menu = $this->menuId ? $this->site->menus()->with('items.children')->find($this->menuId) : null;
 
