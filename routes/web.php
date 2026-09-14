@@ -57,6 +57,23 @@ Route::middleware(['auth', 'verified', 'admin'])
 
             return redirect()->route('admin.site.dashboard', $site);
         })->name('websites.access');
+        Route::post('websites/exit-access', function () {
+            $siteId = session('platform_admin_site_id');
+            if ($siteId) {
+                SiteAdminAuditLog::create([
+                    'site_id' => $siteId,
+                    'actor_id' => auth()->id(),
+                    'action' => 'platform_admin_exit',
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'metadata' => ['source' => 'platform_admin'],
+                ]);
+            }
+
+            session()->forget('platform_admin_site_id');
+
+            return redirect()->route('admin.websites');
+        })->name('websites.exit-access');
     });
 
 Route::middleware(['auth', 'verified', 'site.access'])
