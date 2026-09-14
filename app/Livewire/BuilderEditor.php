@@ -30,6 +30,10 @@ class BuilderEditor extends Component
 
     public bool $dirty = false;
 
+    public array $history = [];
+
+    public array $future = [];
+
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
@@ -45,6 +49,16 @@ class BuilderEditor extends Component
         }
 
         $this->selectPage($page->id);
+    }
+
+    public function getCanUndoProperty(): bool
+    {
+        return count($this->history) > 0;
+    }
+
+    public function getCanRedoProperty(): bool
+    {
+        return count($this->future) > 0;
     }
 
     public function selectPage(int $pageId): void
@@ -66,11 +80,14 @@ class BuilderEditor extends Component
             ])
             ->values()
             ->all();
+        $this->history = [];
+        $this->future = [];
         $this->dirty = false;
     }
 
     public function createPage(): void
     {
+        $this->checkpoint();
         $base = 'nova-pagina';
         $slug = $base;
         $counter = 2;
@@ -104,6 +121,7 @@ class BuilderEditor extends Component
 
     public function duplicatePage(): void
     {
+        $this->checkpoint();
         $source = $this->site->pages()->with('sections')->findOrFail($this->pageId);
         $slug = $source->slug.'-copia';
         $counter = 2;
@@ -138,6 +156,7 @@ class BuilderEditor extends Component
 
     public function deletePage(): void
     {
+        $this->checkpoint();
         $page = $this->site->pages()->findOrFail($this->pageId);
         abort_if($page->is_homepage, 422, 'A homepage não pode ser eliminada.');
 
@@ -156,6 +175,7 @@ class BuilderEditor extends Component
         ];
         abort_unless(in_array($type, $allowed, true), 422);
 
+        $this->checkpoint();
         $this->sections[] = [
             'id' => null,
             'type' => $type,
@@ -169,6 +189,8 @@ class BuilderEditor extends Component
 
     public function removeSection(int $index): void
     {
+        abort_unless(isset($this->sections[$index]), 404);
+        $this->checkpoint();
         unset($this->sections[$index]);
         $this->sections = array_values($this->sections);
         $this->dirty = true;
@@ -176,17 +198,41 @@ class BuilderEditor extends Component
 
     public function moveSection(int $index, string $direction): void
     {
+        abort_unless(in_array($direction, ['up', 'down'], true), 422);
         $target = $direction === 'up' ? $index - 1 : $index + 1;
 
         if ($target < 0 || $target >= count($this->sections)) {
             return;
         }
 
+        $this->checkpoint();
         [$this->sections[$index], $this->sections[$target]] = [
             $this->sections[$target],
             $this->sections[$index],
         ];
         $this->dirty = true;
+    }
+
+    public function undo(): void
+    {
+        if (! $this->history) {
+            return;
+        }
+
+        $this->future[] = $this->currentSnapshot();
+        $snapshot = array_pop($this->history);
+        $this->restoreSnapshot($snapshot);
+    }
+
+    public function redo(): void
+    {
+        if (! $this->future) {
+            return;
+        }
+
+        $this->history[] = $this->currentSnapshot();
+        $snapshot = array_pop($this->future);
+        $this->restoreSnapshot($snapshot);
     }
 
     public function save(): void
@@ -238,6 +284,36 @@ class BuilderEditor extends Component
         ]);
         $this->site->refresh();
         $this->dispatch('builder-published');
+    }
+
+    private function checkpoint(): void
+    {
+        $this->history[] = $this->currentSnapshot();
+        if (count($this->history) > 30) {
+            array_shift($this->history);
+        }
+        $this->future = [];
+    }
+
+    private function currentSnapshot(): array
+    {
+        return [
+            'sections' => $this->sections,
+            'pageName' => $this->pageName,
+            'pageSlug' => $this->pageSlug,
+            'pageStatus' => $this->pageStatus,
+            'theme' => $this->theme,
+        ];
+    }
+
+    private function restoreSnapshot(array $snapshot): void
+    {
+        $this->sections = $snapshot['sections'];
+        $this->pageName = $snapshot['pageName'];
+        $this->pageSlug = $snapshot['pageSlug'];
+        $this->pageStatus = $snapshot['pageStatus'];
+        $this->theme = $snapshot['theme'];
+        $this->dirty = true;
     }
 
     private function createDefaultPage(): SitePage
