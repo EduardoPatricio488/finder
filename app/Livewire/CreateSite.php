@@ -88,8 +88,50 @@ class CreateSite extends Component
         ]);
 
         $site->members()->syncWithoutDetaching([auth()->id() => ['role' => 'owner']]);
+
+        $labels = ['home' => 'Home', 'about' => 'Sobre', 'services' => 'Serviços', 'products' => 'Produtos', 'blog' => 'Blog', 'contact' => 'Contacto', 'faq' => 'FAQ', 'privacy' => 'Privacidade'];
+        foreach (array_values(array_unique($this->pages)) as $index => $pageSlug) {
+            $page = $site->pages()->create([
+                'name' => $labels[$pageSlug] ?? Str::headline($pageSlug),
+                'slug' => $pageSlug,
+                'status' => 'draft',
+                'is_homepage' => $pageSlug === 'home',
+                'sort_order' => $index,
+            ]);
+
+            if ($pageSlug === 'home') {
+                foreach (['hero', 'feature_grid', 'cta'] as $sectionIndex => $sectionType) {
+                    $page->sections()->create([
+                        'type' => $sectionType,
+                        'label' => Str::headline($sectionType),
+                        'content' => $this->defaultContent($sectionType),
+                        'settings' => ['background' => 'transparent', 'padding' => 'lg'],
+                        'sort_order' => $sectionIndex,
+                    ]);
+                }
+            } else {
+                $page->sections()->create([
+                    'type' => 'text',
+                    'label' => $labels[$pageSlug] ?? Str::headline($pageSlug),
+                    'content' => ['title' => $labels[$pageSlug] ?? Str::headline($pageSlug), 'body' => 'Personaliza esta página no editor.'],
+                    'settings' => ['background' => 'transparent', 'padding' => 'lg'],
+                    'sort_order' => 0,
+                ]);
+            }
+        }
+
         session()->flash('status', 'Website criado. Agora podes começar a editá-lo.');
         return redirect()->route('builder.edit', $site);
+    }
+
+    private function defaultContent(string $type): array
+    {
+        return match ($type) {
+            'hero' => ['title' => 'Cria algo incrível.', 'subtitle' => 'Personaliza este conteúdo diretamente no Finder.', 'button_label' => 'Saber mais', 'button_url' => '#'],
+            'feature_grid' => ['title' => 'Tudo o que precisas', 'items' => [['title' => 'Simples', 'description' => 'Edita sem código.'], ['title' => 'Flexível', 'description' => 'Adapta o teu design.'], ['title' => 'Rápido', 'description' => 'Publica em poucos minutos.']]],
+            'cta' => ['title' => 'Pronto para começar?', 'description' => 'Publica o teu website quando estiveres satisfeito.', 'button_label' => 'Começar'],
+            default => ['title' => Str::headline($type), 'description' => 'Personaliza esta secção.'],
+        };
     }
 
     public function render() { return view('livewire.create-site'); }
