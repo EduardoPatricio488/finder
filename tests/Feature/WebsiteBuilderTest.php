@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\BuilderEditor;
 use App\Livewire\CreateSite;
-use App\Livewire\MenuManager;
 use App\Livewire\SiteSettings;
 use App\Models\Site;
 use App\Models\User;
