@@ -2,16 +2,23 @@
 
 namespace App\Livewire;
 
+use App\Models\Plan;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.landing')]
-#[Title('Finder — Build your website. Make it yours.')]
+#[Title('Finder — Cria. Personaliza. Publica.')]
 class LandingPage extends Component
 {
     public function render()
     {
-        return view('livewire.landing-page');
+        /** @var Collection<int, Plan> $plans */
+        $plans = Plan::query()
+            ->orderBy('price_monthly')
+            ->get();
+
+        return view('livewire.landing-page', compact('plans'));
     }
 }
