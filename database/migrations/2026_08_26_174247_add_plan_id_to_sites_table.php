@@ -9,19 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void {
-    Schema::table('sites', function (Blueprint $table) {
-        $table->foreignId('plan_id')->nullable()->constrained();
-    });
-}
+    public function up(): void
+    {
+        Schema::table('sites', function (Blueprint $table): void {
+            $table->foreignId('plan_id')->nullable()->constrained();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('sites', function (Blueprint $table) {
-            //
+        Schema::table('sites', function (Blueprint $table): void {
+            $table->dropConstrainedForeignId('plan_id');
         });
     }
 };
