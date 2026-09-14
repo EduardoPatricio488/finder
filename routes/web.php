@@ -20,12 +20,17 @@ use App\Livewire\ProductDetail;
 use App\Livewire\ProductManager;
 use App\Livewire\PublicSite;
 use App\Livewire\Reports;
+use App\Livewire\SalesManager;
 use App\Livewire\SiteAnalytics;
 use App\Livewire\SiteSettings;
+use App\Livewire\SiteSubmissions;
 use App\Livewire\StoreSettings;
 use App\Livewire\UpgradeSelection;
 use App\Livewire\UserDashboard;
 use App\Livewire\UserManager;
+use App\Livewire\PromotionManager;
+use App\Livewire\PaymentManager;
+use App\Livewire\StockMovementManager;
 use App\Models\Site;
 use App\Models\SiteAdminAuditLog;
 use Illuminate\Support\Facades\Route;
@@ -107,6 +112,11 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('produtos', ProductManager::class)->name('products');
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('encomendas', OrderManager::class)->name('orders');
+        Route::get('vendas', SalesManager::class)->name('sales');
+        Route::get('pagamentos', PaymentManager::class)->name('payments');
+        Route::get('promocoes', PromotionManager::class)->name('promotions');
+        Route::get('stock', StockMovementManager::class)->name('stock');
+        Route::get('submissoes', SiteSubmissions::class)->name('submissions');
         Route::get('utilizadores', UserManager::class)->name('users');
         Route::get('relatorios', Reports::class)
             ->middleware('can:access-reports,site')
