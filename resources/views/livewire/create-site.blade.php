@@ -1,35 +1,19 @@
-﻿<div class="flex items-center justify-center min-h-screen bg-zinc-50 dark:bg-zinc-950 px-4">
-    <div class="w-full max-w-lg">
-        <flux:card class="p-8 shadow-2xl border-zinc-200 dark:border-zinc-800">
-            <div class="space-y-8">
-                <div class="text-center">
-                    <div class="inline-flex p-3 rounded-2xl bg-amber-500/10 text-amber-600 mb-4">
-                        <flux:icon name="building-storefront" variant="outline" class="size-8" />
-                    </div>
-                    <flux:heading size="xl" class="font-black uppercase italic tracking-tighter">Lançar Novo Projeto</flux:heading>
-                    <flux:subheading class="mt-2">Escolha um nome e um link único para a sua loja.</flux:subheading>
-                </div>
+<div class="min-h-screen bg-zinc-50 px-4 py-10 dark:bg-zinc-950">
+    <div class="mx-auto max-w-4xl">
+        <div class="mb-8 flex items-center justify-between">
+            <div><a href="{{ route('dashboard') }}" wire:navigate class="text-sm font-semibold">FINDER</a><h1 class="mt-4 text-3xl font-bold tracking-tight">Criar website</h1><p class="mt-2 text-sm text-zinc-500">Vamos preparar a estrutura inicial em poucos passos.</p></div>
+            <div class="text-sm text-zinc-400">{{ $step }}/4</div>
+        </div>
+        <div class="mb-8 h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"><div class="h-full rounded-full bg-indigo-600 transition-all" style="width: {{ $step * 25 }}%"></div></div>
 
-                <form wire:submit="create" class="space-y-6">
-                    <flux:input 
-                        wire:model.live="name" 
-                        label="Nome da Loja" 
-                        placeholder="Ex: Minha Boutique" 
-                    />
-                    
-                    <flux:input 
-                        wire:model="slug" 
-                        label="Endereço (Slug)" 
-                        prefix="finder.test/sites/" 
-                    />
-
-                    <div class="pt-4">
-                        <flux:button type="submit" variant="primary" class="w-full h-12 font-black uppercase tracking-widest text-xs">
-                            Criar Loja Agora 🚀
-                        </flux:button>
-                    </div>
-                </form>
-            </div>
-        </flux:card>
+        @if($step === 1)
+            <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><h2 class="text-xl font-semibold">O que queres criar?</h2><p class="mt-1 text-sm text-zinc-500">Escolhe a estrutura que melhor corresponde ao teu objetivo.</p><div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">@foreach($types as $key => $item)<button wire:click="$set('type','{{ $key }}')" class="rounded-2xl border p-4 text-left transition {{ $type === $key ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10' : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' }}"><span class="font-semibold">{{ $item['label'] }}</span><span class="mt-1 block text-xs leading-5 text-zinc-500">{{ $item['description'] }}</span></button>@endforeach</div><div class="mt-8 flex justify-end"><flux:button variant="primary" wire:click="next">Continuar</flux:button></div></section>
+        @elseif($step === 2)
+            <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><h2 class="text-xl font-semibold">Escolhe um template</h2><div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">@foreach($templates as $key => $item)<button wire:click="$set('template','{{ $key }}')" class="overflow-hidden rounded-2xl border text-left transition {{ $template === $key ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-zinc-200 dark:border-zinc-700' }}"><div class="aspect-[4/3] bg-gradient-to-br from-indigo-100 via-violet-100 to-fuchsia-100 dark:from-indigo-950 dark:via-violet-950 dark:to-fuchsia-950"></div><div class="p-4"><span class="font-semibold">{{ $item['label'] }}</span><span class="mt-1 block text-xs text-zinc-500">{{ $item['description'] }}</span></div></button>@endforeach</div><div class="mt-8 flex justify-between"><flux:button wire:click="previous">Voltar</flux:button><flux:button variant="primary" wire:click="next">Continuar</flux:button></div></section>
+        @elseif($step === 3)
+            <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><h2 class="text-xl font-semibold">Personaliza a identidade</h2><div class="mt-6 grid gap-5 sm:grid-cols-2"><flux:input wire:model.live="name" label="Nome do website" placeholder="A minha empresa" /><flux:input wire:model.live="slug" label="Slug" placeholder="a-minha-empresa" /><label class="block text-sm">Cor principal<input type="color" wire:model.live="primaryColor" class="mt-2 block h-11 w-full rounded-lg border border-zinc-200 p-1 dark:border-zinc-700"></label><label class="block text-sm">Cor secundária<input type="color" wire:model.live="secondaryColor" class="mt-2 block h-11 w-full rounded-lg border border-zinc-200 p-1 dark:border-zinc-700"></label><flux:select wire:model="font" label="Tipografia"><option value="Inter">Inter</option><option value="Manrope">Manrope</option><option value="DM Sans">DM Sans</option><option value="Plus Jakarta Sans">Plus Jakarta Sans</option></flux:select></div><div class="mt-8 flex justify-between"><flux:button wire:click="previous">Voltar</flux:button><flux:button variant="primary" wire:click="next">Continuar</flux:button></div></section>
+        @else
+            <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><h2 class="text-xl font-semibold">Escolhe as páginas iniciais</h2><p class="mt-1 text-sm text-zinc-500">Podes editar, duplicar ou remover páginas depois.</p><div class="mt-6 grid gap-3 sm:grid-cols-2">@foreach(['home'=>'Home','about'=>'Sobre','services'=>'Serviços','products'=>'Produtos','blog'=>'Blog','contact'=>'Contacto','faq'=>'FAQ','privacy'=>'Privacidade'] as $key => $label)<button wire:click="togglePage('{{ $key }}')" class="flex items-center justify-between rounded-xl border p-4 text-left {{ in_array($key,$pages,true) ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10' : 'border-zinc-200 dark:border-zinc-700' }}"><span class="text-sm font-medium">{{ $label }}</span><span class="text-xs text-zinc-400">{{ in_array($key,$pages,true) ? 'Incluída' : 'Adicionar' }}</span></button>@endforeach</div><div class="mt-8 flex justify-between"><flux:button wire:click="previous">Voltar</flux:button><flux:button variant="primary" wire:click="create">Criar website</flux:button></div></section>
+        @endif
     </div>
 </div>
