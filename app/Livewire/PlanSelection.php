@@ -27,7 +27,7 @@ class PlanSelection extends Component
     public function render()
     {
         return view('livewire.plan-selection', [
-            'plans' => Plan::all()
+            'plans' => Plan::all(),
         ])->layout('layouts.app');
     }
 }
