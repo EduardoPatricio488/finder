@@ -3,15 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\SoftDeletable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['site_id', 'name', 'slug', 'status', 'is_homepage', 'seo', 'sort_order'])]
-#[SoftDeletable]
 class SitePage extends Model
 {
+    use SoftDeletes;
+
     protected function casts(): array
     {
         return [
