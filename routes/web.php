@@ -10,6 +10,7 @@ use App\Livewire\MenuManager;
 use App\Livewire\OrderManager;
 use App\Livewire\PlanSelection;
 use App\Livewire\PlatformAdminDashboard;
+use App\Livewire\PlatformWebsites;
 use App\Livewire\ProductManager;
 use App\Livewire\PublicSite;
 use App\Livewire\Reports;
@@ -38,6 +39,7 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->name('admin.')
     ->group(function (): void {
         Route::get('/', PlatformAdminDashboard::class)->name('dashboard');
+        Route::get('websites', PlatformWebsites::class)->name('websites');
         Route::get('utilizadores', UserManager::class)->name('users');
         Route::get('configuracoes', StoreSettings::class)->name('config');
         Route::post('websites/{site:slug}/access', function (Site $site) {
