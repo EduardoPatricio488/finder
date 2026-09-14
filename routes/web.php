@@ -2,60 +2,50 @@
 
 use App\Livewire\AdminAssistant;
 use App\Livewire\AdminDashboard;
+use App\Livewire\BuilderEditor;
 use App\Livewire\CategoryManager;
-use App\Livewire\CustomerAccount;
-use App\Livewire\CustomerManager;
-use App\Livewire\OrderManager;
-use App\Livewire\OrderTracking;
-use App\Livewire\PaymentManager;
-use App\Livewire\ProductCatalog;
-use App\Livewire\ProductDetail;
-use App\Livewire\ProductManager;
-use App\Livewire\PromotionManager;
-use App\Livewire\Reports;
-use App\Livewire\SalesManager;
-use App\Livewire\SiteDirectory;
-use App\Livewire\SiteWorkspace;
-use App\Livewire\StockMovementManager;
-use App\Livewire\StoreSettings;
-use App\Livewire\UserManager;
 use App\Livewire\CreateSite;
+use App\Livewire\LandingPage;
+use App\Livewire\OrderManager;
 use App\Livewire\PlanSelection;
+use App\Livewire\ProductManager;
+use App\Livewire\PublicSite;
+use App\Livewire\Reports;
+use App\Livewire\StoreSettings;
 use App\Livewire\UpgradeSelection;
+use App\Livewire\UserDashboard;
+use App\Livewire\UserManager;
 use Illuminate\Support\Facades\Route;
 
-// --- PORTAL PÚBLICO ---
-Route::get('/', SiteDirectory::class)->name('home');
+// --- LANDING PAGE ---
+Route::get('/', LandingPage::class)->name('home');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 
-// --- ROTA DE ENTRADA INTELIGENTE ---
+// --- ENTRADA APÓS LOGIN ---
 Route::middleware(['auth', 'verified'])->get('entrada', function () {
-    $user = auth()->user();
-
-    // SE FOR ADMIN GLOBAL (admin@admin.pt) -> VAI PARA O DASHBOARD MESTRE
-    if ($user->isAdministrator()) {
-        return redirect()->route('dashboard');
-    }
-
-    // SE FOR UTILIZADOR COMUM -> VAI PARA O HUB DE SITES
-    return redirect()->route('home');
+    return redirect()->route('dashboard');
 })->name('entry');
 
-// --- PAINEL ADMINISTRATIVO MESTRE (SÓ PARA TI) ---
-Route::middleware(['auth', 'verified', 'admin'])->group(function () {
-    Route::get('dashboard', AdminDashboard::class)->name('dashboard');
-    Route::get('admin/utilizadores', UserManager::class)->name('admin.users');
-    Route::get('admin/config-global', StoreSettings::class)->name('admin.config');
+// --- DASHBOARD DA PLATAFORMA ---
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('dashboard', UserDashboard::class)->name('dashboard');
+    Route::get('websites/create', CreateSite::class)->name('site.create');
+    Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
 });
 
-// --- CRIAR NOVA LOJA ---
-Route::middleware(['auth', 'verified'])->get('criar-loja', CreateSite::class)->name('site.create');
+// --- ADMIN GLOBAL DA PLATAFORMA ---
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('platform.admin.')->group(function (): void {
+    Route::get('/', AdminDashboard::class)->name('dashboard');
+    Route::get('utilizadores', UserManager::class)->name('users');
+    Route::get('websites', UserManager::class)->name('websites');
+    Route::get('configuracoes', StoreSettings::class)->name('settings');
+});
 
-// --- PAINEL DO LOJISTA (ISOLADO POR SITE) ---
+// --- ADMIN DO WEBSITE ---
 Route::middleware(['auth', 'verified', 'site.access'])
     ->prefix('admin/sites/{site:slug}')
     ->name('admin.site.')
-    ->group(function () {
+    ->group(function (): void {
         Route::get('dashboard', AdminDashboard::class)->name('dashboard');
         Route::get('config', StoreSettings::class)->name('config');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
@@ -63,10 +53,11 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('encomendas', OrderManager::class)->name('orders');
         Route::get('utilizadores', UserManager::class)->name('users');
-
-        // PREMIUM
         Route::get('relatorios', Reports::class)->middleware('can:access-reports,site')->name('reports');
         Route::get('assistente', AdminAssistant::class)->middleware('can:access-ai,site')->name('assistant');
     });
+
+// --- WEBSITE PÚBLICO ---
+Route::get('site/{site:slug}/{pageSlug?}', PublicSite::class)->name('site.public');
 
 require __DIR__.'/settings.php';
