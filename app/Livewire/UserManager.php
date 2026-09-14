@@ -52,6 +52,7 @@ class UserManager extends Component
     {
         if ($userId === auth()->id()) {
             session()->flash('error', 'Não pode excluir a sua própria conta.');
+
             return;
         }
 
@@ -85,6 +86,7 @@ class UserManager extends Component
     {
         if (! $this->site) {
             abort_unless(auth()->user()?->isAdministrator(), 403);
+
             return User::query();
         }
 
