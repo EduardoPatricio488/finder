@@ -1,44 +1,33 @@
 <?php
 
-use App\Livewire\AdminAssistant;
+use App\Models\Site;
 use App\Models\User;
-use Livewire\Livewire;
 
-test('authenticated users can access the administration space', function () {
+test('global administrators can access platform administration', function () {
     $user = User::factory()->administrator()->create();
-
     $this->actingAs($user);
 
-    $this->get(route('dashboard'))->assertOk();
-    $this->get(route('admin.products'))->assertOk();
+    $this->get(route('admin.dashboard'))->assertOk();
     $this->get(route('admin.users'))->assertOk();
     $this->get(route('admin.config'))->assertOk();
-    $this->get(route('admin.sales'))->assertOk();
-    $this->get(route('admin.customers'))->assertOk();
-    $this->get(route('admin.categories'))->assertOk();
-    $this->get(route('admin.reports'))->assertOk();
-    $this->get(route('admin.orders'))->assertOk();
-    $this->get(route('admin.payments'))->assertOk();
-    $this->get(route('admin.stock'))->assertOk();
-    $this->get(route('admin.assistant'))->assertOk();
 });
 
-test('regular users are denied access to the administration space', function () {
+test('regular users are denied global administration', function () {
     $user = User::factory()->create();
-
     $this->actingAs($user);
 
-    $this->get(route('dashboard'))->assertForbidden();
-    $this->get(route('admin.products'))->assertForbidden();
+    $this->get(route('admin.dashboard'))->assertForbidden();
+    $this->get(route('admin.users'))->assertForbidden();
 });
 
-test('the administration assistant answers sales questions from current data', function () {
-    $user = User::factory()->create();
+test('website administration is isolated by ownership', function () {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    $site = Site::factory()->create(['owner_id' => $owner->id]);
 
-    $this->actingAs($user);
+    $this->actingAs($owner);
+    $this->get(route('admin.site.dashboard', $site))->assertOk();
 
-    Livewire::test(AdminAssistant::class)
-        ->set('question', 'Como estão as vendas este mês?')
-        ->call('ask')
-        ->assertSee('Este mês, a loja registou');
+    $this->actingAs($other);
+    $this->get(route('admin.site.dashboard', $site))->assertForbidden();
 });
