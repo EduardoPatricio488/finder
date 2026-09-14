@@ -10,6 +10,7 @@ use Livewire\Component;
 class SiteAnalytics extends Component
 {
     public Site $site;
+
     public int $days = 30;
 
     public function mount(Site $site): void
