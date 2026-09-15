@@ -47,7 +47,7 @@ Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show
 Route::get('sites/{site:slug}', PublicSite::class)->name('sites.show');
 
 Route::middleware(['auth', 'verified'])
-    ->get('entrada', fn () => redirect()->route('dashboard'))
+    ->get('entrada', fn () => redirect()->route('sales'))
     ->name('entry');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
@@ -56,10 +56,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('websites/create', CreateSite::class)->name('site.create');
     Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
     Route::get('conta/{section?}', CustomerAccount::class)->name('account');
-    Route::get('conta/favoritos', fn () => redirect()->route('account', ['section' => 'favorites']))->name('account.favorites');
-    Route::get('conta/moradas', fn () => redirect()->route('account', ['section' => 'addresses']))->name('account.addresses');
-    Route::get('conta/pagamentos', fn () => redirect()->route('account', ['section' => 'payments']))->name('account.payments');
-    Route::get('conta/notificacoes', fn () => redirect()->route('account', ['section' => 'notifications']))->name('account.notifications');
+    Route::get('conta/favoritos', CustomerAccount::class)->defaults('section', 'favorites')->name('account.favorites');
+    Route::get('conta/moradas', CustomerAccount::class)->defaults('section', 'addresses')->name('account.addresses');
+    Route::get('conta/pagamentos', CustomerAccount::class)->defaults('section', 'payments')->name('account.payments');
+    Route::get('conta/notificacoes', CustomerAccount::class)->defaults('section', 'notifications')->name('account.notifications');
     Route::get('encomendas/acompanhamento', OrderTracking::class)->name('orders.tracking');
     Route::get('assistente', CustomerAssistant::class)->name('customer.assistant');
 });
