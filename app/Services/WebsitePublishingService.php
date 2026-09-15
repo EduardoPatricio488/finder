@@ -34,6 +34,10 @@ final class WebsitePublishingService
                 $errors[] = 'Existe uma página sem nome ou slug.';
             }
 
+            if ($pages->where('slug', $page->slug)->count() > 1) {
+                $errors[] = 'O slug "'.$page->slug.'" está duplicado.';
+            }
+
             if ($page->sections->isEmpty()) {
                 $errors[] = 'A página "'.$page->name.'" está vazia.';
             }
@@ -45,6 +49,16 @@ final class WebsitePublishingService
             if (blank($seo['description'] ?? null)) {
                 $warnings[] = 'A página "'.$page->name.'" não tem meta descrição.';
             }
+
+            foreach ($page->sections as $section) {
+                $content = is_array($section->content) ? $section->content : [];
+                if ($section->type === 'image' && blank($content['url'] ?? null)) {
+                    $warnings[] = 'A secção de imagem "'.$section->label.'" na página "'.$page->name.'" não tem imagem.';
+                }
+                if (in_array($section->type, ['video', 'map'], true) && blank($content['url'] ?? $content['embed_url'] ?? null) && blank($content['address'] ?? null)) {
+                    $warnings[] = 'A secção "'.$section->label.'" na página "'.$page->name.'" precisa de conteúdo.';
+                }
+            }
         }
 
         if (blank($site->favicon)) {
@@ -53,6 +67,10 @@ final class WebsitePublishingService
 
         if (blank($site->seo['og_image'] ?? null)) {
             $warnings[] = 'Adiciona uma imagem social para melhorar as partilhas.';
+        }
+
+        if (blank($site->description) && blank($site->tagline)) {
+            $warnings[] = 'Adiciona uma descrição do website para melhorar o SEO e a partilha social.';
         }
 
         return [
@@ -70,11 +88,10 @@ final class WebsitePublishingService
             abort(422, implode(' ', $result['errors']));
         }
 
-        $this->versions->create(
-            $site->fresh(),
-            auth()->id(),
-            'Backup automático antes da publicação',
-        );
+        $latest = $site->versions()->latest('created_at')->first();
+        if (! $latest || ! $latest->created_at || $latest->created_at->lt(now()->subSeconds(5))) {
+            $this->versions->create($site->fresh(), auth()->id(), 'Backup automático antes da publicação');
+        }
 
         $site->forceFill([
             'is_published' => true,
