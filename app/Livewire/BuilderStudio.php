@@ -28,25 +28,45 @@ use Livewire\Component;
 class BuilderStudio extends Component
 {
     public Site $site;
+
     public ?int $pageId = null;
+
     public array $pages = [];
+
     public array $sections = [];
+
     public array $theme = [];
+
     public array $siteSettings = [];
+
     public array $pageSeo = [];
+
     public ?int $selectedSection = null;
+
     public ?string $selectedElementId = null;
+
     public string $device = 'desktop';
+
     public string $panel = 'pages';
+
     public string $aiBrief = '';
+
     public string $statusMessage = 'Guardado';
+
     public bool $dirty = false;
+
     public bool $showAi = false;
+
     public bool $showTemplates = false;
+
     public bool $showPublish = false;
+
     public bool $showSettings = false;
+
     public bool $showVersions = false;
+
     public array $publishChecks = [];
+
     public array $versions = [];
 
     public function mount(Site $site): void
