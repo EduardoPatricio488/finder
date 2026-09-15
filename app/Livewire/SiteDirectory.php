@@ -159,7 +159,7 @@ class SiteDirectory extends Component
 
         $site = Site::query()->findOrFail($siteId);
         abort_if($site->isProtected(), 403);
-        abort_unless($user->isAdministrator() || $site->isManageableBy($user), 403);
+        abort_unless($user->isAdministrator() || $site->owner_id === $user->id, 403);
 
         $site->delete();
     }
