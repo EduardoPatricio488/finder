@@ -40,4 +40,17 @@ document.addEventListener('submit', async (event) => {
     } catch (error) {
         console.error('Finder public form submission failed.', error);
     }
-}, true);
+});
+
+// Smooth navigation feedback for Livewire Navigate without affecting normal actions.
+document.addEventListener('livewire:navigate', () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    document.documentElement.classList.add('finder-navigating');
+});
+
+document.addEventListener('livewire:navigated', () => {
+    document.documentElement.classList.remove('finder-navigating');
+});
