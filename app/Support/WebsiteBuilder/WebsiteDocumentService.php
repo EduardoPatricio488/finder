@@ -17,20 +17,15 @@ final class WebsiteDocumentService
     public function write(SiteSection $section, array $document): void
     {
         $document = BuilderDocument::normalize($document);
-        $data = SiteSectionDocument::toSectionData($document);
-        $payload = $data[0] ?? null;
+        $payload = SiteSectionDocument::toSectionData($document)[0] ?? null;
 
         if (! is_array($payload)) {
             throw new InvalidArgumentException('A section document must contain one root container.');
         }
 
-        unset($payload['id']);
-        $settings = is_array($payload['settings'] ?? null) ? $payload['settings'] : [];
-        $settings['builder_document'] = $document;
-
         $section->fill([
             'content' => is_array($payload['content'] ?? null) ? $payload['content'] : [],
-            'settings' => $settings,
+            'settings' => is_array($payload['settings'] ?? null) ? $payload['settings'] : [],
         ]);
         $section->save();
     }
