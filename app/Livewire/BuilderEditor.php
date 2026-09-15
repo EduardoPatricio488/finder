@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Product;
 use App\Models\Site;
 use App\Models\SitePage;
 use App\Models\SiteSection;
@@ -105,6 +106,7 @@ class BuilderEditor extends Component
             'is_visible' => $section->is_visible,
         ])->values()->all();
 
+        $this->syncProductGridItems();
         $this->selectedSection = count($this->sections) ? 0 : null;
         $this->history = [];
         $this->future = [];
@@ -207,6 +209,7 @@ class BuilderEditor extends Component
         $this->checkpoint();
         $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
         $this->selectedSection = count($this->sections) - 1;
+        if ($type === 'product_grid') $this->syncProductGridItems();
         $this->markDirty();
     }
 
@@ -225,6 +228,15 @@ class BuilderEditor extends Component
     public function addItem(int $sectionIndex): void
     {
         abort_unless(isset($this->sections[$sectionIndex]), 404);
+        $type = $this->sections[$sectionIndex]['type'];
+
+        if ($type === 'product_grid') {
+            $this->selectedSection = $sectionIndex;
+            $this->syncProductGridItems($sectionIndex);
+            $this->dispatch('builder-products-loaded', section: $sectionIndex);
+            return;
+        }
+
         $templates = [
             'feature_grid' => ['title' => 'Novo benefício', 'description' => 'Descreve este benefício.'],
             'testimonials' => ['name' => 'Cliente', 'role' => 'Função', 'quote' => 'Escreve aqui o testemunho.', 'image' => ''],
@@ -234,12 +246,13 @@ class BuilderEditor extends Component
             'blog_posts' => ['title' => 'Novo artigo', 'excerpt' => 'Resumo do artigo.', 'url' => '#', 'image' => ''],
             'social_links' => ['label' => 'Nova rede', 'url' => '#'],
         ];
-        $type = $this->sections[$sectionIndex]['type'];
+
         if (! isset($templates[$type])) {
             $this->selectedSection = $sectionIndex;
             $this->dispatch('builder-item-not-supported', section: $sectionIndex, type: $type);
             return;
         }
+
         $this->checkpoint();
         if (! isset($this->sections[$sectionIndex]['content']['items']) || ! is_array($this->sections[$sectionIndex]['content']['items'])) {
             $this->sections[$sectionIndex]['content']['items'] = [];
@@ -252,6 +265,7 @@ class BuilderEditor extends Component
     public function removeItem(int $sectionIndex, int $itemIndex): void
     {
         abort_unless(isset($this->sections[$sectionIndex]['content']['items'][$itemIndex]), 404);
+        abort_unless($this->sections[$sectionIndex]['type'] !== 'product_grid', 422);
         $this->checkpoint();
         array_splice($this->sections[$sectionIndex]['content']['items'], $itemIndex, 1);
         $this->markDirty();
@@ -260,6 +274,7 @@ class BuilderEditor extends Component
     public function moveItem(int $sectionIndex, int $itemIndex, string $direction): void
     {
         abort_unless(in_array($direction, ['up', 'down'], true), 422);
+        abort_unless($this->sections[$sectionIndex]['type'] !== 'product_grid', 422);
         $items = $this->sections[$sectionIndex]['content']['items'] ?? [];
         $target = $direction === 'up' ? $itemIndex - 1 : $itemIndex + 1;
         if (! isset($items[$itemIndex]) || $target < 0 || $target >= count($items)) return;
@@ -339,7 +354,11 @@ class BuilderEditor extends Component
             $keepIds = [];
             foreach ($this->sections as $index => $data) {
                 $section = ! empty($data['id']) ? $page->sections()->findOrFail($data['id']) : new SiteSection(['site_page_id' => $page->id]);
-                $section->fill(['type' => $data['type'], 'label' => $data['label'] ?? Str::headline($data['type']), 'content' => $data['content'] ?? [], 'settings' => $data['settings'] ?? [], 'sort_order' => $index, 'is_visible' => (bool) ($data['is_visible'] ?? true)]);
+                $content = $data['content'] ?? [];
+                if (($data['type'] ?? '') === 'product_grid') {
+                    unset($content['items']);
+                }
+                $section->fill(['type' => $data['type'], 'label' => $data['label'] ?? Str::headline($data['type']), 'content' => $content, 'settings' => $data['settings'] ?? [], 'sort_order' => $index, 'is_visible' => (bool) ($data['is_visible'] ?? true)]);
                 $section->save();
                 $keepIds[] = $section->id;
                 $this->sections[$index]['id'] = $section->id;
@@ -351,6 +370,7 @@ class BuilderEditor extends Component
         });
 
         $this->site->load('pages.sections');
+        $this->syncProductGridItems();
         $this->dirty = false;
         $this->dispatch('builder-saved');
     }
@@ -398,6 +418,33 @@ class BuilderEditor extends Component
         $this->theme = $snapshot['theme'];
         $this->selectedSection = count($this->sections) ? 0 : null;
         $this->markDirty();
+    }
+
+    private function syncProductGridItems(?int $onlySection = null): void
+    {
+        $products = $this->site->products()
+            ->with('category')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        foreach ($this->sections as $index => $section) {
+            if (($section['type'] ?? '') !== 'product_grid' || ($onlySection !== null && $onlySection !== $index)) {
+                continue;
+            }
+
+            $this->sections[$index]['content']['items'] = $products->map(fn (Product $product): array => [
+                'product_id' => $product->id,
+                'title' => $product->name,
+                'name' => $product->name,
+                'description' => $product->description ?? '',
+                'price' => number_format((float) $product->price, 2, ',', '.').' €',
+                'category' => $product->category?->name ?? 'Sem categoria',
+                'sku' => $product->sku ?? '',
+                'stock' => (int) $product->stock,
+                'image_url' => $product->image_url ?? '',
+            ])->values()->all();
+        }
     }
 
     private function createDefaultPage(): SitePage
