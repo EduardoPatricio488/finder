@@ -62,7 +62,7 @@ class StoreSettings extends Component
             'address' => $validated['address'],
         ]);
 
-        session()->flash('status', 'Configurações salvas com sucesso.');
+        session()->flash('status', 'Definições guardadas com sucesso.');
     }
 
     public function render(): mixed
