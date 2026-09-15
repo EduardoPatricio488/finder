@@ -11,90 +11,19 @@ final class ElementRegistry
     public static function all(): array
     {
         return [
-            'heading' => [
-                'type' => 'heading',
-                'label' => 'Título',
-                'category' => 'Conteúdo',
-                'icon' => 'heading',
-                'description' => 'Adiciona um título à página.',
-                'default_content' => ['text' => 'Novo título', 'level' => 'h2'],
-                'default_settings' => ['align' => 'left'],
-                'allowed_parents' => ['container'],
-                'schema' => [
-                    'content' => ['text' => 'string', 'level' => ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']],
-                    'settings' => ['align' => ['left', 'center', 'right']],
-                ],
-            ],
-            'text' => [
-                'type' => 'text',
-                'label' => 'Texto',
-                'category' => 'Conteúdo',
-                'icon' => 'text',
-                'description' => 'Adiciona texto à página.',
-                'default_content' => ['text' => 'Escreve aqui o teu texto.'],
-                'default_settings' => ['align' => 'left'],
-                'allowed_parents' => ['container'],
-                'schema' => [
-                    'content' => ['text' => 'string'],
-                    'settings' => ['align' => ['left', 'center', 'right', 'justify']],
-                ],
-            ],
-            'image' => [
-                'type' => 'image',
-                'label' => 'Imagem',
-                'category' => 'Media',
-                'icon' => 'image',
-                'description' => 'Adiciona uma imagem à página.',
-                'default_content' => ['url' => '', 'alt' => '', 'caption' => ''],
-                'default_settings' => ['width' => 'full', 'radius' => 'none'],
-                'allowed_parents' => ['container'],
-                'schema' => [
-                    'content' => ['url' => 'string', 'alt' => 'string', 'caption' => 'string'],
-                    'settings' => ['width' => ['auto', 'full'], 'radius' => ['none', 'sm', 'md', 'lg', 'xl', 'full']],
-                ],
-            ],
-            'button' => [
-                'type' => 'button',
-                'label' => 'Botão',
-                'category' => 'Ação',
-                'icon' => 'cursor-arrow-rays',
-                'description' => 'Adiciona um botão com ligação.',
-                'default_content' => ['label' => 'Saber mais', 'url' => '#'],
-                'default_settings' => ['style' => 'primary', 'align' => 'left'],
-                'allowed_parents' => ['container'],
-                'schema' => [
-                    'content' => ['label' => 'string', 'url' => 'string'],
-                    'settings' => ['style' => ['primary', 'secondary', 'outline', 'ghost'], 'align' => ['left', 'center', 'right']],
-                ],
-            ],
-            'divider' => [
-                'type' => 'divider',
-                'label' => 'Divisor',
-                'category' => 'Layout',
-                'icon' => 'minus',
-                'description' => 'Adiciona uma linha divisória.',
-                'default_content' => [],
-                'default_settings' => ['width' => 'full', 'style' => 'solid'],
-                'allowed_parents' => ['container'],
-                'schema' => [
-                    'content' => [],
-                    'settings' => ['width' => ['auto', 'full'], 'style' => ['solid', 'dashed', 'dotted']],
-                ],
-            ],
-            'spacer' => [
-                'type' => 'spacer',
-                'label' => 'Espaçamento',
-                'category' => 'Layout',
-                'icon' => 'arrows-up-down',
-                'description' => 'Adiciona espaço vertical entre elementos.',
-                'default_content' => [],
-                'default_settings' => ['height' => 'md'],
-                'allowed_parents' => ['container'],
-                'schema' => [
-                    'content' => [],
-                    'settings' => ['height' => ['sm', 'md', 'lg', 'xl']],
-                ],
-            ],
+            'heading' => self::definition('heading', 'Título', 'Conteúdo', 'Adiciona um título à página.', ['text' => 'Novo título', 'level' => 'h2'], ['align' => 'left']),
+            'text' => self::definition('text', 'Texto', 'Conteúdo', 'Adiciona texto à página.', ['text' => 'Escreve aqui o teu texto.'], ['align' => 'left']),
+            'image' => self::definition('image', 'Imagem', 'Media', 'Adiciona uma imagem à página.', ['url' => '', 'alt' => '', 'caption' => ''], ['width' => 'full', 'radius' => 'none']),
+            'button' => self::definition('button', 'Botão', 'Ação', 'Adiciona um botão com ligação.', ['label' => 'Saber mais', 'url' => '#'], ['style' => 'primary', 'align' => 'left']),
+            'divider' => self::definition('divider', 'Divisor', 'Layout', 'Adiciona uma linha divisória.', [], ['width' => 'full', 'style' => 'solid']),
+            'spacer' => self::definition('spacer', 'Espaçamento', 'Layout', 'Adiciona espaço vertical entre elementos.', [], ['height' => 'md']),
+            'video' => self::definition('video', 'Vídeo', 'Media', 'Adiciona um vídeo incorporado.', ['url' => '', 'title' => 'Vídeo'], ['ratio' => '16:9']),
+            'quote' => self::definition('quote', 'Citação', 'Conteúdo', 'Adiciona uma citação destacada.', ['text' => 'Uma frase importante para os teus visitantes.', 'author' => ''], ['align' => 'left']),
+            'social_links' => self::definition('social_links', 'Redes sociais', 'Conteúdo', 'Mostra ligações para redes sociais.', ['items' => []], ['align' => 'left']),
+            'faq' => self::definition('faq', 'FAQ', 'Conteúdo', 'Adiciona perguntas e respostas.', ['title' => 'Perguntas frequentes', 'items' => []], []),
+            'gallery' => self::definition('gallery', 'Galeria', 'Media', 'Apresenta várias imagens.', ['items' => []], ['columns' => 3]),
+            'form' => self::definition('form', 'Formulário', 'Conversão', 'Adiciona um formulário de contacto.', ['title' => 'Fala connosco', 'submit_label' => 'Enviar'], ['style' => 'card']),
+            'html' => self::definition('html', 'HTML', 'Avançado', 'Adiciona HTML personalizado.', ['html' => ''], [], ['content' => ['html' => 'string']]),
         ];
     }
 
@@ -117,9 +46,35 @@ final class ElementRegistry
     {
         $definition = self::get($type);
 
+        return ['content' => $definition['default_content'], 'settings' => $definition['default_settings']];
+    }
+
+    private static function definition(string $type, string $label, string $category, string $description, array $content, array $settings, ?array $schema = null): array
+    {
+        $contentSchema = [];
+        foreach ($content as $key => $value) {
+            $contentSchema[$key] = is_array($value) ? 'array' : 'string';
+        }
+        $settingsSchema = [];
+        foreach ($settings as $key => $value) {
+            $settingsSchema[$key] = is_array($value) ? array_values($value) : 'string';
+        }
+
         return [
-            'content' => $definition['default_content'],
-            'settings' => $definition['default_settings'],
+            'type' => $type,
+            'label' => $label,
+            'category' => $category,
+            'icon' => match ($type) {
+                'heading' => 'heading', 'text' => 'text', 'image', 'gallery' => 'image',
+                'button', 'form' => 'cursor-arrow-rays', 'video' => 'play', 'quote' => 'chat-bubble-left-right',
+                'faq' => 'question-mark-circle', 'social_links' => 'share', 'html' => 'code-bracket',
+                'divider' => 'minus', default => 'arrows-up-down',
+            },
+            'description' => $description,
+            'default_content' => $content,
+            'default_settings' => $settings,
+            'allowed_parents' => ['container'],
+            'schema' => $schema ?? ['content' => $contentSchema, 'settings' => $settingsSchema],
         ];
     }
 }
