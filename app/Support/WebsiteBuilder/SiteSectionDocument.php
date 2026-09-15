@@ -12,10 +12,19 @@ final class SiteSectionDocument
     public static function fromSection(SiteSection $section): array
     {
         $settings = is_array($section->settings) ? $section->settings : [];
+        $storedDocument = $settings['builder_document'] ?? null;
 
-        if (is_array($settings['builder_document'] ?? null)) {
-            BuilderDocument::validate($settings['builder_document']);
-            $document = BuilderDocument::normalize($settings['builder_document']);
+        if (is_string($storedDocument) && trim($storedDocument) !== '') {
+            try {
+                $storedDocument = json_decode($storedDocument, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                throw new InvalidArgumentException('Stored builder document contains invalid JSON.');
+            }
+        }
+
+        if (is_array($storedDocument)) {
+            BuilderDocument::validate($storedDocument);
+            $document = BuilderDocument::normalize($storedDocument);
 
             foreach ($document['nodes'] as &$node) {
                 if (($node['type'] ?? null) !== 'container') {
@@ -70,9 +79,13 @@ final class SiteSectionDocument
     {
         $document = BuilderDocument::normalize($document);
         $storageDocument = self::compactLegacyPayload($document);
+        $storageDocumentJson = json_encode(
+            $storageDocument,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR
+        );
         $sections = [];
 
-        foreach ($document['nodes'] as $index => $node) {
+        foreach ($document['nodes'] as $node) {
             $legacy = $node['settings']['legacy'] ?? null;
 
             if (! is_array($legacy) || ! array_key_exists('type', $legacy)) {
@@ -87,7 +100,7 @@ final class SiteSectionDocument
             }
 
             $nodeSettings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
-            $nodeSettings['builder_document'] = $storageDocument;
+            $nodeSettings['builder_document'] = $storageDocumentJson;
 
             $section = [
                 'site_page_id' => $legacy['site_page_id'] ?? null,
