@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\WebsiteBuilder;
 
 use App\Support\WebsiteBuilder\WebsiteTemplates;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class WebsiteTemplatesTest extends TestCase
 {
@@ -48,7 +48,7 @@ final class WebsiteTemplatesTest extends TestCase
     {
         self::assertFalse(WebsiteTemplates::has('does-not-exist'));
 
-        $this->expectException(HttpException::class);
+        $this->expectException(InvalidArgumentException::class);
         WebsiteTemplates::get('does-not-exist');
     }
 }
