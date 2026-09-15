@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
 
+# CI is intentionally read-only: formatting is validated, never committed automatically.
 jobs:
   ci:
     runs-on: ubuntu-latest
