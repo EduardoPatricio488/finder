@@ -15,6 +15,22 @@
         $canonical = is_string($canonical) && preg_match('#^https?://#i', $canonical) ? $canonical : $defaultCanonical;
         $faviconUrl = $favicon && preg_match('#^https?://#i', $favicon) ? $favicon : ($favicon ? asset($favicon) : asset('favicon.svg'));
         $seoImageUrl = $seoImage && preg_match('#^https?://#i', $seoImage) ? $seoImage : ($seoImage ? asset($seoImage) : null);
+        $theme = is_array($site->theme) ? $site->theme : [];
+        $primary = is_string($theme['primary'] ?? null) && preg_match('/^#[0-9a-f]{6}$/i', $theme['primary']) ? $theme['primary'] : '#635bff';
+        $secondary = is_string($theme['secondary'] ?? null) && preg_match('/^#[0-9a-f]{6}$/i', $theme['secondary']) ? $theme['secondary'] : '#111827';
+        $background = is_string($theme['background'] ?? null) && preg_match('/^#[0-9a-f]{6}$/i', $theme['background']) ? $theme['background'] : '#ffffff';
+        $text = is_string($theme['text'] ?? null) && preg_match('/^#[0-9a-f]{6}$/i', $theme['text']) ? $theme['text'] : '#111827';
+        $font = in_array($theme['font_body'] ?? null, ['Inter', 'Manrope', 'DM Sans', 'Plus Jakarta Sans'], true) ? $theme['font_body'] : 'Inter';
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => $site->name,
+            'url' => $canonical,
+            'description' => $seoDescription,
+        ];
+        if ($seoImageUrl) {
+            $schema['image'] = $seoImageUrl;
+        }
     @endphp
     <meta name="description" content="{{ $seoDescription }}">
     <meta name="robots" content="{{ $preview ?? false ? 'noindex,nofollow,noarchive' : 'index,follow' }}">
@@ -38,10 +54,11 @@
     @endif
     <meta name="twitter:title" content="{{ $seoTitle }}">
     <meta name="twitter:description" content="{{ $seoDescription }}">
+    <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
     <title>{{ $seoTitle }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-white text-zinc-950 antialiased dark:bg-zinc-950 dark:text-white">
+<body class="min-h-screen bg-white text-zinc-950 antialiased dark:bg-zinc-950 dark:text-white" style="--finder-primary: {{ $primary }}; --finder-secondary: {{ $secondary }}; --finder-background: {{ $background }}; --finder-text: {{ $text }}; --finder-font: '{{ $font }}', ui-sans-serif, system-ui, sans-serif;">
     {{ $slot }}
     @fluxScripts
 </body>
