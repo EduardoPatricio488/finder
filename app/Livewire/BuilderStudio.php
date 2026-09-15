@@ -26,6 +26,7 @@ use Livewire\Component;
 #[Title('Website Studio')]
 class BuilderStudio extends Component
 {
+    // @php-cs-fixer-ignore class_attributes_separation,control_structure_braces,unary_operator_spaces,braces_position,statement_indentation
     public Site $site;
     public ?int $pageId = null;
     public array $pages = [];
@@ -342,9 +343,7 @@ class BuilderStudio extends Component
     public function updateSelectedElement(string $field, string $value): void
     {
         abort_unless($this->selectedSection !== null && $this->selectedElementId !== null, 422);
-        $allowedFields = [
-            'text', 'label', 'url', 'alt', 'caption', 'title', 'author', 'button_label', 'button_url',
-        ];
+        $allowedFields = ['text', 'label', 'url', 'alt', 'caption', 'title', 'author', 'button_label', 'button_url'];
         abort_unless(in_array($field, $allowedFields, true), 422);
         $index = $this->selectedSection;
         $document = SiteSectionDocument::fromSection($this->sectionModel($index));
@@ -497,7 +496,7 @@ class BuilderStudio extends Component
             return;
         }
 
-        app(WebsitePublishingService::class)->publish($this->site);
+        app(WebsitePublishingService::class)->publish($this->site, auth()->id());
         $this->site->refresh();
         $this->showPublish = false;
         $this->statusMessage = 'Website publicado';
