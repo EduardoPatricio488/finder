@@ -119,11 +119,30 @@ class ProductCatalog extends Component
         abort_unless(auth()->check(), 403);
         abort_unless($this->siteScoped(Product::query())->whereKey($productId)->exists(), 404);
 
-        $favorite = DB::table('favorite_products')->where('site_id', $this->site()->id)->where('user_id', auth()->id())->where('product_id', $productId);
+        $favorite = DB::table('favorite_products')
+            ->where('user_id', auth()->id())
+            ->where('product_id', $productId);
 
-        $favorite->exists()
-            ? $favorite->delete()
-            : DB::table('favorite_products')->insert(['site_id' => $this->site()->id, 'user_id' => auth()->id(), 'product_id' => $productId]);
+        if (Schema::hasColumn('favorite_products', 'site_id')) {
+            $favorite->where('site_id', $this->site()->id);
+        }
+
+        if ($favorite->exists()) {
+            $favorite->delete();
+
+            return;
+        }
+
+        $data = [
+            'user_id' => auth()->id(),
+            'product_id' => $productId,
+        ];
+
+        if (Schema::hasColumn('favorite_products', 'site_id')) {
+            $data['site_id'] = $this->site()->id;
+        }
+
+        DB::table('favorite_products')->insert($data);
     }
 
     public function removeFromCart(int $productId): void
@@ -321,7 +340,7 @@ class ProductCatalog extends Component
         $minimumRating = (float) $this->minRating;
         $products = $this->siteScoped(Product::query())
             ->where('is_active', true)
-            ->when($this->availability === '', fn ($query) => $query->where('stock', '>', 0))
+            ->when(request()->routeIs('products') && $this->availability === '', fn ($query) => $query->where('stock', '>', 0))
             ->with('category')
             ->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])
             ->withAvg('reviews', 'rating')
