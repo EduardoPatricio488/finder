@@ -3,14 +3,19 @@
 namespace App\Livewire;
 
 use App\Models\Site;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.admin')]
 #[Title('Definições do website')]
 class SiteSettings extends Component
 {
+    use WithFileUploads;
+
     public Site $site;
 
     public string $name = '';
@@ -30,6 +35,12 @@ class SiteSettings extends Component
     public string $ogImage = '';
 
     public bool $robotsIndex = true;
+
+    public $logoUpload = null;
+
+    public $faviconUpload = null;
+
+    public $ogImageUpload = null;
 
     /**
      * Kept as a backwards-compatible Livewire property so stale browser
@@ -62,32 +73,77 @@ class SiteSettings extends Component
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:sites,slug,'.$this->site->id],
             'tagline' => ['nullable', 'string', 'max:500'],
-            'logoUrl' => ['nullable', 'url', 'max:2048'],
-            'faviconUrl' => ['nullable', 'url', 'max:2048'],
+            'logoUpload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
+            'faviconUpload' => ['nullable', 'file', 'mimes:ico,png,jpg,jpeg,webp,svg', 'max:5120'],
+            'ogImageUpload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
             'seoTitle' => ['nullable', 'string', 'max:255'],
             'seoDescription' => ['nullable', 'string', 'max:500'],
-            'ogImage' => ['nullable', 'url', 'max:2048'],
             'robotsIndex' => ['boolean'],
         ]);
+
+        $settings = array_merge($this->site->settings ?? [], []);
+        $seo = array_merge($this->site->seo ?? [], []);
+
+        if ($this->logoUpload) {
+            $oldLogo = $this->logoUrl;
+            $path = $this->logoUpload->store('sites/'.$this->site->id.'/branding', 'public');
+            $this->logoUrl = Storage::disk('public')->url($path);
+            $settings['logo_url'] = $this->logoUrl;
+            $this->deleteStoredPublicFile($oldLogo);
+        }
+
+        if ($this->faviconUpload) {
+            $oldFavicon = $this->faviconUrl;
+            $path = $this->faviconUpload->store('sites/'.$this->site->id.'/branding', 'public');
+            $this->faviconUrl = Storage::disk('public')->url($path);
+            $settings['favicon_url'] = $this->faviconUrl;
+            $this->deleteStoredPublicFile($oldFavicon);
+        }
+
+        if ($this->ogImageUpload) {
+            $oldOgImage = $this->ogImage;
+            $path = $this->ogImageUpload->store('sites/'.$this->site->id.'/branding', 'public');
+            $this->ogImage = Storage::disk('public')->url($path);
+            $seo['og_image'] = $this->ogImage;
+            $this->deleteStoredPublicFile($oldOgImage);
+        }
 
         $this->site->update([
             'name' => $validated['name'],
             'slug' => $validated['slug'],
             'tagline' => $validated['tagline'],
-            'settings' => array_merge($this->site->settings ?? [], [
-                'logo_url' => $validated['logoUrl'],
-                'favicon_url' => $validated['faviconUrl'],
+            'settings' => array_merge($settings, [
+                'logo_url' => $this->logoUrl,
+                'favicon_url' => $this->faviconUrl,
             ]),
-            'seo' => array_merge($this->site->seo ?? [], [
+            'seo' => array_merge($seo, [
                 'title' => $validated['seoTitle'] ?: $validated['name'],
                 'description' => $validated['seoDescription'],
-                'og_image' => $validated['ogImage'],
+                'og_image' => $this->ogImage,
                 'robots_index' => $validated['robotsIndex'],
             ]),
         ]);
 
         $this->site->refresh();
+        $this->reset(['logoUpload', 'faviconUpload', 'ogImageUpload']);
         session()->flash('status', 'Definições do website guardadas.');
+    }
+
+    private function deleteStoredPublicFile(string $url): void
+    {
+        if ($url === '') {
+            return;
+        }
+
+        $path = parse_url($url, PHP_URL_PATH);
+        if (!is_string($path) || !Str::startsWith($path, '/storage/')) {
+            return;
+        }
+
+        $storagePath = ltrim(Str::after($path, '/storage/'), '/');
+        if ($storagePath !== '') {
+            Storage::disk('public')->delete($storagePath);
+        }
     }
 
     public function render(): mixed
