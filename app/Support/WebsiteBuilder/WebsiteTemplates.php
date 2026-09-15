@@ -62,15 +62,7 @@ final class WebsiteTemplates
     /** @return Collection<int, string> */
     public static function sectionTypes(): Collection
     {
-        return collect(self::all())
-            ->flatMap(fn (array $template): array => array_map(
-                fn (array $page): array => array_column($page['sections'], 'type'),
-                $template['pages'],
-            ))
-            ->flatten()
-            ->unique()
-            ->values()
-            ->map(fn (mixed $type): string => (string) $type);
+        return collect(SectionRegistry::types());
     }
 
     /** @return array{name:string,description:string,pages:list<array{name:string,slug:string,sections:list<array{type:string,label:string}>}>} */
@@ -93,7 +85,7 @@ final class WebsiteTemplates
     private static function sectionLabel(string $type): string
     {
         return [
-            'hero' => 'Hero', 'text' => 'Texto', 'image' => 'Imagem', 'button' => 'Botão', 'feature_grid' => 'Benefícios', 'card' => 'Cartão', 'testimonials' => 'Testemunhos', 'faq' => 'FAQ', 'gallery' => 'Galeria', 'contact_form' => 'Formulário de contacto', 'product_grid' => 'Produtos', 'pricing' => 'Preços', 'blog_posts' => 'Artigos', 'social_links' => 'Redes sociais', 'video' => 'Vídeo', 'map' => 'Mapa', 'newsletter' => 'Newsletter', 'cta' => 'CTA',
+            'hero' => 'Hero', 'text' => 'Texto', 'image' => 'Imagem', 'button' => 'Botão', 'feature_grid' => 'Benefícios', 'card' => 'Cartão', 'testimonials' => 'Testemunhos', 'faq' => 'FAQ', 'gallery' => 'Galeria', 'contact_form' => 'Formulário de contacto', 'product_grid' => 'Produtos', 'product_card' => 'Cartão de produto', 'pricing' => 'Preços', 'blog_posts' => 'Artigos', 'social_links' => 'Redes sociais', 'video' => 'Vídeo', 'map' => 'Mapa', 'newsletter' => 'Newsletter', 'cta' => 'CTA',
         ][$type] ?? Str::headline($type);
     }
 }
