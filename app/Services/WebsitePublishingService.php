@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Site;
+use App\Support\WebsiteBuilder\BuilderDocument;
 
 final class WebsitePublishingService
 {
@@ -34,6 +35,12 @@ final class WebsitePublishingService
                 $content = is_array($section->content) ? $section->content : [];
                 $settings = is_array($section->settings) ? $section->settings : [];
                 if ($this->containsUnsafeUrl($content) || $this->containsUnsafeUrl($settings)) $errors[] = 'A página "'.$page->name.'" contém uma ligação não permitida.';
+
+                $document = $settings['builder_document'] ?? null;
+                if ($document !== null && (! is_array($document) || ! BuilderDocument::isValid($document))) {
+                    $errors[] = 'A secção "'.$section->label.'" na página "'.$page->name.'" contém uma estrutura inválida.';
+                }
+
                 if ($section->type === 'image' && blank($content['url'] ?? null)) $warnings[] = 'A secção de imagem "'.$section->label.'" na página "'.$page->name.'" não tem imagem.';
                 if ($section->type === 'image' && ! blank($content['url'] ?? null) && blank($content['alt'] ?? null)) $warnings[] = 'A imagem "'.$section->label.'" na página "'.$page->name.'" não tem texto alternativo.';
                 if (in_array($section->type, ['video', 'map'], true) && blank($content['url'] ?? $content['embed_url'] ?? null) && blank($content['address'] ?? null)) $warnings[] = 'A secção "'.$section->label.'" na página "'.$page->name.'" precisa de conteúdo.';
