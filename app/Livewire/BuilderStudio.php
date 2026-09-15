@@ -29,45 +29,25 @@ use Livewire\Component;
 class BuilderStudio extends Component
 {
     public Site $site;
-
     public ?int $pageId = null;
-
     public array $pages = [];
-
     public array $sections = [];
-
     public array $theme = [];
-
     public array $siteSettings = [];
-
     public array $pageSeo = [];
-
     public ?int $selectedSection = null;
-
     public ?string $selectedElementId = null;
-
     public string $device = 'desktop';
-
     public string $panel = 'pages';
-
     public string $aiBrief = '';
-
     public string $statusMessage = 'Guardado';
-
     public bool $dirty = false;
-
     public bool $showAi = false;
-
     public bool $showTemplates = false;
-
     public bool $showPublish = false;
-
     public bool $showSettings = false;
-
     public bool $showVersions = false;
-
     public array $publishChecks = [];
-
     public array $versions = [];
 
     public function mount(Site $site): void
@@ -342,8 +322,7 @@ class BuilderStudio extends Component
 
     public function addSection(string $type): void
     {
-        $allowed = ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'];
-        abort_unless(in_array($type, $allowed, true), 422);
+        abort_unless(WebsiteTemplates::sectionTypes()->contains($type), 422);
         $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
         $this->selectedSection = count($this->sections) - 1;
         $this->selectedElementId = null;
@@ -455,7 +434,6 @@ class BuilderStudio extends Component
         $this->publishChecks = $this->formatPublishChecks($result);
         if (! $result['ok']) {
             $this->showPublish = true;
-
             return;
         }
         app(WebsitePublishingService::class)->publish($this->site, auth()->id());
@@ -476,7 +454,6 @@ class BuilderStudio extends Component
         if ($checks === []) {
             $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
         }
-
         return $checks;
     }
 
@@ -541,7 +518,12 @@ class BuilderStudio extends Component
             $sections = $this->sanitizeAiSections($pageData);
             $page->sections()->delete();
             foreach ($sections as $index => $section) {
-                $page->sections()->create(['type' => $section['type'], 'label' => $section['label'], 'content' => $section['content'], 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
+                $created = $page->sections()->create(['type' => $section['type'], 'label' => $section['label'], 'content' => $section['content'], 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
+                $data = SiteSectionDocument::toSectionData(SiteSectionDocument::fromSection($created));
+                $payload = $data[0] ?? null;
+                if (is_array($payload)) {
+                    $created->update(['content' => $payload['content'] ?? [], 'settings' => $payload['settings'] ?? []]);
+                }
             }
             if ($slug === 'home') {
                 $this->site->pages()->update(['is_homepage' => false]);
@@ -562,14 +544,13 @@ class BuilderStudio extends Component
     {
         $result = [];
         foreach (array_slice($sections, 0, 20) as $section) {
-            if (! is_array($section) || ! is_string($section['type'] ?? null) || ! in_array($section['type'], ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'], true)) {
+            if (! is_array($section) || ! is_string($section['type'] ?? null) || ! WebsiteTemplates::sectionTypes()->contains($section['type'])) {
                 continue;
             }
             $type = $section['type'];
             $content = is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type);
             $result[] = ['type' => $type, 'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''), 'content' => $this->sanitizeLegacyContent($content)];
         }
-
         return $result;
     }
 
@@ -580,7 +561,6 @@ class BuilderStudio extends Component
                 $value = Str::limit($value, 4000, '');
             }
         });
-
         return $content;
     }
 
@@ -593,7 +573,6 @@ class BuilderStudio extends Component
                 $value = Str::limit($value, 2000, '');
             }
         }
-
         return $content;
     }
 
@@ -601,7 +580,6 @@ class BuilderStudio extends Component
     {
         $children = $document['nodes'][0]['children'] ?? [];
         $last = end($children);
-
         return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
     }
 
@@ -618,14 +596,12 @@ class BuilderStudio extends Component
                 }
             }
         }
-
         return null;
     }
 
     private function pageSortOrder(string $slug): int
     {
         $existing = $this->site->pages()->where('slug', $slug)->value('sort_order');
-
         return $existing !== null ? (int) $existing : ((int) $this->site->pages()->max('sort_order')) + 1;
     }
 
@@ -647,18 +623,26 @@ class BuilderStudio extends Component
     private function defaultContent(string $type): array
     {
         return match ($type) {
-            'hero' => ['title' => 'O teu novo website', 'subtitle' => 'Uma presença online profissional.', 'button_label' => 'Saber mais', 'button_url' => '#'],
-            'text' => ['title' => 'Sobre nós', 'body' => 'Escreve aqui o conteúdo da tua secção.'],
-            'image' => ['url' => '', 'alt' => '', 'caption' => ''],
+            'hero' => ['title' => 'A tua marca, apresentada de forma profissional.', 'subtitle' => 'Explica em poucas palavras o que fazes, para quem e porque é que os visitantes devem escolher-te.', 'button_label' => 'Falar connosco', 'button_url' => '#contacto'],
+            'text' => ['title' => 'Uma história que merece ser contada', 'body' => 'Apresenta aqui a tua empresa, experiência, valores ou proposta de valor.'],
+            'image' => ['url' => '', 'alt' => '', 'caption' => 'Adiciona uma imagem relevante para esta secção.'],
             'button' => ['label' => 'Saber mais', 'url' => '#'],
-            'feature_grid' => ['title' => 'O que oferecemos', 'items' => [['title' => 'Qualidade', 'description' => 'Uma experiência pensada para os teus clientes.'], ['title' => 'Simplicidade', 'description' => 'Informação clara e fácil de encontrar.'], ['title' => 'Confiança', 'description' => 'Uma presença digital profissional.']]],
-            'testimonials' => ['title' => 'O que dizem os clientes', 'items' => [['name' => 'Cliente', 'quote' => 'Excelente experiência.']]],
-            'faq' => ['title' => 'Perguntas frequentes', 'items' => [['question' => 'Como funciona?', 'answer' => 'Adiciona aqui a resposta.']]],
-            'pricing' => ['title' => 'Planos', 'items' => [['name' => 'Essencial', 'price' => 'Desde 0€', 'description' => 'Uma opção simples para começar.']]],
-            'cta' => ['title' => 'Pronto para começar?', 'description' => 'Fala connosco e descobre como podemos ajudar.', 'button_label' => 'Contactar', 'button_url' => '#'],
-            'contact_form' => ['title' => 'Fala connosco'],
-            'newsletter' => ['title' => 'Recebe novidades', 'description' => 'Subscreve a nossa newsletter.'],
-            default => ['title' => Str::headline($type)],
+            'feature_grid' => ['title' => 'Porque escolher-nos', 'items' => [['title' => 'Experiência', 'description' => 'Mostra aquilo que sabes fazer.'], ['title' => 'Qualidade', 'description' => 'Explica o valor que entregas.'], ['title' => 'Confiança', 'description' => 'Dá uma razão clara para avançar.']]],
+            'card' => ['title' => 'Uma oferta clara', 'description' => 'Resume aqui um serviço ou vantagem importante.', 'button_label' => 'Saber mais', 'button_url' => '#'],
+            'testimonials' => ['title' => 'O que dizem os clientes', 'items' => [['name' => 'Cliente', 'quote' => 'Adiciona aqui um testemunho real.']]],
+            'faq' => ['title' => 'Perguntas frequentes', 'items' => [['question' => 'Como funciona?', 'answer' => 'Explica de forma simples o teu processo.']]],
+            'gallery' => ['title' => 'Galeria', 'items' => []],
+            'contact_form' => ['title' => 'Vamos falar?', 'description' => 'Envia uma mensagem e entraremos em contacto.', 'button_label' => 'Enviar mensagem'],
+            'product_grid' => ['title' => 'Produtos em destaque', 'description' => 'Apresenta aqui os produtos mais relevantes.', 'limit' => 6],
+            'product_card' => ['title' => 'Produto', 'description' => 'Descrição do produto.', 'price' => ''],
+            'pricing' => ['title' => 'Escolhe a opção certa', 'items' => [['name' => 'Essencial', 'price' => 'Consultar', 'description' => 'Para começar.'], ['name' => 'Profissional', 'price' => 'Consultar', 'description' => 'Para necessidades completas.']]],
+            'blog_posts' => ['title' => 'Últimos artigos', 'description' => 'Partilha conhecimento e novidades.'],
+            'social_links' => ['title' => 'Segue-nos', 'items' => []],
+            'video' => ['title' => 'Conhece melhor o nosso trabalho', 'url' => ''],
+            'map' => ['title' => 'Encontra-nos', 'address' => 'Adiciona aqui a morada.'],
+            'newsletter' => ['title' => 'Recebe as novidades', 'description' => 'Deixa o teu email para receber novidades.', 'button_label' => 'Subscrever'],
+            'cta' => ['title' => 'Pronto para dar o próximo passo?', 'description' => 'Cria uma chamada à acção clara.', 'button_label' => 'Entrar em contacto', 'button_url' => '#contacto'],
+            default => ['title' => Str::headline($type), 'description' => 'Personaliza esta secção com informação relevante.'],
         };
     }
 
