@@ -7,10 +7,12 @@
         $seoTitle = $page->seo['title'] ?? $site->seo['title'] ?? $page->name.' — '.$site->name;
         $seoDescription = $page->seo['description'] ?? $site->seo['description'] ?? $site->description ?? '';
         $seoImage = $page->seo['og_image'] ?? $site->seo['og_image'] ?? null;
-        $favicon = $site->favicon ?: null;
-        $canonical = $page->is_homepage
+        $favicon = $site->favicon ?: ($site->settings['favicon_url'] ?? null);
+        $defaultCanonical = $page->is_homepage
             ? route('site.public', ['site' => $site->slug])
             : route('site.public', ['site' => $site->slug, 'pageSlug' => $page->slug]);
+        $canonical = $page->seo['canonical'] ?? $defaultCanonical;
+        $canonical = is_string($canonical) && preg_match('#^https?://#i', $canonical) ? $canonical : $defaultCanonical;
         $faviconUrl = $favicon && preg_match('#^https?://#i', $favicon) ? $favicon : ($favicon ? asset($favicon) : asset('favicon.svg'));
         $seoImageUrl = $seoImage && preg_match('#^https?://#i', $seoImage) ? $seoImage : ($seoImage ? asset($seoImage) : null);
     @endphp
