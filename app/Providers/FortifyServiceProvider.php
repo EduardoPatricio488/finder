@@ -39,7 +39,7 @@ class FortifyServiceProvider extends ServiceProvider
         {
             public function toResponse($request): Response
             {
-                return redirect()->route('dashboard');
+                return redirect()->to(route('dashboard', absolute: false).'?verified=1');
             }
         });
     }
