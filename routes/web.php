@@ -55,11 +55,11 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('ajuda', Help::class)->name('help');
     Route::get('websites/create', CreateSite::class)->name('site.create');
     Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
-    Route::get('conta/{section?}', CustomerAccount::class)->name('account');
     Route::get('conta/favoritos', CustomerAccount::class)->defaults('section', 'favorites')->name('account.favorites');
     Route::get('conta/moradas', CustomerAccount::class)->defaults('section', 'addresses')->name('account.addresses');
     Route::get('conta/pagamentos', CustomerAccount::class)->defaults('section', 'payments')->name('account.payments');
     Route::get('conta/notificacoes', CustomerAccount::class)->defaults('section', 'notifications')->name('account.notifications');
+    Route::get('conta/{section?}', CustomerAccount::class)->name('account');
     Route::get('encomendas/acompanhamento', OrderTracking::class)->name('orders.tracking');
     Route::get('assistente', CustomerAssistant::class)->name('customer.assistant');
 });
