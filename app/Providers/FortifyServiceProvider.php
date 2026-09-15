@@ -13,6 +13,7 @@ use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Contracts\VerifyEmailResponse;
 use Laravel\Fortify\Fortify;
+use Symfony\Component\HttpFoundation\Response;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -20,7 +21,7 @@ class FortifyServiceProvider extends ServiceProvider
     {
         $this->app->singleton(LoginResponse::class, fn () => new class implements LoginResponse
         {
-            public function toResponse($request)
+            public function toResponse($request): Response
             {
                 return redirect()->route('entry');
             }
@@ -28,7 +29,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         $this->app->singleton(RegisterResponse::class, fn () => new class implements RegisterResponse
         {
-            public function toResponse($request)
+            public function toResponse($request): Response
             {
                 return redirect()->route('dashboard');
             }
@@ -36,9 +37,9 @@ class FortifyServiceProvider extends ServiceProvider
 
         $this->app->singleton(VerifyEmailResponse::class, fn () => new class implements VerifyEmailResponse
         {
-            public function toResponse($request)
+            public function toResponse($request): Response
             {
-                return redirect()->route('dashboard', absolute: false).'?verified=1';
+                return redirect()->route('dashboard');
             }
         });
     }
