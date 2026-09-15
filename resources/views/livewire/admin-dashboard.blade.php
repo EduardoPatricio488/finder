@@ -47,7 +47,7 @@
     {{-- 3. CARTÕES DE MÉTRICAS (KPIs) --}}
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {{-- Produtos --}}
-        <div class="group relative overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all hover:border-amber-300 dark:border-zinc-800 dark:bg-zinc-900">
+        <a href="{{ route('admin.site.products', $site) }}" class="group relative block overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-amber-500/60">
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Produtos Ativos</span>
                 <flux:icon name="archive-box" class="size-4 text-amber-500" />
@@ -59,37 +59,41 @@
             <div class="mt-4 h-1 w-full rounded-full bg-stone-100 dark:bg-zinc-800">
                 <div class="h-full rounded-full bg-amber-500 transition-all duration-1000" style="width: {{ ($activeProducts / ($site->plan->product_limit ?? 100)) * 100 }}%"></div>
             </div>
-        </div>
+            <p class="mt-4 text-xs font-bold text-amber-700 transition group-hover:translate-x-1 dark:text-amber-400">Abrir produtos →</p>
+        </a>
 
         {{-- Utilizadores --}}
-        <div class="rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <a href="{{ route('admin.site.users', $site) }}" class="group relative block overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-500/60">
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Utilizadores</span>
                 <flux:icon name="users" class="size-4 text-emerald-500" />
             </div>
             <p class="mt-4 text-4xl font-black tracking-tighter text-stone-950 dark:text-white">{{ $totalUsers }}</p>
             <p class="mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Contas registadas</p>
-        </div>
+            <p class="mt-4 text-xs font-bold text-emerald-700 transition group-hover:translate-x-1 dark:text-emerald-400">Gerir utilizadores →</p>
+        </a>
 
         {{-- Receita --}}
-        <div class="rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <a href="{{ route('admin.site.sales', $site) }}" class="group relative block overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-sky-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-sky-500/60">
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Receita Hoje</span>
                 <flux:icon name="currency-euro" class="size-4 text-sky-500" />
             </div>
             <p class="mt-4 text-4xl font-black tracking-tighter text-stone-950 dark:text-white">{{ number_format($revenue, 2, ',', '.') }} €</p>
             <p class="mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">{{ $sales }} venda(s) hoje</p>
-        </div>
+            <p class="mt-4 text-xs font-bold text-sky-700 transition group-hover:translate-x-1 dark:text-sky-400">Abrir vendas →</p>
+        </a>
 
         {{-- Stock baixo --}}
-        <div class="rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all hover:border-red-200 dark:border-zinc-800 dark:bg-zinc-900">
+        <a href="{{ route('admin.site.stock', $site) }}" class="group relative block overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-red-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-red-500/60">
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Stock baixo</span>
                 <flux:icon name="exclamation-triangle" class="size-4 text-red-500" />
             </div>
             <p class="mt-4 text-4xl font-black tracking-tighter text-stone-950 dark:text-white">{{ $lowStockProducts->count() }}</p>
             <p class="mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Artigos a verificar</p>
-        </div>
+            <p class="mt-4 text-xs font-bold text-red-700 transition group-hover:translate-x-1 dark:text-red-400">Ver stock →</p>
+        </a>
     </div>
 
     <div class="grid gap-8 lg:grid-cols-2">
