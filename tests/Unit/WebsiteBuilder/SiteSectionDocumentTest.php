@@ -6,7 +6,6 @@ use App\Models\SiteSection;
 use App\Support\WebsiteBuilder\BuilderDocument;
 use App\Support\WebsiteBuilder\BuilderNodeId;
 use App\Support\WebsiteBuilder\SiteSectionDocument;
-use InvalidArgumentException;
 
 it('converts a legacy section to valid v2', function (): void {
     $section = new SiteSection(['site_page_id' => 7, 'type' => 'hero', 'label' => 'Bem-vindo', 'content' => ['title' => 'Olá', 'subtitle' => 'Descrição', 'button_label' => 'Saber mais', 'button_url' => '/contactos'], 'settings' => ['align' => 'center'], 'sort_order' => 0, 'is_visible' => true]);
@@ -69,5 +68,5 @@ it('handles empty legacy data without inventing content', function (): void {
 it('rejects invalid v2 documents through the existing validator', function (): void {
     $document = ['schema_version' => 2, 'nodes' => [['id' => 'cnt_0000000000000001', 'type' => 'container', 'settings' => [], 'children' => [['id' => 'el_0000000000000001', 'type' => 'not-registered', 'content' => [], 'settings' => []]]]]];
     expect(BuilderDocument::isValid($document))->toBeFalse();
-    expect(fn (): array => BuilderDocument::normalize($document))->toThrow(InvalidArgumentException::class);
+    expect(fn (): array => BuilderDocument::normalize($document))->toThrow(\InvalidArgumentException::class);
 });
