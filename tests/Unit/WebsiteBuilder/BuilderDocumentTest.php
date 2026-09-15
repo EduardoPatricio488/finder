@@ -6,7 +6,6 @@ use App\Support\WebsiteBuilder\BuilderDocument;
 use App\Support\WebsiteBuilder\BuilderNodeId;
 use App\Support\WebsiteBuilder\ElementRegistry;
 use App\Support\WebsiteBuilder\SectionRegistry;
-use InvalidArgumentException;
 
 it('registers the initial website elements', function () {
     expect(ElementRegistry::types())->toBe(['heading', 'text', 'image', 'button', 'divider', 'spacer'])
