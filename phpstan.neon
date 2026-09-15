@@ -12,14 +12,22 @@ parameters:
 
     level: 3
 
-    # Eloquent models expose database columns and relationship properties
-    # dynamically. These patterns only suppress PHPStan's generic Model/Collection
-    # inference failures; application-specific types and all other error classes
-    # remain visible and still fail CI.
+    # Keep PHPStan strict everywhere else. The few scoped exceptions below are
+    # framework inference gaps that are verified by the application code:
+    # Livewire computed properties are exposed through get*Property() methods,
+    # withSum()/withCount() add runtime aggregate attributes, and Larastan can
+    # lose the concrete related model type through some Eloquent relation chains.
+    # Every exception is restricted to the exact affected file/error shape.
     ignoreErrors:
-        - identifier: property.notFound
-          message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$.*\.$#'
-        - identifier: property.notFound
-          message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection<.*\\|Illuminate\\Database\\Eloquent\\Model::\$.*\.$#'
         - identifier: method.notFound
-          message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model::.*\(\)\.$#'
+          path: app/Livewire/BuilderEditor.php
+          message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed\(\)\.$#'
+        - identifier: return.type
+          path: app/Livewire/BuilderEditor.php
+          message: '#^Method App\\Livewire\\BuilderEditor::createDefaultPage\(\) should return App\\Models\\SitePage but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+        - identifier: assign.propertyType
+          path: app/Livewire/PublicSite.php
+          message: '#^Property App\\Livewire\\PublicSite::\$page \(App\\Models\\SitePage\) does not accept Illuminate\\Database\\Eloquent\\Model\.$#'
+        - identifier: property.notFound
+          path: app/Livewire/ProductCatalog.php
+          message: '#^Access to an undefined property App\\Livewire\\ProductCatalog::\$(cartSubtotal|shipping|vat|cartProducts)\.$#'
