@@ -93,6 +93,148 @@ class BuilderStudio extends Component
         ])->all();
     }
 
+    public function currentPage(): array
+    {
+        foreach ($this->pages as $page) {
+            if (($page['id'] ?? null) === $this->pageId) {
+                return $page;
+            }
+        }
+
+        return [];
+    }
+
+    public function createPage(): void
+    {
+        $baseName = 'Nova página';
+        $baseSlug = 'nova-pagina';
+        $slug = $baseSlug;
+        $suffix = 2;
+
+        while ($this->site->pages()->where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$suffix;
+            $suffix++;
+        }
+
+        $page = $this->site->pages()->create([
+            'name' => $suffix === 2 ? $baseName : $baseName.' '.$suffix - 1,
+            'slug' => $slug,
+            'status' => 'draft',
+            'is_homepage' => false,
+            'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
+            'seo' => [],
+        ]);
+
+        $this->refreshPages();
+        $this->loadPage($page->id);
+        $this->statusMessage = 'Nova página criada';
+    }
+
+    public function duplicatePage(): void
+    {
+        $source = $this->site->pages()->with('sections')->findOrFail($this->pageId);
+
+        if ($this->dirty) {
+            $this->save();
+            $source->refresh()->load('sections');
+        }
+
+        $baseSlug = Str::slug($source->slug.'-copia');
+        $slug = $baseSlug;
+        $suffix = 2;
+        while ($this->site->pages()->where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$suffix++;
+        }
+
+        $page = $this->site->pages()->create([
+            'name' => $source->name.' (cópia)',
+            'slug' => $slug,
+            'status' => 'draft',
+            'is_homepage' => false,
+            'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
+            'seo' => $source->seo ?: [],
+        ]);
+
+        foreach ($source->sections as $section) {
+            $page->sections()->create([
+                'type' => $section->type,
+                'label' => $section->label,
+                'content' => $section->content ?: [],
+                'settings' => $section->settings ?: [],
+                'sort_order' => $section->sort_order,
+                'is_visible' => (bool) $section->is_visible,
+            ]);
+        }
+
+        $this->refreshPages();
+        $this->loadPage($page->id);
+        $this->statusMessage = 'Página duplicada';
+    }
+
+    public function deletePage(): void
+    {
+        $page = $this->site->pages()->findOrFail($this->pageId);
+        abort_if($this->site->pages()->count() <= 1, 422, 'O website precisa de pelo menos uma página.');
+
+        $wasHomepage = (bool) $page->is_homepage;
+        $page->delete();
+
+        if ($wasHomepage) {
+            $replacement = $this->site->pages()->orderBy('sort_order')->firstOrFail();
+            $this->setHomepage($replacement->id);
+        }
+
+        $replacement = $this->site->pages()->where('is_homepage', true)->first() ?? $this->site->pages()->orderBy('sort_order')->firstOrFail();
+        $this->refreshPages();
+        $this->loadPage($replacement->id);
+        $this->statusMessage = 'Página eliminada';
+    }
+
+    public function setHomepage(int $id): void
+    {
+        DB::transaction(function () use ($id): void {
+            $page = $this->site->pages()->findOrFail($id);
+            $this->site->pages()->update(['is_homepage' => false]);
+            $page->update(['is_homepage' => true]);
+        });
+
+        $this->refreshPages();
+        $this->statusMessage = 'Homepage actualizada';
+    }
+
+    public function updatePageName(string $name): void
+    {
+        $name = trim($name);
+        abort_if($name === '', 422, 'O nome da página não pode ficar vazio.');
+        $page = $this->site->pages()->findOrFail($this->pageId);
+        $page->update(['name' => Str::limit($name, 120, '')]);
+        $this->refreshPages();
+        $this->statusMessage = 'Nome da página actualizado';
+    }
+
+    public function updatePageSeo(string $key, string $value): void
+    {
+        abort_unless(in_array($key, ['title', 'description', 'canonical', 'og_image'], true), 422);
+        $this->pageSeo[$key] = Str::limit($value, $key === 'description' ? 320 : 500, '');
+        $this->dirty = true;
+    }
+
+    public function reorderPages(array $orderedIds): void
+    {
+        $allowedIds = $this->site->pages()->pluck('id')->map(fn ($id): int => (int) $id)->all();
+        $orderedIds = array_values(array_filter(array_map('intval', $orderedIds), fn (int $id): bool => in_array($id, $allowedIds, true)));
+
+        abort_unless(count($orderedIds) === count($allowedIds) && count(array_unique($orderedIds)) === count($allowedIds), 422);
+
+        DB::transaction(function () use ($orderedIds): void {
+            foreach ($orderedIds as $index => $id) {
+                $this->site->pages()->whereKey($id)->update(['sort_order' => $index]);
+            }
+        });
+
+        $this->refreshPages();
+    }
+
     public function loadVersions(): void
     {
         $this->versions = $this->site->versions()->with('creator')->latest('version_number')->limit(30)->get()->map(fn (SiteVersion $version): array => [
@@ -297,7 +439,8 @@ class BuilderStudio extends Component
 
     public function runPublishChecks(): void
     {
-        $this->publishChecks = app(WebsitePublishingService::class)->validate($this->site->fresh());
+        $result = app(WebsitePublishingService::class)->validate($this->site->fresh());
+        $this->publishChecks = $this->formatPublishChecks($result);
         $this->showPublish = true;
     }
 
@@ -305,17 +448,34 @@ class BuilderStudio extends Component
     {
         $this->save();
         $this->site->refresh();
-        $this->publishChecks = app(WebsitePublishingService::class)->validate($this->site);
+        $result = app(WebsitePublishingService::class)->validate($this->site);
+        $this->publishChecks = $this->formatPublishChecks($result);
 
-        if (collect($this->publishChecks)->contains(fn (array $check): bool => ($check['level'] ?? '') === 'error')) {
+        if (! $result['ok']) {
             $this->showPublish = true;
             return;
         }
 
-        app(WebsitePublishingService::class)->publish($this->site, auth()->id());
+        app(WebsitePublishingService::class)->publish($this->site);
         $this->site->refresh();
         $this->showPublish = false;
         $this->statusMessage = 'Website publicado';
+    }
+
+    private function formatPublishChecks(array $result): array
+    {
+        $checks = [];
+        foreach ($result['errors'] ?? [] as $message) {
+            $checks[] = ['level' => 'error', 'label' => 'Necessário', 'message' => $message];
+        }
+        foreach ($result['warnings'] ?? [] as $message) {
+            $checks[] = ['level' => 'warning', 'label' => 'Recomendado', 'message' => $message];
+        }
+        if ($checks === []) {
+            $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
+        }
+
+        return $checks;
     }
 
     public function unpublish(): void
