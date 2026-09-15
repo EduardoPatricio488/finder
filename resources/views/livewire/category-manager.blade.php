@@ -17,14 +17,14 @@
                 <label for="category-name" class="sr-only">Nome da categoria</label>
                 <input
                     id="category-name"
-                    wire:model.live="name"
+                    wire:model.live="categoryName"
                     type="text"
                     maxlength="255"
                     autocomplete="off"
                     placeholder="Nome da categoria"
                     class="w-full rounded-lg border-stone-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
                 >
-                @error('name')
+                @error('categoryName')
                     <p class="mt-2 text-sm text-red-600" role="alert">{{ $message }}</p>
                 @enderror
             </div>
