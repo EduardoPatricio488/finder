@@ -121,6 +121,7 @@ class BuilderStudio extends Component
                 return $page;
             }
         }
+
         return [];
     }
 
@@ -448,6 +449,7 @@ class BuilderStudio extends Component
     {
         $id = $this->sections[$index]['id'] ?? null;
         abort_unless(is_numeric($id), 422);
+
         return $this->site->pages()->findOrFail($this->pageId)->sections()->findOrFail((int) $id);
     }
 
@@ -499,6 +501,7 @@ class BuilderStudio extends Component
         $this->publishChecks = $this->formatPublishChecks($result);
         if (! $result['ok']) {
             $this->showPublish = true;
+
             return;
         }
         app(WebsitePublishingService::class)->publish($this->site, auth()->id());
@@ -519,6 +522,7 @@ class BuilderStudio extends Component
         if ($checks === []) {
             $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
         }
+
         return $checks;
     }
 
@@ -625,6 +629,7 @@ class BuilderStudio extends Component
                 'content' => $this->sanitizeLegacyContent($content),
             ];
         }
+
         return $result;
     }
 
@@ -635,6 +640,7 @@ class BuilderStudio extends Component
                 $value = Str::limit($value, 4000, '');
             }
         });
+
         return $content;
     }
 
@@ -648,6 +654,7 @@ class BuilderStudio extends Component
                 $value = Str::limit($value, 2000, '');
             }
         }
+
         return $content;
     }
 
@@ -655,6 +662,7 @@ class BuilderStudio extends Component
     {
         $children = $document['nodes'][0]['children'] ?? [];
         $last = end($children);
+
         return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
     }
 
@@ -671,6 +679,7 @@ class BuilderStudio extends Component
                 }
             }
         }
+
         return null;
     }
 
@@ -680,6 +689,7 @@ class BuilderStudio extends Component
         if ($existing !== null) {
             return (int) $existing;
         }
+
         return ((int) $this->site->pages()->max('sort_order')) + 1;
     }
 

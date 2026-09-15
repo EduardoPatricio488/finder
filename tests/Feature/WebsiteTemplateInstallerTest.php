@@ -8,6 +8,7 @@ use App\Models\Site;
 use App\Models\User;
 use App\Services\WebsiteTemplateInstaller;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 final class WebsiteTemplateInstallerTest extends TestCase
@@ -52,7 +53,7 @@ final class WebsiteTemplateInstallerTest extends TestCase
     {
         $site = Site::factory()->create(['user_id' => User::factory()->create()->id]);
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
         app(WebsiteTemplateInstaller::class)->install($site, 'missing');
     }
 }
