@@ -129,8 +129,8 @@ class PublicSite extends Component
         return 'desktop';
     }
 
-    public function render()
+    public function render(): mixed
     {
-        return view('livewire.public-site');
+        return view('livewire.public-site-renderer');
     }
 }
