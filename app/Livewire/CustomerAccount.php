@@ -31,7 +31,14 @@ class CustomerAccount extends Component
 
     public function mount(?string $section = null): void
     {
-        $this->section = $section ?? 'overview';
+        $this->section = $section ?? match (true) {
+            request()->routeIs('account.favorites') => 'favorites',
+            request()->routeIs('account.addresses') => 'addresses',
+            request()->routeIs('account.payments') => 'payments',
+            request()->routeIs('account.notifications') => 'notifications',
+            default => 'overview',
+        };
+
         $preferences = DB::table('customer_notification_preferences')->where('user_id', auth()->id())->first();
         if ($preferences !== null) {
             $this->orderUpdates = (bool) $preferences->order_updates;
