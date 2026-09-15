@@ -11,14 +11,14 @@
         $canonical = $page->is_homepage
             ? route('site.public', ['site' => $site->slug])
             : route('site.public', ['site' => $site->slug, 'pageSlug' => $page->slug]);
+        $faviconUrl = $favicon && preg_match('#^https?://#i', $favicon) ? $favicon : ($favicon ? asset($favicon) : asset('favicon.svg'));
+        $seoImageUrl = $seoImage && preg_match('#^https?://#i', $seoImage) ? $seoImage : ($seoImage ? asset($seoImage) : null);
     @endphp
     <meta name="description" content="{{ $seoDescription }}">
     <meta name="robots" content="{{ $preview ?? false ? 'noindex,nofollow,noarchive' : 'index,follow' }}">
     <link rel="canonical" href="{{ $canonical }}">
-    @if($favicon)
-        <link rel="icon" href="{{ str_starts_with($favicon, ['http://', 'https://']) ? $favicon : asset($favicon) }}">
-    @else
-        <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ $faviconUrl }}">
+    @if(!$favicon)
         <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     @endif
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
@@ -27,10 +27,10 @@
     <meta property="og:description" content="{{ $seoDescription }}">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:site_name" content="{{ $site->name }}">
-    @if($seoImage)
-        <meta property="og:image" content="{{ str_starts_with($seoImage, ['http://', 'https://']) ? $seoImage : asset($seoImage) }}">
+    @if($seoImageUrl)
+        <meta property="og:image" content="{{ $seoImageUrl }}">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:image" content="{{ str_starts_with($seoImage, ['http://', 'https://']) ? $seoImage : asset($seoImage) }}">
+        <meta name="twitter:image" content="{{ $seoImageUrl }}">
     @else
         <meta name="twitter:card" content="summary">
     @endif
