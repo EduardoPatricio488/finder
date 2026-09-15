@@ -8,6 +8,8 @@ use App\Models\Site;
 
 final class WebsitePublishingService
 {
+    public function __construct(private readonly WebsiteVersionService $versions) {}
+
     /** @return array{ok:bool,errors:list<string>,warnings:list<string>} */
     public function validate(Site $site): array
     {
@@ -53,7 +55,11 @@ final class WebsitePublishingService
             $warnings[] = 'Adiciona uma imagem social para melhorar as partilhas.';
         }
 
-        return ['ok' => $errors === [], 'errors' => array_values(array_unique($errors)), 'warnings' => array_values(array_unique($warnings))];
+        return [
+            'ok' => $errors === [],
+            'errors' => array_values(array_unique($errors)),
+            'warnings' => array_values(array_unique($warnings)),
+        ];
     }
 
     public function publish(Site $site): void
@@ -63,6 +69,12 @@ final class WebsitePublishingService
         if (! $result['ok']) {
             abort(422, implode(' ', $result['errors']));
         }
+
+        $this->versions->create(
+            $site->fresh(),
+            auth()->id(),
+            'Backup automático antes da publicação',
+        );
 
         $site->forceFill([
             'is_published' => true,
