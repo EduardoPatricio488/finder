@@ -12,7 +12,7 @@ class WebsiteAiGenerator
      */
     public function generate(array $brief): array
     {
-        $apiKey = trim((string) config('services.openai.key', env('OPENAI_API_KEY', '')));
+        $apiKey = trim((string) config('services.openai.key', ''));
 
         if ($apiKey === '') {
             return ['pages' => $this->fallback($brief)];
@@ -25,7 +25,7 @@ class WebsiteAiGenerator
         ]);
 
         $payload = [
-            'model' => env('OPENAI_MODEL', 'gpt-5-mini'),
+            'model' => (string) config('services.openai.model', 'gpt-5-mini'),
             'temperature' => 0.4,
             'response_format' => ['type' => 'json_object'],
             'messages' => [
