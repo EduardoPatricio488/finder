@@ -21,7 +21,7 @@ final class ElementRegistry
             'quote' => self::definition('quote', 'Citação', 'Conteúdo', 'Adiciona uma citação destacada.', ['text' => 'Uma frase importante para os teus visitantes.', 'author' => ''], ['align' => 'left']),
             'social_links' => self::definition('social_links', 'Redes sociais', 'Conteúdo', 'Mostra ligações para redes sociais.', ['items' => []], ['align' => 'left']),
             'faq' => self::definition('faq', 'FAQ', 'Conteúdo', 'Adiciona perguntas e respostas.', ['title' => 'Perguntas frequentes', 'items' => []], []),
-            'gallery' => self::definition('gallery', 'Galeria', 'Media', 'Apresenta várias imagens.', ['items' => []], ['columns' => 3]),
+            'gallery' => self::definition('gallery', 'Galeria', 'Media', 'Apresenta várias imagens.', ['items' => []], ['columns' => 3], ['content' => ['items' => 'array'], 'settings' => ['columns' => 'integer']]),
             'form' => self::definition('form', 'Formulário', 'Conversão', 'Adiciona um formulário de contacto.', ['title' => 'Fala connosco', 'submit_label' => 'Enviar'], ['style' => 'card']),
             'html' => self::definition('html', 'HTML', 'Avançado', 'Adiciona HTML personalizado.', ['html' => ''], [], ['content' => ['html' => 'string']]),
         ];
@@ -53,11 +53,11 @@ final class ElementRegistry
     {
         $contentSchema = [];
         foreach ($content as $key => $value) {
-            $contentSchema[$key] = is_array($value) ? 'array' : 'string';
+            $contentSchema[$key] = self::valueRule($value);
         }
         $settingsSchema = [];
         foreach ($settings as $key => $value) {
-            $settingsSchema[$key] = is_array($value) ? array_values($value) : 'string';
+            $settingsSchema[$key] = self::valueRule($value);
         }
 
         return [
@@ -76,5 +76,15 @@ final class ElementRegistry
             'allowed_parents' => ['container'],
             'schema' => $schema ?? ['content' => $contentSchema, 'settings' => $settingsSchema],
         ];
+    }
+
+    private static function valueRule(mixed $value): string|array
+    {
+        return match (true) {
+            is_array($value) => 'array',
+            is_int($value) => 'integer',
+            is_bool($value) => 'boolean',
+            default => 'string',
+        };
     }
 }
