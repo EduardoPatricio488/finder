@@ -32,10 +32,10 @@ class CustomerAccount extends Component
     public function mount(?string $section = null): void
     {
         $this->section = $section ?? match (true) {
-            request()->routeIs('account.favorites') => 'favorites',
-            request()->routeIs('account.addresses') => 'addresses',
-            request()->routeIs('account.payments') => 'payments',
-            request()->routeIs('account.notifications') => 'notifications',
+            request()->is('conta/favoritos') => 'favorites',
+            request()->is('conta/moradas') => 'addresses',
+            request()->is('conta/pagamentos') => 'payments',
+            request()->is('conta/notificacoes') => 'notifications',
             default => 'overview',
         };
 
