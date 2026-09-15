@@ -45,15 +45,13 @@ document.addEventListener('livewire:navigated', () => {
         const target = event.target instanceof Element ? event.target : null;
         if (!target) return;
 
-        const section = target.closest('.builder-section[data-section-id]');
+        const section = target.closest('section[data-section-id]');
         if (!section) return;
 
-        // Do not hijack real controls or the builder's own action buttons.
-        // Editable visual elements are intentionally allowed through so that
-        // clicking text, images and other canvas elements selects their section.
-        if (target.closest('button, a, input, textarea, select')) return;
+        // Do not hijack real controls or an element that is being edited.
+        if (target.closest('button, a, input, textarea, select, [contenteditable="true"]')) return;
 
-        const sections = [...document.querySelectorAll('.builder-section[data-section-id]')];
+        const sections = [...document.querySelectorAll('section[data-section-id]')];
         const sectionIndex = sections.indexOf(section);
         if (sectionIndex < 0) return;
 
@@ -64,8 +62,116 @@ document.addEventListener('livewire:navigated', () => {
         component.selectSection(sectionIndex);
     };
 
+    const inlineDefinition = (section, element, field, itemIndex = null) => {
+        element.dataset.finderInlineField = field;
+        if (itemIndex !== null) element.dataset.finderInlineItem = String(itemIndex);
+        element.contentEditable = 'true';
+        element.spellcheck = true;
+        element.classList.add('cursor-text', 'rounded-lg', 'outline-none', 'transition');
+        element.classList.add('hover:ring-2', 'hover:ring-indigo-200', 'focus:ring-2', 'focus:ring-indigo-400', 'focus:bg-indigo-50/30');
+        element.title = 'Clique para editar directamente';
+
+        if (element.dataset.finderInlineReady === '1') return;
+        element.dataset.finderInlineReady = '1';
+
+        element.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+
+        element.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                element.blur();
+            }
+        });
+
+        element.addEventListener('blur', async () => {
+            const component = getBuilderComponent();
+            if (!component) return;
+
+            const sections = [...document.querySelectorAll('section[data-section-id]')];
+            const sectionIndex = sections.indexOf(section);
+            if (sectionIndex < 0) return;
+
+            const value = element.innerText.replace(/\u00a0/g, ' ').trim();
+            const currentItemIndex = element.dataset.finderInlineItem;
+            const item = currentItemIndex === undefined ? null : Number(currentItemIndex);
+
+            await component.updateInline(sectionIndex, field, value, Number.isInteger(item) ? item : null);
+            scheduleSave();
+        });
+    };
+
+    const makeInlineEditable = (section, index) => {
+        const type = section.dataset.sectionType || '';
+        const content = section.querySelector(':scope > div:last-child');
+        if (!content) return;
+
+        const headings = [...content.querySelectorAll('h1, h2')];
+        const paragraphs = [...content.querySelectorAll('p')];
+        const buttons = [...content.querySelectorAll('span')].filter((element) => {
+            return element.classList.contains('text-white') && element.classList.contains('font-black');
+        });
+
+        if (type === 'hero') {
+            if (paragraphs[0]) inlineDefinition(section, paragraphs[0], 'subtitle');
+            if (headings[0]) inlineDefinition(section, headings[0], 'title');
+            if (paragraphs[1]) inlineDefinition(section, paragraphs[1], 'description');
+            if (buttons[0]) inlineDefinition(section, buttons[0], 'button_label');
+            return;
+        }
+
+        if (type === 'text') {
+            if (headings[0]) inlineDefinition(section, headings[0], 'title');
+            if (paragraphs[0]) inlineDefinition(section, paragraphs[0], 'body');
+            return;
+        }
+
+        if (type === 'cta') {
+            if (headings[0]) inlineDefinition(section, headings[0], 'title');
+            if (paragraphs[0]) inlineDefinition(section, paragraphs[0], 'description');
+            if (buttons[0]) inlineDefinition(section, buttons[0], 'button_label');
+            return;
+        }
+
+        if (headings[0]) inlineDefinition(section, headings[0], 'title');
+
+        const description = paragraphs[0];
+        if (description && !description.closest('article')) {
+            inlineDefinition(section, description, 'description');
+        }
+
+        [...content.querySelectorAll('article')].forEach((article, itemIndex) => {
+            const itemHeading = article.querySelector('p.font-black');
+            const itemDescription = article.querySelector('p.mt-2');
+
+            if (itemHeading) {
+                const field = type === 'faq' ? 'question' : (type === 'testimonials' ? 'name' : 'title');
+                inlineDefinition(section, itemHeading, field, itemIndex);
+            }
+
+            if (itemDescription) {
+                const field = type === 'faq' ? 'answer' : (type === 'testimonials' ? 'quote' : (type === 'pricing' ? 'price' : 'description'));
+                inlineDefinition(section, itemDescription, field, itemIndex);
+            }
+        });
+    };
+
+    const bootInlineEditing = () => {
+        const sections = [...document.querySelectorAll('section[data-section-id]')];
+        if (!sections.length) return;
+
+        sections.forEach((section, index) => {
+            if (!section.dataset.finderInlineSectionReady) {
+                section.dataset.finderInlineSectionReady = '1';
+            }
+
+            makeInlineEditable(section, index);
+        });
+    };
+
     const bootVisualSelection = () => {
-        const canvas = document.querySelector('.builder-section')?.closest('main');
+        const canvas = document.querySelector('section[data-section-id]')?.closest('main');
         if (!canvas || canvas.dataset.finderVisualSelectionReady === '1') return;
 
         canvas.dataset.finderVisualSelectionReady = '1';
@@ -73,7 +179,7 @@ document.addEventListener('livewire:navigated', () => {
     };
 
     const bootDragAndDrop = () => {
-        const sections = [...document.querySelectorAll('.builder-section[wire\\:key]')];
+        const sections = [...document.querySelectorAll('section[data-section-id][wire\\:key]')];
         if (!sections.length) return;
 
         sections.forEach((section) => {
@@ -83,6 +189,11 @@ document.addEventListener('livewire:navigated', () => {
             section.draggable = true;
 
             section.addEventListener('dragstart', (event) => {
+                if (event.target instanceof Element && event.target.closest('[contenteditable="true"], input, textarea, button, a')) {
+                    event.preventDefault();
+                    return;
+                }
+
                 section.classList.add('opacity-60');
                 event.dataTransfer.effectAllowed = 'move';
                 event.dataTransfer.setData('text/plain', section.getAttribute('wire:key') || '');
@@ -90,7 +201,7 @@ document.addEventListener('livewire:navigated', () => {
 
             section.addEventListener('dragend', () => {
                 section.classList.remove('opacity-60');
-                document.querySelectorAll('.builder-section').forEach((item) => {
+                document.querySelectorAll('section[data-section-id]').forEach((item) => {
                     item.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-100');
                 });
             });
@@ -114,7 +225,7 @@ document.addEventListener('livewire:navigated', () => {
                 if (!draggedKey || !targetKey || draggedKey === targetKey) return;
 
                 const container = section.parentElement;
-                const dragged = [...container.querySelectorAll('.builder-section[wire\\:key]')]
+                const dragged = [...container.querySelectorAll('section[data-section-id][wire\\:key]')]
                     .find((item) => item.getAttribute('wire:key') === draggedKey);
                 if (!dragged) return;
 
@@ -126,8 +237,8 @@ document.addEventListener('livewire:navigated', () => {
                     container.insertBefore(dragged, section.nextSibling);
                 }
 
-                const orderedIds = [...container.querySelectorAll('.builder-section[wire\\:key]')]
-                    .map((item) => item.getAttribute('wire:key').replace(/^section-/, ''));
+                const orderedIds = [...container.querySelectorAll('section[data-section-id][wire\\:key]')]
+                    .map((item) => item.getAttribute('wire:key').replace(/^builder-section-/, '').replace(/^section-/, ''));
 
                 const component = getBuilderComponent();
                 if (component) {
@@ -138,6 +249,7 @@ document.addEventListener('livewire:navigated', () => {
     };
 
     const boot = () => {
+        bootInlineEditing();
         bootVisualSelection();
         bootDragAndDrop();
     };
