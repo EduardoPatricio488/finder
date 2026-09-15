@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Services\WebsiteTemplateInstaller;
 use App\Support\WebsiteBuilder\SiteSectionDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 final class WebsiteTemplateInstallerTest extends TestCase
@@ -62,7 +62,7 @@ final class WebsiteTemplateInstallerTest extends TestCase
     {
         $site = Site::factory()->create(['owner_id' => User::factory()->create()->id]);
 
-        $this->expectException(HttpException::class);
+        $this->expectException(InvalidArgumentException::class);
         app(WebsiteTemplateInstaller::class)->install($site, 'missing');
     }
 }
