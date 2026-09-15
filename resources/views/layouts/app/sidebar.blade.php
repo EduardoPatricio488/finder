@@ -51,8 +51,18 @@
                     <flux:sidebar.group heading="Catálogo" class="grid"><flux:sidebar.item icon="shopping-bag" :href="$siteRoute('products')" :current="request()->routeIs('admin.site.products')" wire:navigate>Produtos</flux:sidebar.item><flux:sidebar.item icon="tag" :href="$siteRoute('categories')" :current="request()->routeIs('admin.site.categories')" wire:navigate>Categorias</flux:sidebar.item></flux:sidebar.group>
                     <flux:sidebar.group heading="Vendas & Clientes" class="grid"><flux:sidebar.item icon="clipboard-document-list" :href="$siteRoute('orders')" :current="request()->routeIs('admin.site.orders')" wire:navigate>Encomendas</flux:sidebar.item><flux:sidebar.item icon="users" :href="$siteRoute('users')" :current="request()->routeIs('admin.site.users')" wire:navigate>Utilizadores</flux:sidebar.item></flux:sidebar.group>
                     <flux:sidebar.group heading="Inteligência" class="grid">
-                        @can('access-reports', $currentSite)<flux:sidebar.item icon="chart-bar" :href="$siteRoute('reports')" :current="request()->routeIs('admin.site.reports')" wire:navigate>Relatórios</flux:sidebar.item><flux:sidebar.item icon="presentation-chart-line" :href="$siteRoute('analytics')" :current="request()->routeIs('admin.site.analytics')" wire:navigate>Analytics</flux:sidebar.item>@endcan
-                        @can('access-ai', $currentSite)<flux:sidebar.item icon="sparkles" :href="$siteRoute('assistant')" :current="request()->routeIs('admin.site.assistant')" wire:navigate>Assistente IA</flux:sidebar.item>@endcan
+                        @can('access-reports', $currentSite)
+                            <flux:sidebar.item icon="chart-bar" :href="$siteRoute('reports')" :current="request()->routeIs('admin.site.reports')" wire:navigate>Relatórios</flux:sidebar.item>
+                            <flux:sidebar.item icon="presentation-chart-line" :href="$siteRoute('analytics')" :current="request()->routeIs('admin.site.analytics')" wire:navigate>Analytics</flux:sidebar.item>
+                        @else
+                            <flux:sidebar.item icon="lock-closed" :href="$siteRoute('upgrade')" :current="request()->routeIs('admin.site.upgrade')" wire:navigate>Relatórios <span class="ms-auto text-[10px] font-semibold uppercase tracking-wide text-amber-500">Pro</span></flux:sidebar.item>
+                            <flux:sidebar.item icon="lock-closed" :href="$siteRoute('upgrade')" wire:navigate>Analytics <span class="ms-auto text-[10px] font-semibold uppercase tracking-wide text-amber-500">Pro</span></flux:sidebar.item>
+                        @endcan
+                        @can('access-ai', $currentSite)
+                            <flux:sidebar.item icon="sparkles" :href="$siteRoute('assistant')" :current="request()->routeIs('admin.site.assistant')" wire:navigate>Assistente IA</flux:sidebar.item>
+                        @else
+                            <flux:sidebar.item icon="lock-closed" :href="$siteRoute('upgrade')" :current="request()->routeIs('admin.site.upgrade')" wire:navigate>Assistente IA <span class="ms-auto text-[10px] font-semibold uppercase tracking-wide text-amber-500">Pro</span></flux:sidebar.item>
+                        @endcan
                     </flux:sidebar.group>
                 @else
                     <div class="px-4 py-8 text-center"><p class="text-xs font-bold uppercase tracking-widest text-zinc-500">Cria ou seleciona um website para começar.</p><flux:button :href="route('site.create')" size="sm" class="mt-4 !rounded-xl" variant="primary">Criar website</flux:button></div>
