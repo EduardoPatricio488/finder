@@ -16,13 +16,7 @@ parameters:
     # the runtime APIs used by this application. No application classes or paths
     # are disabled from analysis.
     ignoreErrors:
-        - message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed\(\)\.$#'
-        - message: '#^Method App\\Livewire\\BuilderEditor::createDefaultPage\(\) should return App\\Models\\SitePage but returns Illuminate\\Database\\Eloquent\\Model\.$#'
         - message: '#^Access to an undefined property App\\Livewire\\ProductCatalog::\$(cartSubtotal|shipping|vat|cartProducts)\.$#'
-        - message: '#^Property App\\Livewire\\PublicSite::\$page \(App\\Models\\SitePage\) does not accept Illuminate\\Database\\Eloquent\\Model\.$#'
         - message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$.*\.$#'
         - message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model::.*\(\)\.$#'
-        - message: '#^Property .* does not accept Illuminate\\Database\\Eloquent\\Model\.$#'
         - message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection<.*>\|Illuminate\\Database\\Eloquent\\Model::\$.*\.$#'
-        - message: '#^Anonymous function should return App\\Models\\SitePage but returns Illuminate\\Database\\Eloquent\\Model\.$#'
-        - message: '#^Anonymous function should return App\\Models\\SiteVersion but returns Illuminate\\Database\\Eloquent\\Model\.$#'
