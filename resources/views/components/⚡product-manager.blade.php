@@ -38,12 +38,6 @@ new class extends Component
         $this->loadData();
     }
 
-    public function openForm(): void
-    {
-        $this->resetForm();
-        $this->dispatch('product-form-opened');
-    }
-
     public function closeForm(): void
     {
         $this->resetForm();
@@ -148,7 +142,11 @@ new class extends Component
                 <p class="text-sm font-medium text-stone-500">Administração</p>
                 <h1 class="mt-1 text-2xl font-semibold tracking-tight">Produtos</h1>
             </div>
-            <button type="button" wire:click="openForm" class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700">
+            <button
+                type="button"
+                x-on:click="productFormOpen = true"
+                class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700"
+            >
                 Novo produto
             </button>
         </div>
