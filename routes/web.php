@@ -25,6 +25,7 @@ use App\Livewire\PublicSite;
 use App\Livewire\Reports;
 use App\Livewire\SalesManager;
 use App\Livewire\SiteAnalytics;
+use App\Livewire\SiteDirectory;
 use App\Livewire\SiteSettings;
 use App\Livewire\SiteSubmissions;
 use App\Livewire\StockMovementManager;
@@ -36,11 +37,14 @@ use App\Models\Site;
 use App\Models\SiteAdminAuditLog;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', LandingPage::class)->name('home');
+Route::get('/', SiteDirectory::class)->name('home');
+Route::get('finder', LandingPage::class)->name('landing');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 Route::get('vendas', ProductCatalog::class)->name('sales');
 Route::get('produtos', ProductCatalog::class)->name('products');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
+
+Route::get('sites/{site:slug}', PublicSite::class)->name('sites.show');
 
 Route::middleware(['auth', 'verified'])
     ->get('entrada', fn () => redirect()->route('dashboard'))
