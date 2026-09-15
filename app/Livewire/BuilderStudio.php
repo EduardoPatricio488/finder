@@ -95,7 +95,7 @@ class BuilderStudio extends Component
 
     public function loadVersions(): void
     {
-        $this->versions = $this->site->versions()->with('creator')->limit(30)->get()->map(fn (SiteVersion $version): array => [
+        $this->versions = $this->site->versions()->with('creator')->latest('version_number')->limit(30)->get()->map(fn (SiteVersion $version): array => [
             'id' => $version->id,
             'version_number' => $version->version_number,
             'label' => $version->label,
@@ -259,6 +259,7 @@ class BuilderStudio extends Component
     {
         $id = $this->sections[$index]['id'] ?? null;
         abort_unless(is_numeric($id), 422);
+
         return $this->site->pages()->findOrFail($this->pageId)->sections()->findOrFail((int) $id);
     }
 
@@ -340,11 +341,14 @@ class BuilderStudio extends Component
 
     public function applyTemplate(string $template): void
     {
+        abort_unless(WebsiteTemplates::has($template), 422);
         $definition = WebsiteTemplates::get($template);
         $this->sections = [];
+
         foreach ($definition['pages'][0]['sections'] ?? [] as $section) {
             $this->sections[] = ['id' => null, 'type' => $section['type'], 'label' => $section['label'], 'content' => $this->defaultContent($section['type']), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
         }
+
         $this->selectedSection = $this->sections !== [] ? 0 : null;
         $this->dirty = true;
         $this->showTemplates = false;
@@ -354,16 +358,62 @@ class BuilderStudio extends Component
     {
         $brief = trim($this->aiBrief);
         abort_if($brief === '', 422, 'Descreve o website que queres criar.');
-        $result = app(WebsiteAiGenerator::class)->generate(['prompt' => $brief, 'site' => $this->site->name, 'category' => $this->site->type]);
-        foreach ($result['pages'] ?? [] as $pageData) {
-            $page = $this->site->pages()->updateOrCreate(['slug' => Str::slug($pageData['slug'] ?? $pageData['name'] ?? 'pagina')], ['name' => $pageData['name'] ?? 'Página', 'seo' => $pageData['seo'] ?? [], 'sort_order' => $this->site->pages()->count()]);
-            if ($page->id === $this->pageId) {
-                $this->loadPage($page->id);
+        abort_if(mb_strlen($brief) > 4000, 422, 'A descrição do website é demasiado longa.');
+
+        $result = app(WebsiteAiGenerator::class)->generate([
+            'prompt' => $brief,
+            'description' => $brief,
+            'business_name' => $this->site->name,
+            'category' => $this->site->type,
+            'pages' => ['home', 'about', 'services', 'contact'],
+        ]);
+        $pages = is_array($result['pages'] ?? null) ? $result['pages'] : [];
+
+        foreach ($pages as $slug => $pageData) {
+            if (! is_string($slug) || ! is_array($pageData)) {
+                continue;
+            }
+
+            $page = $this->site->pages()->updateOrCreate(
+                ['slug' => Str::slug($slug)],
+                ['name' => Str::headline($slug), 'seo' => [], 'sort_order' => $this->site->pages()->count()]
+            );
+
+            if ($page->id !== $this->pageId) {
+                continue;
+            }
+
+            $sections = [];
+            foreach ($pageData as $section) {
+                if (! is_array($section) || ! is_string($section['type'] ?? null)) {
+                    continue;
+                }
+
+                $type = $section['type'];
+                if (! in_array($type, ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'], true)) {
+                    continue;
+                }
+
+                $sections[] = [
+                    'id' => null,
+                    'type' => $type,
+                    'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''),
+                    'content' => is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type),
+                    'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
+                    'is_visible' => true,
+                ];
+            }
+
+            if ($sections !== []) {
+                $this->sections = $sections;
+                $this->selectedSection = 0;
             }
         }
+
+        $this->refreshPages();
         $this->dirty = true;
         $this->showAi = false;
-        $this->statusMessage = 'Estrutura gerada por IA — por rever e guardar';
+        $this->statusMessage = 'Estrutura gerada por IA — revê e guarda';
     }
 
     private function createPageRecord(string $name, string $slug, bool $homepage = false): SitePage
