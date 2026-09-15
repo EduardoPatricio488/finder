@@ -16,8 +16,6 @@ final class SiteSectionDocument
         if (is_array($settings['builder_document'] ?? null)) {
             BuilderDocument::validate($settings['builder_document']);
             $document = BuilderDocument::normalize($settings['builder_document']);
-            $legacySettings = $settings;
-            unset($legacySettings['builder_document']);
 
             foreach ($document['nodes'] as &$node) {
                 if (($node['type'] ?? null) !== 'container') {
@@ -31,8 +29,6 @@ final class SiteSectionDocument
                 $legacy['label'] = $section->label;
                 $legacy['sort_order'] = (int) ($section->sort_order ?? 0);
                 $legacy['is_visible'] = (bool) ($section->is_visible ?? true);
-                $legacy['content'] = is_array($section->content) ? $section->content : [];
-                $legacy['settings'] = $legacySettings;
                 $node['settings']['legacy'] = $legacy;
             }
             unset($node);
