@@ -14,15 +14,25 @@ use Livewire\Component;
 class CreateSite extends Component
 {
     public int $step = 1;
+
     public string $type = 'business';
+
     public string $template = 'studio';
+
     public string $name = '';
+
     public string $slug = '';
+
     public string $primaryColor = '#635bff';
+
     public string $secondaryColor = '#111827';
+
     public string $font = 'Inter';
+
     public array $pages = ['home', 'about', 'services', 'contact'];
+
     public array $types = [];
+
     public array $templates = [];
 
     public function mount(): void
@@ -178,7 +188,7 @@ class CreateSite extends Component
                 'title' => 'Fala connosco',
                 'description' => 'Encontra a informação certa e entra em contacto.',
                 'button_label' => 'Contactar',
-                'button_url' => '/contact',
+                'button_url' => '#',
             ],
             'contact_form' => [
                 'title' => 'Entra em contacto',
