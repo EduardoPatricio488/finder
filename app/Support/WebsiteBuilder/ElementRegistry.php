@@ -60,6 +60,10 @@ final class ElementRegistry
             $settingsSchema[$key] = self::valueRule($value);
         }
 
+        $schema ??= ['content' => $contentSchema, 'settings' => $settingsSchema];
+        $schema['content'] = array_replace($contentSchema, $schema['content'] ?? []);
+        $schema['settings'] = array_replace($settingsSchema, $schema['settings'] ?? []);
+
         return [
             'type' => $type,
             'label' => $label,
@@ -74,7 +78,7 @@ final class ElementRegistry
             'default_content' => $content,
             'default_settings' => $settings,
             'allowed_parents' => ['container'],
-            'schema' => $schema ?? ['content' => $contentSchema, 'settings' => $settingsSchema],
+            'schema' => $schema,
         ];
     }
 
