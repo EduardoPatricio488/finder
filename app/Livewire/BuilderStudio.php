@@ -10,6 +10,7 @@ use App\Models\SiteSection;
 use App\Models\SiteVersion;
 use App\Services\WebsiteAiGenerator;
 use App\Services\WebsitePublishingService;
+use App\Services\WebsiteTemplateInstaller;
 use App\Services\WebsiteVersionRestoreService;
 use App\Services\WebsiteVersionService;
 use App\Support\WebsiteBuilder\BuilderDocumentEditor;
@@ -28,56 +29,37 @@ use Livewire\Component;
 class BuilderStudio extends Component
 {
     public Site $site;
-
     public ?int $pageId = null;
-
     public array $pages = [];
-
     public array $sections = [];
-
     public array $theme = [];
-
     public array $siteSettings = [];
-
     public array $pageSeo = [];
-
     public ?int $selectedSection = null;
-
     public ?string $selectedElementId = null;
-
     public string $device = 'desktop';
-
     public string $panel = 'pages';
-
     public string $aiBrief = '';
-
     public string $statusMessage = 'Guardado';
-
     public bool $dirty = false;
-
     public bool $showAi = false;
-
     public bool $showTemplates = false;
-
     public bool $showPublish = false;
-
     public bool $showSettings = false;
-
     public bool $showVersions = false;
-
     public array $publishChecks = [];
-
     public array $versions = [];
 
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
-        $this->theme = $site->theme ?: $this->defaultTheme();
-        $this->siteSettings = $site->settings ?: [];
+        $this->theme = is_array($site->theme) && $site->theme !== [] ? $site->theme : $this->defaultTheme();
+        $this->siteSettings = is_array($site->settings) ? $site->settings : [];
         $page = $site->pages()->orderByDesc('is_homepage')->orderBy('sort_order')->first();
         if (! $page) {
             $page = $this->createPageRecord('Home', 'home', true);
+            $this->addStarterSection($page);
         }
         $this->loadPage($page->id);
         $this->loadVersions();
@@ -106,44 +88,29 @@ class BuilderStudio extends Component
     public function refreshPages(): void
     {
         $this->pages = $this->site->pages()->orderBy('sort_order')->get()->map(fn (SitePage $page): array => [
-            'id' => $page->id,
-            'name' => $page->name,
-            'slug' => $page->slug,
-            'is_homepage' => (bool) $page->is_homepage,
-            'status' => $page->status,
+            'id' => $page->id, 'name' => $page->name, 'slug' => $page->slug,
+            'is_homepage' => (bool) $page->is_homepage, 'status' => $page->status,
         ])->all();
     }
 
     public function currentPage(): array
     {
-        foreach ($this->pages as $page) {
-            if (($page['id'] ?? null) === $this->pageId) {
-                return $page;
-            }
-        }
-
-        return [];
+        return collect($this->pages)->firstWhere('id', $this->pageId) ?? [];
     }
 
     public function createPage(): void
     {
-        $baseName = 'Nova página';
-        $baseSlug = 'nova-pagina';
-        $slug = $baseSlug;
+        $slug = 'nova-pagina';
         $suffix = 2;
         while ($this->site->pages()->where('slug', $slug)->exists()) {
-            $slug = $baseSlug.'-'.$suffix;
-            $suffix++;
+            $slug = 'nova-pagina-'.$suffix++;
         }
-        $name = $suffix === 2 ? $baseName : $baseName.' '.($suffix - 1);
+        $name = $suffix === 2 ? 'Nova página' : 'Nova página '.($suffix - 1);
         $page = $this->site->pages()->create([
-            'name' => $name,
-            'slug' => $slug,
-            'status' => 'draft',
-            'is_homepage' => false,
-            'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
-            'seo' => [],
+            'name' => $name, 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false,
+            'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1, 'seo' => [],
         ]);
+        $this->addStarterSection($page);
         $this->refreshPages();
         $this->loadPage($page->id);
         $this->statusMessage = 'Nova página criada';
@@ -163,21 +130,13 @@ class BuilderStudio extends Component
             $slug = $baseSlug.'-'.$suffix++;
         }
         $page = $this->site->pages()->create([
-            'name' => $source->name.' (cópia)',
-            'slug' => $slug,
-            'status' => 'draft',
-            'is_homepage' => false,
-            'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
-            'seo' => $source->seo ?: [],
+            'name' => $source->name.' (cópia)', 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false,
+            'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1, 'seo' => $source->seo ?: [],
         ]);
         foreach ($source->sections as $section) {
             $page->sections()->create([
-                'type' => $section->type,
-                'label' => $section->label,
-                'content' => $section->content ?: [],
-                'settings' => $section->settings ?: [],
-                'sort_order' => $section->sort_order,
-                'is_visible' => (bool) $section->is_visible,
+                'type' => $section->type, 'label' => $section->label, 'content' => $section->content ?: [],
+                'settings' => $section->settings ?: [], 'sort_order' => $section->sort_order, 'is_visible' => (bool) $section->is_visible,
             ]);
         }
         $this->refreshPages();
@@ -225,6 +184,10 @@ class BuilderStudio extends Component
     public function updatePageSeo(string $key, string $value): void
     {
         abort_unless(in_array($key, ['title', 'description', 'canonical', 'og_image'], true), 422);
+        $value = trim($value);
+        if (in_array($key, ['canonical', 'og_image'], true) && $value !== '' && ! preg_match('#^(https://|/)#i', $value)) {
+            abort(422, 'A ligação SEO deve começar por https:// ou /.');
+        }
         $this->pageSeo[$key] = Str::limit($value, $key === 'description' ? 320 : 500, '');
         $this->dirty = true;
     }
@@ -245,11 +208,8 @@ class BuilderStudio extends Component
     public function loadVersions(): void
     {
         $this->versions = $this->site->versions()->with('creator')->latest('version_number')->limit(30)->get()->map(fn (SiteVersion $version): array => [
-            'id' => $version->id,
-            'version_number' => $version->version_number,
-            'label' => $version->label,
-            'created_at' => optional($version->created_at)->format('d/m/Y H:i'),
-            'created_by' => $version->creator?->name,
+            'id' => $version->id, 'version_number' => $version->version_number, 'label' => $version->label,
+            'created_at' => optional($version->created_at)->format('d/m/Y H:i'), 'created_by' => $version->creator?->name,
         ])->all();
     }
 
@@ -257,7 +217,7 @@ class BuilderStudio extends Component
     {
         $page = $this->site->pages()->findOrFail($this->pageId);
         if ($this->dirty) {
-            app(WebsiteVersionService::class)->create($this->site, auth()->id(), 'Antes de guardar alterações');
+            app(WebsiteVersionService::class)->create($this->site->fresh(), auth()->id(), 'Backup antes de guardar');
         }
         DB::transaction(function () use ($page): void {
             $this->site->update(['theme' => $this->theme, 'settings' => $this->siteSettings]);
@@ -265,23 +225,20 @@ class BuilderStudio extends Component
             $existingIds = [];
             foreach ($this->sections as $index => $data) {
                 $payload = [
-                    'type' => $data['type'],
-                    'label' => Str::limit((string) ($data['label'] ?? Str::headline($data['type'])), 120, ''),
+                    'type' => Str::limit((string) ($data['type'] ?? 'text'), 80, ''),
+                    'label' => Str::limit((string) ($data['label'] ?? 'Secção'), 120, ''),
                     'content' => is_array($data['content'] ?? null) ? $data['content'] : [],
                     'settings' => is_array($data['settings'] ?? null) ? $data['settings'] : [],
-                    'sort_order' => $index,
-                    'is_visible' => (bool) ($data['is_visible'] ?? true),
+                    'sort_order' => $index, 'is_visible' => (bool) ($data['is_visible'] ?? true),
                 ];
                 if (! empty($data['id'])) {
-                    $section = $page->sections()->findOrFail($data['id']);
+                    $section = $page->sections()->findOrFail((int) $data['id']);
                     $section->update($payload);
-                    $existingIds[] = $section->id;
-                    $this->sections[$index]['id'] = $section->id;
                 } else {
                     $section = $page->sections()->create($payload);
-                    $existingIds[] = $section->id;
-                    $this->sections[$index]['id'] = $section->id;
                 }
+                $existingIds[] = $section->id;
+                $this->sections[$index]['id'] = $section->id;
             }
             $page->sections()->whereNotIn('id', $existingIds ?: [0])->delete();
         });
@@ -296,7 +253,7 @@ class BuilderStudio extends Component
         if ($this->dirty) {
             $this->save();
         }
-        app(WebsiteVersionService::class)->create($this->site->fresh(), auth()->id(), $label);
+        app(WebsiteVersionService::class)->create($this->site->fresh(), auth()->id(), Str::limit(trim($label) ?: 'Versão guardada', 120, ''));
         $this->loadVersions();
         $this->statusMessage = 'Versão guardada';
     }
@@ -339,8 +296,7 @@ class BuilderStudio extends Component
     public function updateSelectedElement(string $field, string $value): void
     {
         abort_unless($this->selectedSection !== null && $this->selectedElementId !== null, 422);
-        $allowedFields = ['text', 'label', 'url', 'alt', 'caption', 'title', 'author', 'button_label', 'button_url'];
-        abort_unless(in_array($field, $allowedFields, true), 422);
+        abort_unless(in_array($field, ['text', 'label', 'url', 'alt', 'caption', 'title', 'author', 'button_label', 'button_url'], true), 422);
         $index = $this->selectedSection;
         $document = SiteSectionDocument::fromSection($this->sectionModel($index));
         $element = $this->findElement($document['nodes'] ?? [], $this->selectedElementId);
@@ -363,7 +319,7 @@ class BuilderStudio extends Component
         $element = $this->findElement($document['nodes'] ?? [], $this->selectedElementId);
         abort_unless(is_array($element), 404);
         $settings = is_array($element['settings'] ?? null) ? $element['settings'] : [];
-        ResponsiveStyles::setForDevice($settings, $this->device, $key, $value);
+        ResponsiveStyles::setForDevice($settings, $this->device, $key, trim($value));
         $document = BuilderDocumentEditor::updateElement($document, $this->selectedElementId, null, $settings);
         $this->applyDocumentToSection($index, $document);
         $this->dirty = true;
@@ -396,8 +352,7 @@ class BuilderStudio extends Component
 
     public function addSection(string $type): void
     {
-        $allowed = ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'];
-        abort_unless(in_array($type, $allowed, true), 422);
+        abort_unless(WebsiteTemplates::hasSection($type), 422);
         $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
         $this->selectedSection = count($this->sections) - 1;
         $this->selectedElementId = null;
@@ -430,9 +385,7 @@ class BuilderStudio extends Component
     {
         abort_unless(in_array($direction, ['up', 'down'], true), 422);
         $target = $direction === 'up' ? $index - 1 : $index + 1;
-        if (! isset($this->sections[$index], $this->sections[$target])) {
-            return;
-        }
+        if (! isset($this->sections[$index], $this->sections[$target])) return;
         [$this->sections[$index], $this->sections[$target]] = [$this->sections[$target], $this->sections[$index]];
         $this->selectedSection = $target;
         $this->dirty = true;
@@ -449,7 +402,6 @@ class BuilderStudio extends Component
     {
         $id = $this->sections[$index]['id'] ?? null;
         abort_unless(is_numeric($id), 422);
-
         return $this->site->pages()->findOrFail($this->pageId)->sections()->findOrFail((int) $id);
     }
 
@@ -468,7 +420,6 @@ class BuilderStudio extends Component
         $document = BuilderDocumentEditor::updateElement($document, $elementId, $content, $settings);
         $this->applyDocumentToSection($index, $document);
         $this->dirty = true;
-        $this->statusMessage = 'Alteração por guardar';
     }
 
     public function selectSection(int $index): void
@@ -481,15 +432,13 @@ class BuilderStudio extends Component
 
     public function updatedDevice(string $device): void
     {
-        if (! in_array($device, ['desktop', 'tablet', 'mobile'], true)) {
-            $this->device = 'desktop';
-        }
+        if (! in_array($device, ['desktop', 'tablet', 'mobile'], true)) $this->device = 'desktop';
     }
 
     public function runPublishChecks(): void
     {
-        $result = app(WebsitePublishingService::class)->validate($this->site->fresh());
-        $this->publishChecks = $this->formatPublishChecks($result);
+        if ($this->dirty) $this->save();
+        $this->publishChecks = $this->formatPublishChecks(app(WebsitePublishingService::class)->validate($this->site->fresh()));
         $this->showPublish = true;
     }
 
@@ -499,11 +448,7 @@ class BuilderStudio extends Component
         $this->site->refresh();
         $result = app(WebsitePublishingService::class)->validate($this->site);
         $this->publishChecks = $this->formatPublishChecks($result);
-        if (! $result['ok']) {
-            $this->showPublish = true;
-
-            return;
-        }
+        if (! $result['ok']) { $this->showPublish = true; return; }
         app(WebsitePublishingService::class)->publish($this->site, auth()->id());
         $this->site->refresh();
         $this->showPublish = false;
@@ -513,16 +458,9 @@ class BuilderStudio extends Component
     private function formatPublishChecks(array $result): array
     {
         $checks = [];
-        foreach ($result['errors'] ?? [] as $message) {
-            $checks[] = ['level' => 'error', 'label' => 'Necessário', 'message' => $message];
-        }
-        foreach ($result['warnings'] ?? [] as $message) {
-            $checks[] = ['level' => 'warning', 'label' => 'Recomendado', 'message' => $message];
-        }
-        if ($checks === []) {
-            $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
-        }
-
+        foreach ($result['errors'] ?? [] as $message) $checks[] = ['level' => 'error', 'label' => 'Necessário', 'message' => $message];
+        foreach ($result['warnings'] ?? [] as $message) $checks[] = ['level' => 'warning', 'label' => 'Recomendado', 'message' => $message];
+        if ($checks === []) $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
         return $checks;
     }
 
@@ -541,8 +479,10 @@ class BuilderStudio extends Component
 
     public function updateTheme(string $key, string $value): void
     {
-        $allowed = ['primary', 'secondary', 'background', 'text', 'radius', 'font_heading', 'font_body'];
-        abort_unless(in_array($key, $allowed, true), 422);
+        abort_unless(in_array($key, ['primary', 'secondary', 'background', 'text', 'radius', 'font_heading', 'font_body'], true), 422);
+        $value = trim($value);
+        if (in_array($key, ['primary', 'secondary', 'background', 'text'], true) && ! preg_match('/^#[0-9a-f]{6}$/i', $value)) abort(422, 'Cor inválida.');
+        if ($key === 'radius' && ! preg_match('/^(0|[0-9]+(?:\.[0-9]+)?)(px|rem|em|%)$/', $value)) abort(422, 'Raio inválido.');
         $this->theme[$key] = Str::limit($value, 100, '');
         $this->dirty = true;
     }
@@ -550,15 +490,14 @@ class BuilderStudio extends Component
     public function applyTemplate(string $template): void
     {
         abort_unless(WebsiteTemplates::has($template), 422);
-        $definition = WebsiteTemplates::get($template);
-        $this->sections = [];
-        foreach ($definition['pages'][0]['sections'] ?? [] as $section) {
-            $this->sections[] = ['id' => null, 'type' => $section['type'], 'label' => $section['label'], 'content' => $this->defaultContent($section['type']), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
-        }
-        $this->selectedSection = $this->sections !== [] ? 0 : null;
-        $this->selectedElementId = null;
-        $this->dirty = true;
+        if ($this->dirty) $this->save();
+        app(WebsiteTemplateInstaller::class)->install($this->site->fresh(), $template);
+        $this->site->refresh();
+        $home = $this->site->pages()->where('is_homepage', true)->firstOrFail();
+        $this->loadPage($home->id);
+        $this->loadVersions();
         $this->showTemplates = false;
+        $this->statusMessage = 'Template aplicado ao website inteiro';
     }
 
     public function generateWithAi(): void
@@ -566,47 +505,22 @@ class BuilderStudio extends Component
         $brief = trim($this->aiBrief);
         abort_if($brief === '', 422, 'Descreve o website que queres criar.');
         abort_if(mb_strlen($brief) > 4000, 422, 'A descrição do website é demasiado longa.');
-        $result = app(WebsiteAiGenerator::class)->generate([
-            'prompt' => $brief,
-            'description' => $brief,
-            'business_name' => $this->site->name,
-            'category' => $this->site->type,
-            'pages' => ['home', 'about', 'services', 'contact'],
-        ]);
+        $result = app(WebsiteAiGenerator::class)->generate(['prompt' => $brief, 'description' => $brief, 'business_name' => $this->site->name, 'category' => $this->site->type, 'pages' => ['home', 'about', 'services', 'contact']]);
         $pages = is_array($result['pages'] ?? null) ? $result['pages'] : [];
         foreach ($pages as $slug => $pageData) {
-            if (! is_string($slug) || ! is_array($pageData)) {
-                continue;
-            }
+            if (! is_string($slug) || ! is_array($pageData)) continue;
             $slug = Str::slug($slug);
-            if ($slug === '') {
-                continue;
-            }
-            $page = $this->site->pages()->updateOrCreate(
-                ['slug' => $slug],
-                ['name' => Str::headline($slug), 'status' => 'draft', 'seo' => [], 'sort_order' => $this->pageSortOrder($slug)]
-            );
+            if ($slug === '') continue;
+            $page = $this->site->pages()->updateOrCreate(['slug' => $slug], ['name' => Str::headline($slug), 'status' => 'draft', 'seo' => [], 'sort_order' => $this->pageSortOrder($slug)]);
             $sections = $this->sanitizeAiSections($pageData);
             $page->sections()->delete();
             foreach ($sections as $index => $section) {
-                $page->sections()->create([
-                    'type' => $section['type'],
-                    'label' => $section['label'],
-                    'content' => $section['content'],
-                    'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
-                    'sort_order' => $index,
-                    'is_visible' => true,
-                ]);
+                $page->sections()->create(['type' => $section['type'], 'label' => $section['label'], 'content' => $section['content'], 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
             }
-            if ($slug === 'home') {
-                $this->site->pages()->update(['is_homepage' => false]);
-                $page->update(['is_homepage' => true]);
-            }
+            if ($slug === 'home') { $this->site->pages()->update(['is_homepage' => false]); $page->update(['is_homepage' => true]); }
         }
         $home = $this->site->pages()->where('is_homepage', true)->first() ?? $this->site->pages()->orderBy('sort_order')->first();
-        if ($home) {
-            $this->loadPage($home->id);
-        }
+        if ($home) $this->loadPage($home->id);
         $this->refreshPages();
         $this->dirty = false;
         $this->showAi = false;
@@ -615,46 +529,29 @@ class BuilderStudio extends Component
 
     private function sanitizeAiSections(array $sections): array
     {
-        $allowed = ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'];
         $result = [];
         foreach (array_slice($sections, 0, 20) as $section) {
-            if (! is_array($section) || ! is_string($section['type'] ?? null) || ! in_array($section['type'], $allowed, true)) {
-                continue;
-            }
+            if (! is_array($section) || ! is_string($section['type'] ?? null) || ! WebsiteTemplates::hasSection($section['type'])) continue;
             $type = $section['type'];
             $content = is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type);
-            $result[] = [
-                'type' => $type,
-                'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''),
-                'content' => $this->sanitizeLegacyContent($content),
-            ];
+            $result[] = ['type' => $type, 'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''), 'content' => $this->sanitizeLegacyContent($content)];
         }
-
         return $result;
     }
 
     private function sanitizeLegacyContent(array $content): array
     {
         array_walk_recursive($content, function (&$value): void {
-            if (is_string($value)) {
-                $value = Str::limit($value, 4000, '');
-            }
+            if (is_string($value)) $value = Str::limit($value, 4000, '');
         });
-
         return $content;
     }
 
     private function sanitizeElementContent(string $type, array $content): array
     {
         $definition = ElementRegistry::get($type);
-        $allowedKeys = array_keys($definition['default_content']);
-        $content = array_intersect_key($content, array_flip($allowedKeys));
-        foreach ($content as $key => &$value) {
-            if (is_string($value)) {
-                $value = Str::limit($value, 2000, '');
-            }
-        }
-
+        $content = array_intersect_key($content, array_flip(array_keys($definition['default_content'])));
+        foreach ($content as $key => &$value) if (is_string($value)) $value = Str::limit($value, 2000, '');
         return $content;
     }
 
@@ -662,40 +559,35 @@ class BuilderStudio extends Component
     {
         $children = $document['nodes'][0]['children'] ?? [];
         $last = end($children);
-
         return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
     }
 
     private function findElement(array $nodes, string $elementId): ?array
     {
         foreach ($nodes as $node) {
-            if (($node['id'] ?? null) === $elementId) {
-                return $node;
-            }
+            if (($node['id'] ?? null) === $elementId) return $node;
             if (is_array($node['children'] ?? null)) {
                 $found = $this->findElement($node['children'], $elementId);
-                if ($found !== null) {
-                    return $found;
-                }
+                if ($found !== null) return $found;
             }
         }
-
         return null;
     }
 
     private function pageSortOrder(string $slug): int
     {
         $existing = $this->site->pages()->where('slug', $slug)->value('sort_order');
-        if ($existing !== null) {
-            return (int) $existing;
-        }
-
-        return ((int) $this->site->pages()->max('sort_order')) + 1;
+        return $existing !== null ? (int) $existing : ((int) $this->site->pages()->max('sort_order')) + 1;
     }
 
     private function createPageRecord(string $name, string $slug, bool $homepage = false): SitePage
     {
         return $this->site->pages()->create(['name' => $name, 'slug' => $slug, 'status' => 'draft', 'is_homepage' => $homepage, 'sort_order' => 0, 'seo' => []]);
+    }
+
+    private function addStarterSection(SitePage $page): void
+    {
+        $page->sections()->create(['type' => 'hero', 'label' => 'Hero', 'content' => $this->defaultContent('hero'), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => 0, 'is_visible' => true]);
     }
 
     private function defaultTheme(): array
@@ -710,6 +602,13 @@ class BuilderStudio extends Component
             'text' => ['title' => 'Sobre nós', 'body' => 'Escreve aqui o conteúdo da tua secção.'],
             'image' => ['url' => '', 'alt' => '', 'caption' => ''],
             'button' => ['label' => 'Saber mais', 'url' => '#'],
+            'feature_grid' => ['title' => 'O que oferecemos', 'items' => [['title' => 'Qualidade', 'description' => 'Uma experiência pensada para os teus clientes.'], ['title' => 'Simplicidade', 'description' => 'Informação clara e fácil de encontrar.'], ['title' => 'Confiança', 'description' => 'Uma presença digital profissional.']]],
+            'testimonials' => ['title' => 'O que dizem os clientes', 'items' => [['name' => 'Cliente', 'quote' => 'Excelente experiência.']]],
+            'faq' => ['title' => 'Perguntas frequentes', 'items' => [['question' => 'Como funciona?', 'answer' => 'Adiciona aqui a resposta.']]],
+            'pricing' => ['title' => 'Planos', 'items' => [['name' => 'Essencial', 'price' => 'Desde 0€', 'description' => 'Uma opção simples para começar.']]],
+            'cta' => ['title' => 'Pronto para começar?', 'description' => 'Fala connosco e descobre como podemos ajudar.', 'button_label' => 'Contactar', 'button_url' => '#'],
+            'contact_form' => ['title' => 'Fala connosco'],
+            'newsletter' => ['title' => 'Recebe novidades', 'description' => 'Subscreve a nossa newsletter.'],
             default => ['title' => Str::headline($type)],
         };
     }
