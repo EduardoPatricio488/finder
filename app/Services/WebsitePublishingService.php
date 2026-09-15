@@ -52,8 +52,14 @@ final class WebsitePublishingService
 
             foreach ($page->sections as $section) {
                 $content = is_array($section->content) ? $section->content : [];
+                if ($this->containsUnsafeUrl($content)) {
+                    $errors[] = 'A página "'.$page->name.'" contém uma ligação não permitida.';
+                }
                 if ($section->type === 'image' && blank($content['url'] ?? null)) {
                     $warnings[] = 'A secção de imagem "'.$section->label.'" na página "'.$page->name.'" não tem imagem.';
+                }
+                if ($section->type === 'image' && ! blank($content['url'] ?? null) && blank($content['alt'] ?? null)) {
+                    $warnings[] = 'A imagem "'.$section->label.'" na página "'.$page->name.'" não tem texto alternativo.';
                 }
                 if (in_array($section->type, ['video', 'map'], true) && blank($content['url'] ?? $content['embed_url'] ?? null) && blank($content['address'] ?? null)) {
                     $warnings[] = 'A secção "'.$section->label.'" na página "'.$page->name.'" precisa de conteúdo.';
@@ -106,5 +112,19 @@ final class WebsitePublishingService
             'is_published' => false,
             'status' => 'draft',
         ])->save();
+    }
+
+    private function containsUnsafeUrl(array $value): bool
+    {
+        foreach ($value as $item) {
+            if (is_array($item) && $this->containsUnsafeUrl($item)) {
+                return true;
+            }
+            if (is_string($item) && preg_match('/(?:^|\s)(?:javascript|data|vbscript):/i', trim($item))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
