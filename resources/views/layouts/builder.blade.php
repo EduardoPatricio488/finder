@@ -9,6 +9,7 @@
 </head>
 <body class="h-full overflow-hidden bg-zinc-100 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-white">
     {{ $slot }}
+    <livewire:builder-templates />
     @fluxScripts
 </body>
 </html>
