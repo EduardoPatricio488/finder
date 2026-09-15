@@ -6,6 +6,7 @@ use App\Models\SiteSection;
 use App\Support\WebsiteBuilder\BuilderDocument;
 use App\Support\WebsiteBuilder\BuilderNodeId;
 use App\Support\WebsiteBuilder\SiteSectionDocument;
+use InvalidArgumentException;
 
 it('converts a legacy section to valid v2', function (): void {
     $section = new SiteSection([
@@ -121,5 +122,5 @@ it('rejects invalid v2 documents through the existing validator', function (): v
     ];
 
     expect($document)->and(BuilderDocument::isValid($document))->toBeFalse();
-    expect(fn (): array => BuilderDocument::normalize($document))->toThrow(\InvalidArgumentException::class);
+    expect(fn (): array => BuilderDocument::normalize($document))->toThrow(InvalidArgumentException::class);
 });
