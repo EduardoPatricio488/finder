@@ -11,10 +11,17 @@ final class SiteSectionDocument
 {
     public static function fromSection(SiteSection $section): array
     {
+        $settings = is_array($section->settings) ? $section->settings : [];
+        if (is_array($settings['builder_document'] ?? null)) {
+            BuilderDocument::validate($settings['builder_document']);
+            return BuilderDocument::normalize($settings['builder_document']);
+        }
+
         $type = (string) ($section->type ?? '');
         $content = is_array($section->content) ? $section->content : [];
-        $settings = is_array($section->settings) ? $section->settings : [];
         $containerId = BuilderNodeId::stable('container', self::seed($section));
+        $legacySettings = $settings;
+        unset($legacySettings['builder_document']);
 
         $node = [
             'id' => $containerId,
@@ -28,12 +35,12 @@ final class SiteSectionDocument
                     'type' => $type,
                     'label' => $section->label,
                     'content' => $content,
-                    'settings' => $settings,
+                    'settings' => $legacySettings,
                     'sort_order' => (int) ($section->sort_order ?? 0),
                     'is_visible' => (bool) ($section->is_visible ?? true),
                 ],
             ],
-            'children' => self::elements($section, $containerId, $content, $settings),
+            'children' => self::elements($section, $containerId, $content, $legacySettings),
         ];
 
         return BuilderDocument::normalize([
@@ -53,12 +60,14 @@ final class SiteSectionDocument
                 throw new InvalidArgumentException('Document node does not contain SiteSection legacy metadata.');
             }
 
+            $settings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
+            $settings['builder_document'] = $document;
             $section = [
                 'site_page_id' => $legacy['site_page_id'] ?? null,
                 'type' => (string) $legacy['type'],
                 'label' => $legacy['label'] ?? null,
                 'content' => is_array($legacy['content'] ?? null) ? $legacy['content'] : [],
-                'settings' => is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [],
+                'settings' => $settings,
                 'sort_order' => (int) ($legacy['sort_order'] ?? 0),
                 'is_visible' => (bool) ($legacy['is_visible'] ?? true),
             ];
@@ -81,10 +90,7 @@ final class SiteSectionDocument
             : 'left';
 
         if (is_string($content['title'] ?? null)) {
-            $elements[] = self::element('heading', BuilderNodeId::stable('heading', $containerId.':title'), ['text' => $content['title']], [
-                'align' => $align,
-                'level' => $section->type === 'hero' ? 'h1' : 'h2',
-            ]);
+            $elements[] = self::element('heading', BuilderNodeId::stable('heading', $containerId.':title'), ['text' => $content['title']], ['align' => $align, 'level' => $section->type === 'hero' ? 'h1' : 'h2']);
         }
 
         foreach (['subtitle', 'body', 'description'] as $field) {
@@ -94,20 +100,13 @@ final class SiteSectionDocument
         }
 
         if ($section->type === 'image' && is_string($content['url'] ?? null) && $content['url'] !== '') {
-            $elements[] = self::element('image', BuilderNodeId::stable('image', $containerId.':image'), [
-                'url' => $content['url'],
-                'alt' => is_string($content['alt'] ?? null) ? $content['alt'] : '',
-                'caption' => is_string($content['caption'] ?? null) ? $content['caption'] : '',
-            ], ['width' => 'full', 'radius' => 'none']);
+            $elements[] = self::element('image', BuilderNodeId::stable('image', $containerId.':image'), ['url' => $content['url'], 'alt' => is_string($content['alt'] ?? null) ? $content['alt'] : '', 'caption' => is_string($content['caption'] ?? null) ? $content['caption'] : ''], ['width' => 'full', 'radius' => 'none']);
         }
 
         $buttonLabel = $content['button_label'] ?? $content['label'] ?? null;
         $buttonUrl = $content['button_url'] ?? $content['url'] ?? null;
         if (is_string($buttonLabel) && $buttonLabel !== '' && is_string($buttonUrl)) {
-            $elements[] = self::element('button', BuilderNodeId::stable('button', $containerId.':button'), [
-                'label' => $buttonLabel,
-                'url' => $buttonUrl,
-            ], ['style' => 'primary', 'align' => $align]);
+            $elements[] = self::element('button', BuilderNodeId::stable('button', $containerId.':button'), ['label' => $buttonLabel, 'url' => $buttonUrl], ['style' => 'primary', 'align' => $align]);
         }
 
         return $elements;
@@ -120,15 +119,8 @@ final class SiteSectionDocument
 
     private static function seed(SiteSection $section): string
     {
-        if ($section->getKey() !== null) {
-            return 'site-section:'.$section->getKey();
-        }
+        if ($section->getKey() !== null) return 'site-section:'.$section->getKey();
 
-        return 'site-section:'.hash('sha256', serialize([
-            $section->site_page_id,
-            $section->type,
-            $section->label,
-            $section->sort_order,
-        ]));
+        return 'site-section:'.hash('sha256', serialize([$section->site_page_id, $section->type, $section->label, $section->sort_order]));
     }
 }
