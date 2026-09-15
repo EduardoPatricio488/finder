@@ -68,7 +68,7 @@
                     <div class="px-4 py-8 text-center"><p class="text-xs font-bold uppercase tracking-widest text-zinc-500">Cria ou seleciona um website para começar.</p><flux:button :href="route('site.create')" size="sm" class="mt-4 !rounded-xl" variant="primary">Criar website</flux:button></div>
                 @endif
             </flux:sidebar.nav>
-            <flux:spacer /><flux:sidebar.nav><flux:sidebar.item icon="book-open-text" href="#" target="_blank">Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            <flux:spacer /><flux:sidebar.nav><flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
         {{ $slot }}
