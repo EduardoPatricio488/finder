@@ -42,9 +42,12 @@ it('reads and writes a builder document back to the same section', function () {
     $service->write($section, $document);
     $section->refresh();
 
-    $savedTextElement = collect($section->settings['builder_document']['nodes'][0]['children'])
+    $savedDocument = $section->settings['builder_document'];
+    $savedTextElement = collect($savedDocument['nodes'][0]['children'])
         ->firstWhere('type', 'text');
+    $reloadedDocument = SiteSectionDocument::fromSection($section);
 
-    expect($section->settings['builder_document'])->toEqual(SiteSectionDocument::fromSection($section))
-        ->and($savedTextElement['content']['text'])->toBe('Actualizado');
+    expect($savedDocument)->toBeArray()
+        ->and($savedTextElement['content']['text'])->toBe('Actualizado')
+        ->and($reloadedDocument['nodes'][0]['children'])->toEqual($savedDocument['nodes'][0]['children']);
 });
