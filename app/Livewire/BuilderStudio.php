@@ -29,45 +29,25 @@ use Livewire\Component;
 class BuilderStudio extends Component
 {
     public Site $site;
-
     public ?int $pageId = null;
-
     public array $pages = [];
-
     public array $sections = [];
-
     public array $theme = [];
-
     public array $siteSettings = [];
-
     public array $pageSeo = [];
-
     public ?int $selectedSection = null;
-
     public ?string $selectedElementId = null;
-
     public string $device = 'desktop';
-
     public string $panel = 'pages';
-
     public string $aiBrief = '';
-
     public string $statusMessage = 'Guardado';
-
     public bool $dirty = false;
-
     public bool $showAi = false;
-
     public bool $showTemplates = false;
-
     public bool $showPublish = false;
-
     public bool $showSettings = false;
-
     public bool $showVersions = false;
-
     public array $publishChecks = [];
-
     public array $versions = [];
 
     public function mount(Site $site): void
@@ -80,7 +60,8 @@ class BuilderStudio extends Component
         if (! $page) {
             $page = $this->createPageRecord('Home', 'home', true);
             $this->addStarterSection($page);
-        } $this->loadPage($page->id);
+        }
+        $this->loadPage($page->id);
         $this->loadVersions();
     }
 
@@ -113,7 +94,8 @@ class BuilderStudio extends Component
         $suffix = 2;
         while ($this->site->pages()->where('slug', $slug)->exists()) {
             $slug = 'nova-pagina-'.$suffix++;
-        } $name = $suffix === 2 ? 'Nova página' : 'Nova página '.($suffix - 1);
+        }
+        $name = $suffix === 2 ? 'Nova página' : 'Nova página '.($suffix - 1);
         $page = $this->site->pages()->create(['name' => $name, 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1, 'seo' => []]);
         $this->addStarterSection($page);
         $this->refreshPages();
@@ -127,15 +109,18 @@ class BuilderStudio extends Component
         if ($this->dirty) {
             $this->save();
             $source->refresh()->load('sections');
-        } $baseSlug = Str::slug($source->slug.'-copia');
+        }
+        $baseSlug = Str::slug($source->slug.'-copia');
         $slug = $baseSlug;
         $suffix = 2;
         while ($this->site->pages()->where('slug', $slug)->exists()) {
             $slug = $baseSlug.'-'.$suffix++;
-        }$page = $this->site->pages()->create(['name' => $source->name.' (cópia)', 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1, 'seo' => $source->seo ?: []]);
+        }
+        $page = $this->site->pages()->create(['name' => $source->name.' (cópia)', 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1, 'seo' => $source->seo ?: []]);
         foreach ($source->sections as $section) {
             $page->sections()->create(['type' => $section->type, 'label' => $section->label, 'content' => $section->content ?: [], 'settings' => $section->settings ?: [], 'sort_order' => $section->sort_order, 'is_visible' => (bool) $section->is_visible]);
-        }$this->refreshPages();
+        }
+        $this->refreshPages();
         $this->loadPage($page->id);
         $this->statusMessage = 'Página duplicada';
     }
@@ -149,7 +134,8 @@ class BuilderStudio extends Component
         if ($wasHomepage) {
             $replacement = $this->site->pages()->orderBy('sort_order')->firstOrFail();
             $this->setHomepage($replacement->id);
-        } $replacement = $this->site->pages()->where('is_homepage', true)->first() ?? $this->site->pages()->orderBy('sort_order')->firstOrFail();
+        }
+        $replacement = $this->site->pages()->where('is_homepage', true)->first() ?? $this->site->pages()->orderBy('sort_order')->firstOrFail();
         $this->refreshPages();
         $this->loadPage($replacement->id);
         $this->statusMessage = 'Página eliminada';
@@ -182,7 +168,8 @@ class BuilderStudio extends Component
         $value = trim($value);
         if (in_array($key, ['canonical', 'og_image'], true) && $value !== '' && ! preg_match('#^(https://|/)#i', $value)) {
             abort(422, 'A ligação SEO deve começar por https:// ou /.');
-        }$this->pageSeo[$key] = Str::limit($value, $key === 'description' ? 320 : 500, '');
+        }
+        $this->pageSeo[$key] = Str::limit($value, $key === 'description' ? 320 : 500, '');
         $this->dirty = true;
     }
 
@@ -209,7 +196,8 @@ class BuilderStudio extends Component
         $page = $this->site->pages()->findOrFail($this->pageId);
         if ($this->dirty) {
             app(WebsiteVersionService::class)->create($this->site->fresh(), auth()->id(), 'Backup antes de guardar');
-        }DB::transaction(function () use ($page): void {
+        }
+        DB::transaction(function () use ($page): void {
             $this->site->update(['theme' => $this->theme, 'settings' => $this->siteSettings]);
             $page->update(['seo' => $this->pageSeo]);
             $existingIds = [];
@@ -218,9 +206,11 @@ class BuilderStudio extends Component
                 $section = ! empty($data['id']) ? $page->sections()->findOrFail((int) $data['id']) : $page->sections()->create($payload);
                 if (! empty($data['id'])) {
                     $section->update($payload);
-                }$existingIds[] = $section->id;
+                }
+                $existingIds[] = $section->id;
                 $this->sections[$index]['id'] = $section->id;
-            }$page->sections()->whereNotIn('id', $existingIds ?: [0])->delete();
+            }
+            $page->sections()->whereNotIn('id', $existingIds ?: [0])->delete();
         });
         $this->dirty = false;
         $this->statusMessage = 'Guardado agora';
@@ -232,7 +222,8 @@ class BuilderStudio extends Component
     {
         if ($this->dirty) {
             $this->save();
-        }app(WebsiteVersionService::class)->create($this->site->fresh(), auth()->id(), Str::limit(trim($label) ?: 'Versão guardada', 120, ''));
+        }
+        app(WebsiteVersionService::class)->create($this->site->fresh(), auth()->id(), Str::limit(trim($label) ?: 'Versão guardada', 120, ''));
         $this->loadVersions();
         $this->statusMessage = 'Versão guardada';
     }
@@ -314,7 +305,8 @@ class BuilderStudio extends Component
         $this->applyDocumentToSection($index, $document);
         if ($this->selectedElementId === $elementId) {
             $this->selectedElementId = null;
-        }$this->dirty = true;
+        }
+        $this->dirty = true;
     }
 
     public function moveElement(string $elementId, int $offset): void
@@ -364,9 +356,10 @@ class BuilderStudio extends Component
     {
         abort_unless(in_array($direction, ['up', 'down'], true), 422);
         $target = $direction === 'up' ? $index - 1 : $index + 1;
-        if (! isset($this->sections[$index],$this->sections[$target])) {
+        if (! isset($this->sections[$index], $this->sections[$target])) {
             return;
-        }[$this->sections[$index],$this->sections[$target]] = [$this->sections[$target], $this->sections[$index]];
+        }
+        [$this->sections[$index], $this->sections[$target]] = [$this->sections[$target], $this->sections[$index]];
         $this->selectedSection = $target;
         $this->dirty = true;
     }
@@ -422,21 +415,24 @@ class BuilderStudio extends Component
     {
         if ($this->dirty) {
             $this->save();
-        }$this->publishChecks = $this->formatPublishChecks(app(WebsitePublishingService::class)->validate($this->site->fresh()));
+        }
+        $this->publishChecks = $this->formatPublishChecks(app(WebsitePublishingService::class)->validate($this->site->fresh()));
         $this->showPublish = true;
     }
 
     public function publish(): void
     {
-        $this->save();
+        if ($this->dirty) {
+            $this->save();
+        }
         $this->site->refresh();
         $result = app(WebsitePublishingService::class)->validate($this->site);
         $this->publishChecks = $this->formatPublishChecks($result);
         if (! $result['ok']) {
             $this->showPublish = true;
-
             return;
-        }app(WebsitePublishingService::class)->publish($this->site, auth()->id());
+        }
+        app(WebsitePublishingService::class)->publish($this->site, auth()->id());
         $this->site->refresh();
         $this->showPublish = false;
         $this->statusMessage = 'Website publicado';
@@ -447,12 +443,13 @@ class BuilderStudio extends Component
         $checks = [];
         foreach ($result['errors'] ?? [] as $message) {
             $checks[] = ['level' => 'error', 'label' => 'Necessário', 'message' => $message];
-        }foreach ($result['warnings'] ?? [] as $message) {
+        }
+        foreach ($result['warnings'] ?? [] as $message) {
             $checks[] = ['level' => 'warning', 'label' => 'Recomendado', 'message' => $message];
-        }if ($checks === []) {
+        }
+        if ($checks === []) {
             $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
         }
-
         return $checks;
     }
 
@@ -475,9 +472,11 @@ class BuilderStudio extends Component
         $value = trim($value);
         if (in_array($key, ['primary', 'secondary', 'background', 'text'], true) && ! preg_match('/^#[0-9a-f]{6}$/i', $value)) {
             abort(422, 'Cor inválida.');
-        }if ($key === 'radius' && ! preg_match('/^(0|[0-9]+(?:\.[0-9]+)?)(px|rem|em|%)$/', $value)) {
+        }
+        if ($key === 'radius' && ! preg_match('/^(0|[0-9]+(?:\.[0-9]+)?)(px|rem|em|%)$/', $value)) {
             abort(422, 'Raio inválido.');
-        }$this->theme[$key] = Str::limit($value, 100, '');
+        }
+        $this->theme[$key] = Str::limit($value, 100, '');
         $this->dirty = true;
     }
 
@@ -486,7 +485,8 @@ class BuilderStudio extends Component
         abort_unless(WebsiteTemplates::has($template), 422);
         if ($this->dirty) {
             $this->save();
-        }app(WebsiteTemplateInstaller::class)->install($this->site->fresh(), $template);
+        }
+        app(WebsiteTemplateInstaller::class)->install($this->site->fresh(), $template);
         $this->site->refresh();
         $home = $this->site->pages()->where('is_homepage', true)->firstOrFail();
         $this->loadPage($home->id);
@@ -498,111 +498,54 @@ class BuilderStudio extends Component
     public function generateWithAi(): void
     {
         $brief = trim($this->aiBrief);
-        abort_if($brief === '', 422, 'Descreve o website que queres criar.');
-        abort_if(mb_strlen($brief) > 4000, 422, 'A descrição do website é demasiado longa.');
-        $result = app(WebsiteAiGenerator::class)->generate(['prompt' => $brief, 'description' => $brief, 'business_name' => $this->site->name, 'category' => $this->site->type, 'pages' => ['home', 'about', 'services', 'contact']]);
-        $pages = is_array($result['pages'] ?? null) ? $result['pages'] : [];
-        foreach ($pages as $slug => $pageData) {
-            if (! is_string($slug) || ! is_array($pageData)) {
-                continue;
-            }$slug = Str::slug($slug);
-            if ($slug === '') {
-                continue;
-            }$page = $this->site->pages()->updateOrCreate(['slug' => $slug], ['name' => Str::headline($slug), 'status' => 'draft', 'seo' => [], 'sort_order' => $this->pageSortOrder($slug)]);
-            $sections = $this->sanitizeAiSections($pageData);
-            $page->sections()->delete();
-            foreach ($sections as $index => $section) {
-                $page->sections()->create(['type' => $section['type'], 'label' => $section['label'], 'content' => $section['content'], 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
-            }if ($slug === 'home') {
-                $this->site->pages()->update(['is_homepage' => false]);
-                $page->update(['is_homepage' => true]);
-            }
-        }$home = $this->site->pages()->where('is_homepage', true)->first() ?? $this->site->pages()->orderBy('sort_order')->first();
-        if ($home) {
-            $this->loadPage($home->id);
-        }$this->refreshPages();
-        $this->dirty = false;
-        $this->showAi = false;
-        $this->statusMessage = 'Website gerado por IA — revê as páginas antes de publicar';
-    }
-
-    private function sanitizeAiSections(array $sections): array
-    {
-        $result = [];
-        foreach (array_slice($sections, 0, 20) as $section) {
-            if (! is_array($section) || ! is_string($section['type'] ?? null) || ! in_array($section['type'], ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'], true)) {
-                continue;
-            }$type = $section['type'];
-            $content = is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type);
-            $result[] = ['type' => $type, 'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''), 'content' => $this->sanitizeLegacyContent($content)];
+        abort_if($brief === '', 422, 'Descreve primeiro o website que queres criar.');
+        if ($this->dirty) {
+            $this->save();
         }
-
-        return $result;
-    }
-
-    private function sanitizeLegacyContent(array $content): array
-    {
-        array_walk_recursive($content, function (&$value): void {
-            if (is_string($value)) {
-                $value = Str::limit($value, 4000, '');
+        $generated = app(WebsiteAiGenerator::class)->generate($brief);
+        DB::transaction(function () use ($generated): void {
+            $this->site->update(['theme' => array_replace($this->theme, is_array($generated['theme'] ?? null) ? $generated['theme'] : [])]);
+            $pages = is_array($generated['pages'] ?? null) ? $generated['pages'] : [];
+            if ($pages === []) {
+                return;
             }
-        });
-
-        return $content;
-    }
-
-    private function sanitizeElementContent(string $type, array $content): array
-    {
-        $definition = ElementRegistry::get($type);
-        $content = array_intersect_key($content, array_flip(array_keys($definition['default_content'])));
-        foreach ($content as &$value) {
-            if (is_string($value)) {
-                $value = Str::limit($value, 2000, '');
-            }
-        }
-
-        return $content;
-    }
-
-    private function lastElementId(array $document): ?string
-    {
-        $children = $document['nodes'][0]['children'] ?? [];
-        $last = end($children);
-
-        return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
-    }
-
-    private function findElement(array $nodes, string $elementId): ?array
-    {
-        foreach ($nodes as $node) {
-            if (($node['id'] ?? null) === $elementId) {
-                return $node;
-            }if (is_array($node['children'] ?? null)) {
-                $found = $this->findElement($node['children'], $elementId);
-                if ($found !== null) {
-                    return $found;
+            $this->site->pages()->delete();
+            foreach ($pages as $index => $pageData) {
+                $page = $this->site->pages()->create(['name' => Str::limit((string) ($pageData['name'] ?? 'Página'), 120, ''), 'slug' => Str::slug((string) ($pageData['slug'] ?? 'pagina-'.$index)), 'status' => 'draft', 'is_homepage' => $index === 0, 'sort_order' => $index, 'seo' => is_array($pageData['seo'] ?? null) ? $pageData['seo'] : []]);
+                foreach ((array) ($pageData['sections'] ?? []) as $sectionIndex => $sectionData) {
+                    $section = $page->sections()->create(['type' => Str::limit((string) ($sectionData['type'] ?? 'text'), 80, ''), 'label' => Str::limit((string) ($sectionData['label'] ?? 'Secção'), 120, ''), 'content' => is_array($sectionData['content'] ?? null) ? $sectionData['content'] : [], 'settings' => is_array($sectionData['settings'] ?? null) ? $sectionData['settings'] : [], 'sort_order' => $sectionIndex, 'is_visible' => true]);
+                    SiteSectionDocument::fromSection($section);
                 }
             }
-        }
-
-        return null;
+        });
+        $this->site->refresh();
+        $home = $this->site->pages()->where('is_homepage', true)->firstOrFail();
+        $this->loadPage($home->id);
+        $this->loadVersions();
+        $this->showAi = false;
+        $this->aiBrief = '';
+        $this->statusMessage = 'Website gerado por IA';
     }
 
-    private function pageSortOrder(string $slug): int
-    {
-        $existing = $this->site->pages()->where('slug', $slug)->value('sort_order');
-
-        return $existing !== null ? (int) $existing : ((int) $this->site->pages()->max('sort_order')) + 1;
-    }
-
-    private function createPageRecord(string $name, string $slug, bool $homepage = false): SitePage
+    private function createPageRecord(string $name, string $slug, bool $homepage): SitePage
     {
         return $this->site->pages()->create(['name' => $name, 'slug' => $slug, 'status' => 'draft', 'is_homepage' => $homepage, 'sort_order' => 0, 'seo' => []]);
     }
 
     private function addStarterSection(SitePage $page): void
     {
-        $page->sections()->create(['type' => 'hero', 'label' => 'Hero', 'content' => $this->defaultContent('hero'), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => 0, 'is_visible' => true]);
+        $page->sections()->create(['type' => 'hero', 'label' => 'Hero', 'content' => $this->defaultContent('hero'), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'center'], 'sort_order' => 0, 'is_visible' => true]);
+    }
+
+    private function defaultContent(string $type): array
+    {
+        return match ($type) {
+            'hero' => ['title' => 'O teu novo website', 'subtitle' => 'Uma presença online profissional.', 'button_label' => 'Saber mais', 'button_url' => '#'],
+            'text' => ['title' => 'Sobre nós', 'body' => 'Escreve aqui o conteúdo da tua secção.'],
+            'image' => ['url' => '', 'alt' => '', 'caption' => ''],
+            'button' => ['label' => 'Saber mais', 'url' => '#'],
+            default => ['title' => Str::headline($type)],
+        };
     }
 
     private function defaultTheme(): array
@@ -610,15 +553,40 @@ class BuilderStudio extends Component
         return ['primary' => '#635bff', 'secondary' => '#111827', 'background' => '#ffffff', 'text' => '#111827', 'radius' => '1rem', 'font_heading' => 'Inter', 'font_body' => 'Inter'];
     }
 
-    private function defaultContent(string $type): array
+    private function findElement(array $nodes, string $id): ?array
     {
-        return match ($type) {
-            'hero' => ['title' => 'O teu novo website', 'subtitle' => 'Uma presença online profissional.', 'button_label' => 'Saber mais', 'button_url' => '#'], 'text' => ['title' => 'Sobre nós', 'body' => 'Escreve aqui o conteúdo da tua secção.'], 'image' => ['url' => '', 'alt' => '', 'caption' => ''], 'button' => ['label' => 'Saber mais', 'url' => '#'], 'feature_grid' => ['title' => 'O que oferecemos', 'items' => [['title' => 'Qualidade', 'description' => 'Uma experiência pensada para os teus clientes.'], ['title' => 'Simplicidade', 'description' => 'Informação clara e fácil de encontrar.'], ['title' => 'Confiança', 'description' => 'Uma presença digital profissional.']]], 'testimonials' => ['title' => 'O que dizem os clientes', 'items' => [['name' => 'Cliente', 'quote' => 'Excelente experiência.']]], 'faq' => ['title' => 'Perguntas frequentes', 'items' => [['question' => 'Como funciona?', 'answer' => 'Adiciona aqui a resposta.']]], 'pricing' => ['title' => 'Planos', 'items' => [['name' => 'Essencial', 'price' => 'Desde 0€', 'description' => 'Uma opção simples para começar.']]], 'cta' => ['title' => 'Pronto para começar?', 'description' => 'Fala connosco e descobre como podemos ajudar.', 'button_label' => 'Contactar', 'button_url' => '#'], 'contact_form' => ['title' => 'Fala connosco'], 'newsletter' => ['title' => 'Recebe novidades', 'description' => 'Subscreve a nossa newsletter.'], default => ['title' => Str::headline($type)],
-        };
+        foreach ($nodes as $node) {
+            if (($node['id'] ?? null) === $id) {
+                return $node;
+            }
+            if (! empty($node['children'])) {
+                $found = $this->findElement($node['children'], $id);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+        return null;
     }
 
-    public function render()
+    private function lastElementId(array $document): ?string
     {
-        return view('livewire.builder-studio');
+        $container = $document['nodes'][0] ?? [];
+        $children = $container['children'] ?? [];
+        $last = end($children);
+        return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
+    }
+
+    private function sanitizeElementContent(string $type, array $content): array
+    {
+        foreach (['url', 'button_url'] as $key) {
+            if (isset($content[$key]) && is_string($content[$key]) && ! preg_match('#^(https://|/|#)#i', $content[$key])) {
+                $content[$key] = '#';
+            }
+        }
+        if ($type !== 'html') {
+            unset($content['html']);
+        }
+        return $content;
     }
 }
