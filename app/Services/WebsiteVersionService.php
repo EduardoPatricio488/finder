@@ -51,7 +51,13 @@ final class WebsiteVersionService
                 'snapshot' => $snapshot,
             ]);
 
-            $oldVersionIds = $site->versions()->orderByDesc('version_number')->skip(30)->pluck('id');
+            $oldVersionIds = $site->versions()
+                ->orderByDesc('version_number')
+                ->limit(PHP_INT_MAX)
+                ->get(['id'])
+                ->skip(30)
+                ->pluck('id');
+
             if ($oldVersionIds->isNotEmpty()) {
                 SiteVersion::query()->whereIn('id', $oldVersionIds)->delete();
             }
