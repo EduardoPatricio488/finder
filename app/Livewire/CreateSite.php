@@ -14,40 +14,22 @@ use Livewire\Component;
 class CreateSite extends Component
 {
     public int $step = 1;
-
     public string $type = 'business';
-
     public string $template = 'studio';
-
     public string $name = '';
-
     public string $slug = '';
-
     public string $primaryColor = '#635bff';
-
     public string $secondaryColor = '#111827';
-
     public string $font = 'Inter';
-
     public array $pages = ['home', 'about', 'services', 'contact'];
+    public array $types = [];
+    public array $templates = [];
 
-    public array $types = [
-        'personal' => ['label' => 'Pessoal', 'description' => 'Um espaço pessoal ou página de apresentação.'],
-        'portfolio' => ['label' => 'Portfólio', 'description' => 'Mostra trabalho, projetos e experiência.'],
-        'business' => ['label' => 'Empresa', 'description' => 'Uma presença profissional para a tua empresa.'],
-        'online_store' => ['label' => 'Loja online', 'description' => 'Produtos, catálogo e estrutura de ecommerce.'],
-        'blog' => ['label' => 'Blog', 'description' => 'Conteúdo, artigos e publicação regular.'],
-        'restaurant' => ['label' => 'Restaurante', 'description' => 'Menu, localização, reservas e contacto.'],
-        'services' => ['label' => 'Serviços', 'description' => 'Apresenta serviços e capta contactos.'],
-        'landing' => ['label' => 'Landing page', 'description' => 'Uma página focada numa oferta ou campanha.'],
-    ];
-
-    public array $templates = [
-        'studio' => ['label' => 'Studio', 'description' => 'Minimalista e editorial.'],
-        'launch' => ['label' => 'Launch', 'description' => 'Moderno e orientado para conversão.'],
-        'commerce' => ['label' => 'Commerce', 'description' => 'Focado em produtos e catálogo.'],
-        'elegant' => ['label' => 'Elegant', 'description' => 'Premium, sofisticado e espaçado.'],
-    ];
+    public function mount(): void
+    {
+        $this->types = config('website.types', []);
+        $this->templates = config('website.templates', []);
+    }
 
     public function updatedName($value): void
     {
@@ -57,15 +39,11 @@ class CreateSite extends Component
     public function next(): void
     {
         if ($this->step === 1) {
-            $this->validate([
-                'type' => 'required|in:personal,portfolio,business,online_store,blog,restaurant,services,landing',
-            ]);
+            $this->validate(['type' => ['required', 'in:'.implode(',', array_keys($this->types))]]);
         }
 
         if ($this->step === 2) {
-            $this->validate([
-                'template' => 'required|in:studio,launch,commerce,elegant',
-            ]);
+            $this->validate(['template' => ['required', 'in:'.implode(',', array_keys($this->templates))]]);
         }
 
         if ($this->step < 4) {
@@ -82,7 +60,7 @@ class CreateSite extends Component
 
     public function togglePage(string $page): void
     {
-        if ($page === 'home') {
+        if (! array_key_exists($page, config('website.pages', [])) || $page === 'home') {
             return;
         }
 
@@ -96,14 +74,15 @@ class CreateSite extends Component
         $this->validate([
             'name' => 'required|min:2|max:80',
             'slug' => 'required|alpha_dash|unique:sites,slug',
-            'type' => 'required|string|max:40',
-            'template' => 'required|string|max:40',
+            'type' => ['required', 'in:'.implode(',', array_keys($this->types))],
+            'template' => ['required', 'in:'.implode(',', array_keys($this->templates))],
             'primaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'secondaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'font' => 'required|string|max:40',
         ]);
 
         $plan = Plan::query()->where('name', 'Free')->first() ?? Plan::query()->first();
+        $pageLabels = config('website.pages', []);
 
         $site = Site::create([
             'name' => $this->name,
@@ -136,50 +115,37 @@ class CreateSite extends Component
             'seo' => ['title' => $this->name],
         ]);
 
-        $site->members()->syncWithoutDetaching([
-            auth()->id() => ['role' => 'owner'],
-        ]);
-
-        $labels = [
-            'home' => 'Home',
-            'about' => 'Sobre',
-            'services' => 'Serviços',
-            'products' => 'Produtos',
-            'blog' => 'Blog',
-            'contact' => 'Contacto',
-            'faq' => 'FAQ',
-            'privacy' => 'Privacidade',
-        ];
+        $site->members()->syncWithoutDetaching([auth()->id() => ['role' => 'owner']]);
 
         foreach (array_values(array_unique($this->pages)) as $index => $pageSlug) {
+            if (! array_key_exists($pageSlug, $pageLabels)) {
+                continue;
+            }
+
             $page = $site->pages()->create([
-                'name' => $labels[$pageSlug] ?? Str::headline($pageSlug),
+                'name' => $pageLabels[$pageSlug],
                 'slug' => $pageSlug,
                 'status' => 'draft',
                 'is_homepage' => $pageSlug === 'home',
                 'sort_order' => $index,
             ]);
 
-            if ($pageSlug === 'home') {
-                foreach (['hero', 'feature_grid', 'cta'] as $sectionIndex => $sectionType) {
-                    $page->sections()->create([
-                        'type' => $sectionType,
-                        'label' => Str::headline($sectionType),
-                        'content' => $this->defaultContent($sectionType),
-                        'settings' => ['background' => 'transparent', 'padding' => 'lg'],
-                        'sort_order' => $sectionIndex,
-                    ]);
-                }
-            } else {
+            $sections = match ($pageSlug) {
+                'home' => ['hero', 'feature_grid', 'cta'],
+                'contact' => ['text', 'contact_form'],
+                'products' => ['text', 'product_grid'],
+                'blog' => ['text', 'blog_posts'],
+                'faq' => ['text', 'faq'],
+                default => ['text'],
+            };
+
+            foreach ($sections as $sectionIndex => $sectionType) {
                 $page->sections()->create([
-                    'type' => 'text',
-                    'label' => $labels[$pageSlug] ?? Str::headline($pageSlug),
-                    'content' => [
-                        'title' => $labels[$pageSlug] ?? Str::headline($pageSlug),
-                        'body' => 'Personaliza esta página no editor.',
-                    ],
+                    'type' => $sectionType,
+                    'label' => Str::headline($sectionType),
+                    'content' => $this->defaultContent($sectionType, $pageSlug),
                     'settings' => ['background' => 'transparent', 'padding' => 'lg'],
-                    'sort_order' => 0,
+                    'sort_order' => $sectionIndex,
                 ]);
             }
         }
@@ -189,36 +155,73 @@ class CreateSite extends Component
         return redirect()->route('builder.edit', $site);
     }
 
-    private function defaultContent(string $type): array
+    private function defaultContent(string $type, string $pageSlug = 'home'): array
     {
+        $typeLabel = $this->types[$this->type]['label'] ?? 'website';
+
         return match ($type) {
             'hero' => [
-                'title' => 'Cria algo incrível.',
-                'subtitle' => 'Personaliza este conteúdo diretamente no Finder.',
-                'button_label' => 'Saber mais',
+                'title' => $this->name,
+                'subtitle' => $this->defaultTagline($typeLabel),
+                'button_label' => 'Conhecer',
                 'button_url' => '#',
             ],
             'feature_grid' => [
-                'title' => 'Tudo o que precisas',
+                'title' => 'Uma presença digital clara e profissional',
                 'items' => [
-                    ['title' => 'Simples', 'description' => 'Edita sem código.'],
-                    ['title' => 'Flexível', 'description' => 'Adapta o teu design.'],
-                    ['title' => 'Rápido', 'description' => 'Publica em poucos minutos.'],
+                    ['title' => 'Conteúdo', 'description' => 'Apresenta o que fazes com uma estrutura simples e clara.'],
+                    ['title' => 'Experiência', 'description' => 'Organiza páginas, navegação e conteúdo num único website.'],
+                    ['title' => 'Contacto', 'description' => 'Facilita o contacto através dos canais que escolheres.'],
                 ],
             ],
             'cta' => [
-                'title' => 'Pronto para começar?',
-                'description' => 'Publica o teu website quando estiveres satisfeito.',
-                'button_label' => 'Começar',
+                'title' => 'Fala connosco',
+                'description' => 'Encontra a informação certa e entra em contacto.',
+                'button_label' => 'Contactar',
+                'button_url' => '/contact',
             ],
+            'contact_form' => [
+                'title' => 'Entra em contacto',
+                'description' => 'Envia uma mensagem e entraremos em contacto contigo.',
+            ],
+            'product_grid' => ['title' => 'Produtos'],
+            'blog_posts' => ['title' => 'Artigos', 'items' => []],
+            'faq' => ['title' => 'Perguntas frequentes', 'items' => []],
             default => [
-                'title' => Str::headline($type),
-                'description' => 'Personaliza esta secção.',
+                'title' => $pageSlug === 'about' ? 'Sobre nós' : ($this->types[$this->type]['label'] ?? Str::headline($pageSlug)),
+                'body' => $this->defaultPageBody($pageSlug, $typeLabel),
             ],
         };
     }
 
-    public function render()
+    private function defaultTagline(string $typeLabel): string
+    {
+        return match ($this->type) {
+            'portfolio' => 'Uma seleção do nosso trabalho, projetos e experiência.',
+            'online_store' => 'Descobre os nossos produtos e encontra o que procuras.',
+            'restaurant' => 'Conhece o nosso espaço, menu e formas de contacto.',
+            'blog' => 'Ideias, artigos e conteúdos publicados num só lugar.',
+            'services' => 'Conhece os nossos serviços e encontra a solução certa.',
+            'landing' => 'Uma presença digital focada naquilo que queres comunicar.',
+            'personal' => 'Um espaço pessoal para apresentar quem somos e o que fazemos.',
+            default => "Uma presença digital profissional para $typeLabel.",
+        };
+    }
+
+    private function defaultPageBody(string $pageSlug, string $typeLabel): string
+    {
+        return match ($pageSlug) {
+            'about' => 'Conhece melhor o nosso projeto, experiência e forma de trabalhar.',
+            'services' => 'Apresentamos aqui os serviços que disponibilizamos e a forma como podemos ajudar.',
+            'products' => 'Consulta os produtos disponíveis e escolhe os que melhor respondem às tuas necessidades.',
+            'blog' => 'Explora os nossos artigos, novidades e conteúdos.',
+            'faq' => 'Encontra respostas às perguntas mais frequentes sobre este website e os nossos serviços.',
+            'privacy' => 'Consulta aqui a informação de privacidade e tratamento de dados deste website.',
+            default => "Este é o espaço dedicado a apresentar $typeLabel de forma clara e profissional.",
+        };
+    }
+
+    public function render(): mixed
     {
         return view('livewire.create-site');
     }
