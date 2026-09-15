@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Models\Site;
 use App\Support\WebsiteBuilder\BuilderDocumentEditor;
-use App\Support\WebsiteBuilder\WebsiteDocumentService;
 use App\Support\WebsiteBuilder\SiteSectionDocument;
+use App\Support\WebsiteBuilder\WebsiteDocumentService;
 
 it('reads and writes a builder document back to the same section', function () {
     $site = Site::factory()->create();
@@ -28,12 +28,13 @@ it('reads and writes a builder document back to the same section', function () {
 
     $service = app(WebsiteDocumentService::class);
     $document = $service->read($section);
-    $elementId = $document['nodes'][0]['children'][0]['id'];
+    $element = collect($document['nodes'][0]['children'])->firstWhere('type', 'text');
+    $elementId = $element['id'];
     $document = BuilderDocumentEditor::updateElement($document, $elementId, ['text' => 'Actualizado']);
 
     $service->write($section, $document);
     $section->refresh();
 
     expect($section->settings['builder_document'])->toEqual(SiteSectionDocument::fromSection($section))
-        ->and($section->settings['builder_document']['nodes'][0]['children'][0]['content']['text'])->toBe('Actualizado');
+        ->and($section->settings['builder_document']['nodes'][0]['children'][1]['content']['text'])->toBe('Actualizado');
 });
