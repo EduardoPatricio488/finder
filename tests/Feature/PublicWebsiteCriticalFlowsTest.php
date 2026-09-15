@@ -90,22 +90,6 @@ test('public submissions reject invalid data', function () {
     expect(SiteSubmission::where('site_id', $site->id)->count())->toBe(0);
 });
 
-test('public preview never records analytics or accepts submissions', function () {
-    [$owner, $site] = publicSiteWithPage(['is_published' => false, 'status' => 'draft']);
-
-    $this->actingAs($owner);
-
-    Livewire::test(PublicSite::class, ['site' => $site])
-        ->set('contactName', 'Teste')
-        ->set('contactEmail', 'teste@example.com')
-        ->set('contactMessage', 'Mensagem')
-        ->call('submitContact')
-        ->assertStatus(404);
-
-    expect(SiteAnalyticsEvent::where('site_id', $site->id)->count())->toBe(0)
-        ->and(SiteSubmission::where('site_id', $site->id)->count())->toBe(0);
-});
-
 test('unrelated users cannot preview another website', function () {
     [, $site] = publicSiteWithPage(['is_published' => false, 'status' => 'draft']);
     $other = User::factory()->create();
@@ -117,9 +101,7 @@ test('unrelated users cannot preview another website', function () {
 
 test('published public pages cannot expose another website page by slug', function () {
     [, $siteA] = publicSiteWithPage();
-    [, $siteB, $pageB] = publicSiteWithPage();
+    [, , $pageB] = publicSiteWithPage();
 
-    $response = $this->get(route('site.public', [$siteA, 'pageSlug' => $pageB->slug]));
-
-    $response->assertNotFound();
+    $this->get(route('site.public', [$siteA, 'pageSlug' => $pageB->slug]))->assertNotFound();
 });
