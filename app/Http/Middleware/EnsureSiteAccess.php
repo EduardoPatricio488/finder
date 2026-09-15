@@ -12,7 +12,21 @@ class EnsureSiteAccess
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $site = $request->route('site');
+        $route = $request->route();
+        $site = $route?->parameter('site');
+
+        // Route model binding should normally resolve {site:slug} to a Site model.
+        // Resolve it defensively here as well so this access middleware never
+        // returns a false 404 merely because binding has not run yet.
+        if (! $site instanceof Site && filled($site)) {
+            $site = Site::query()
+                ->where('slug', (string) $site)
+                ->first();
+
+            abort_unless($site instanceof Site, 404);
+
+            $route->setParameter('site', $site);
+        }
 
         abort_unless($site instanceof Site, 404);
 
