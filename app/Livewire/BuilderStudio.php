@@ -26,27 +26,46 @@ use Livewire\Component;
 #[Title('Website Studio')]
 class BuilderStudio extends Component
 {
-    // @php-cs-fixer-ignore class_attributes_separation,control_structure_braces,unary_operator_spaces,braces_position,statement_indentation
     public Site $site;
+
     public ?int $pageId = null;
+
     public array $pages = [];
+
     public array $sections = [];
+
     public array $theme = [];
+
     public array $siteSettings = [];
+
     public array $pageSeo = [];
+
     public ?int $selectedSection = null;
+
     public ?string $selectedElementId = null;
+
     public string $device = 'desktop';
+
     public string $panel = 'pages';
+
     public string $aiBrief = '';
+
     public string $statusMessage = 'Guardado';
+
     public bool $dirty = false;
+
     public bool $showAi = false;
+
     public bool $showTemplates = false;
+
     public bool $showPublish = false;
+
     public bool $showSettings = false;
+
     public bool $showVersions = false;
+
     public array $publishChecks = [];
+
     public array $versions = [];
 
     public function mount(Site $site): void
@@ -351,12 +370,35 @@ class BuilderStudio extends Component
         abort_unless(is_array($element), 404);
 
         $content = is_array($element['content'] ?? null) ? $element['content'] : [];
-        $content[$field] = Str::limit($value, $field === 'url' ? 2000 : 2000, '');
+        $content[$field] = Str::limit($value, 2000, '');
         $content = $this->sanitizeElementContent((string) $element['type'], $content);
         $document = BuilderDocumentEditor::updateElement($document, $this->selectedElementId, $content, null);
         $this->applyDocumentToSection($index, $document);
         $this->dirty = true;
         $this->statusMessage = 'Elemento alterado — por guardar';
+    }
+
+    public function updateSelectedElementSetting(string $key, string $value): void
+    {
+        abort_unless($this->selectedSection !== null && $this->selectedElementId !== null, 422);
+        abort_unless(in_array($key, ['font_size', 'padding', 'margin', 'align', 'width', 'visibility'], true), 422);
+
+        $index = $this->selectedSection;
+        $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+        $element = $this->findElement($document['nodes'] ?? [], $this->selectedElementId);
+        abort_unless(is_array($element), 404);
+
+        $settings = is_array($element['settings'] ?? null) ? $element['settings'] : [];
+        $responsive = is_array($settings['responsive'] ?? null) ? $settings['responsive'] : [];
+        $bucket = $this->device === 'desktop' ? 'base' : $this->device;
+        $responsive[$bucket] = is_array($responsive[$bucket] ?? null) ? $responsive[$bucket] : [];
+        $responsive[$bucket][$key] = Str::limit($value, 100, '');
+        $settings['responsive'] = $responsive;
+
+        $document = BuilderDocumentEditor::updateElement($document, $this->selectedElementId, null, $settings);
+        $this->applyDocumentToSection($index, $document);
+        $this->dirty = true;
+        $this->statusMessage = 'Estilo responsivo alterado — por guardar';
     }
 
     public function removeElement(string $elementId): void
