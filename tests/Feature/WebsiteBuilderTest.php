@@ -121,6 +121,22 @@ test('website owners can update identity and SEO settings', function () {
         ->and($site->seo['title'])->toBe('Novo Nome | Website');
 });
 
+test('site settings tolerate stale contactName updates from older Livewire snapshots', function () {
+    $owner = User::factory()->create();
+    $site = Site::factory()->create(['owner_id' => $owner->id]);
+    $this->actingAs($owner);
+
+    Livewire::test(SiteSettings::class, ['site' => $site])
+        ->set('contactName', 'Declair')
+        ->set('tagline', 'Descrição actualizada')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $site->refresh();
+    expect($site->tagline)->toBe('Descrição actualizada')
+        ->and($site->settings)->not->toHaveKey('contactName');
+});
+
 test('users cannot manage another websites settings or menus', function () {
     $owner = User::factory()->create();
     $other = User::factory()->create();
