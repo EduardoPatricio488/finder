@@ -20,9 +20,16 @@ class CategoryManager extends Component
 
         $this->categoryName = trim($this->categoryName);
 
-        $validated = $this->validate([
-            'categoryName' => ['required', 'string', 'max:255'],
-        ]);
+        $validated = $this->validate(
+            [
+                'categoryName' => ['required', 'string', 'max:255'],
+            ],
+            [
+                'categoryName.required' => 'O nome da categoria é obrigatório.',
+                'categoryName.string' => 'O nome da categoria tem de ser um texto válido.',
+                'categoryName.max' => 'O nome da categoria não pode ter mais de 255 caracteres.',
+            ]
+        );
 
         $slug = Str::slug($validated['categoryName']);
 
