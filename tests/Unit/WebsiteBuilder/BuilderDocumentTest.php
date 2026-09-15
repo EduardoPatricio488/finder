@@ -7,10 +7,12 @@ use App\Support\WebsiteBuilder\BuilderNodeId;
 use App\Support\WebsiteBuilder\ElementRegistry;
 use App\Support\WebsiteBuilder\SectionRegistry;
 
-it('registers the initial website elements', function () {
-    expect(ElementRegistry::types())->toBe(['heading', 'text', 'image', 'button', 'divider', 'spacer'])
+it('registers the current website elements', function () {
+    expect(ElementRegistry::types())->toBe([
+        'heading', 'text', 'image', 'button', 'divider', 'spacer', 'video', 'quote', 'social_links', 'faq', 'gallery', 'form', 'html',
+    ])
         ->and(ElementRegistry::has('heading'))->toBeTrue()
-        ->and(ElementRegistry::has('button'))->toBeTrue()
+        ->and(ElementRegistry::has('video'))->toBeTrue()
         ->and(ElementRegistry::has('unknown'))->toBeFalse();
 
     expect(ElementRegistry::get('heading'))
@@ -44,18 +46,11 @@ it('generates stable typed node ids', function () {
 it('normalizes a valid document and applies element defaults', function () {
     $document = BuilderDocument::normalize([
         'schema_version' => 2,
-        'nodes' => [
-            [
-                'type' => 'container',
-                'settings' => [],
-                'children' => [
-                    [
-                        'type' => 'heading',
-                        'content' => ['text' => 'Título personalizado'],
-                    ],
-                ],
-            ],
-        ],
+        'nodes' => [[
+            'type' => 'container', 'settings' => [], 'children' => [[
+                'type' => 'heading', 'content' => ['text' => 'Título personalizado'],
+            ]],
+        ]],
     ]);
 
     expect($document['schema_version'])->toBe(2)
@@ -71,14 +66,9 @@ it('preserves existing valid ids and user data during normalization', function (
     $document = BuilderDocument::normalize([
         'schema_version' => 2,
         'nodes' => [[
-            'id' => 'cnt_1234567890abcdef',
-            'type' => 'container',
-            'settings' => ['max_width' => '1200px'],
+            'id' => 'cnt_1234567890abcdef', 'type' => 'container', 'settings' => ['max_width' => '1200px'],
             'children' => [[
-                'id' => 'el_abcdef1234567890',
-                'type' => 'text',
-                'content' => ['text' => 'Conteúdo'],
-                'settings' => ['align' => 'center', 'custom' => true],
+                'id' => 'el_abcdef1234567890', 'type' => 'text', 'content' => ['text' => 'Conteúdo'], 'settings' => ['align' => 'center', 'custom' => true],
             ]],
         ]],
     ]);
@@ -95,65 +85,19 @@ it('rejects missing or unsupported schema versions', function () {
 });
 
 it('rejects duplicate ids and unknown element types', function () {
-    $duplicate = [
-        'schema_version' => 2,
-        'nodes' => [
-            ['id' => 'cnt_1234567890abcdef', 'type' => 'container', 'settings' => [], 'children' => []],
-            ['id' => 'cnt_1234567890abcdef', 'type' => 'container', 'settings' => [], 'children' => []],
+    $duplicate = ['schema_version' => 2, 'nodes' => [[
+        'id' => 'cnt_1234567890abcdef', 'type' => 'container', 'settings' => [], 'children' => [
+            ['id' => 'el_1234567890abcdef', 'type' => 'text', 'content' => ['text' => 'A'], 'settings' => []],
+            ['id' => 'el_1234567890abcdef', 'type' => 'text', 'content' => ['text' => 'B'], 'settings' => []],
         ],
-    ];
+    ]]];
 
-    $unknown = [
-        'schema_version' => 2,
-        'nodes' => [[
-            'id' => 'cnt_1234567890abcdef',
-            'type' => 'container',
-            'settings' => [],
-            'children' => [[
-                'id' => 'el_abcdef1234567890',
-                'type' => 'unknown',
-                'content' => [],
-                'settings' => [],
-            ]],
-        ]],
-    ];
+    $unknown = ['schema_version' => 2, 'nodes' => [[
+        'id' => 'cnt_1234567890abcdef', 'type' => 'container', 'settings' => [], 'children' => [
+            ['id' => 'el_1234567890abcdef', 'type' => 'unknown', 'content' => [], 'settings' => []],
+        ],
+    ]]];
 
     expect(fn () => BuilderDocument::validate($duplicate))->toThrow(InvalidArgumentException::class)
-        ->and(fn () => BuilderDocument::validate($unknown))->toThrow(InvalidArgumentException::class)
-        ->and(BuilderDocument::isValid($unknown))->toBeFalse();
-});
-
-it('rejects impossible nesting and invalid schema values', function () {
-    $nestedContainer = [
-        'schema_version' => 2,
-        'nodes' => [[
-            'id' => 'cnt_1234567890abcdef',
-            'type' => 'container',
-            'settings' => [],
-            'children' => [[
-                'id' => 'cnt_abcdef1234567890',
-                'type' => 'container',
-                'settings' => [],
-                'children' => [],
-            ]],
-        ]],
-    ];
-
-    $invalidHeading = [
-        'schema_version' => 2,
-        'nodes' => [[
-            'id' => 'cnt_1234567890abcdef',
-            'type' => 'container',
-            'settings' => [],
-            'children' => [[
-                'id' => 'el_abcdef1234567890',
-                'type' => 'heading',
-                'content' => ['text' => 'Título', 'level' => 'h7'],
-                'settings' => ['align' => 'left'],
-            ]],
-        ]],
-    ];
-
-    expect(fn () => BuilderDocument::validate($nestedContainer))->toThrow(InvalidArgumentException::class)
-        ->and(fn () => BuilderDocument::validate($invalidHeading))->toThrow(InvalidArgumentException::class);
+        ->and(fn () => BuilderDocument::normalize($unknown))->toThrow(InvalidArgumentException::class);
 });

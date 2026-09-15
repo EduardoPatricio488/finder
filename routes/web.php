@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\SiteSeoController;
 use App\Livewire\AdminAssistant;
 use App\Livewire\AdminDashboard;
 use App\Livewire\BuilderEditor;
+use App\Livewire\BuilderStudio;
 use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
 use App\Livewire\CustomerAccount;
@@ -43,8 +45,9 @@ Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 Route::get('vendas', ProductCatalog::class)->name('sales');
 Route::get('produtos', ProductCatalog::class)->name('products');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
-
 Route::get('sites/{site:slug}', PublicSite::class)->name('sites.show');
+Route::get('site/{site:slug}/sitemap.xml', [SiteSeoController::class, 'sitemap'])->name('site.sitemap');
+Route::get('site/{site:slug}/robots.txt', [SiteSeoController::class, 'robots'])->name('site.robots');
 
 Route::middleware(['auth', 'verified'])
     ->get('entrada', fn () => redirect()->route('sales'))
@@ -54,7 +57,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', UserDashboard::class)->name('dashboard');
     Route::get('ajuda', Help::class)->name('help');
     Route::get('websites/create', CreateSite::class)->name('site.create');
-    Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
+    Route::get('websites/{site:slug}/builder', BuilderStudio::class)->name('builder.edit');
+    Route::get('websites/{site:slug}/builder-classic', BuilderEditor::class)->name('builder.classic');
     Route::get('conta/favoritos', CustomerAccount::class)->defaults('section', 'favorites')->name('account.favorites');
     Route::get('conta/moradas', CustomerAccount::class)->defaults('section', 'addresses')->name('account.addresses');
     Route::get('conta/pagamentos', CustomerAccount::class)->defaults('section', 'payments')->name('account.payments');
@@ -77,7 +81,6 @@ Route::middleware(['auth', 'verified', 'admin'])
 
         $siteRedirect = function (string $route): mixed {
             $site = Site::query()->where('owner_id', auth()->id())->first() ?? Site::query()->first();
-
             abort_if($site === null, 404, 'Não existe nenhum website disponível para administração.');
 
             return redirect()->route($route, ['site' => $site]);
@@ -132,9 +135,7 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('config', StoreSettings::class)->name('config');
         Route::get('definicoes', SiteSettings::class)->name('settings');
         Route::get('media', MediaLibrary::class)->name('media');
-        Route::get('analytics', SiteAnalytics::class)
-            ->middleware('can:access-reports,site')
-            ->name('analytics');
+        Route::get('analytics', SiteAnalytics::class)->middleware('can:access-reports,site')->name('analytics');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
         Route::get('produtos', ProductManager::class)->name('products');
@@ -146,12 +147,8 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('stock', StockMovementManager::class)->name('stock');
         Route::get('submissoes', SiteSubmissions::class)->name('submissions');
         Route::get('utilizadores', UserManager::class)->name('users');
-        Route::get('relatorios', Reports::class)
-            ->middleware('can:access-reports,site')
-            ->name('reports');
-        Route::get('assistente', AdminAssistant::class)
-            ->middleware('can:access-ai,site')
-            ->name('assistant');
+        Route::get('relatorios', Reports::class)->middleware('can:access-reports,site')->name('reports');
+        Route::get('assistente', AdminAssistant::class)->middleware('can:access-ai,site')->name('assistant');
     });
 
 require __DIR__.'/settings.php';

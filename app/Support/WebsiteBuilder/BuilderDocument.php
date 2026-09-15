@@ -237,12 +237,16 @@ final class BuilderDocument
             }
 
             $value = $values[$key];
-            if ($rule === 'string' && ! is_string($value)) {
-                throw new InvalidArgumentException("Document field [{$key}] must be a string.");
-            }
+            $valid = match ($rule) {
+                'string' => is_string($value),
+                'array' => is_array($value),
+                'integer' => is_int($value),
+                'boolean' => is_bool($value),
+                default => is_array($rule) && in_array($value, $rule, true),
+            };
 
-            if (is_array($rule) && ! in_array($value, $rule, true)) {
-                throw new InvalidArgumentException("Document field [{$key}] contains an unsupported value.");
+            if (! $valid) {
+                throw new InvalidArgumentException("Document field [{$key}] does not match its schema.");
             }
         }
     }

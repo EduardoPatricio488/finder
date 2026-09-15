@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\Site;
@@ -46,9 +48,13 @@ class PublicSite extends Component
             abort_unless($site->is_published && $site->status === 'published', 404);
         }
 
-        $this->site = $site->load(['menus.items.children.page', 'pages.sections', 'products']);
+        $this->site = $site->load([
+            'menus.items.children.page',
+            'pages:id,site_id,name,slug,status,is_homepage,sort_order,seo',
+        ]);
 
-        if ($this->site->pages->isEmpty()) {
+        $pages = $this->site->pages;
+        if ($pages->isEmpty()) {
             abort_if(! $this->preview, 404);
 
             $fallbackPage = new SitePage([
@@ -73,10 +79,19 @@ class PublicSite extends Component
             ]));
             $this->page = $fallbackPage;
         } else {
+            $pageQuery = $this->site->pages()->with('sections')->when(
+                ! $this->preview,
+                fn ($query) => $query->where('status', 'published')
+            );
+
             $this->page = $pageSlug
-                ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
-                : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
-                    ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail());
+                ? $pageQuery->where('slug', $pageSlug)->firstOrFail()
+                : ($pageQuery->where('is_homepage', true)->first()
+                    ?? $pageQuery->orderBy('sort_order')->firstOrFail());
+        }
+
+        if ($this->page->sections->contains(fn (SiteSection $section): bool => $section->type === 'product_grid')) {
+            $this->site->load('products');
         }
 
         if (! $this->preview) {
