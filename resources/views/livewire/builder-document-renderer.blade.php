@@ -1,7 +1,8 @@
 @php
     use App\Support\WebsiteBuilder\ResponsiveStyles;
 
-    $renderNodes = static function (array $nodes) use (&$renderNodes): void {
+    $device = in_array($device ?? 'desktop', ['desktop', 'tablet', 'mobile'], true) ? ($device ?? 'desktop') : 'desktop';
+    $renderNodes = static function (array $nodes) use (&$renderNodes, $device): void {
         foreach ($nodes as $node) {
             if (! is_array($node) || empty($node['type'])) {
                 continue;
@@ -11,19 +12,20 @@
             $content = is_array($node['content'] ?? null) ? $node['content'] : [];
             $settings = is_array($node['settings'] ?? null) ? $node['settings'] : [];
             $children = is_array($node['children'] ?? null) ? $node['children'] : [];
-            $styles = ResponsiveStyles::cssForNode($settings);
+            $styles = ResponsiveStyles::cssForNode($settings, $device);
             $styleAttribute = '';
             if ($styles !== []) {
                 $styleAttribute = ' style="'.e(collect($styles)->map(fn (string $value, string $key): string => $key.':'.$value)->implode(';')).'"';
             }
-            $align = in_array($settings['align'] ?? 'left', ['left', 'center', 'right', 'justify'], true) ? $settings['align'] : 'left';
+            $resolvedStyles = ResponsiveStyles::forDevice($settings, $device);
+            $align = in_array($resolvedStyles['align'] ?? $settings['align'] ?? 'left', ['left', 'center', 'right', 'justify'], true) ? ($resolvedStyles['align'] ?? $settings['align'] ?? 'left') : 'left';
             $alignClass = match ($align) {
                 'center' => 'text-center',
                 'right' => 'text-right',
                 'justify' => 'text-justify',
                 default => 'text-left',
             };
-            $spacing = match ($settings['padding'] ?? 'md') {
+            $spacing = match ($resolvedStyles['padding'] ?? $settings['padding'] ?? 'md') {
                 'none' => 'p-0',
                 'sm' => 'p-3',
                 'lg' => 'p-10',
