@@ -24,3 +24,5 @@ parameters:
         - message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model::.*\(\)\.$#'
         - message: '#^Property .* does not accept Illuminate\\Database\\Eloquent\\Model\.$#'
         - message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection<.*>\|Illuminate\\Database\\Eloquent\\Model::\$.*\.$#'
+        - message: '#^Anonymous function should return App\\Models\\SitePage but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+        - message: '#^Anonymous function should return App\\Models\\SiteVersion but returns Illuminate\\Database\\Eloquent\\Model\.$#'
