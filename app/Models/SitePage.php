@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['site_id', 'name', 'slug', 'status', 'is_homepage', 'seo', 'sort_order'])]
+#[Fillable(['site_id', 'name', 'slug', 'status', 'is_homepage', 'seo', 'theme', 'sort_order'])]
 class SitePage extends Model
 {
     use SoftDeletes;
@@ -18,6 +18,7 @@ class SitePage extends Model
         return [
             'is_homepage' => 'boolean',
             'seo' => 'array',
+            'theme' => 'array',
         ];
     }
 
