@@ -47,8 +47,6 @@ document.addEventListener('livewire:navigated', () => {
 
         const section = target.closest('section[data-section-id]');
         if (!section) return;
-
-        // Do not hijack real controls or an element that is being edited.
         if (target.closest('button, a, input, textarea, select, [contenteditable="true"]')) return;
 
         const sections = [...document.querySelectorAll('section[data-section-id]')];
@@ -74,9 +72,7 @@ document.addEventListener('livewire:navigated', () => {
         if (element.dataset.finderInlineReady === '1') return;
         element.dataset.finderInlineReady = '1';
 
-        element.addEventListener('click', (event) => {
-            event.stopPropagation();
-        });
+        element.addEventListener('click', (event) => event.stopPropagation());
 
         element.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -94,16 +90,15 @@ document.addEventListener('livewire:navigated', () => {
             if (sectionIndex < 0) return;
 
             const value = element.innerText.replace(/\u00a0/g, ' ').trim();
-            const currentItemIndex = element.dataset.finderInlineItem;
-            const item = currentItemIndex === undefined ? null : Number(currentItemIndex);
+            const rawItemIndex = element.dataset.finderInlineItem;
+            const item = rawItemIndex === undefined ? null : Number(rawItemIndex);
 
             await component.updateInline(sectionIndex, field, value, Number.isInteger(item) ? item : null);
             scheduleSave();
         });
     };
 
-    const makeInlineEditable = (section, index) => {
-        const type = section.dataset.sectionType || '';
+    const makeInlineEditable = (section) => {
         const content = section.querySelector(':scope > div:last-child');
         if (!content) return;
 
@@ -112,23 +107,21 @@ document.addEventListener('livewire:navigated', () => {
         const buttons = [...content.querySelectorAll('span')].filter((element) => {
             return element.classList.contains('text-white') && element.classList.contains('font-black');
         });
+        const articles = [...content.querySelectorAll('article')];
 
-        if (type === 'hero') {
+        // Hero sections have h1 + two paragraphs + an optional button.
+        if (headings[0]?.tagName === 'H1') {
             if (paragraphs[0]) inlineDefinition(section, paragraphs[0], 'subtitle');
-            if (headings[0]) inlineDefinition(section, headings[0], 'title');
+            inlineDefinition(section, headings[0], 'title');
             if (paragraphs[1]) inlineDefinition(section, paragraphs[1], 'description');
             if (buttons[0]) inlineDefinition(section, buttons[0], 'button_label');
             return;
         }
 
-        if (type === 'text') {
-            if (headings[0]) inlineDefinition(section, headings[0], 'title');
-            if (paragraphs[0]) inlineDefinition(section, paragraphs[0], 'body');
-            return;
-        }
-
-        if (type === 'cta') {
-            if (headings[0]) inlineDefinition(section, headings[0], 'title');
+        // CTA sections have h2 + paragraph + optional button and a rounded CTA wrapper.
+        const isCta = Boolean(content.querySelector('.rounded-3xl')) && headings[0]?.tagName === 'H2';
+        if (isCta) {
+            inlineDefinition(section, headings[0], 'title');
             if (paragraphs[0]) inlineDefinition(section, paragraphs[0], 'description');
             if (buttons[0]) inlineDefinition(section, buttons[0], 'button_label');
             return;
@@ -136,38 +129,20 @@ document.addEventListener('livewire:navigated', () => {
 
         if (headings[0]) inlineDefinition(section, headings[0], 'title');
 
-        const description = paragraphs[0];
-        if (description && !description.closest('article')) {
-            inlineDefinition(section, description, 'description');
-        }
+        const description = paragraphs.find((paragraph) => !paragraph.closest('article'));
+        if (description) inlineDefinition(section, description, 'description');
 
-        [...content.querySelectorAll('article')].forEach((article, itemIndex) => {
+        articles.forEach((article, itemIndex) => {
             const itemHeading = article.querySelector('p.font-black');
             const itemDescription = article.querySelector('p.mt-2');
 
-            if (itemHeading) {
-                const field = type === 'faq' ? 'question' : (type === 'testimonials' ? 'name' : 'title');
-                inlineDefinition(section, itemHeading, field, itemIndex);
-            }
-
-            if (itemDescription) {
-                const field = type === 'faq' ? 'answer' : (type === 'testimonials' ? 'quote' : (type === 'pricing' ? 'price' : 'description'));
-                inlineDefinition(section, itemDescription, field, itemIndex);
-            }
+            if (itemHeading) inlineDefinition(section, itemHeading, 'title', itemIndex);
+            if (itemDescription) inlineDefinition(section, itemDescription, 'description', itemIndex);
         });
     };
 
     const bootInlineEditing = () => {
-        const sections = [...document.querySelectorAll('section[data-section-id]')];
-        if (!sections.length) return;
-
-        sections.forEach((section, index) => {
-            if (!section.dataset.finderInlineSectionReady) {
-                section.dataset.finderInlineSectionReady = '1';
-            }
-
-            makeInlineEditable(section, index);
-        });
+        document.querySelectorAll('section[data-section-id]').forEach(makeInlineEditable);
     };
 
     const bootVisualSelection = () => {
@@ -201,9 +176,6 @@ document.addEventListener('livewire:navigated', () => {
 
             section.addEventListener('dragend', () => {
                 section.classList.remove('opacity-60');
-                document.querySelectorAll('section[data-section-id]').forEach((item) => {
-                    item.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-100');
-                });
             });
 
             section.addEventListener('dragover', (event) => {
@@ -231,19 +203,14 @@ document.addEventListener('livewire:navigated', () => {
 
                 const rect = section.getBoundingClientRect();
                 const insertBefore = event.clientY < rect.top + rect.height / 2;
-                if (insertBefore) {
-                    container.insertBefore(dragged, section);
-                } else {
-                    container.insertBefore(dragged, section.nextSibling);
-                }
+                if (insertBefore) container.insertBefore(dragged, section);
+                else container.insertBefore(dragged, section.nextSibling);
 
                 const orderedIds = [...container.querySelectorAll('section[data-section-id][wire\\:key]')]
                     .map((item) => item.getAttribute('wire:key').replace(/^builder-section-/, '').replace(/^section-/, ''));
 
                 const component = getBuilderComponent();
-                if (component) {
-                    await component.reorderSections(orderedIds);
-                }
+                if (component) await component.reorderSections(orderedIds);
             });
         });
     };
@@ -258,10 +225,7 @@ document.addEventListener('livewire:navigated', () => {
 
     document.addEventListener('builder-dirty', scheduleSave);
     document.addEventListener('builder-sections-reordered', scheduleSave);
-    document.addEventListener('builder-saved', () => {
-        window.clearTimeout(saveTimer);
-    });
-
+    document.addEventListener('builder-saved', () => window.clearTimeout(saveTimer));
     document.addEventListener('livewire:navigated', boot);
     document.addEventListener('DOMContentLoaded', boot);
 
