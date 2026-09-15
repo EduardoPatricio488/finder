@@ -6,7 +6,7 @@ namespace App\Support\WebsiteBuilder;
 
 final class WebsiteTemplates
 {
-    /** @return array<string, array{name:string, description:string, pages:list<array{name:string,slug:string,sections:list<string>}>}> */
+    /** @return array<string, array{name:string,description:string,pages:list<array{name:string,slug:string,sections:list<array{type:string,label:string}>}>}> */
     public static function all(): array
     {
         return [
@@ -70,9 +70,63 @@ final class WebsiteTemplates
         ];
     }
 
-    /** @return array{name:string,description:string,pages:list<array{name:string,slug:string,sections:list<string>}>} */
+    public static function has(string $key): bool
+    {
+        return isset(self::all()[$key]);
+    }
+
+    /** @return array{name:string,description:string,pages:list<array{name:string,slug:string,sections:list<array{type:string,label:string}>}>} */
+    public static function get(string $key): array
+    {
+        abort_unless(self::has($key), 404, 'Template não encontrado.');
+
+        return self::all()[$key];
+    }
+
+    /** @return array{name:string,description:string,pages:list<array{name:string,slug:string,sections:list<array{type:string,label:string}>}>} */
     private static function template(string $name, string $description, array $pages): array
     {
-        return compact('name', 'description', 'pages');
+        return [
+            'name' => $name,
+            'description' => $description,
+            'pages' => array_map(
+                fn (array $page): array => [
+                    'name' => $page[0],
+                    'slug' => $page[1],
+                    'sections' => array_map(
+                        fn (string $type): array => [
+                            'type' => $type,
+                            'label' => self::sectionLabel($type),
+                        ],
+                        $page[2],
+                    ),
+                ],
+                $pages,
+            ),
+        ];
+    }
+
+    private static function sectionLabel(string $type): string
+    {
+        return [
+            'hero' => 'Hero',
+            'text' => 'Texto',
+            'image' => 'Imagem',
+            'button' => 'Botão',
+            'feature_grid' => 'Benefícios',
+            'card' => 'Cartão',
+            'testimonials' => 'Testemunhos',
+            'faq' => 'FAQ',
+            'gallery' => 'Galeria',
+            'contact_form' => 'Formulário de contacto',
+            'product_grid' => 'Produtos',
+            'pricing' => 'Preços',
+            'blog_posts' => 'Artigos',
+            'social_links' => 'Redes sociais',
+            'video' => 'Vídeo',
+            'map' => 'Mapa',
+            'newsletter' => 'Newsletter',
+            'cta' => 'CTA',
+        ][$type] ?? Str::headline($type);
     }
 }
