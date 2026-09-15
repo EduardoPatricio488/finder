@@ -6,8 +6,9 @@ use App\Models\Site;
 use App\Support\WebsiteBuilder\BuilderDocumentEditor;
 use App\Support\WebsiteBuilder\SiteSectionDocument;
 use App\Support\WebsiteBuilder\WebsiteDocumentService;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 it('reads and writes a builder document back to the same section', function () {
     $site = Site::factory()->create();
