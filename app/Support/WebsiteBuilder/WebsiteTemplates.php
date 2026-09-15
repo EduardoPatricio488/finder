@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\WebsiteBuilder;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 final class WebsiteTemplates
@@ -56,6 +57,19 @@ final class WebsiteTemplates
         abort_unless(self::has($key), 404, 'Template não encontrado.');
 
         return self::all()[$key];
+    }
+
+    /** @return Collection<int, string> */
+    public static function sectionTypes(): Collection
+    {
+        return collect(self::all())
+            ->flatMap(fn (array $template): array => array_map(
+                fn (array $page): array => array_column($page['sections'], 'type'),
+                $template['pages'],
+            ))
+            ->flatten()
+            ->unique()
+            ->values();
     }
 
     /** @return array{name:string,description:string,pages:list<array{name:string,slug:string,sections:list<array{type:string,label:string}>}>} */
