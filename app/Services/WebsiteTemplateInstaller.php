@@ -6,6 +6,8 @@ namespace App\Services;
 
 use App\Models\Site;
 use App\Models\SitePage;
+use App\Models\SiteSection;
+use App\Support\WebsiteBuilder\SiteSectionDocument;
 use App\Support\WebsiteBuilder\WebsiteTemplates;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -37,9 +39,9 @@ final class WebsiteTemplateInstaller
 
                 foreach ($definitionPage['sections'] as $sectionIndex => $definitionSection) {
                     $type = $definitionSection['type'];
-                    $page->sections()->create([
+                    $section = $page->sections()->create([
                         'type' => $type,
-                        'label' => $definitionSection['label'],
+                        'label' => Str::limit($definitionSection['label'], 120, ''),
                         'content' => $this->defaultContent($type),
                         'settings' => [
                             'background' => 'transparent',
@@ -49,6 +51,8 @@ final class WebsiteTemplateInstaller
                         'sort_order' => $sectionIndex,
                         'is_visible' => true,
                     ]);
+
+                    $this->upgradeSectionToDocument($section);
                 }
 
                 if ($definitionPage['slug'] === 'home') {
@@ -66,6 +70,22 @@ final class WebsiteTemplateInstaller
 
             return $home;
         });
+    }
+
+    private function upgradeSectionToDocument(SiteSection $section): void
+    {
+        $document = SiteSectionDocument::fromSection($section);
+        $data = SiteSectionDocument::toSectionData($document);
+        $payload = $data[0] ?? null;
+
+        if (! is_array($payload)) {
+            throw new InvalidArgumentException('Não foi possível preparar a secção do template.');
+        }
+
+        $section->update([
+            'content' => is_array($payload['content'] ?? null) ? $payload['content'] : [],
+            'settings' => is_array($payload['settings'] ?? null) ? $payload['settings'] : [],
+        ]);
     }
 
     private function defaultTheme(): array
