@@ -19,41 +19,23 @@ use Livewire\Component;
 class ProductCatalog extends Component
 {
     public string $search = '';
-
     public string $category = '';
-
     public string $minPrice = '';
-
     public string $maxPrice = '';
-
     public string $availability = '';
-
     public string $minRating = '';
-
     public array $cart = [];
-
     public string $couponCode = '';
-
     public ?string $appliedCouponCode = null;
-
     public float $couponDiscount = 0;
-
     public string $couponMessage = '';
-
     public bool $cartOpen = false;
-
     public bool $checkoutOpen = false;
-
     public string $customerName = '';
-
     public string $customerEmail = '';
-
     public string $customerPhone = '';
-
     public string $deliveryAddress = '';
-
     public string $paymentMethod = 'mbway';
-
     public ?string $completedOrderNumber = null;
 
     private function site(): Site
@@ -74,13 +56,7 @@ class ProductCatalog extends Component
             return $query;
         }
 
-        return $query->where(function (Builder $query) use ($site): void {
-            $query->where('site_id', $site->id);
-
-            if ($site->slug === 'casa-co') {
-                $query->orWhereNull('site_id');
-            }
-        });
+        return $query->where('site_id', $site->id);
     }
 
     public function mount(): void
@@ -157,13 +133,7 @@ class ProductCatalog extends Component
         $this->resetErrorBag('couponCode');
         $site = $this->site();
         $coupon = DB::table('coupons')
-            ->when(Schema::hasColumn('coupons', 'site_id'), fn ($query) => $query->where(function ($query) use ($site): void {
-                $query->where('site_id', $site->id);
-
-                if ($site->slug === 'casa-co') {
-                    $query->orWhereNull('site_id');
-                }
-            }))
+            ->when(Schema::hasColumn('coupons', 'site_id'), fn ($query) => $query->where('site_id', $site->id))
             ->whereRaw('upper(code) = ?', [strtoupper(trim($this->couponCode))])
             ->where('starts_at', '<=', now())
             ->where('ends_at', '>=', now())
@@ -344,7 +314,6 @@ class ProductCatalog extends Component
             ->when($this->category !== '', fn ($query) => $query->whereHas('category', fn ($query) => $query->where('slug', $this->category)))
             ->when($this->minPrice !== '', fn ($query) => $query->where('price', '>=', (float) $this->minPrice))
             ->when($this->maxPrice !== '', fn ($query) => $query->where('price', '<=', (float) $this->maxPrice))
-            ->when($this->search === '' && $this->category === '' && $this->minPrice === '' && $this->maxPrice === '' && $this->availability === '' && $this->minRating === '', fn ($query) => $query->where('stock', '>', 0))
             ->when($this->availability === 'disponivel', fn ($query) => $query->where('stock', '>', 0))
             ->when($this->availability === 'esgotado', fn ($query) => $query->where('stock', 0))
             ->when($this->minRating !== '', fn ($query) => $query->whereHas('reviews', fn ($query) => $query->where('rating', '>=', $minimumRating)))
