@@ -15,8 +15,29 @@ final class SiteSectionDocument
 
         if (is_array($settings['builder_document'] ?? null)) {
             BuilderDocument::validate($settings['builder_document']);
+            $document = BuilderDocument::normalize($settings['builder_document']);
+            $legacySettings = $settings;
+            unset($legacySettings['builder_document']);
 
-            return BuilderDocument::normalize($settings['builder_document']);
+            foreach ($document['nodes'] as &$node) {
+                if (($node['type'] ?? null) !== 'container') {
+                    continue;
+                }
+
+                $legacy = is_array($node['settings']['legacy'] ?? null) ? $node['settings']['legacy'] : [];
+                $legacy['section_id'] = $section->getKey();
+                $legacy['site_page_id'] = $section->site_page_id;
+                $legacy['type'] = (string) ($section->type ?? '');
+                $legacy['label'] = $section->label;
+                $legacy['sort_order'] = (int) ($section->sort_order ?? 0);
+                $legacy['is_visible'] = (bool) ($section->is_visible ?? true);
+                $legacy['content'] = is_array($section->content) ? $section->content : [];
+                $legacy['settings'] = $legacySettings;
+                $node['settings']['legacy'] = $legacy;
+            }
+            unset($node);
+
+            return BuilderDocument::normalize($document);
         }
 
         $type = (string) ($section->type ?? '');
@@ -52,9 +73,10 @@ final class SiteSectionDocument
     public static function toSectionData(array $document, ?array $legacyContent = null, ?array $legacySettings = null): array
     {
         $document = BuilderDocument::normalize($document);
+        $storageDocument = self::compactLegacyPayload($document);
         $sections = [];
 
-        foreach ($document['nodes'] as $node) {
+        foreach ($document['nodes'] as $index => $node) {
             $legacy = $node['settings']['legacy'] ?? null;
 
             if (! is_array($legacy) || ! array_key_exists('type', $legacy)) {
@@ -69,7 +91,7 @@ final class SiteSectionDocument
             }
 
             $nodeSettings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
-            $nodeSettings['builder_document'] = $document;
+            $nodeSettings['builder_document'] = $storageDocument;
 
             $section = [
                 'site_page_id' => $legacy['site_page_id'] ?? null,
@@ -95,6 +117,22 @@ final class SiteSectionDocument
         return $sections;
     }
 
+    private static function compactLegacyPayload(array $document): array
+    {
+        foreach ($document['nodes'] as &$node) {
+            if (! is_array($node) || ($node['type'] ?? null) !== 'container') {
+                continue;
+            }
+
+            if (is_array($node['settings']['legacy'] ?? null)) {
+                unset($node['settings']['legacy']['content'], $node['settings']['legacy']['settings']);
+            }
+        }
+        unset($node);
+
+        return $document;
+    }
+
     private static function elements(SiteSection $section, string $containerId, array $content, array $settings): array
     {
         $elements = [];
@@ -111,11 +149,7 @@ final class SiteSectionDocument
         }
 
         if ($section->type === 'image' && is_string($content['url'] ?? null) && $content['url'] !== '') {
-            $elements[] = self::element('image', BuilderNodeId::stable('image', $containerId.':image'), [
-                'url' => $content['url'],
-                'alt' => is_string($content['alt'] ?? null) ? $content['alt'] : '',
-                'caption' => is_string($content['caption'] ?? null) ? $content['caption'] : '',
-            ], ['width' => 'full', 'radius' => 'none']);
+            $elements[] = self::element('image', BuilderNodeId::stable('image', $containerId.':image'), ['url' => $content['url'], 'alt' => is_string($content['alt'] ?? null) ? $content['alt'] : '', 'caption' => is_string($content['caption'] ?? null) ? $content['caption'] : ''], ['width' => 'full', 'radius' => 'none']);
         }
 
         $buttonLabel = $content['button_label'] ?? $content['label'] ?? null;
@@ -200,11 +234,6 @@ final class SiteSectionDocument
             return 'site-section:'.$section->getKey();
         }
 
-        return 'site-section:'.hash('sha256', serialize([
-            $section->site_page_id,
-            $section->type,
-            $section->label,
-            $section->sort_order,
-        ]));
+        return 'site-section:'.hash('sha256', serialize([$section->site_page_id, $section->type, $section->label, $section->sort_order]));
     }
 }
