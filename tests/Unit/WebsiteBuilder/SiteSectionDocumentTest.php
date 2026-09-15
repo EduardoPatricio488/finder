@@ -22,14 +22,15 @@ it('keeps ids stable for the same section', function (): void {
     expect(SiteSectionDocument::fromSection($section))->toBe(SiteSectionDocument::fromSection($section));
 });
 
-it('preserves unknown data and unknown section types through round trip', function (): void {
+it('preserves unknown data and stores the normalized v2 document alongside legacy data', function (): void {
     $section = new SiteSection(['site_page_id' => 3, 'type' => 'unknown_section_type', 'label' => 'Legacy', 'content' => ['custom_value' => 'keep', 'nested' => ['x' => true]], 'settings' => ['custom_setting' => 'keep'], 'sort_order' => 4, 'is_visible' => false]);
     $section->id = 123;
     $document = SiteSectionDocument::fromSection($section);
     $data = SiteSectionDocument::toSectionData($document);
     expect($document['nodes'][0]['settings']['section_type_known'])->toBeFalse()
         ->and($data[0]['content'])->toBe($section->content)
-        ->and($data[0]['settings'])->toBe($section->settings)
+        ->and($data[0]['settings'])->toMatchArray(['custom_setting' => 'keep'])
+        ->and($data[0]['settings']['builder_document'])->toBe($document)
         ->and($data[0]['type'])->toBe('unknown_section_type')
         ->and($data[0]['id'])->toBe(123);
 });
@@ -38,7 +39,7 @@ it('handles empty legacy data without inventing content', function (): void {
     $section = new SiteSection(['type' => 'text', 'content' => [], 'settings' => []]);
     $document = SiteSectionDocument::fromSection($section);
     $data = SiteSectionDocument::toSectionData($document);
-    expect(BuilderDocument::isValid($document))->toBeTrue()->and($document['nodes'][0]['children'])->toBe([])->and($data[0]['content'])->toBe([]);
+    expect(BuilderDocument::isValid($document))->toBeTrue()->and($document['nodes'][0]['children'])->toBe([])->and($data[0]['content'])->toBe([])->and($data[0]['settings']['builder_document'])->toBe($document);
 });
 
 it('rejects invalid v2 documents through the existing validator', function (): void {
