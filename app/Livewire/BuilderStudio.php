@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// @php-cs-fixer-ignore class_attributes_separation
+// @php-cs-fixer-ignore control_structure_braces
+
 namespace App\Livewire;
 
 use App\Models\Site;
@@ -226,7 +229,9 @@ class BuilderStudio extends Component
     {
         abort_unless(in_array($direction, ['up', 'down'], true), 422);
         $target = $direction === 'up' ? $index - 1 : $index + 1;
-        if (! isset($this->sections[$index], $this->sections[$target])) return;
+        if (! isset($this->sections[$index], $this->sections[$target])) {
+            return;
+        }
         [$this->sections[$index], $this->sections[$target]] = [$this->sections[$target], $this->sections[$index]];
         $this->selectedSection = $target;
         $this->dirty = true;
@@ -246,7 +251,9 @@ class BuilderStudio extends Component
         $slug = Str::slug($name) ?: 'nova-pagina';
         $base = $slug;
         $number = 2;
-        while ($this->site->pages()->where('slug', $slug)->exists()) $slug = $base.'-'.($number++);
+        while ($this->site->pages()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.($number++);
+        }
         $page = $this->site->pages()->create(['name' => Str::limit($name, 120, ''), 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1, 'seo' => []]);
         $this->loadPage($page->id);
     }
@@ -258,10 +265,14 @@ class BuilderStudio extends Component
         $slug = $source->slug.'-copia';
         $base = $slug;
         $number = 2;
-        while ($this->site->pages()->where('slug', $slug)->exists()) $slug = $base.'-'.($number++);
+        while ($this->site->pages()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.($number++);
+        }
         $page = DB::transaction(function () use ($source, $name, $slug): SitePage {
             $newPage = $this->site->pages()->create(['name' => $name, 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1, 'seo' => $source->seo]);
-            foreach ($source->sections as $section) $newPage->sections()->create(['type' => $section->type, 'label' => $section->label, 'content' => $section->content, 'settings' => $section->settings, 'sort_order' => $section->sort_order, 'is_visible' => $section->is_visible]);
+            foreach ($source->sections as $section) {
+                $newPage->sections()->create(['type' => $section->type, 'label' => $section->label, 'content' => $section->content, 'settings' => $section->settings, 'sort_order' => $section->sort_order, 'is_visible' => $section->is_visible]);
+            }
             return $newPage;
         });
         $this->loadPage($page->id);
@@ -291,7 +302,9 @@ class BuilderStudio extends Component
         $ids = array_values(array_map('intval', $ids));
         $pages = $this->site->pages()->whereIn('id', $ids)->get()->keyBy('id');
         abort_unless($pages->count() === count($ids), 422);
-        foreach ($ids as $index => $id) $pages[$id]->update(['sort_order' => $index]);
+        foreach ($ids as $index => $id) {
+            $pages[$id]->update(['sort_order' => $index]);
+        }
         $this->refreshPages();
     }
 
@@ -313,7 +326,9 @@ class BuilderStudio extends Component
             $this->site->pages()->each(fn (SitePage $page) => $page->delete());
             foreach ($definition['pages'] as $index => $pageDefinition) {
                 $page = $this->site->pages()->create(['name' => $pageDefinition['name'], 'slug' => $pageDefinition['slug'], 'status' => 'draft', 'is_homepage' => $index === 0, 'sort_order' => $index, 'seo' => ['title' => $pageDefinition['name'].' — '.$this->site->name]]);
-                foreach ($pageDefinition['sections'] as $sortOrder => $type) $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $sortOrder, 'is_visible' => true]);
+                foreach ($pageDefinition['sections'] as $sortOrder => $type) {
+                    $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $sortOrder, 'is_visible' => true]);
+                }
             }
         });
         $page = $this->site->pages()->where('is_homepage', true)->firstOrFail();
@@ -332,11 +347,15 @@ class BuilderStudio extends Component
             $this->site->pages()->each(fn (SitePage $page) => $page->delete());
             $order = 0;
             foreach ($pages as $slug => $sections) {
-                if (! is_array($sections)) continue;
+                if (! is_array($sections)) {
+                    continue;
+                }
                 $name = match ($slug) { 'home' => 'Home', 'about' => 'Sobre nós', 'services' => 'Serviços', 'contact' => 'Contactos', default => Str::headline((string) $slug) };
                 $page = $this->site->pages()->create(['name' => $name, 'slug' => Str::slug((string) $slug), 'status' => 'draft', 'is_homepage' => $order === 0, 'sort_order' => $order, 'seo' => ['title' => $name.' — '.$this->site->name]]);
                 foreach ($sections as $sortOrder => $section) {
-                    if (! is_array($section) || ! is_string($section['type'] ?? null)) continue;
+                    if (! is_array($section) || ! is_string($section['type'] ?? null)) {
+                        continue;
+                    }
                     $page->sections()->create(['type' => $section['type'], 'label' => $section['label'] ?? Str::headline($section['type']), 'content' => is_array($section['content'] ?? null) ? $section['content'] : [], 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => (int) $sortOrder, 'is_visible' => true]);
                 }
                 $order++;
@@ -394,7 +413,9 @@ class BuilderStudio extends Component
     private function sectionModel(int $index): SiteSection
     {
         $id = $this->sections[$index]['id'] ?? null;
-        if ($id) return $this->site->pages()->findOrFail($this->pageId)->sections()->findOrFail((int) $id);
+        if ($id) {
+            return $this->site->pages()->findOrFail($this->pageId)->sections()->findOrFail((int) $id);
+        }
         $section = new SiteSection($this->sections[$index]);
         $section->site_page_id = $this->pageId;
         return $section;
@@ -413,7 +434,9 @@ class BuilderStudio extends Component
     {
         return DB::transaction(function () use ($name, $slug, $home): SitePage {
             $page = $this->site->pages()->create(['name' => $name, 'slug' => $slug, 'status' => 'draft', 'is_homepage' => $home, 'sort_order' => 0, 'seo' => ['title' => $name.' — '.$this->site->name]]);
-            foreach (['hero', 'feature_grid', 'cta'] as $index => $type) $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
+            foreach (['hero', 'feature_grid', 'cta'] as $index => $type) {
+                $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
+            }
             return $page;
         });
     }
