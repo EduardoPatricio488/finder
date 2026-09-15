@@ -321,6 +321,7 @@ class ProductCatalog extends Component
         $minimumRating = (float) $this->minRating;
         $products = $this->siteScoped(Product::query())
             ->where('is_active', true)
+            ->when($this->availability === '', fn ($query) => $query->where('stock', '>', 0))
             ->with('category')
             ->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])
             ->withAvg('reviews', 'rating')
