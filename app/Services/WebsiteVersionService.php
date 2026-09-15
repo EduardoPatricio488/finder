@@ -21,7 +21,7 @@ final class WebsiteVersionService
                     'seo' => $site->seo ?? [],
                     'is_published' => (bool) $site->is_published,
                     'status' => $site->status,
-                    'published_at' => $site->published_at?->toISOString(),
+                    'published_at' => $site->getRawOriginal('published_at'),
                 ],
                 'pages' => $site->pages()->with('sections')->orderBy('sort_order')->get()->map(fn ($page): array => [
                     'name' => $page->name,
@@ -54,14 +54,11 @@ final class WebsiteVersionService
                 'snapshot' => $snapshot,
             ]);
 
-            $oldVersionIds = $site->versions()
+            $versionIds = $site->versions()
                 ->orderByDesc('version_number')
-                ->get(['id'])
-                ->skip(30)
                 ->pluck('id')
-                ->filter(static fn (mixed $id): bool => is_int($id) || is_string($id))
-                ->values()
                 ->all();
+            $oldVersionIds = array_slice($versionIds, 30);
 
             if ($oldVersionIds !== []) {
                 SiteVersion::query()->whereIn('id', $oldVersionIds)->delete();
