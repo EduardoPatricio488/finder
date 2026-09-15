@@ -49,7 +49,9 @@ document.addEventListener('livewire:navigated', () => {
         if (!section) return;
 
         // Do not hijack real controls or the builder's own action buttons.
-        if (target.closest('button, a, input, textarea, select, [contenteditable="true"]')) return;
+        // Editable visual elements are intentionally allowed through so that
+        // clicking text, images and other canvas elements selects their section.
+        if (target.closest('button, a, input, textarea, select')) return;
 
         const sections = [...document.querySelectorAll('.builder-section[data-section-id]')];
         const sectionIndex = sections.indexOf(section);
