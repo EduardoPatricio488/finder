@@ -49,3 +49,14 @@ it('updates, moves and removes elements without changing their ids', function ()
         ->and($document['nodes'][0]['children'][0]['id'])->toBe($heading)
         ->and(BuilderDocument::isValid($document))->toBeTrue();
 });
+
+it('does not fail when moving an element beyond its container boundary', function (): void {
+    $document = editorDocument();
+    $container = $document['nodes'][0]['id'];
+    $document = BuilderDocumentEditor::addElement($document, $container, 'heading');
+    $elementId = $document['nodes'][0]['children'][0]['id'];
+
+    $updated = BuilderDocumentEditor::moveElement($document, $elementId, -1);
+
+    expect($updated)->toEqual($document);
+});
