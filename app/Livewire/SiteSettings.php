@@ -31,6 +31,13 @@ class SiteSettings extends Component
 
     public bool $robotsIndex = true;
 
+    /**
+     * Kept as a backwards-compatible Livewire property so stale browser
+     * snapshots from an older SiteSettings version cannot trigger a 500.
+     * Contact form data belongs to PublicSite and is intentionally not saved here.
+     */
+    public string $contactName = '';
+
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
