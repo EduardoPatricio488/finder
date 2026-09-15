@@ -91,6 +91,8 @@ class PublicSite extends Component
                 'occurred_at' => now(),
             ]);
         }
+
+        return null;
     }
 
     public function submitContact(): void
