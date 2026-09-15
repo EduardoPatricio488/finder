@@ -16,7 +16,6 @@
 
         {{-- ============================= HERO ============================= --}}
         <div class="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-800 dark:bg-zinc-900">
-            {{-- decoração de fundo, puramente visual --}}
             <div class="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-indigo-500/10 blur-3xl dark:bg-indigo-500/10" aria-hidden="true"></div>
             <div class="pointer-events-none absolute -bottom-28 left-1/3 size-64 rounded-full bg-fuchsia-500/5 blur-3xl dark:bg-fuchsia-500/10" aria-hidden="true"></div>
 
@@ -34,13 +33,7 @@
                     </p>
                 </div>
 
-                <flux:button
-                    variant="primary"
-                    icon="plus"
-                    href="{{ route('site.create') }}"
-                    wire:navigate
-                    class="motion-safe:transition motion-safe:hover:-translate-y-0.5 shadow-lg shadow-indigo-500/20"
-                >
+                <flux:button variant="primary" icon="plus" href="{{ route('site.create') }}" wire:navigate class="motion-safe:transition motion-safe:hover:-translate-y-0.5 shadow-lg shadow-indigo-500/20">
                     Criar website
                 </flux:button>
             </div>
@@ -54,21 +47,13 @@
                 ['label' => 'Rascunhos', 'value' => $draftCount, 'icon' => 'pencil-square', 'accent' => 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-500/10'],
                 ['label' => 'Produtos', 'value' => $totalProducts, 'icon' => 'shopping-bag', 'accent' => 'text-fuchsia-600 bg-fuchsia-50 dark:text-fuchsia-400 dark:bg-fuchsia-500/10'],
             ] as $index => $stat)
-                <div
-                    class="dash-fade-up group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm motion-safe:transition motion-safe:duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
-                    style="animation-delay: {{ $index * 60 }}ms"
-                >
+                <div class="dash-fade-up group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm motion-safe:transition motion-safe:duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900" style="animation-delay: {{ $index * 60 }}ms">
                     <div class="pointer-events-none absolute -right-6 -top-6 size-20 rounded-full bg-zinc-50 motion-safe:transition motion-safe:duration-300 group-hover:scale-125 dark:bg-zinc-800/60" aria-hidden="true"></div>
-
                     <div class="relative flex items-center justify-between">
                         <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ $stat['label'] }}</span>
-                        <span class="flex size-9 items-center justify-center rounded-xl {{ $stat['accent'] }}">
-                            <flux:icon :name="$stat['icon']" class="size-4.5" />
-                        </span>
+                        <span class="flex size-9 items-center justify-center rounded-xl {{ $stat['accent'] }}"><flux:icon :name="$stat['icon']" class="size-4.5" /></span>
                     </div>
-                    <p class="relative mt-4 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
-                        {{ number_format($stat['value']) }}
-                    </p>
+                    <p class="relative mt-4 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">{{ number_format($stat['value']) }}</p>
                 </div>
             @endforeach
         </div>
@@ -86,104 +71,56 @@
             </div>
 
             @unless ($sites->isEmpty())
-                <flux:button
-                    variant="ghost"
-                    icon="plus"
-                    href="{{ route('site.create') }}"
-                    wire:navigate
-                    class="hidden sm:inline-flex"
-                >
+                <flux:button variant="ghost" icon="plus" href="{{ route('site.create') }}" wire:navigate class="hidden sm:inline-flex">
                     Novo website
                 </flux:button>
             @endunless
         </div>
 
         @if ($sites->isEmpty())
-            {{-- ============================= EMPTY STATE ============================= --}}
             <div class="relative mt-5 overflow-hidden rounded-3xl border border-dashed border-zinc-300 bg-white p-10 text-center sm:p-16 dark:border-zinc-700 dark:bg-zinc-900">
                 <div class="pointer-events-none absolute inset-0 -z-0" aria-hidden="true">
                     <div class="absolute left-1/2 top-0 h-40 w-[36rem] -translate-x-1/2 rounded-full bg-indigo-500/5 blur-3xl dark:bg-indigo-500/10"></div>
                 </div>
-
                 <div class="relative mx-auto flex max-w-md flex-col items-center">
-                    {{-- ilustração puramente visual, sem dados --}}
                     <div class="relative flex size-20 items-center justify-center">
                         <span class="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 opacity-10 motion-safe:animate-pulse" aria-hidden="true"></span>
-                        <span class="relative flex size-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm dark:bg-indigo-500/10 dark:text-indigo-400">
-                            <flux:icon name="globe-alt" class="size-7" />
-                        </span>
-                        <span class="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white dark:border-zinc-900" aria-hidden="true">
-                            <flux:icon name="plus" class="size-3.5" />
-                        </span>
+                        <span class="relative flex size-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm dark:bg-indigo-500/10 dark:text-indigo-400"><flux:icon name="globe-alt" class="size-7" /></span>
+                        <span class="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white dark:border-zinc-900" aria-hidden="true"><flux:icon name="plus" class="size-3.5" /></span>
                     </div>
-
                     <h3 class="mt-6 text-lg font-semibold text-zinc-950 dark:text-white">Ainda não tens nenhum website</h3>
-                    <p class="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-                        Escolhe um tipo e um template. O Finder cria a estrutura inicial para começares a editar.
-                    </p>
-
-                    <flux:button
-                        class="mt-7 motion-safe:transition motion-safe:hover:-translate-y-0.5 shadow-lg shadow-indigo-500/20"
-                        variant="primary"
-                        icon="plus"
-                        href="{{ route('site.create') }}"
-                        wire:navigate
-                    >
+                    <p class="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">Escolhe um tipo e um template. O Finder cria a estrutura inicial para começares a editar.</p>
+                    <flux:button class="mt-7 motion-safe:transition motion-safe:hover:-translate-y-0.5 shadow-lg shadow-indigo-500/20" variant="primary" icon="plus" href="{{ route('site.create') }}" wire:navigate>
                         Criar o meu primeiro website
                     </flux:button>
                 </div>
             </div>
         @else
-            {{-- ============================= CARDS DOS WEBSITES ============================= --}}
             <div class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($sites as $site)
-                    <article
-                        class="dash-fade-up group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm motion-safe:transition motion-safe:duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900"
-                        style="animation-delay: {{ $loop->index * 60 }}ms"
-                    >
-                        {{-- preview visual, sem screenshots reais --}}
+                    <article class="dash-fade-up group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm motion-safe:transition motion-safe:duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900" style="animation-delay: {{ $loop->index * 60 }}ms">
                         <div class="relative h-40 overflow-hidden bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500">
                             <div class="absolute inset-0 bg-black/10"></div>
-                            <div
-                                class="absolute inset-0 opacity-25 motion-safe:transition motion-safe:duration-300 group-hover:scale-105 group-hover:opacity-30"
-                                style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.6) 1px, transparent 0); background-size: 18px 18px;"
-                                aria-hidden="true"
-                            ></div>
-
+                            <div class="absolute inset-0 opacity-25 motion-safe:transition motion-safe:duration-300 group-hover:scale-105 group-hover:opacity-30" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.6) 1px, transparent 0); background-size: 18px 18px;" aria-hidden="true"></div>
                             <div class="relative flex h-full flex-col justify-between p-5">
                                 <div class="flex items-start justify-between gap-3">
                                     <span class="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-zinc-700 shadow-sm dark:bg-zinc-950/80 dark:text-zinc-200">
-                                        <span
-                                            class="size-1.5 rounded-full {{ $site->is_published ? 'bg-emerald-500' : 'bg-amber-500' }}"
-                                            aria-hidden="true"
-                                        ></span>
+                                        <span class="size-1.5 rounded-full {{ $site->is_published ? 'bg-emerald-500' : 'bg-amber-500' }}" aria-hidden="true"></span>
                                         {{ $site->is_published ? 'Publicado' : 'Rascunho' }}
                                     </span>
                                 </div>
-
                                 <div class="rounded-xl bg-white/15 px-3 py-2.5 text-white backdrop-blur">
-                                    <p class="text-xs font-medium uppercase tracking-wide text-white/80">
-                                        {{ ucfirst(str_replace('_', ' ', $site->type)) }}
-                                    </p>
+                                    <p class="text-xs font-medium uppercase tracking-wide text-white/80">{{ ucfirst(str_replace('_', ' ', $site->type)) }}</p>
                                     <p class="mt-0.5 truncate text-lg font-semibold">{{ $site->name }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex flex-1 flex-col p-5">
-                            <p class="line-clamp-2 min-h-10 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-                                {{ $site->description ?: 'Personaliza o teu website, adiciona páginas e publica quando estiveres pronto.' }}
-                            </p>
-
+                            <p class="line-clamp-2 min-h-10 text-sm leading-6 text-zinc-500 dark:text-zinc-400">{{ $site->description ?: 'Personaliza o teu website, adiciona páginas e publica quando estiveres pronto.' }}</p>
                             <div class="mt-4 flex gap-4 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                                <span class="inline-flex items-center gap-1.5">
-                                    <flux:icon name="document" class="size-3.5 text-zinc-400 dark:text-zinc-500" />
-                                    {{ $site->pages_count }} páginas
-                                </span>
-                                <span class="inline-flex items-center gap-1.5">
-                                    <flux:icon name="shopping-bag" class="size-3.5 text-zinc-400 dark:text-zinc-500" />
-                                    {{ $site->products_count }} produtos
-                                </span>
+                                <span class="inline-flex items-center gap-1.5"><flux:icon name="document" class="size-3.5 text-zinc-400 dark:text-zinc-500" />{{ $site->pages_count }} páginas</span>
+                                <span class="inline-flex items-center gap-1.5"><flux:icon name="shopping-bag" class="size-3.5 text-zinc-400 dark:text-zinc-500" />{{ $site->products_count }} produtos</span>
                             </div>
 
                             <div class="mt-5 flex gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
@@ -191,7 +128,6 @@
                                     class="flex-1"
                                     variant="ghost"
                                     href="{{ route('admin.site.dashboard', $site) }}"
-                                    wire:navigate
                                 >
                                     Gerir
                                 </flux:button>
