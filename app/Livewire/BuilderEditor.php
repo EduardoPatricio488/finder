@@ -225,10 +225,25 @@ class BuilderEditor extends Component
     public function addItem(int $sectionIndex): void
     {
         abort_unless(isset($this->sections[$sectionIndex]), 404);
-        $templates = ['feature_grid' => ['title' => 'Novo benefício', 'description' => 'Descreve este benefício.'], 'testimonials' => ['name' => 'Cliente', 'role' => 'Função', 'quote' => 'Escreve aqui o testemunho.', 'image' => ''], 'faq' => ['question' => 'Nova pergunta?', 'answer' => 'Escreve a resposta.'], 'gallery' => ['url' => '', 'alt' => '', 'caption' => ''], 'pricing' => ['name' => 'Novo plano', 'price' => '49 €', 'description' => 'Descrição do plano.', 'features' => ['Funcionalidade 1', 'Funcionalidade 2'], 'button_label' => 'Escolher', 'button_url' => '#'], 'blog_posts' => ['title' => 'Novo artigo', 'excerpt' => 'Resumo do artigo.', 'url' => '#', 'image' => ''], 'social_links' => ['label' => 'Nova rede', 'url' => '#']];
+        $templates = [
+            'feature_grid' => ['title' => 'Novo benefício', 'description' => 'Descreve este benefício.'],
+            'testimonials' => ['name' => 'Cliente', 'role' => 'Função', 'quote' => 'Escreve aqui o testemunho.', 'image' => ''],
+            'faq' => ['question' => 'Nova pergunta?', 'answer' => 'Escreve a resposta.'],
+            'gallery' => ['url' => '', 'alt' => '', 'caption' => ''],
+            'pricing' => ['name' => 'Novo plano', 'price' => '49 €', 'description' => 'Descrição do plano.', 'features' => ['Funcionalidade 1', 'Funcionalidade 2'], 'button_label' => 'Escolher', 'button_url' => '#'],
+            'blog_posts' => ['title' => 'Novo artigo', 'excerpt' => 'Resumo do artigo.', 'url' => '#', 'image' => ''],
+            'social_links' => ['label' => 'Nova rede', 'url' => '#'],
+        ];
         $type = $this->sections[$sectionIndex]['type'];
-        abort_unless(isset($templates[$type]), 422);
+        if (! isset($templates[$type])) {
+            $this->selectedSection = $sectionIndex;
+            $this->dispatch('builder-item-not-supported', section: $sectionIndex, type: $type);
+            return;
+        }
         $this->checkpoint();
+        if (! isset($this->sections[$sectionIndex]['content']['items']) || ! is_array($this->sections[$sectionIndex]['content']['items'])) {
+            $this->sections[$sectionIndex]['content']['items'] = [];
+        }
         $this->sections[$sectionIndex]['content']['items'][] = $templates[$type];
         $this->selectedSection = $sectionIndex;
         $this->markDirty();
