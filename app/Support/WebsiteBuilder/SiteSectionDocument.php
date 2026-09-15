@@ -50,7 +50,7 @@ final class SiteSectionDocument
         ]);
     }
 
-    public static function toSectionData(array $document): array
+    public static function toSectionData(array $document, ?array $legacyContent = null, ?array $legacySettings = null): array
     {
         $document = BuilderDocument::normalize($document);
         $sections = [];
@@ -62,15 +62,22 @@ final class SiteSectionDocument
                 throw new InvalidArgumentException('Document node does not contain SiteSection legacy metadata.');
             }
 
-            $legacySettings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
-            $legacySettings['builder_document'] = $document;
+            if ($legacyContent !== null) {
+                $legacy['content'] = $legacyContent;
+            }
+            if ($legacySettings !== null) {
+                $legacy['settings'] = $legacySettings;
+            }
+
+            $nodeSettings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
+            $nodeSettings['builder_document'] = $document;
 
             $section = [
                 'site_page_id' => $legacy['site_page_id'] ?? null,
                 'type' => (string) $legacy['type'],
                 'label' => $legacy['label'] ?? null,
                 'content' => is_array($legacy['content'] ?? null) ? $legacy['content'] : [],
-                'settings' => $legacySettings,
+                'settings' => $nodeSettings,
                 'sort_order' => (int) ($legacy['sort_order'] ?? 0),
                 'is_visible' => (bool) ($legacy['is_visible'] ?? true),
             ];
@@ -80,6 +87,10 @@ final class SiteSectionDocument
             }
 
             $sections[] = $section;
+        }
+
+        if ($legacyContent !== null || $legacySettings !== null) {
+            return $sections[0] ?? [];
         }
 
         return $sections;
