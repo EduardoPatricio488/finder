@@ -10,46 +10,50 @@ final class BuilderDocument
 {
     public const VERSION = 2;
 
-    public static function normalize(array $document): array
+    /**
+     * Normalize a Document v2 structure without silently converting legacy data.
+     * Missing node IDs are generated; existing valid IDs and user data are kept.
+     */
+    public static function normalize(array $input): array
     {
-        $version = $document['schema_version'] ?? null;
-        if ($version !== self::VERSION) {
-            throw new InvalidArgumentException('Unsupported builder document schema version.');
+        if (! array_key_exists('schema_version', $input)) {
+            throw new InvalidArgumentException('Document schema_version is required.');
         }
 
-        $nodes = $document['nodes'] ?? null;
-        if (! is_array($nodes)) {
-            throw new InvalidArgumentException('Builder documents require nodes.');
+        if ($input['schema_version'] !== self::VERSION) {
+            throw new InvalidArgumentException('Unsupported document schema version.');
         }
 
-        $normalized = [
+        if (array_key_exists('nodes', $input) && ! is_array($input['nodes'])) {
+            throw new InvalidArgumentException('Document nodes must be an array.');
+        }
+
+        $document = [
             'schema_version' => self::VERSION,
-            'nodes' => array_values(array_map(static fn (mixed $node): array => self::normalizeNode($node), $nodes)),
+            'nodes' => [],
         ];
 
-        self::validate($normalized);
+        foreach (($input['nodes'] ?? []) as $node) {
+            if (! is_array($node)) {
+                throw new InvalidArgumentException('Every document node must be an object-like array.');
+            }
 
-        return $normalized;
-    }
-
-    public static function isValid(array $document): bool
-    {
-        try {
-            self::validate($document);
-
-            return true;
-        } catch (InvalidArgumentException) {
-            return false;
+            $document['nodes'][] = self::normalizeContainer($node, $document['nodes']);
         }
+
+        self::validate($document);
+
+        return $document;
     }
 
     public static function validate(array $document): void
     {
         if (($document['schema_version'] ?? null) !== self::VERSION) {
-            throw new InvalidArgumentException('Unsupported builder document schema version.');
+            throw new InvalidArgumentException('Unsupported or missing document schema version.');
         }
+
         if (! isset($document['nodes']) || ! is_array($document['nodes'])) {
-            throw new InvalidArgumentException('Builder documents require nodes.');
+            throw new InvalidArgumentException('Document nodes must be an array.');
         }
 
         $ids = [];
@@ -58,63 +62,129 @@ final class BuilderDocument
         }
     }
 
-    private static function normalizeNode(mixed $node): array
+    public static function isValid(mixed $document): bool
     {
-        if (! is_array($node)) {
-            throw new InvalidArgumentException('Builder document nodes must be arrays.');
+        if (! is_array($document)) {
+            return false;
         }
 
+        try {
+            self::validate($document);
+        } catch (InvalidArgumentException) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** @param array<int, array<string, mixed>> $siblings */
+    private static function normalizeContainer(array $node, array $siblings): array
+    {
         $type = $node['type'] ?? null;
-        if (! is_string($type)) {
-            throw new InvalidArgumentException('Builder document nodes require a type.');
+        if ($type !== 'container') {
+            throw new InvalidArgumentException('Document root nodes must be containers.');
         }
 
-        if ($type === 'container') {
-            $normalized = [
-                'id' => is_string($node['id'] ?? null) ? $node['id'] : BuilderNodeId::generate('container'),
-                'type' => 'container',
-                'settings' => is_array($node['settings'] ?? null) ? $node['settings'] : [],
-                'children' => array_values(array_map(static fn (mixed $child): array => self::normalizeNode($child), is_array($node['children'] ?? null) ? $node['children'] : [])),
-            ];
-
-            return $normalized;
+        $id = $node['id'] ?? BuilderNodeId::generate('container');
+        if (! is_string($id) || ! BuilderNodeId::isValid($id, 'container')) {
+            throw new InvalidArgumentException('Container node IDs are invalid.');
         }
 
-        $defaults = ElementRegistry::defaults($type);
-        $content = is_array($node['content'] ?? null) ? $node['content'] : [];
-        $settings = is_array($node['settings'] ?? null) ? $node['settings'] : [];
+        $settings = $node['settings'] ?? [];
+        if (! is_array($settings)) {
+            throw new InvalidArgumentException('Container settings must be an array.');
+        }
+
+        $children = $node['children'] ?? [];
+        if (! is_array($children)) {
+            throw new InvalidArgumentException('Container children must be an array.');
+        }
+
+        $normalized = [
+            'id' => $id,
+            'type' => 'container',
+            'settings' => $settings,
+            'children' => [],
+        ];
+
+        foreach ($children as $child) {
+            if (! is_array($child)) {
+                throw new InvalidArgumentException('Container children must be objects.');
+            }
+
+            $normalized['children'][] = self::normalizeElement($child);
+        }
+
+        return $normalized;
+    }
+
+    private static function normalizeElement(array $node): array
+    {
+        $type = $node['type'] ?? null;
+        if (! is_string($type) || ! ElementRegistry::has($type)) {
+            throw new InvalidArgumentException('Unknown document element type.');
+        }
+
+        $id = $node['id'] ?? BuilderNodeId::generate($type);
+        if (! is_string($id) || ! BuilderNodeId::isValid($id, $type)) {
+            throw new InvalidArgumentException('Element node IDs are invalid.');
+        }
+
+        $content = $node['content'] ?? ElementRegistry::get($type)['default_content'];
+        $settings = $node['settings'] ?? ElementRegistry::get($type)['default_settings'];
+
+        if (! is_array($content) || ! is_array($settings)) {
+            throw new InvalidArgumentException('Element content and settings must be arrays.');
+        }
 
         return [
-            'id' => is_string($node['id'] ?? null) ? $node['id'] : BuilderNodeId::generate($type),
+            'id' => $id,
             'type' => $type,
-            'content' => array_replace($defaults['content'], $content),
-            'settings' => array_replace($defaults['settings'], $settings),
+            'content' => $content,
+            'settings' => $settings,
         ];
     }
 
+    /** @param array<string, bool> $ids */
     private static function validateNode(mixed $node, ?string $parentType, array &$ids): void
     {
         if (! is_array($node)) {
-            throw new InvalidArgumentException('Builder document nodes must be arrays.');
+            throw new InvalidArgumentException('Document nodes must be arrays.');
         }
 
-        $type = $node['type'] ?? null;
         $id = $node['id'] ?? null;
-        if (! is_string($type) || ! is_string($id)) {
-            throw new InvalidArgumentException('Builder document nodes require type and id.');
+        $type = $node['type'] ?? null;
+
+        if (! is_string($id) || ! is_string($type)) {
+            throw new InvalidArgumentException('Every node requires a string id and type.');
         }
+
         if (isset($ids[$id])) {
-            throw new InvalidArgumentException('Builder document contains duplicate node IDs.');
+            throw new InvalidArgumentException('Document node IDs must be unique.');
         }
         $ids[$id] = true;
 
         if ($type === 'container') {
+            if ($parentType !== null) {
+                throw new InvalidArgumentException('Containers cannot be nested inside another node.');
+            }
+
             if (! BuilderNodeId::isValid($id, 'container')) {
-                throw new InvalidArgumentException('Container node ID is invalid.');
+                throw new InvalidArgumentException('Container node ID does not match its type.');
             }
-            if (! is_array($node['settings'] ?? null) || ! is_array($node['children'] ?? null)) {
-                throw new InvalidArgumentException('Container nodes require settings and children arrays.');
+
+            if (isset($node['content'])) {
+                throw new InvalidArgumentException('Containers cannot define element content.');
             }
+
+            if (! isset($node['settings']) || ! is_array($node['settings'])) {
+                throw new InvalidArgumentException('Containers require an array of settings.');
+            }
+
+            if (! isset($node['children']) || ! is_array($node['children'])) {
+                throw new InvalidArgumentException('Containers require an array of children.');
+            }
+
             foreach ($node['children'] as $child) {
                 self::validateNode($child, 'container', $ids);
             }
@@ -122,12 +192,10 @@ final class BuilderDocument
             return;
         }
 
-        if (! ElementRegistry::has($type)) {
-            throw new InvalidArgumentException("Unknown website element type [{$type}].");
+        if ($parentType !== 'container' || ! ElementRegistry::has($type)) {
+            throw new InvalidArgumentException('Elements must be registered children of a container.');
         }
-        if ($parentType !== 'container') {
-            throw new InvalidArgumentException('Elements must belong to a container.');
-        }
+
         if (! BuilderNodeId::isValid($id, $type)) {
             throw new InvalidArgumentException('Element node ID does not match its type.');
         }
@@ -136,9 +204,11 @@ final class BuilderDocument
         if (! in_array($parentType, $definition['allowed_parents'], true)) {
             throw new InvalidArgumentException('Element parent is not allowed.');
         }
+
         if (! isset($node['content']) || ! is_array($node['content'])) {
             throw new InvalidArgumentException('Elements require an array of content.');
         }
+
         if (! isset($node['settings']) || ! is_array($node['settings'])) {
             throw new InvalidArgumentException('Elements require an array of settings.');
         }
@@ -156,6 +226,7 @@ final class BuilderDocument
         if ($schema === [] || $schema === 'legacy-section-content' || $schema === 'legacy-section-settings') {
             return;
         }
+
         if (! is_array($schema)) {
             return;
         }
