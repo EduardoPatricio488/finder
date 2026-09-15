@@ -10,7 +10,7 @@
             <a href="{{ route('dashboard') }}" class="rounded-xl px-2 py-2 text-sm font-semibold hover:bg-slate-100">← <span class="hidden sm:inline">Dashboard</span></a>
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2"><b class="truncate">{{ $site->name }}</b><span class="rounded-full px-2 py-0.5 text-[11px] font-bold {{ $site->is_published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $site->is_published ? 'Online' : 'Rascunho' }}</span></div>
-                <div class="truncate text-xs text-slate-500">{{ $currentPage()['name'] ?? 'Página' }} · {{ $statusMessage }}</div>
+                <div class="truncate text-xs text-slate-500">{{ $this->currentPage()['name'] ?? 'Página' }} · {{ $statusMessage }}</div>
             </div>
             <div class="hidden rounded-xl border bg-slate-50 p-1 md:flex">
                 @foreach(['desktop'=>'Computador','tablet'=>'Tablet','mobile'=>'Telemóvel'] as $key=>$label)
@@ -66,7 +66,7 @@
         <main class="min-w-0 overflow-auto bg-slate-100">
             <div class="flex items-center justify-between border-b bg-white px-4 py-2 lg:hidden"><select wire:change="loadPage($event.target.value)" class="rounded-lg border-slate-200 text-sm font-bold">@foreach($pages as $page)<option value="{{ $page['id'] }}" @selected($pageId===$page['id'])>{{ $page['name'] }}</option>@endforeach</select><div class="flex gap-1">@foreach(['desktop','tablet','mobile'] as $key)<button wire:click="$set('device','{{ $key }}')" class="rounded-lg px-2 py-1 text-xs {{ $device===$key?'bg-slate-900 text-white':'bg-slate-100' }}">{{ ucfirst($key) }}</button>@endforeach</div></div>
             <div class="flex min-h-[calc(100vh-7rem)] justify-center p-4 md:p-8"><div class="w-full overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 {{ $device === 'mobile' ? 'max-w-[390px]' : ($device === 'tablet' ? 'max-w-[768px]' : 'max-w-[1280px]') }}" style="--finder-primary:{{ $theme['primary'] ?? '#635bff' }};--finder-secondary:{{ $theme['secondary'] ?? '#111827' }};--finder-bg:{{ $theme['background'] ?? '#ffffff' }};--finder-text:{{ $theme['text'] ?? '#111827' }}">
-                <div class="flex items-center justify-between border-b px-5 py-3 text-xs text-slate-400"><span>{{ $currentPage()['name'] ?? 'Página' }}</span><span>{{ ucfirst($device) }}</span></div>
+                <div class="flex items-center justify-between border-b px-5 py-3 text-xs text-slate-400"><span>{{ $this->currentPage()['name'] ?? 'Página' }}</span><span>{{ ucfirst($device) }}</span></div>
                 @forelse($sections as $i=>$section)
                     @php($sectionModel = new SiteSection($section))
                     @php($document = SiteSectionDocument::fromSection($sectionModel))
@@ -74,7 +74,7 @@
                         <div class="absolute right-3 top-3 z-20 hidden gap-1 rounded-xl border bg-white p-1 shadow-lg group-hover:flex"><button wire:click.stop="moveSection({{ $i }},'up')">↑</button><button wire:click.stop="moveSection({{ $i }},'down')">↓</button><button wire:click.stop="duplicateSection({{ $i }})">⧉</button><button wire:click.stop="toggleSection({{ $i }})">{{ $section['is_visible'] ? '◌' : '●' }}</button><button wire:click.stop="deleteSection({{ $i }})" class="text-red-600">×</button></div>
                         <div class="min-h-28 px-6 py-10 md:px-12">
                             @if(is_array($section['settings']['builder_document'] ?? null))
-                                @include('livewire.builder-document-renderer', ['document' => $section['settings']['builder_document']])
+                                @include('livewire.builder-document-renderer', ['document' => $section['settings']['builder_document'], 'device' => $device])
                             @else
                                 @switch($section['type'])
                                     @case('hero')<div class="mx-auto max-w-3xl text-center"><h1 class="text-4xl font-black tracking-tight md:text-6xl">{{ $section['content']['title'] ?? 'Título principal' }}</h1><p class="mt-4 text-lg text-slate-600">{{ $section['content']['subtitle'] ?? '' }}</p><span class="mt-7 inline-block rounded-xl px-5 py-3 text-sm font-bold text-white" style="background:var(--finder-primary)">{{ $section['content']['button_label'] ?? 'Saber mais' }}</span></div>@break
