@@ -97,6 +97,7 @@ class Site extends Model
         return $this->hasOne(StoreConfig::class);
     }
 
+    /** @return HasMany<SitePage, $this> */
     public function pages(): HasMany
     {
         return $this->hasMany(SitePage::class)->orderBy('sort_order');
@@ -122,6 +123,7 @@ class Site extends Model
         return $this->hasMany(SiteAdminAuditLog::class);
     }
 
+    /** @return HasMany<SiteVersion, $this> */
     public function versions(): HasMany
     {
         return $this->hasMany(SiteVersion::class)->orderByDesc('version_number');
