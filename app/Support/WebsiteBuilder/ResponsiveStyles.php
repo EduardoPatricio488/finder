@@ -33,13 +33,16 @@ final class ResponsiveStyles
         if (! in_array($key, self::ALLOWED_KEYS, true)) {
             return;
         }
+
         if (! isset($settings['responsive']) || ! is_array($settings['responsive'])) {
             $settings['responsive'] = [];
         }
+
         $bucket = $device === 'desktop' ? 'base' : $device;
         if (! isset($settings['responsive'][$bucket]) || ! is_array($settings['responsive'][$bucket])) {
             $settings['responsive'][$bucket] = [];
         }
+
         $settings['responsive'][$bucket][$key] = self::sanitizeValue($key, $value);
     }
 
@@ -48,6 +51,7 @@ final class ResponsiveStyles
     {
         $styles = self::forDevice($settings, $device);
         $css = [];
+
         foreach (['font_size' => 'font-size', 'padding' => 'padding', 'margin' => 'margin', 'width' => 'width', 'align' => 'text-align'] as $key => $property) {
             $value = $styles[$key] ?? null;
             if (is_string($value) && $value !== '') {
@@ -57,9 +61,11 @@ final class ResponsiveStyles
                 }
             }
         }
+
         if (($styles['visibility'] ?? null) === 'hidden') {
             $css['display'] = 'none';
         }
+
         return $css;
     }
 
@@ -73,9 +79,11 @@ final class ResponsiveStyles
         if ($key === 'visibility') {
             return in_array($value, ['visible', 'hidden'], true) ? $value : 'visible';
         }
+
         if ($key === 'align') {
             return in_array($value, ['left', 'center', 'right'], true) ? $value : 'left';
         }
+
         return is_scalar($value) ? mb_substr((string) $value, 0, 100) : '';
     }
 
@@ -84,6 +92,7 @@ final class ResponsiveStyles
         if ($key === 'align') {
             return in_array($value, ['left', 'center', 'right'], true) ? $value : '';
         }
+
         return preg_match('/^(?:0|auto|none|(?:-?[0-9]+(?:\.[0-9]+)?)(?:px|rem|em|%|vw|vh))$/', trim($value)) === 1 ? trim($value) : '';
     }
 }
