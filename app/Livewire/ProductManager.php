@@ -27,7 +27,6 @@ class ProductManager extends Component
     public $image;
     public $products = [];
     public $categories = [];
-
     public string $pageBackgroundColor = '#f7f4ee';
     public string $pageTextColor = '#1c1917';
     public string $pageAccentColor = '#f59e0b';
@@ -49,14 +48,9 @@ class ProductManager extends Component
                 return;
             }
         }
-
         $site = $this->currentSite();
         $settings = $site->settings ?? [];
-        $settings['products_page'] = [
-            'background' => strtolower($this->pageBackgroundColor),
-            'text' => strtolower($this->pageTextColor),
-            'accent' => strtolower($this->pageAccentColor),
-        ];
+        $settings['products_page'] = ['background' => strtolower($this->pageBackgroundColor), 'text' => strtolower($this->pageTextColor), 'accent' => strtolower($this->pageAccentColor)];
         $site->settings = $settings;
         $site->save();
         session()->flash('status', 'Cores da página de produtos guardadas com sucesso.');
@@ -70,16 +64,15 @@ class ProductManager extends Component
         $this->categoryId = $product->category_id;
         $this->description = $product->description ?? '';
         $this->price = (string) $product->price;
-        $this->isActive = $product->is_active;
-        $this->stock = $product->stock;
-        $this->minimumStock = $product->minimum_stock;
+        $this->isActive = (bool) $product->is_active;
+        $this->stock = (int) $product->stock;
+        $this->minimumStock = (int) $product->minimum_stock;
         $this->image = null;
     }
 
     public function save(): void
     {
-        $site = $this->currentSite();
-        $validated = $this->validate([
+        $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'categoryId' => ['required', 'integer', 'exists:categories,id'],
             'description' => ['nullable', 'string'],
@@ -89,29 +82,14 @@ class ProductManager extends Component
             'minimumStock' => ['required', 'integer', 'min:0'],
             'image' => ['nullable', 'image', 'max:2048'],
         ]);
-
-        abort_unless($site->categories()->whereKey($validated['categoryId'])->exists(), 404);
-        $product = $this->editingProductId === null
-            ? new Product(['site_id' => $site->id])
-            : $site->products()->findOrFail($this->editingProductId);
+        $site = $this->currentSite();
+        abort_unless($site->categories()->whereKey($data['categoryId'])->exists(), 404);
+        $product = $this->editingProductId ? $site->products()->findOrFail($this->editingProductId) : new Product(['site_id' => $site->id]);
         $oldImage = $product->image_url;
-        $product->fill([
-            'category_id' => $validated['categoryId'],
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'description' => $validated['description'],
-            'price' => $validated['price'],
-            'is_active' => $validated['isActive'],
-            'stock' => $validated['stock'],
-            'minimum_stock' => $validated['minimumStock'],
-        ]);
-        if ($this->image !== null) {
-            $product->image_url = $this->image->store('products', 'public');
-        }
+        $product->fill(['category_id' => $data['categoryId'], 'name' => $data['name'], 'slug' => Str::slug($data['name']), 'description' => $data['description'], 'price' => $data['price'], 'is_active' => $data['isActive'], 'stock' => $data['stock'], 'minimum_stock' => $data['minimumStock']]);
+        if ($this->image !== null) $product->image_url = $this->image->store('products', 'public');
         $product->save();
-        if ($oldImage !== null && $this->image !== null) {
-            Storage::disk('public')->delete($oldImage);
-        }
+        if ($oldImage && $this->image !== null) Storage::disk('public')->delete($oldImage);
         $this->resetForm();
         $this->loadData();
         session()->flash('status', 'Produto guardado com sucesso.');
@@ -122,9 +100,7 @@ class ProductManager extends Component
         $product = $this->currentSite()->products()->findOrFail($productId);
         $image = $product->image_url;
         $product->delete();
-        if ($image !== null) {
-            Storage::disk('public')->delete($image);
-        }
+        if ($image) Storage::disk('public')->delete($image);
         $this->loadData();
         session()->flash('status', 'Produto eliminado com sucesso.');
     }
@@ -145,6 +121,6 @@ class ProductManager extends Component
 
     public function render(): mixed
     {
-        return view('components.⚡product-manager');
+        return view('livewire.product-manager');
     }
 }
