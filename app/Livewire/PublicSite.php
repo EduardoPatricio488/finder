@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Site;
 use App\Models\SiteAnalyticsEvent;
 use App\Models\SitePage;
+use App\Models\SiteSection;
 use App\Models\SiteSubmission;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -46,10 +47,37 @@ class PublicSite extends Component
         }
 
         $this->site = $site->load(['menus.items.children.page', 'pages.sections', 'products']);
-        $this->page = $pageSlug
-            ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
-            : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
-                ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail());
+
+        if ($this->site->pages->isEmpty()) {
+            abort_if(! $this->preview, 404);
+
+            $fallbackPage = new SitePage([
+                'name' => 'Home',
+                'slug' => 'home',
+                'status' => 'draft',
+                'is_homepage' => true,
+                'sort_order' => 0,
+            ]);
+            $fallbackPage->setRelation('sections', collect([
+                new SiteSection([
+                    'type' => 'hero',
+                    'label' => 'Destaque principal',
+                    'content' => [
+                        'title' => $this->site->name,
+                        'subtitle' => $this->site->tagline,
+                    ],
+                    'settings' => [],
+                    'is_visible' => true,
+                    'sort_order' => 0,
+                ]),
+            ]));
+            $this->page = $fallbackPage;
+        } else {
+            $this->page = $pageSlug
+                ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
+                : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
+                    ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail());
+        }
 
         if (! $this->preview) {
             SiteAnalyticsEvent::create([
