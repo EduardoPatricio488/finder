@@ -6,6 +6,7 @@ use App\Livewire\BuilderStudio;
 use App\Models\Site;
 use App\Models\SitePage;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -75,7 +76,7 @@ test('builder studio keeps page and section mutations scoped to the current site
     $this->actingAs($owner);
     $component = Livewire::test(BuilderStudio::class, ['site' => $site]);
 
-    expect(fn () => $component->call('loadPage', $otherPage->id))->toThrow(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+    expect(fn () => $component->call('loadPage', $otherPage->id))->toThrow(ModelNotFoundException::class);
     expect($page->fresh()->site_id)->toBe($site->id);
 });
 
