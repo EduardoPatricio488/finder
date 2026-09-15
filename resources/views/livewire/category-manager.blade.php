@@ -12,32 +12,39 @@
     @endif
 
     <form wire:submit="save" class="rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div class="flex flex-col gap-3 sm:flex-row">
-            <div class="min-w-0 flex-1">
-                <label for="category-name" class="sr-only">Nome da categoria</label>
-                <input
-                    id="category-name"
-                    wire:model.live="categoryName"
-                    type="text"
-                    maxlength="255"
-                    autocomplete="off"
-                    placeholder="Nome da categoria"
-                    class="w-full rounded-lg border-stone-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                >
-                @error('categoryName')
-                    <p class="mt-2 text-sm text-red-600" role="alert">{{ $message }}</p>
-                @enderror
-            </div>
+        <div class="space-y-2">
+            <label for="category-name" class="block text-sm font-medium text-stone-700 dark:text-zinc-200">
+                Nome da categoria
+            </label>
 
-            <button
-                type="submit"
-                wire:loading.attr="disabled"
-                wire:target="save"
-                class="rounded-lg bg-stone-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
-            >
-                <span wire:loading.remove wire:target="save">Adicionar categoria</span>
-                <span wire:loading wire:target="save">A adicionar...</span>
-            </button>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div class="min-w-0 flex-1">
+                    <input
+                        id="category-name"
+                        name="categoryName"
+                        wire:model="categoryName"
+                        type="text"
+                        maxlength="255"
+                        autocomplete="off"
+                        placeholder="Ex.: Roupa, Calçado, Acessórios..."
+                        class="block min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:focus:border-zinc-500 dark:focus:ring-zinc-800"
+                    >
+
+                    @error('categoryName')
+                        <p class="mt-2 text-sm text-red-600" role="alert">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <button
+                    type="submit"
+                    wire:loading.attr="disabled"
+                    wire:target="save"
+                    class="min-h-11 shrink-0 rounded-lg bg-stone-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                >
+                    <span wire:loading.remove wire:target="save">Adicionar categoria</span>
+                    <span wire:loading wire:target="save">A adicionar...</span>
+                </button>
+            </div>
         </div>
     </form>
 
