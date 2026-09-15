@@ -58,9 +58,12 @@ final class WebsiteVersionService
                 ->orderByDesc('version_number')
                 ->get(['id'])
                 ->skip(30)
-                ->pluck('id');
+                ->pluck('id')
+                ->filter(static fn (mixed $id): bool => is_int($id) || is_string($id))
+                ->values()
+                ->all();
 
-            if ($oldVersionIds->isNotEmpty()) {
+            if ($oldVersionIds !== []) {
                 SiteVersion::query()->whereIn('id', $oldVersionIds)->delete();
             }
 
