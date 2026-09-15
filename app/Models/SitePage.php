@@ -27,6 +27,7 @@ class SitePage extends Model
         return $this->belongsTo(Site::class);
     }
 
+    /** @return HasMany<SiteSection, $this> */
     public function sections(): HasMany
     {
         return $this->hasMany(SiteSection::class)->orderBy('sort_order');
