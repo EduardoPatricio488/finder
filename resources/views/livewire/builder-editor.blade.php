@@ -24,9 +24,9 @@
     }"
     x-on:builder-dirty.window="queueAutosave()"
     x-on:builder-saved.window="autosaveLabel = 'Guardado'"
-    class="flex min-h-screen flex-col bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100"
+    class="flex h-screen min-h-0 flex-col overflow-hidden bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100"
 >
-    <header class="sticky top-0 z-40 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
+    <header class="z-40 shrink-0 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
         <div class="flex min-h-16 items-center gap-3 px-4 lg:px-6">
             <a href="{{ route('admin.site.dashboard', $site) }}" class="shrink-0 rounded-xl border border-zinc-200 px-3 py-2 text-sm font-bold hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">← Sair</a>
             <div class="hidden min-w-0 lg:block"><p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">Finder · Website Builder</p><p class="truncate text-sm font-black">{{ $site->name }}</p></div>
@@ -47,8 +47,8 @@
         </div>
     </header>
 
-    <div class="flex min-h-0 flex-1">
-        <aside class="builder-scroll hidden w-72 shrink-0 overflow-y-auto border-r border-zinc-200 bg-white lg:block dark:border-zinc-800 dark:bg-zinc-900">
+    <div class="flex min-h-0 flex-1 overflow-hidden">
+        <aside class="builder-scroll hidden h-full w-72 shrink-0 overflow-y-auto overscroll-contain border-r border-zinc-200 bg-white lg:block dark:border-zinc-800 dark:bg-zinc-900">
             <div class="border-b border-zinc-100 p-5 dark:border-zinc-800">
                 <p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">1 · Adicionar</p>
                 <h2 class="mt-1 text-lg font-black">Construir página</h2>
@@ -75,7 +75,7 @@
             </div>
         </aside>
 
-        <main class="min-w-0 flex-1 overflow-y-auto">
+        <main class="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain">
             <div class="border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
                 <div class="mx-auto flex max-w-[1440px] flex-wrap items-center gap-3">
                     <div class="min-w-0 flex-1"><div class="flex items-center gap-2"><input wire:model.live.debounce.500ms="pageName" aria-label="Nome da página" class="min-w-0 border-0 bg-transparent p-0 text-lg font-black outline-none focus:ring-0"><span class="rounded-full px-2 py-1 text-[9px] font-black uppercase {{ $pageStatus === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $pageStatus === 'published' ? 'Publicada' : 'Rascunho' }}</span></div><p class="text-xs text-zinc-400">/{{ trim($pageSlug, '/') }}</p></div>
@@ -124,9 +124,9 @@
                                     @elseif($section['type'] === 'cta')
                                         <div class="rounded-3xl p-8 text-center sm:p-14" style="background: {{ $theme['background'] ?? '#f4f4f5' }}"><h2 class="text-3xl font-black">{{ $content['title'] ?? 'Pronto para começar?' }}</h2><p class="mx-auto mt-3 max-w-2xl text-zinc-500">{{ $content['description'] ?? '' }}</p><span class="mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-black text-white" style="background: {{ $theme['primary'] ?? '#635bff' }}">{{ $content['button_label'] ?? 'Começar' }}</span></div>
                                     @elseif(in_array($section['type'], ['feature_grid','card','testimonials','faq','pricing','gallery','product_grid','product_card','blog_posts','social_links'], true))
-                                        <div><h2 class="text-center text-3xl font-black">{{ $content['title'] ?? Str::headline($section['type']) }}</h2>@if(!empty($content['description']))<p class="mx-auto mt-3 max-w-2xl text-center text-zinc-500">{{ $content['description'] }}</p>@endif<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">@forelse($items as $item)<div class="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-700"><p class="font-black">{{ $item['title'] ?? $item['name'] ?? $item['question'] ?? $item['label'] ?? 'Item' }}</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ $item['description'] ?? $item['quote'] ?? $item['answer'] ?? $item['excerpt'] ?? $item['price'] ?? '' }}</p></div>@empty<div class="col-span-full rounded-2xl border-2 border-dashed border-zinc-200 py-12 text-center text-sm text-zinc-400">Ainda não existem itens nesta secção.</div>@endforelse</div></div>
+                                        <div><h2 class="text-center text-3xl font-black">{{ $content['title'] ?? \Illuminate\Support\Str::headline($section['type']) }}</h2>@if(!empty($content['description']))<p class="mx-auto mt-3 max-w-2xl text-center text-zinc-500">{{ $content['description'] }}</p>@endif<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">@forelse($items as $item)<div class="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-700"><p class="font-black">{{ $item['title'] ?? $item['name'] ?? $item['question'] ?? $item['label'] ?? 'Item' }}</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ $item['description'] ?? $item['quote'] ?? $item['answer'] ?? $item['excerpt'] ?? $item['price'] ?? '' }}</p></div>@empty<div class="col-span-full rounded-2xl border-2 border-dashed border-zinc-200 py-12 text-center text-sm text-zinc-400">Ainda não existem itens nesta secção.</div>@endforelse</div></div>
                                     @else
-                                        <div class="mx-auto max-w-3xl text-center"><h2 class="text-3xl font-black">{{ $content['title'] ?? Str::headline($section['type']) }}</h2><p class="mt-4 text-zinc-500">{{ $content['description'] ?? $content['body'] ?? $content['address'] ?? 'Personaliza esta secção no painel da direita.' }}</p></div>
+                                        <div class="mx-auto max-w-3xl text-center"><h2 class="text-3xl font-black">{{ $content['title'] ?? \Illuminate\Support\Str::headline($section['type']) }}</h2><p class="mt-4 text-zinc-500">{{ $content['description'] ?? $content['body'] ?? $content['address'] ?? 'Personaliza esta secção no painel da direita.' }}</p></div>
                                     @endif
                                 </div>
                             </section>
@@ -138,41 +138,54 @@
             </div>
         </main>
 
-        <aside class="builder-scroll hidden w-80 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white lg:block dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="border-b border-zinc-100 p-4 dark:border-zinc-800"><p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">3 · Personalizar</p><h2 class="mt-1 font-black">{{ $sections[$selectedSection ?? 0]['label'] ?? 'Elemento seleccionado' }}</h2><p class="mt-1 text-xs leading-5 text-zinc-500">Altera o conteúdo aqui ou edita directamente no website.</p></div>
-            <div class="space-y-6 p-4">
-                @php($sIndex=$selectedSection ?? 0)
-                @if(isset($sections[$sIndex]))
-                    @php($s=$sections[$sIndex]) @php($c=$s['content']??[])
-                    <div><label class="text-xs font-bold">Nome interno</label><input wire:model.live="sections.{{ $sIndex }}.label" class="mt-2 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></div>
-                    @foreach(['title'=>'Título','subtitle'=>'Subtítulo','body'=>'Texto','description'=>'Descrição','button_label'=>'Texto do botão','button_url'=>'Ligação / URL','caption'=>'Legenda','alt'=>'Texto alternativo','address'=>'Morada','url'=>'URL'] as $field=>$label)
-                        @if(array_key_exists($field,$c))<div><label class="text-xs font-bold">{{ $label }}</label>@if(in_array($field,['body','description'],true))<textarea wire:model.live.debounce.300ms="sections.{{ $sIndex }}.content.{{ $field }}" rows="4" class="mt-2 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></textarea>@else<input wire:model.live.debounce.300ms="sections.{{ $sIndex }}.content.{{ $field }}" class="mt-2 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800">@endif</div>@endif
-                    @endforeach
-                    @if(isset($c['items']) && is_array($c['items']))
-                        <div class="border-t border-zinc-100 pt-5 dark:border-zinc-800"><div class="flex items-center justify-between"><div><p class="text-xs font-black">Itens</p><p class="mt-1 text-[10px] text-zinc-400">Adiciona e organiza conteúdos repetidos.</p></div><button type="button" wire:click="addItem({{ $sIndex }})" class="rounded-lg bg-indigo-50 px-2.5 py-1.5 text-[10px] font-bold text-indigo-700">+ Adicionar</button></div><div class="mt-3 space-y-3">@foreach($c['items'] as $itemIndex=>$item)<div class="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700"><div class="flex items-center justify-between"><span class="text-[10px] font-black text-zinc-400">Item {{ $itemIndex+1 }}</span><div class="flex gap-1"><button type="button" wire:click="moveItem({{ $sIndex }},{{ $itemIndex }},'up')" class="px-1 text-xs">↑</button><button type="button" wire:click="moveItem({{ $sIndex }},{{ $itemIndex }},'down')" class="px-1 text-xs">↓</button><button type="button" wire:click="removeItem({{ $sIndex }},{{ $itemIndex }})" class="px-1 text-xs text-red-600">×</button></div></div>@foreach($item as $key=>$value)@if(!is_array($value))<label class="mt-2 block text-[10px] font-bold text-zinc-500">{{ Str::headline($key) }}<input wire:model.live.debounce.300ms="sections.{{ $sIndex }}.content.items.{{ $itemIndex }}.{{ $key }}" class="mt-1 w-full rounded-lg border-zinc-200 text-xs dark:border-zinc-700 dark:bg-zinc-800"></label>@endif @endforeach</div>@endforeach</div></div>
+        <aside class="builder-scroll hidden h-full w-80 shrink-0 overflow-y-auto overscroll-contain border-l border-zinc-200 bg-white lg:block dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="border-b border-zinc-100 p-4 dark:border-zinc-800"><p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">3 · Personalizar</p><h2 class="mt-1 text-lg font-black">Inspector</h2><p class="mt-1 text-xs text-zinc-500">Seleciona uma secção para editar o conteúdo.</p></div>
+            @if($selectedSection !== null && isset($sections[$selectedSection]))
+                @php($selected=$sections[$selectedSection])
+                @php($selectedContent=$selected['content'] ?? [])
+                <div class="space-y-5 p-4">
+                    <div><p class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Secção</p><p class="mt-1 font-black">{{ \Illuminate\Support\Str::headline($selected['type']) }}</p></div>
+                    <div class="space-y-3">
+                        <label class="block"><span class="text-xs font-bold">Título</span><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.title" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>
+                        <label class="block"><span class="text-xs font-bold">Subtítulo</span><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.subtitle" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>
+                        <label class="block"><span class="text-xs font-bold">Descrição / texto</span><textarea wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.description" rows="5" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></textarea></label>
+                        <label class="block"><span class="text-xs font-bold">Texto do botão</span><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.button_label" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>
+                        <label class="block"><span class="text-xs font-bold">URL</span><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.url" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>
+                        <label class="block"><span class="text-xs font-bold">Imagem / URL</span><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.image" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>
+                        <label class="block"><span class="text-xs font-bold">Legenda</span><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.caption" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>
+                        <label class="block"><span class="text-xs font-bold">Alt da imagem</span><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.alt" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>
+                    </div>
+                    @if(!empty($selectedContent['items']) && is_array($selectedContent['items']))
+                        <div><div class="mb-2 flex items-center justify-between"><span class="text-xs font-black">Itens</span><button type="button" wire:click="addItem({{ $selectedSection }})" class="rounded-lg bg-zinc-950 px-2 py-1 text-[10px] font-bold text-white">+ Item</button></div><div class="space-y-2">@foreach($selectedContent['items'] as $itemIndex=>$item)<div class="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700"><input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.items.{{ $itemIndex }}.title" placeholder="Título" class="w-full rounded-lg border-zinc-200 text-xs dark:border-zinc-700 dark:bg-zinc-800"><textarea wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.items.{{ $itemIndex }}.description" placeholder="Descrição" rows="2" class="mt-2 w-full rounded-lg border-zinc-200 text-xs dark:border-zinc-700 dark:bg-zinc-800"></textarea><div class="mt-2 flex gap-1"><button type="button" wire:click="moveItem({{ $selectedSection }},{{ $itemIndex }},'up')" class="rounded border px-2 py-1 text-[10px]">↑</button><button type="button" wire:click="moveItem({{ $selectedSection }},{{ $itemIndex }},'down')" class="rounded border px-2 py-1 text-[10px]">↓</button><button type="button" wire:click="removeItem({{ $selectedSection }},{{ $itemIndex }})" class="ml-auto rounded border border-red-200 px-2 py-1 text-[10px] text-red-600">Eliminar</button></div></div>@endforeach</div></div>
                     @endif
-                    <div class="border-t border-zinc-100 pt-5 dark:border-zinc-800"><p class="text-xs font-black">Secção</p><div class="mt-3 grid grid-cols-2 gap-2"><button type="button" wire:click="moveSection({{ $sIndex }},'up')" class="rounded-lg border p-2 text-xs">↑ Subir</button><button type="button" wire:click="moveSection({{ $sIndex }},'down')" class="rounded-lg border p-2 text-xs">↓ Descer</button><button type="button" wire:click="duplicateSection({{ $sIndex }})" class="rounded-lg border p-2 text-xs">Duplicar</button><button type="button" wire:click="removeSection({{ $sIndex }})" class="rounded-lg border border-red-200 p-2 text-xs text-red-600">Eliminar</button></div></div>
-                @else
-                    <div class="rounded-xl bg-zinc-50 p-4 text-xs leading-5 text-zinc-500 dark:bg-zinc-800">Seleciona uma secção no centro para a personalizares.</div>
-                @endif
-                <div class="border-t border-zinc-100 pt-5 dark:border-zinc-800"><p class="text-xs font-black">Design do website</p><p class="mt-1 text-[10px] leading-4 text-zinc-400">Cores e largura usadas como base visual.</p><div class="mt-3 grid grid-cols-2 gap-2">@foreach(['primary'=>'Principal','secondary'=>'Secundária','background'=>'Fundo','text'=>'Texto'] as $key=>$label)<label class="text-[10px] font-bold">{{ $label }}<input type="color" wire:model.live="theme.{{ $key }}" class="mt-1 h-9 w-full cursor-pointer rounded-lg border"></label>@endforeach</div><label class="mt-3 block text-[10px] font-bold">Largura do conteúdo<select wire:model.live="theme.content_width" class="mt-1 w-full rounded-lg border-zinc-200 text-xs dark:border-zinc-700 dark:bg-zinc-800"><option value="960px">Compacta</option><option value="1200px">Normal</option><option value="1440px">Grande</option></select></label></div>
-            </div>
+                    <div class="flex gap-2"><button type="button" wire:click="moveSection({{ $selectedSection }},'up')" class="flex-1 rounded-xl border px-3 py-2 text-xs font-bold">↑ Subir</button><button type="button" wire:click="moveSection({{ $selectedSection }},'down')" class="flex-1 rounded-xl border px-3 py-2 text-xs font-bold">↓ Descer</button></div>
+                    <div class="flex gap-2"><button type="button" wire:click="duplicateSection({{ $selectedSection }})" class="flex-1 rounded-xl border px-3 py-2 text-xs font-bold">Duplicar</button><button type="button" wire:click="removeSection({{ $selectedSection }})" class="flex-1 rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600">Eliminar</button></div>
+                </div>
+            @else
+                <div class="p-5 text-sm leading-6 text-zinc-500">Clica numa secção no canvas para abrir as opções de edição.</div>
+            @endif
         </aside>
     </div>
 
-    <div class="border-t border-zinc-200 bg-white px-3 py-2 lg:hidden dark:border-zinc-800 dark:bg-zinc-900"><div class="flex gap-2"><button type="button" @click="add=true" class="flex-1 rounded-xl bg-zinc-950 py-2 text-xs font-bold text-white">+ Adicionar</button><button type="button" @click="settings=true" class="flex-1 rounded-xl border py-2 text-xs font-bold">Personalizar</button><button type="button" wire:click="save" class="rounded-xl border px-4 py-2 text-xs font-bold">Guardar</button></div></div>
-
-    @if($showOnboarding)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4" x-cloak>
-            <div class="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl dark:bg-zinc-900 sm:p-8">
-                <div class="flex items-start justify-between gap-4"><div><span class="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-700">Bem-vindo ao Builder</span><h2 class="mt-3 text-2xl font-black">Constrói o teu website sem código.</h2><p class="mt-2 max-w-xl text-sm leading-6 text-zinc-500">Escolhe uma secção, personaliza o conteúdo e vê as alterações no centro. Podes reorganizar, duplicar, ocultar e publicar quando estiveres pronto.</p></div><button type="button" wire:click="dismissOnboarding" class="rounded-xl border px-3 py-2 text-lg">×</button></div>
-                <div class="mt-7 grid gap-3 sm:grid-cols-3"><div class="rounded-2xl border p-4"><b class="text-sm">1 · Adicionar</b><p class="mt-1 text-xs leading-5 text-zinc-500">Escolhe Hero, Serviços, FAQ, Preços e muito mais.</p></div><div class="rounded-2xl border p-4"><b class="text-sm">2 · Editar</b><p class="mt-1 text-xs leading-5 text-zinc-500">Seleciona uma secção e altera textos, links, itens e design.</p></div><div class="rounded-2xl border p-4"><b class="text-sm">3 · Publicar</b><p class="mt-1 text-xs leading-5 text-zinc-500">O Builder guarda automaticamente e permite pré-visualizar antes de publicar.</p></div></div>
-                <div class="mt-7 flex justify-end"><button type="button" wire:click="dismissOnboarding" class="rounded-xl bg-zinc-950 px-5 py-3 text-sm font-black text-white dark:bg-white dark:text-zinc-950">Começar a editar</button></div>
-            </div>
+    <div class="shrink-0 border-t border-zinc-200 bg-white/95 p-2 backdrop-blur lg:hidden dark:border-zinc-800 dark:bg-zinc-900/95">
+        <div class="grid grid-cols-3 gap-2">
+            <button type="button" @click="add=true" class="rounded-xl border px-3 py-2 text-xs font-black">+ Adicionar</button>
+            <button type="button" @click="settings=true" class="rounded-xl border px-3 py-2 text-xs font-black">Definições</button>
+            <a href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank" class="rounded-xl bg-zinc-950 px-3 py-2 text-center text-xs font-black text-white dark:bg-white dark:text-zinc-950">Pré-visualizar</a>
         </div>
-    @endif
+    </div>
 
-    <div x-show="add" x-cloak class="fixed inset-0 z-50 bg-zinc-950/50 p-4 lg:hidden" @click.self="add=false"><div class="mx-auto mt-16 max-h-[80vh] max-w-md overflow-y-auto rounded-3xl bg-white p-5 dark:bg-zinc-900"><div class="flex items-center justify-between"><h2 class="font-black">Adicionar secção</h2><button @click="add=false" class="text-xl">×</button></div><div class="mt-4 grid gap-2">@foreach(['hero'=>'Hero','text'=>'Texto','image'=>'Imagem','feature_grid'=>'Benefícios','testimonials'=>'Testemunhos','faq'=>'FAQ','pricing'=>'Preços','gallery'=>'Galeria','contact_form'=>'Contacto','product_grid'=>'Produtos','blog_posts'=>'Artigos','newsletter'=>'Newsletter','cta'=>'Call to action'] as $type=>$label)<button type="button" @click="add=false" wire:click="addSection('{{ $type }}')" class="rounded-xl border p-3 text-left text-sm font-bold">{{ $label }}</button>@endforeach</div></div></div>
+    <div x-show="add" x-cloak class="fixed inset-0 z-[100] flex items-end bg-black/50 p-3 lg:hidden" @click.self="add=false">
+        <div class="max-h-[85vh] w-full overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl dark:bg-zinc-900">
+            <div class="mb-4 flex items-center justify-between"><h2 class="text-lg font-black">Adicionar secção</h2><button type="button" @click="add=false" class="text-xl">×</button></div>
+            <div class="grid gap-2">@foreach(['hero'=>'Hero / destaque','text'=>'Texto','image'=>'Imagem','button'=>'Botão','card'=>'Cartão','feature_grid'=>'Benefícios','gallery'=>'Galeria','testimonials'=>'Testemunhos','faq'=>'Perguntas frequentes','pricing'=>'Preços','contact_form'=>'Formulário de contacto','product_grid'=>'Produtos','blog_posts'=>'Artigos','newsletter'=>'Newsletter','cta'=>'Call to action','video'=>'Vídeo','map'=>'Mapa','social_links'=>'Redes sociais'] as $type=>$label)<button type="button" @click="$wire.addSection('{{ $type }}'); add=false" class="flex items-center justify-between rounded-xl border p-3 text-left text-sm font-bold">{{ $label }} <span>+</span></button>@endforeach</div>
+        </div>
+    </div>
 
-    <div x-show="settings" x-cloak class="fixed inset-0 z-50 bg-zinc-950/50 p-4 lg:hidden" @click.self="settings=false"><div class="mx-auto mt-10 max-h-[85vh] max-w-md overflow-y-auto rounded-3xl bg-white p-5 dark:bg-zinc-900"><div class="flex items-center justify-between"><h2 class="font-black">Personalizar</h2><button @click="settings=false" class="text-xl">×</button></div><div class="mt-5 space-y-4">@if(isset($sections[$selectedSection ?? 0])) @php($mobileIndex=$selectedSection ?? 0) @foreach(['title'=>'Título','subtitle'=>'Subtítulo','body'=>'Texto','description'=>'Descrição','button_label'=>'Botão','button_url'=>'URL'] as $field=>$label) @if(array_key_exists($field,$sections[$mobileIndex]['content']??[]))<label class="block text-xs font-bold">{{ $label }}<input wire:model.live="sections.{{ $mobileIndex }}.content.{{ $field }}" class="mt-1 w-full rounded-xl border-zinc-200 text-sm dark:border-zinc-700 dark:bg-zinc-800"></label>@endif @endforeach @endif</div></div></div>
+    <div x-show="settings" x-cloak class="fixed inset-0 z-[100] flex items-end bg-black/50 p-3 lg:hidden" @click.self="settings=false">
+        <div class="w-full rounded-3xl bg-white p-5 shadow-2xl dark:bg-zinc-900">
+            <div class="mb-4 flex items-center justify-between"><h2 class="text-lg font-black">Definições</h2><button type="button" @click="settings=false" class="text-xl">×</button></div>
+            <div class="space-y-3"><button type="button" wire:click="save" class="w-full rounded-xl border px-4 py-3 text-sm font-black">Guardar agora</button><button type="button" wire:click="publish" class="w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-black text-white dark:bg-white dark:text-zinc-950">Publicar</button></div>
+        </div>
+    </div>
 </div>
