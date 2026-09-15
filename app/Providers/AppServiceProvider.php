@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Site;
+use App\Policies\SitePolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -27,17 +28,26 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
+        // Explicitly register the Site policy so site-management authorization
+        // is deterministic in every environment, including cached production/local routes.
+        Gate::policy(Site::class, SitePolicy::class);
+
         // --- LÓGICA DE ACESSO SAAS (GATES) ---
+
+        /**
+         * Gate: manage
+         * Mantém a autorização usada pelo middleware de acesso ao website.
+         * A implementação fica centralizada na SitePolicy.
+         */
+        Gate::define('manage', fn ($user, Site $site): bool => $site->isManageableBy($user));
 
         /**
          * Gate: access-reports
          * Verifica se o site atual tem permissão para ver relatórios avançados.
          */
         Gate::define('access-reports', function ($user, Site $site) {
-            // Carrega o plano se ele não estiver presente
             $site->loadMissing('plan');
 
-            // Permite se o site tiver um plano e a funcionalidade 'has_reports' for verdadeira
             return $site->plan && $site->plan->has_reports === true;
         });
 
@@ -48,16 +58,15 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('access-ai', function ($user, Site $site) {
             $site->loadMissing('plan');
 
-            // Permite se o site tiver um plano e a funcionalidade 'has_ai' for verdadeira
             return $site->plan && $site->plan->has_ai === true;
         });
 
         /**
          * Gate: manage-site
-         * Verifica se o utilizador é dono do site ou membro da equipa.
+         * Compatibilidade com código existente que ainda use este nome.
          */
-        Gate::define('manage-site', function ($user, Site $site) {
-            return $user->id === $site->owner_id || $site->members()->where('user_id', $user->id)->exists();
+        Gate::define('manage-site', function ($user, Site $site): bool {
+            return $site->isManageableBy($user);
         });
     }
 
