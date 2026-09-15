@@ -82,6 +82,7 @@ Route::middleware(['auth', 'verified', 'admin'])
         $siteRedirect = function (string $route): mixed {
             $site = Site::query()->where('owner_id', auth()->id())->first() ?? Site::query()->first();
             abort_if($site === null, 404, 'Não existe nenhum website disponível para administração.');
+
             return redirect()->route($route, ['site' => $site]);
         };
 
@@ -105,6 +106,7 @@ Route::middleware(['auth', 'verified', 'admin'])
                 'metadata' => ['source' => 'platform_admin'],
             ]);
             session(['platform_admin_site_id' => $site->id]);
+
             return redirect()->route('admin.site.dashboard', $site);
         })->name('websites.access');
         Route::post('websites/exit-access', function () {
@@ -120,6 +122,7 @@ Route::middleware(['auth', 'verified', 'admin'])
                 ]);
             }
             session()->forget('platform_admin_site_id');
+
             return redirect()->route('admin.websites');
         })->name('websites.exit-access');
     });

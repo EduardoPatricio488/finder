@@ -21,22 +21,39 @@ use Livewire\Component;
 class BuilderStudio extends Component
 {
     public Site $site;
+
     public ?int $pageId = null;
+
     public array $pages = [];
+
     public array $sections = [];
+
     public array $theme = [];
+
     public array $siteSettings = [];
+
     public array $pageSeo = [];
+
     public ?int $selectedSection = null;
+
     public string $device = 'desktop';
+
     public string $panel = 'pages';
+
     public string $aiBrief = '';
+
     public string $statusMessage = 'Guardado';
+
     public bool $dirty = false;
+
     public bool $showAi = false;
+
     public bool $showTemplates = false;
+
     public bool $showPublish = false;
+
     public bool $showSettings = false;
+
     public array $publishChecks = [];
 
     public function mount(Site $site): void
@@ -214,6 +231,7 @@ class BuilderStudio extends Component
             foreach ($source->sections as $section) {
                 $newPage->sections()->create(['type' => $section->type, 'label' => $section->label, 'content' => $section->content, 'settings' => $section->settings, 'sort_order' => $section->sort_order, 'is_visible' => $section->is_visible]);
             }
+
             return $newPage;
         });
         $this->loadPage($page->id);
@@ -362,6 +380,7 @@ class BuilderStudio extends Component
             foreach (['hero', 'feature_grid', 'cta'] as $index => $type) {
                 $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
             }
+
             return $page;
         });
     }

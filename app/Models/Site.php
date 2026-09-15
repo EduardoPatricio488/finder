@@ -37,24 +37,95 @@ class Site extends Model
         ];
     }
 
-    public function owner(): BelongsTo { return $this->belongsTo(User::class, 'owner_id'); }
-    public function plan(): BelongsTo { return $this->belongsTo(Plan::class); }
-    public function users(): BelongsToMany { return $this->members(); }
-    public function members(): BelongsToMany { return $this->belongsToMany(User::class)->withPivot('role')->withTimestamps(); }
-    public function categories(): HasMany { return $this->hasMany(Category::class); }
-    public function products(): HasMany { return $this->hasMany(Product::class); }
-    public function customers(): HasMany { return $this->hasMany(Customer::class); }
-    public function orders(): HasMany { return $this->hasMany(Order::class); }
-    public function payments(): HasMany { return $this->hasMany(Payment::class); }
-    public function promotions(): HasMany { return $this->hasMany(Promotion::class); }
-    public function stockMovements(): HasMany { return $this->hasMany(StockMovement::class); }
-    public function storeConfig(): HasOne { return $this->hasOne(StoreConfig::class); }
-    public function pages(): HasMany { return $this->hasMany(SitePage::class)->orderBy('sort_order'); }
-    public function menus(): HasMany { return $this->hasMany(SiteMenu::class); }
-    public function media(): HasMany { return $this->hasMany(SiteMedia::class); }
-    public function analyticsEvents(): HasMany { return $this->hasMany(SiteAnalyticsEvent::class); }
-    public function adminAuditLogs(): HasMany { return $this->hasMany(SiteAdminAuditLog::class); }
-    public function versions(): HasMany { return $this->hasMany(SiteVersion::class)->orderByDesc('version_number'); }
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->members();
+    }
+
+    public function members(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withPivot('role')->withTimestamps();
+    }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function customers(): HasMany
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function promotions(): HasMany
+    {
+        return $this->hasMany(Promotion::class);
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    public function storeConfig(): HasOne
+    {
+        return $this->hasOne(StoreConfig::class);
+    }
+
+    public function pages(): HasMany
+    {
+        return $this->hasMany(SitePage::class)->orderBy('sort_order');
+    }
+
+    public function menus(): HasMany
+    {
+        return $this->hasMany(SiteMenu::class);
+    }
+
+    public function media(): HasMany
+    {
+        return $this->hasMany(SiteMedia::class);
+    }
+
+    public function analyticsEvents(): HasMany
+    {
+        return $this->hasMany(SiteAnalyticsEvent::class);
+    }
+
+    public function adminAuditLogs(): HasMany
+    {
+        return $this->hasMany(SiteAdminAuditLog::class);
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(SiteVersion::class)->orderByDesc('version_number');
+    }
 
     #[Scope]
     protected function published(Builder $query): Builder
@@ -62,7 +133,10 @@ class Site extends Model
         return $query->where('is_published', true)->where('status', 'published');
     }
 
-    public function isProtected(): bool { return $this->slug === 'casa-co' || $this->home_route === 'sales'; }
+    public function isProtected(): bool
+    {
+        return $this->slug === 'casa-co' || $this->home_route === 'sales';
+    }
 
     public function isVisibleTo(?User $user): bool
     {
@@ -71,17 +145,35 @@ class Site extends Model
 
     public function isManageableBy(?User $user): bool
     {
-        if ($user === null) return false;
-        if ($user->isAdministrator()) return true;
+        if ($user === null) {
+            return false;
+        }
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
         return $this->owner_id === $user->id || $this->members()->whereKey($user->id)->exists();
     }
 
     public function statusLabel(): string
     {
-        return match ($this->status) { 'published', 'online' => 'Publicado', 'draft' => 'Rascunho', default => 'Despublicado' };
+        return match ($this->status) {
+            'published', 'online' => 'Publicado', 'draft' => 'Rascunho', default => 'Despublicado'
+        };
     }
 
-    public function hasDedicatedHome(): bool { return filled($this->home_route) && Route::has($this->home_route); }
-    public function destinationUrl(): string { return $this->hasDedicatedHome() ? route($this->home_route) : route('site.public', $this); }
-    public function adminUrl(): string { return route('admin.site.dashboard', $this); }
+    public function hasDedicatedHome(): bool
+    {
+        return filled($this->home_route) && Route::has($this->home_route);
+    }
+
+    public function destinationUrl(): string
+    {
+        return $this->hasDedicatedHome() ? route($this->home_route) : route('site.public', $this);
+    }
+
+    public function adminUrl(): string
+    {
+        return route('admin.site.dashboard', $this);
+    }
 }

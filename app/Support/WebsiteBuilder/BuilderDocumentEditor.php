@@ -28,6 +28,7 @@ final class BuilderDocumentEditor
                 throw new InvalidArgumentException('Elements can only be inserted into containers.');
             }
             $node['children'][] = $element;
+
             return true;
         });
 
@@ -55,6 +56,7 @@ final class BuilderDocumentEditor
             if ($settings !== null) {
                 $node['settings'] = $settings;
             }
+
             return true;
         });
 
@@ -73,6 +75,7 @@ final class BuilderDocumentEditor
         if (! $removed) {
             throw new InvalidArgumentException("Unknown builder element [{$elementId}].");
         }
+
         return BuilderDocument::normalize($document);
     }
 
@@ -99,14 +102,17 @@ final class BuilderDocumentEditor
                 }
                 [$node['children'][$index], $node['children'][$target]] = [$node['children'][$target], $node['children'][$index]];
                 $moved = true;
+
                 return true;
             }
+
             return false;
         });
 
         if (! $moved) {
             throw new InvalidArgumentException("Builder element [{$elementId}] cannot be moved.");
         }
+
         return BuilderDocument::normalize($document);
     }
 
@@ -120,6 +126,7 @@ final class BuilderDocumentEditor
                 return true;
             }
         }
+
         return false;
     }
 
@@ -130,6 +137,7 @@ final class BuilderDocumentEditor
                 foreach ($node['children'] as $childIndex => $child) {
                     if (($child['id'] ?? null) === $elementId) {
                         array_splice($node['children'], $childIndex, 1);
+
                         return true;
                     }
                 }
@@ -138,6 +146,7 @@ final class BuilderDocumentEditor
                 }
             }
         }
+
         return false;
     }
 }
