@@ -57,6 +57,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
     Route::get('conta/{section?}', CustomerAccount::class)->name('account');
     Route::get('conta/favoritos', fn () => redirect()->route('account', ['section' => 'favorites']))->name('account.favorites');
+    Route::get('conta/moradas', fn () => redirect()->route('account', ['section' => 'addresses']))->name('account.addresses');
+    Route::get('conta/pagamentos', fn () => redirect()->route('account', ['section' => 'payments']))->name('account.payments');
+    Route::get('conta/notificacoes', fn () => redirect()->route('account', ['section' => 'notifications']))->name('account.notifications');
     Route::get('encomendas/acompanhamento', OrderTracking::class)->name('orders.tracking');
     Route::get('assistente', CustomerAssistant::class)->name('customer.assistant');
 });
@@ -71,6 +74,25 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::get('websites', PlatformWebsites::class)->name('websites');
         Route::get('utilizadores', UserManager::class)->name('users');
         Route::get('configuracoes', StoreSettings::class)->name('config');
+
+        $siteRedirect = function (string $route): mixed {
+            $site = Site::query()->where('owner_id', auth()->id())->first() ?? Site::query()->first();
+
+            abort_if($site === null, 404, 'Não existe nenhum website disponível para administração.');
+
+            return redirect()->route($route, ['site' => $site]);
+        };
+
+        Route::get('products', fn () => $siteRedirect('admin.site.products'))->name('products');
+        Route::get('promotions', fn () => $siteRedirect('admin.site.promotions'))->name('promotions');
+        Route::get('categories', fn () => $siteRedirect('admin.site.categories'))->name('categories');
+        Route::get('sales', fn () => $siteRedirect('admin.site.sales'))->name('sales');
+        Route::get('orders', fn () => $siteRedirect('admin.site.orders'))->name('orders');
+        Route::get('payments', fn () => $siteRedirect('admin.site.payments'))->name('payments');
+        Route::get('customers', fn () => $siteRedirect('admin.site.dashboard'))->name('customers');
+        Route::get('reports', fn () => $siteRedirect('admin.site.reports'))->name('reports');
+        Route::get('stock', fn () => $siteRedirect('admin.site.stock'))->name('stock');
+
         Route::post('websites/{site:slug}/access', function (Site $site) {
             SiteAdminAuditLog::create([
                 'site_id' => $site->id,
