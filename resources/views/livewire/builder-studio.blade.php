@@ -69,6 +69,7 @@
                 <div class="flex items-center justify-between border-b px-5 py-3 text-xs text-slate-400"><span>{{ $this->currentPage()['name'] ?? 'Página' }}</span><span>{{ ucfirst($device) }}</span></div>
                 @forelse($sections as $i=>$section)
                     @php($sectionModel = new SiteSection($section))
+                    @php($sectionModel->id = (int) ($section['id'] ?? 0))
                     @php($document = SiteSectionDocument::fromSection($sectionModel))
                     <section draggable="true" x-on:dragstart="sectionDrag={{ $i }}" x-on:dragover.prevent x-on:drop="if(sectionDrag!==null && sectionDrag!=={{ $i }}) { $wire.moveSection(sectionDrag, sectionDrag < {{ $i }} ? 'down' : 'up'); sectionDrag=null }" wire:click="selectSection({{ $i }})" class="group relative border-2 {{ $selectedSection === $i ? 'border-blue-500 ring-2 ring-blue-100' : 'border-transparent hover:border-blue-200' }} {{ !$section['is_visible'] ? 'opacity-40' : '' }}">
                         <div class="absolute right-3 top-3 z-20 hidden gap-1 rounded-xl border bg-white p-1 shadow-lg group-hover:flex"><button wire:click.stop="moveSection({{ $i }},'up')">↑</button><button wire:click.stop="moveSection({{ $i }},'down')">↓</button><button wire:click.stop="duplicateSection({{ $i }})">⧉</button><button wire:click.stop="toggleSection({{ $i }})">{{ $section['is_visible'] ? '◌' : '●' }}</button><button wire:click.stop="deleteSection({{ $i }})" class="text-red-600">×</button></div>
@@ -100,6 +101,7 @@
         <aside class="hidden border-l bg-white lg:block">
             @php($selected = $selectedSection !== null ? ($sections[$selectedSection] ?? null) : null)
             @php($selectedModel = $selected ? new SiteSection($selected) : null)
+            @php($selectedModel?->setAttribute('id', (int) ($selected['id'] ?? 0)))
             @php($selectedDocument = $selectedModel ? SiteSectionDocument::fromSection($selectedModel) : null)
             @php($selectedElement = $selectedDocument ? collect($selectedDocument['nodes'][0]['children'] ?? [])->firstWhere('id', $selectedElementId) : null)
             <div class="border-b px-4 py-3"><b class="text-sm">{{ $selected ? ($selected['label'] ?: Str::headline($selected['type'])) : 'Inspector' }}</b><div class="text-[11px] text-slate-500">Seleciona uma secção ou elemento para editar.</div></div>
