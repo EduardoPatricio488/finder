@@ -6,9 +6,10 @@ use App\Models\Site;
 use App\Support\WebsiteBuilder\BuilderDocumentEditor;
 use App\Support\WebsiteBuilder\SiteSectionDocument;
 use App\Support\WebsiteBuilder\WebsiteDocumentService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-uses(TestCase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 it('reads and writes a builder document back to the same section', function () {
     $site = Site::factory()->create();
