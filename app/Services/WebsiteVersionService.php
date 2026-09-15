@@ -14,11 +14,14 @@ final class WebsiteVersionService
     {
         return DB::transaction(function () use ($site, $userId, $label): SiteVersion {
             $snapshot = [
-                'schema_version' => 1,
+                'schema_version' => 2,
                 'site' => [
                     'theme' => $site->theme ?? [],
                     'settings' => $site->settings ?? [],
                     'seo' => $site->seo ?? [],
+                    'is_published' => (bool) $site->is_published,
+                    'status' => $site->status,
+                    'published_at' => $site->published_at?->toISOString(),
                 ],
                 'pages' => $site->pages()->with('sections')->orderBy('sort_order')->get()->map(fn ($page): array => [
                     'name' => $page->name,
@@ -53,7 +56,6 @@ final class WebsiteVersionService
 
             $oldVersionIds = $site->versions()
                 ->orderByDesc('version_number')
-                ->limit(PHP_INT_MAX)
                 ->get(['id'])
                 ->skip(30)
                 ->pluck('id');
