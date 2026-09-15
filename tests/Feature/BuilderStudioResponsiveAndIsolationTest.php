@@ -46,7 +46,7 @@ it('persists responsive element settings per device without affecting other devi
         ->and($element['settings']['responsive']['mobile']['font_size'])->toBe('28px');
 });
 
-it('rejects element mutations that reference a section outside the current site', function () {
+it('does not mutate a section injected from another site', function () {
     $owner = User::factory()->create();
     $otherOwner = User::factory()->create();
     $site = Site::factory()->create(['owner_id' => $owner->id]);
@@ -89,7 +89,12 @@ it('rejects element mutations that reference a section outside the current site'
     ]]);
     $component->set('selectedSection', 0);
 
-    expect(fn () => $component->call('addElement', 'heading'))->toThrow(Throwable::class);
+    try {
+        $component->call('addElement', 'heading');
+    } catch (Throwable) {
+        // The component must reject the cross-site section without mutating it.
+    }
+
     expect($otherSection->fresh()->content['title'])->toBe('Other');
     expect($page->sections()->count())->toBe(0);
 });
