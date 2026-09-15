@@ -88,53 +88,53 @@ final class SiteSectionDocument
     private static function elements(SiteSection $section, string $containerId, array $content, array $settings): array
     {
         $elements = [];
-        $align = in_array($settings['align'] ?? null, ['left', 'center', 'right', 'justify'], true)
-            ? $settings['align']
-            : 'left';
+        $align = in_array($settings['align'] ?? null, ['left', 'center', 'right', 'justify'], true) ? $settings['align'] : 'left';
 
         if (is_string($content['title'] ?? null)) {
-            $elements[] = self::element(
-                'heading',
-                BuilderNodeId::stable('heading', $containerId.':title'),
-                ['text' => $content['title']],
-                ['align' => $align, 'level' => $section->type === 'hero' ? 'h1' : 'h2'],
-            );
+            $elements[] = self::element('heading', BuilderNodeId::stable('heading', $containerId.':title'), ['text' => $content['title'], 'level' => $section->type === 'hero' ? 'h1' : 'h2'], ['align' => $align]);
         }
 
         foreach (['subtitle', 'body', 'description'] as $field) {
-            if (is_string($content[$field] ?? null)) {
-                $elements[] = self::element(
-                    'text',
-                    BuilderNodeId::stable('text', $containerId.':'.$field),
-                    ['text' => $content[$field]],
-                    ['align' => $align],
-                );
+            if (is_string($content[$field] ?? null) && $content[$field] !== '') {
+                $elements[] = self::element('text', BuilderNodeId::stable('text', $containerId.':'.$field), ['text' => $content[$field]], ['align' => $align]);
             }
         }
 
         if ($section->type === 'image' && is_string($content['url'] ?? null) && $content['url'] !== '') {
-            $elements[] = self::element(
-                'image',
-                BuilderNodeId::stable('image', $containerId.':image'),
-                [
-                    'url' => $content['url'],
-                    'alt' => is_string($content['alt'] ?? null) ? $content['alt'] : '',
-                    'caption' => is_string($content['caption'] ?? null) ? $content['caption'] : '',
-                ],
-                ['width' => 'full', 'radius' => 'none'],
-            );
+            $elements[] = self::element('image', BuilderNodeId::stable('image', $containerId.':image'), [
+                'url' => $content['url'],
+                'alt' => is_string($content['alt'] ?? null) ? $content['alt'] : '',
+                'caption' => is_string($content['caption'] ?? null) ? $content['caption'] : '',
+            ], ['width' => 'full', 'radius' => 'none']);
         }
 
         $buttonLabel = $content['button_label'] ?? $content['label'] ?? null;
         $buttonUrl = $content['button_url'] ?? $content['url'] ?? null;
-
         if (is_string($buttonLabel) && $buttonLabel !== '' && is_string($buttonUrl)) {
-            $elements[] = self::element(
-                'button',
-                BuilderNodeId::stable('button', $containerId.':button'),
-                ['label' => $buttonLabel, 'url' => $buttonUrl],
-                ['style' => 'primary', 'align' => $align],
-            );
+            $elements[] = self::element('button', BuilderNodeId::stable('button', $containerId.':button'), ['label' => $buttonLabel, 'url' => $buttonUrl], ['style' => 'primary', 'align' => $align]);
+        }
+
+        if ($section->type === 'video' && is_string($content['url'] ?? null) && $content['url'] !== '') {
+            $elements[] = self::element('video', BuilderNodeId::stable('video', $containerId.':video'), ['url' => $content['url'], 'title' => $content['title'] ?? 'Vídeo'], ['ratio' => '16:9']);
+        }
+
+        if ($section->type === 'gallery' && is_array($content['items'] ?? null)) {
+            $items = array_values(array_filter($content['items'], 'is_array'));
+            $elements[] = self::element('gallery', BuilderNodeId::stable('gallery', $containerId.':gallery'), ['items' => $items], ['columns' => 3]);
+        }
+
+        if ($section->type === 'faq' && is_array($content['items'] ?? null)) {
+            $elements[] = self::element('faq', BuilderNodeId::stable('faq', $containerId.':faq'), ['title' => $content['title'] ?? 'Perguntas frequentes', 'items' => array_values(array_filter($content['items'], 'is_array'))], []);
+        }
+
+        if ($section->type === 'social_links' && is_array($content['items'] ?? null)) {
+            $elements[] = self::element('social_links', BuilderNodeId::stable('social_links', $containerId.':social'), ['items' => array_values(array_filter($content['items'], 'is_array'))], ['align' => $align]);
+        }
+
+        if ($section->type === 'testimonials' && is_array($content['items'] ?? null)) {
+            foreach (array_values(array_filter($content['items'], 'is_array')) as $index => $item) {
+                $elements[] = self::element('quote', BuilderNodeId::stable('quote', $containerId.':testimonial:'.$index), ['text' => (string) ($item['quote'] ?? $item['description'] ?? ''), 'author' => (string) ($item['name'] ?? '')], ['align' => $align]);
+            }
         }
 
         return $elements;
