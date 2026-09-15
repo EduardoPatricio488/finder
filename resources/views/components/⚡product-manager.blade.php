@@ -156,7 +156,7 @@ new class extends Component
             </div>
         @endif
 
-        @if ($showProductForm)
+        @if ($this->showProductForm)
             <form wire:submit="save" class="space-y-6 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold">{{ $editingProductId ? 'Editar produto' : 'Adicionar produto' }}</h2>
