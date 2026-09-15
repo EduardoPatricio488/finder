@@ -1,414 +1,106 @@
-<div class="min-h-screen bg-zinc-50 px-4 py-10 dark:bg-zinc-950">
-    <style>
-        @keyframes site-step-in {
-            from { opacity: 0; transform: translateY(6px) scale(.995); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .site-step-in { animation: site-step-in .35s ease-out both; }
-        @media (prefers-reduced-motion: reduce) {
-            .site-step-in { animation: none; }
-        }
-    </style>
-
-    <div class="mx-auto max-w-4xl">
-
-        {{-- ============================= HEADER ============================= --}}
-        <div class="mb-8">
-            <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <a href="{{ route('dashboard') }}" wire:navigate class="inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                        FINDER
-                    </a>
-                    <h1 class="mt-4 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">
-                        Criar website
-                    </h1>
-                    <p class="mt-2 max-w-md text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-                        Vamos preparar a estrutura inicial em poucos passos.
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-2 self-start rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-zinc-500 shadow-sm sm:self-auto dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-                    <span class="size-1.5 rounded-full bg-indigo-500"></span>
-                    Passo {{ $step }} de 4
-                </div>
+<div class="min-h-screen bg-zinc-50 px-4 py-8 text-zinc-950 dark:bg-zinc-950 dark:text-white sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-6xl" x-data="{ help:false }">
+        <div class="mb-8 flex items-start justify-between gap-4">
+            <div>
+                <a href="{{ route('dashboard') }}" wire:navigate class="text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">← Finder</a>
+                <h1 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Vamos criar o teu website</h1>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">Escolhe uma base profissional, responde a algumas perguntas se quiseres usar AI e depois personaliza tudo no Builder.</p>
             </div>
-
-            {{-- ===================== STEPPER ===================== --}}
-            <div class="mt-8 grid grid-cols-4 gap-2 sm:gap-4">
-                @foreach (['Tipo', 'Template', 'Identidade', 'Páginas'] as $index => $label)
-                    @php $number = $index + 1; @endphp
-                    <div class="flex flex-col gap-2">
-                        <div class="flex items-center gap-1.5">
-                            <span
-                                class="flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold
-                                    {{ $step === $number
-                                        ? 'bg-indigo-600 text-white'
-                                        : ($step > $number
-                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-400'
-                                            : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500') }}"
-                            >
-                                @if ($step > $number)
-                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                @else
-                                    {{ str_pad($number, 2, '0', STR_PAD_LEFT) }}
-                                @endif
-                            </span>
-                            <span class="hidden text-xs font-semibold sm:inline {{ $step >= $number ? 'text-zinc-900 dark:text-white' : 'text-zinc-400 dark:text-zinc-600' }}">
-                                {{ $label }}
-                            </span>
-                        </div>
-                        <div class="h-1 rounded-full {{ $step >= $number ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-800' }}" aria-hidden="true"></div>
-                    </div>
-                @endforeach
-            </div>
-
-            {{-- ===================== PROGRESS BAR ===================== --}}
-            <div class="relative mt-4 h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800" role="progressbar" aria-valuenow="{{ $step * 25 }}" aria-valuemin="0" aria-valuemax="100">
-                <div
-                    class="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 transition-all duration-500 ease-out"
-                    style="width: {{ $step * 25 }}%"
-                >
-                    <span class="absolute inset-0 bg-white/20 motion-safe:animate-pulse" aria-hidden="true"></span>
-                </div>
-            </div>
+            <button type="button" @click="help=true" class="flex size-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900" title="Como funciona?"><flux:icon name="question-mark-circle" class="size-5" /></button>
         </div>
 
-        {{-- ============================= PASSO 1 — TIPO ============================= --}}
-        @if ($step === 1)
-            <section wire:key="step-1" class="site-step-in rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">O que queres criar?</h2>
-                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Escolhe a estrutura que melhor corresponde ao teu objetivo.</p>
+        <div class="mb-8 grid grid-cols-4 gap-2">
+            @foreach(['Começar','Modelo','Informação','Páginas'] as $index => $label)
+                @php($number=$index+1)
+                <div><div class="flex items-center gap-2"><span class="flex size-7 items-center justify-center rounded-full text-[10px] font-black {{ $step >= $number ? 'bg-indigo-600 text-white' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-800' }}">{{ $step > $number ? '✓' : $number }}</span><span class="hidden text-xs font-bold sm:inline">{{ $label }}</span></div><div class="mt-2 h-1 rounded-full {{ $step >= $number ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-800' }}"></div></div>
+            @endforeach
+        </div>
 
-                <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    @php $typeIcons = ['sparkles', 'squares-2x2', 'swatch', 'rectangle-stack', 'globe-alt', 'cube', 'bolt', 'star']; @endphp
-                    @foreach ($types as $key => $item)
-                        @php $isSelected = $type === $key; @endphp
-                        <button
-                            type="button"
-                            wire:click="$set('type','{{ $key }}')"
-                            class="group relative flex flex-col items-start gap-3 rounded-2xl border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900
-                                {{ $isSelected
-                                    ? 'border-indigo-500 bg-indigo-50/70 shadow-sm shadow-indigo-500/10 dark:border-indigo-500 dark:bg-indigo-500/10'
-                                    : 'border-zinc-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm dark:border-zinc-700 dark:hover:border-zinc-600' }}"
-                        >
-                            @if ($isSelected)
-                                <span class="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full bg-indigo-600 text-white">
-                                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                </span>
-                            @endif
-
-                            <span class="flex size-10 items-center justify-center rounded-xl {{ $isSelected ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400' }}">
-                                <flux:icon :name="$typeIcons[$loop->index % count($typeIcons)]" class="size-5" />
-                            </span>
-
-                            <span>
-                                <span class="block font-semibold text-zinc-950 dark:text-white">{{ $item['label'] }}</span>
-                                <span class="mt-1 block text-xs leading-5 text-zinc-500 dark:text-zinc-400">{{ $item['description'] }}</span>
-                            </span>
+        @if($step === 1)
+            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+                <p class="text-xs font-black uppercase tracking-widest text-indigo-600">1 · Começar</p>
+                <h2 class="mt-2 text-2xl font-black">Como queres criar o website?</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Nenhuma opção começa numa página confusa. Todas criam uma base que podes editar completamente.</p>
+                <div class="mt-8 grid gap-4 lg:grid-cols-3">
+                    @foreach([
+                        'ai' => ['icon'=>'sparkles','title'=>'Criar com AI','text'=>'Responde a algumas perguntas. A AI prepara uma primeira versão usando um modelo profissional.'],
+                        'model' => ['icon'=>'squares-2x2','title'=>'Escolher um modelo','text'=>'Escolhe directamente uma base profissional por tipo de negócio e personaliza-a.'],
+                        'free' => ['icon'=>'adjustments-horizontal','title'=>'Começar de forma livre','text'=>'Começa com uma estrutura recomendada. Não ficas perante uma página vazia.'],
+                    ] as $key=>$option)
+                        <button type="button" wire:click="selectCreationMode('{{ $key }}')" class="relative rounded-2xl border p-5 text-left transition {{ $creationMode===$key ? 'border-indigo-500 bg-indigo-50/70 ring-2 ring-indigo-500/15 dark:bg-indigo-500/10' : 'border-zinc-200 hover:border-zinc-300 hover:shadow-sm dark:border-zinc-700' }}">
+                            @if($creationMode===$key)<span class="absolute right-4 top-4 flex size-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-black text-white">✓</span>@endif
+                            <span class="flex size-11 items-center justify-center rounded-xl {{ $creationMode===$key ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800' }}"><flux:icon :name="$option['icon']" class="size-5" /></span>
+                            <h3 class="mt-4 font-bold">{{ $option['title'] }}</h3><p class="mt-1 text-xs leading-5 text-zinc-500">{{ $option['text'] }}</p>
                         </button>
                     @endforeach
                 </div>
-
-                <div class="mt-8 flex justify-end">
-                    <flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button>
-                </div>
+                <div class="mt-8 flex justify-end"><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button></div>
             </section>
+        @elseif($step === 2)
+            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+                <p class="text-xs font-black uppercase tracking-widest text-indigo-600">2 · Modelo e tipo</p>
+                <h2 class="mt-2 text-2xl font-black">Escolhe a base do teu website</h2>
+                <p class="mt-2 text-sm text-zinc-500">O modelo é apenas o ponto de partida. Depois podes alterar cores, textos, imagens, secções e páginas.</p>
 
-        {{-- ============================= PASSO 2 — TEMPLATE ============================= --}}
-        @elseif ($step === 2)
-            <section wire:key="step-2" class="site-step-in rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Escolhe um template</h2>
-                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">A estrutura visual inicial do teu website. Podes ajustar tudo depois.</p>
-
-                <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    @foreach ($templates as $key => $item)
-                        @php $isSelected = $template === $key; @endphp
-                        <button
-                            type="button"
-                            wire:click="$set('template','{{ $key }}')"
-                            class="group relative overflow-hidden rounded-2xl border text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900
-                                {{ $isSelected
-                                    ? 'border-indigo-500 ring-2 ring-indigo-500/25'
-                                    : 'border-zinc-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm dark:border-zinc-700 dark:hover:border-zinc-600' }}"
-                        >
-                            @if ($isSelected)
-                                <span class="absolute right-2.5 top-2.5 z-10 flex size-6 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
-                                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                </span>
-                            @endif
-
-                            {{-- preview HTML/CSS de website, sem imagens externas --}}
-                            <div class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-indigo-50 via-violet-50 to-fuchsia-50 p-3 dark:from-indigo-950/60 dark:via-violet-950/50 dark:to-fuchsia-950/40">
-                                <div class="flex items-center gap-1 rounded-md bg-white/80 px-2 py-1 shadow-sm dark:bg-zinc-900/70">
-                                    <span class="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
-                                    <span class="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
-                                    <span class="ml-auto h-1.5 w-10 rounded-full bg-zinc-200 dark:bg-zinc-700"></span>
-                                </div>
-
-                                @if ($loop->index % 2 === 0)
-                                    <div class="mt-2.5 space-y-1.5">
-                                        <div class="h-2.5 w-3/5 rounded bg-zinc-800/70 dark:bg-white/70"></div>
-                                        <div class="h-1.5 w-4/5 rounded bg-zinc-400/50 dark:bg-zinc-400/40"></div>
-                                        <div class="mt-2 h-4 w-14 rounded-md bg-indigo-500/80"></div>
-                                    </div>
-                                    <div class="mt-3 grid grid-cols-3 gap-1">
-                                        <div class="h-6 rounded bg-white/70 shadow-sm dark:bg-white/10"></div>
-                                        <div class="h-6 rounded bg-white/70 shadow-sm dark:bg-white/10"></div>
-                                        <div class="h-6 rounded bg-white/70 shadow-sm dark:bg-white/10"></div>
-                                    </div>
-                                @else
-                                    <div class="mt-2.5 flex gap-2">
-                                        <div class="h-14 w-1/2 rounded-md bg-white/70 shadow-sm dark:bg-white/10"></div>
-                                        <div class="flex-1 space-y-1.5 pt-1">
-                                            <div class="h-2 w-full rounded bg-zinc-800/60 dark:bg-white/60"></div>
-                                            <div class="h-1.5 w-4/5 rounded bg-zinc-400/50 dark:bg-zinc-400/40"></div>
-                                            <div class="h-1.5 w-3/5 rounded bg-zinc-400/50 dark:bg-zinc-400/40"></div>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <div class="p-4">
-                                <span class="block font-semibold text-zinc-950 dark:text-white">{{ $item['label'] }}</span>
-                                <span class="mt-1 block text-xs leading-5 text-zinc-500 dark:text-zinc-400">{{ $item['description'] }}</span>
-                            </div>
-                        </button>
+                <h3 class="mt-7 text-sm font-bold">Tipo de website</h3>
+                <div class="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                    @foreach($types as $key=>$item)
+                        <button type="button" wire:click="$set('type','{{ $key }}')" class="rounded-xl border p-3 text-left {{ $type===$key ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10' : 'border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800' }}"><span class="block text-xs font-bold">{{ $item['label'] }}</span><span class="mt-1 block text-[10px] leading-4 text-zinc-400">{{ $item['description'] }}</span></button>
                     @endforeach
                 </div>
 
-                <div class="mt-8 flex justify-between">
-                    <flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button>
-                    <flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button>
+                <h3 class="mt-8 text-sm font-bold">Estilo visual</h3>
+                <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($templates as $key=>$item)
+                        <button type="button" wire:click="$set('template','{{ $key }}')" class="overflow-hidden rounded-2xl border text-left {{ $template===$key ? 'border-indigo-500 ring-2 ring-indigo-500/15' : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' }}">
+                            <div class="aspect-[16/9] p-4" style="background:linear-gradient(135deg, {{ $item['accent'] ?? '#635bff' }}22, #ffffff 65%)"><div class="h-full rounded-xl border border-white/70 bg-white/70 p-3 shadow-sm"><div class="flex gap-1"><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i></div><div class="mt-4 h-2 w-2/3 rounded bg-zinc-800/70"></div><div class="mt-2 h-1.5 w-4/5 rounded bg-zinc-300"></div><div class="mt-4 h-5 w-16 rounded-md" style="background:{{ $item['accent'] ?? '#635bff' }}"></div></div></div>
+                            <div class="p-4"><div class="flex items-center justify-between"><span class="font-bold">{{ $item['label'] }}</span>@if($template===$key)<span class="text-xs font-bold text-indigo-600">✓ Seleccionado</span>@endif</div><p class="mt-1 text-xs leading-5 text-zinc-500">{{ $item['description'] }}</p></div>
+                        </button>
+                    @endforeach
                 </div>
+                <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button></div>
             </section>
-
-        {{-- ============================= PASSO 3 — IDENTIDADE ============================= --}}
-        @elseif ($step === 3)
-            <section wire:key="step-3" class="site-step-in rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Personaliza a identidade</h2>
-                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Estes valores definem o nome, o endereço e o estilo visual do teu website.</p>
-
-                <div class="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-                    {{-- CAMPOS --}}
-                    <div class="space-y-5">
-                        <flux:input wire:model.live="name" label="Nome do website" placeholder="A minha empresa" />
-                        <flux:input wire:model.live="slug" label="Slug" placeholder="a-minha-empresa" description="O endereço do teu website." />
-
-                        <div class="grid gap-5 sm:grid-cols-2">
-                            <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                                Cor principal
-                                <div class="mt-2 flex items-center gap-2 rounded-xl border border-zinc-200 p-1.5 dark:border-zinc-700">
-                                    <input type="color" wire:model.live="primaryColor" class="size-8 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0">
-                                    <span class="truncate text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ $primaryColor }}</span>
-                                </div>
-                            </label>
-                            <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                                Cor secundária
-                                <div class="mt-2 flex items-center gap-2 rounded-xl border border-zinc-200 p-1.5 dark:border-zinc-700">
-                                    <input type="color" wire:model.live="secondaryColor" class="size-8 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0">
-                                    <span class="truncate text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ $secondaryColor }}</span>
-                                </div>
-                            </label>
-                        </div>
-
-                        <flux:select wire:model="font" label="Tipografia">
-                            <option value="Inter">Inter</option>
-                            <option value="Manrope">Manrope</option>
-                            <option value="DM Sans">DM Sans</option>
-                            <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
-                        </flux:select>
-                    </div>
-
-                    {{-- PRÉ-VISUALIZAÇÃO — reflete tipo, template, cores, tipografia e nome já escolhidos --}}
-                    <div class="lg:sticky lg:top-6 lg:self-start">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pré-visualização do website</p>
-
-                        @if (!empty($types[$type]['label']) || !empty($templates[$template]['label']))
-                            <div class="mt-2 flex flex-wrap gap-1.5">
-                                @if (!empty($types[$type]['label']))
-                                    <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-                                        {{ $types[$type]['label'] }}
-                                    </span>
-                                @endif
-                                @if (!empty($templates[$template]['label']))
-                                    <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-                                        {{ $templates[$template]['label'] }}
-                                    </span>
-                                @endif
-                            </div>
-                        @endif
-
-                        <div class="mt-3 overflow-hidden rounded-2xl border border-zinc-200 shadow-sm dark:border-zinc-700" style="font-family: '{{ $font }}', sans-serif;">
-                            {{-- barra do browser --}}
-                            <div class="flex items-center gap-1.5 border-b border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
-                                <span class="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
-                                <span class="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
-                                <span class="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
-                                <span class="ml-2 truncate rounded bg-white px-2 py-0.5 text-[10px] text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
-                                    {{ $slug ? $slug . '.finder.site' : 'oteusite.finder.site' }}
-                                </span>
-                            </div>
-
-                            <div class="bg-white dark:bg-zinc-950">
-                                {{-- navbar --}}
-                                <div class="flex items-center justify-between px-4 py-3">
-                                    <span class="flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-white">
-                                        <span class="flex size-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style="background-color: {{ $primaryColor }}">
-                                            {{ strtoupper(substr($name ?: 'W', 0, 1)) }}
-                                        </span>
-                                        <span class="max-w-[120px] truncate">{{ $name ?: 'O teu website' }}</span>
-                                    </span>
-                                    <div class="hidden items-center gap-3 text-[10px] font-medium text-zinc-400 sm:flex">
-                                        <span>Início</span><span>Sobre</span><span>Contacto</span>
-                                    </div>
-                                </div>
-
-                                {{-- hero --}}
-                                <div class="px-4 pb-4 pt-1">
-                                    <p class="text-[10px] font-semibold uppercase tracking-wide" style="color: {{ $secondaryColor }}">
-                                        {{ $types[$type]['label'] ?? 'O teu negócio' }}
-                                    </p>
-                                    <p class="mt-1 max-w-[230px] text-base font-bold leading-snug text-zinc-900 dark:text-white">
-                                        Uma presença online profissional para {{ $name ?: 'o teu projeto' }}.
-                                    </p>
-                                    <div class="mt-3 flex gap-2">
-                                        <span class="rounded-lg px-3 py-1.5 text-[10px] font-semibold text-white" style="background-color: {{ $primaryColor }}">
-                                            Começar agora
-                                        </span>
-                                        <span class="rounded-lg border px-3 py-1.5 text-[10px] font-semibold" style="border-color: {{ $secondaryColor }}; color: {{ $secondaryColor }}">
-                                            Saber mais
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {{-- conteúdo: layout varia consoante o template escolhido, tal como no passo 2 --}}
-                                @php
-                                    $templateKeys = array_keys($templates);
-                                    $templateIndex = array_search($template, $templateKeys, true);
-                                    $isSplitLayout = $templateIndex !== false && $templateIndex % 2 === 1;
-                                @endphp
-
-                                <div class="border-t border-zinc-100 bg-zinc-50/70 px-4 py-4 dark:border-zinc-900 dark:bg-zinc-900/40">
-                                    @if ($isSplitLayout)
-                                        <div class="flex gap-2">
-                                            <div class="h-14 w-1/2 rounded-md bg-white shadow-sm dark:bg-zinc-800"></div>
-                                            <div class="flex-1 space-y-1.5 pt-1">
-                                                <div class="h-2 w-full rounded bg-zinc-300 dark:bg-zinc-700"></div>
-                                                <div class="h-1.5 w-4/5 rounded bg-zinc-200 dark:bg-zinc-800"></div>
-                                                <div class="h-1.5 w-3/5 rounded bg-zinc-200 dark:bg-zinc-800"></div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="grid grid-cols-3 gap-1.5">
-                                            <div class="h-10 rounded-md bg-white shadow-sm dark:bg-zinc-800"></div>
-                                            <div class="h-10 rounded-md bg-white shadow-sm dark:bg-zinc-800"></div>
-                                            <div class="h-10 rounded-md bg-white shadow-sm dark:bg-zinc-800"></div>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- rodapé --}}
-                                <div class="flex items-center justify-between px-4 py-2.5 text-[9px] text-zinc-400 dark:text-zinc-600">
-                                    <span>© {{ $name ?: 'O teu website' }}</span>
-                                    <span>{{ $font }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p class="mt-3 text-[11px] leading-5 text-zinc-400 dark:text-zinc-500">
-                            Representação aproximada com base no tipo, template, cores e tipografia que escolheste.
-                        </p>
-                    </div>
+        @elseif($step === 3)
+            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+                <p class="text-xs font-black uppercase tracking-widest text-indigo-600">3 · Informação</p>
+                <h2 class="mt-2 text-2xl font-black">Conta-nos o essencial</h2>
+                <p class="mt-2 text-sm text-zinc-500">Estas respostas são especialmente importantes quando escolhes <strong>Criar com AI</strong>. Também melhoram a estrutura criada nos outros modos.</p>
+                <div class="mt-7 grid gap-5 lg:grid-cols-2">
+                    <flux:input wire:model.live="name" label="Nome do negócio / website" placeholder="Ex.: Declair Studio" />
+                    <flux:input wire:model.live="slug" label="Endereço interno" placeholder="declair-studio" description="É gerado automaticamente a partir do nome." />
+                    <div class="lg:col-span-2"><flux:textarea wire:model.live="description" label="O que faz o teu negócio?" placeholder="Explica em poucas frases o que fazes, o que vendes ou que serviços prestas." rows="3" /></div>
+                    <flux:input wire:model.live="audience" label="Quem são os teus clientes?" placeholder="Ex.: pequenas empresas e profissionais" />
+                    <flux:select wire:model="goal" label="O que queres que o visitante faça?"><option value="contact">Entrar em contacto</option><option value="buy">Comprar</option><option value="quote">Pedir orçamento</option><option value="booking">Fazer uma marcação</option><option value="call">Ligar</option><option value="message">Enviar mensagem</option></flux:select>
+                    <flux:select wire:model="style" label="Estilo que queres transmitir"><option value="Minimalista">Minimalista</option><option value="Moderno">Moderno</option><option value="Premium">Premium</option><option value="Profissional">Profissional</option><option value="Criativo">Criativo</option><option value="Elegante">Elegante</option></flux:select>
+                    <flux:input wire:model="font" label="Tipo de letra" placeholder="Inter" />
+                    <div class="lg:col-span-2"><flux:textarea wire:model.live="additionalInfo" label="Há mais alguma coisa importante?" placeholder="Ex.: Quero transmitir confiança, destacar reservas, explicar uma promoção, etc." rows="3" /></div>
                 </div>
-
-                <div class="mt-8 flex justify-between">
-                    <flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button>
-                    <flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button>
-                </div>
+                <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Escolher páginas</flux:button></div>
             </section>
-
-        {{-- ============================= PASSO 4 — PÁGINAS ============================= --}}
         @else
-            @php
-                $pageOptions = [
-                    'home' => ['label' => 'Home', 'icon' => 'home'],
-                    'about' => ['label' => 'Sobre', 'icon' => 'user'],
-                    'services' => ['label' => 'Serviços', 'icon' => 'briefcase'],
-                    'products' => ['label' => 'Produtos', 'icon' => 'shopping-bag'],
-                    'blog' => ['label' => 'Blog', 'icon' => 'newspaper'],
-                    'contact' => ['label' => 'Contacto', 'icon' => 'envelope'],
-                    'faq' => ['label' => 'FAQ', 'icon' => 'question-mark-circle'],
-                    'privacy' => ['label' => 'Privacidade', 'icon' => 'shield-check'],
-                ];
-            @endphp
-            <section wire:key="step-4" class="site-step-in rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Escolhe as páginas iniciais</h2>
-                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Podes editar, duplicar ou remover páginas depois.</p>
-
-                <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                    @foreach ($pageOptions as $key => $option)
-                        @php $isSelected = in_array($key, $pages, true); @endphp
-                        <button
-                            type="button"
-                            wire:click="togglePage('{{ $key }}')"
-                            aria-pressed="{{ $isSelected ? 'true' : 'false' }}"
-                            class="flex items-center gap-3 rounded-xl border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900
-                                {{ $isSelected
-                                    ? 'border-indigo-500 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-500/10'
-                                    : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600' }}"
-                        >
-                            <span class="flex size-9 shrink-0 items-center justify-center rounded-lg {{ $isSelected ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500' }}">
-                                <flux:icon :name="$option['icon']" class="size-4.5" />
-                            </span>
-
-                            <span class="flex-1 text-sm font-medium text-zinc-900 dark:text-white">{{ $option['label'] }}</span>
-
-                            <span class="flex size-5 shrink-0 items-center justify-center rounded-full border {{ $isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-zinc-300 dark:border-zinc-600' }}">
-                                @if ($isSelected)
-                                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                @endif
-                            </span>
+            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+                <p class="text-xs font-black uppercase tracking-widest text-indigo-600">4 · Páginas</p>
+                <h2 class="mt-2 text-2xl font-black">Que páginas queres começar por ter?</h2>
+                <p class="mt-2 text-sm text-zinc-500">Já seleccionámos uma estrutura recomendada para <strong>{{ $types[$type]['label'] ?? 'o teu website' }}</strong>. Podes alterar tudo mais tarde.</p>
+                <div class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($pageLabels as $key=>$label)
+                        @php($selected=in_array($key,$pages,true))
+                        <button type="button" wire:click="togglePage('{{ $key }}')" class="flex items-center gap-3 rounded-2xl border p-4 text-left {{ $selected ? 'border-indigo-500 bg-indigo-50/60 dark:bg-indigo-500/10' : 'border-zinc-200 dark:border-zinc-700' }} {{ $key==='home' ? 'cursor-default' : 'hover:border-zinc-300' }}">
+                            <span class="flex size-9 items-center justify-center rounded-xl {{ $selected ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800' }}">{{ $selected ? '✓' : '+' }}</span><span class="text-sm font-bold">{{ $label }}</span>@if($key==='home')<span class="ml-auto text-[9px] font-black uppercase text-zinc-400">Obrigatória</span>@endif
                         </button>
                     @endforeach
                 </div>
-
-                {{-- ===================== RESUMO ===================== --}}
-                <div class="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-950/50">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Resumo</p>
-                    <dl class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                            <dt class="text-xs text-zinc-500 dark:text-zinc-400">Tipo</dt>
-                            <dd class="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">{{ $types[$type]['label'] ?? '—' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-zinc-500 dark:text-zinc-400">Template</dt>
-                            <dd class="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">{{ $templates[$template]['label'] ?? '—' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-zinc-500 dark:text-zinc-400">Nome</dt>
-                            <dd class="mt-0.5 truncate text-sm font-semibold text-zinc-900 dark:text-white">{{ $name ?: '—' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-zinc-500 dark:text-zinc-400">Slug</dt>
-                            <dd class="mt-0.5 truncate text-sm font-semibold text-zinc-900 dark:text-white">{{ $slug ?: '—' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-zinc-500 dark:text-zinc-400">Tipografia</dt>
-                            <dd class="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">{{ $font }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-zinc-500 dark:text-zinc-400">Páginas selecionadas</dt>
-                            <dd class="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">{{ count($pages) }}</dd>
-                        </div>
-                    </dl>
-                </div>
-
-                <div class="mt-8 flex justify-between">
-                    <flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button>
-                    <flux:button variant="primary" icon:trailing="check" wire:click="create">Criar website</flux:button>
-                </div>
+                <div class="mt-8 rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-800/60"><p class="text-sm font-bold">O que vai acontecer?</p><p class="mt-1 text-xs leading-5 text-zinc-500">O Finder vai criar estas páginas com secções adequadas ao tipo de website e ao modelo escolhido. Depois, no Builder, podes clicar no conteúdo, editar, adicionar, remover, duplicar e reorganizar.</p></div>
+                <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="rocket-launch" wire:click="create" wire:loading.attr="disabled"><span wire:loading.remove>Criar o meu website</span><span wire:loading>A criar website…</span></flux:button></div>
             </section>
         @endif
+
+        <div x-cloak x-show="help" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 p-4" @click.self="help=false">
+            <div class="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl dark:bg-zinc-900">
+                <div class="flex items-start justify-between gap-4"><div><p class="text-xs font-black uppercase tracking-widest text-indigo-600">Ajuda</p><h2 class="mt-2 text-2xl font-black">Como funciona?</h2></div><button type="button" @click="help=false" class="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">✕</button></div>
+                <div class="mt-6 space-y-4 text-sm"><p><strong>1. Escolhe uma forma de começar.</strong><br><span class="text-zinc-500">AI, um modelo profissional ou uma estrutura recomendada.</span></p><p><strong>2. Define o teu negócio.</strong><br><span class="text-zinc-500">As respostas ajudam o Finder a preparar a estrutura e o conteúdo inicial.</span></p><p><strong>3. Escolhe páginas.</strong><br><span class="text-zinc-500">Não precisas de começar com uma página vazia.</span></p><p><strong>4. Personaliza no Builder.</strong><br><span class="text-zinc-500">Podes editar, adicionar, duplicar, reorganizar e publicar.</span></p></div>
+                <div class="mt-7 flex justify-end"><button type="button" @click="help=false" class="rounded-xl bg-zinc-950 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-zinc-950">Percebi</button></div>
+            </div>
+        </div>
     </div>
 </div>
