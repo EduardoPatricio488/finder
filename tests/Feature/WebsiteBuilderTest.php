@@ -7,6 +7,8 @@ use App\Livewire\CreateSite;
 use App\Livewire\SiteSettings;
 use App\Models\Site;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 test('users can create a website through the creation flow', function () {
@@ -135,6 +137,35 @@ test('site settings tolerate stale contactName updates from older Livewire snaps
     $site->refresh();
     expect($site->tagline)->toBe('Descrição actualizada')
         ->and($site->settings)->not->toHaveKey('contactName');
+});
+
+test('website owners can upload branding and open graph images from their pc', function () {
+    Storage::fake('public');
+
+    $owner = User::factory()->create();
+    $site = Site::factory()->create(['owner_id' => $owner->id]);
+    $this->actingAs($owner);
+
+    Livewire::test(SiteSettings::class, ['site' => $site])
+        ->set('logoUpload', UploadedFile::fake()->image('logo.png', 500, 500))
+        ->set('faviconUpload', UploadedFile::fake()->image('favicon.png', 64, 64))
+        ->set('ogImageUpload', UploadedFile::fake()->image('og-image.jpg', 1200, 630))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $site->refresh();
+
+    expect($site->settings['logo_url'])->toContain('/storage/sites/'.$site->id.'/branding/')
+        ->and($site->settings['favicon_url'])->toContain('/storage/sites/'.$site->id.'/branding/')
+        ->and($site->seo['og_image'])->toContain('/storage/sites/'.$site->id.'/branding/');
+
+    $logoPath = ltrim(str_replace('/storage/', '', parse_url($site->settings['logo_url'], PHP_URL_PATH)), '/');
+    $faviconPath = ltrim(str_replace('/storage/', '', parse_url($site->settings['favicon_url'], PHP_URL_PATH)), '/');
+    $ogImagePath = ltrim(str_replace('/storage/', '', parse_url($site->seo['og_image'], PHP_URL_PATH)), '/');
+
+    Storage::disk('public')->assertExists($logoPath);
+    Storage::disk('public')->assertExists($faviconPath);
+    Storage::disk('public')->assertExists($ogImagePath);
 });
 
 test('users cannot manage another websites settings or menus', function () {
