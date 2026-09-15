@@ -453,7 +453,7 @@ class BuilderStudio extends Component
             $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
         }
 
-return $checks;
+        return $checks;
     }
 
     public function unpublish(): void
@@ -537,7 +537,7 @@ return $checks;
             $result[] = ['type' => $type, 'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''), 'content' => $this->sanitizeLegacyContent($content)];
         }
 
-return $result;
+        return $result;
     }
 
     private function sanitizeLegacyContent(array $content): array
@@ -561,7 +561,7 @@ return $result;
             }
         }
 
-return $content;
+        return $content;
     }
 
     private function lastElementId(array $document): ?string
@@ -585,7 +585,7 @@ return $content;
             }
         }
 
-return null;
+        return null;
     }
 
     private function pageSortOrder(string $slug): int
