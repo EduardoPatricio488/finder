@@ -31,12 +31,18 @@ it('reads and writes a builder document back to the same section', function () {
     $service = app(WebsiteDocumentService::class);
     $document = $service->read($section);
     $element = collect($document['nodes'][0]['children'])->firstWhere('type', 'text');
+
+    expect($element)->toBeArray();
+
     $elementId = $element['id'];
     $document = BuilderDocumentEditor::updateElement($document, $elementId, ['text' => 'Actualizado']);
 
     $service->write($section, $document);
     $section->refresh();
 
+    $savedTextElement = collect($section->settings['builder_document']['nodes'][0]['children'])
+        ->firstWhere('type', 'text');
+
     expect($section->settings['builder_document'])->toEqual(SiteSectionDocument::fromSection($section))
-        ->and($section->settings['builder_document']['nodes'][0]['children'][1]['content']['text'])->toBe('Actualizado');
+        ->and($savedTextElement['content']['text'])->toBe('Actualizado');
 });
