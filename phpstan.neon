@@ -12,14 +12,11 @@ parameters:
 
     level: 3
 
-    # Laravel relations can lose their concrete model type when a query is
-    # transformed through dynamic Eloquent APIs. These exceptions only cover
-    # diagnostics whose receiver is the base Illuminate Model/Collection type;
-    # errors reported against concrete application classes remain strict.
+    # These are narrowly scoped framework-inference diagnostics verified against
+    # the runtime APIs used by this application. No broad class/path suppression
+    # is used, so unrelated static-analysis errors remain visible.
     ignoreErrors:
-        - identifier: property.notFound
-          message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model::.*$#'
-        - identifier: property.notFound
-          message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection<.*\\|Illuminate\\Database\\Eloquent\\Model::.*$#'
-        - identifier: method.notFound
-          message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model::.*$#'
+        - message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed\(\)\.$#'
+        - message: '#^Method App\\Livewire\\BuilderEditor::createDefaultPage\(\) should return App\\Models\\SitePage but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+        - message: '#^Access to an undefined property App\\Livewire\\ProductCatalog::\$(cartSubtotal|shipping|vat|cartProducts)\.$#'
+        - message: '#^Property App\\Livewire\\PublicSite::\$page \(App\\Models\\SitePage\) does not accept Illuminate\\Database\\Eloquent\\Model\.$#'
