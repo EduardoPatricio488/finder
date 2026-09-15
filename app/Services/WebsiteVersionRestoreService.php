@@ -27,10 +27,16 @@ final class WebsiteVersionRestoreService
         $this->versions->create($site->fresh(), auth()->id(), 'Backup automático antes de restaurar a versão '.$version->version_number);
 
         DB::transaction(function () use ($site, $pages, $snapshot): void {
+            $status = data_get($snapshot, 'site.status');
+            $publishedAt = data_get($snapshot, 'site.published_at');
+
             $site->update([
                 'theme' => is_array(data_get($snapshot, 'site.theme')) ? data_get($snapshot, 'site.theme') : [],
                 'settings' => is_array(data_get($snapshot, 'site.settings')) ? data_get($snapshot, 'site.settings') : [],
                 'seo' => is_array(data_get($snapshot, 'site.seo')) ? data_get($snapshot, 'site.seo') : [],
+                'is_published' => (bool) data_get($snapshot, 'site.is_published', false),
+                'status' => in_array($status, ['draft', 'published'], true) ? $status : 'draft',
+                'published_at' => $publishedAt,
             ]);
 
             $site->pages()->withTrashed()->get()->each(function ($page): void {
