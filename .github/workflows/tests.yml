@@ -35,7 +35,7 @@ jobs:
         run: composer setup
 
       - name: Apply Pint formatting
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: |
           ./vendor/bin/pint --parallel
           if git diff --quiet; then
@@ -43,9 +43,13 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/Livewire app/Services
+          git add app/Livewire app/Services app/Support
           git commit -m "Apply Pint formatting"
-          git push
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git push origin "HEAD:${{ github.head_ref }}"
+          else
+            git push
+          fi
 
       - name: Run CI Checks
         run: composer ci:check
