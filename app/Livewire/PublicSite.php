@@ -28,9 +28,16 @@ class PublicSite extends Component
 
     public string $newsletterEmail = '';
 
-    public function mount(Site $site, ?string $pageSlug = null): void
+    public function mount(Site $site, ?string $pageSlug = null): mixed
     {
-        $this->preview = request()->boolean('preview');
+        $requestedPreview = request()->boolean('preview');
+        $directoryPreview = request()->routeIs('sites.show')
+            && auth()->user()?->isAdministrator() === true;
+        $this->preview = $requestedPreview || $directoryPreview;
+
+        if (! $this->preview && $site->isProtected() && $site->hasDedicatedHome()) {
+            return redirect()->route($site->home_route);
+        }
 
         if ($this->preview) {
             abort_unless($site->isManageableBy(auth()->user()), 403);
