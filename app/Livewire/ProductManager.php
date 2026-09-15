@@ -103,7 +103,7 @@ class ProductManager extends Component
 
         $this->resetForm();
         $this->loadData();
-        session()->flash('status', 'Produto salvo com sucesso.');
+        session()->flash('status', 'Produto guardado com sucesso.');
     }
 
     public function delete(int $productId): void
@@ -117,7 +117,7 @@ class ProductManager extends Component
         }
 
         $this->loadData();
-        session()->flash('status', 'Produto excluído com sucesso.');
+        session()->flash('status', 'Produto eliminado com sucesso.');
     }
 
     public function resetForm(): void
@@ -132,7 +132,7 @@ class ProductManager extends Component
         $site = $this->currentSite();
 
         $this->products = $site->products()->with('category')->latest()->get();
-        $this->categories = $site->categories()->orderBy('name')->get();
+        $this->categories = $site->categories()->withCount('products')->orderBy('name')->get();
     }
 
     public function render(): mixed
