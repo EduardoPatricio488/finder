@@ -24,6 +24,7 @@ class BuilderEditor extends Component
     public array $theme = [];
     public bool $dirty = false;
     public bool $showOnboarding = false;
+    public ?int $selectedSection = null;
     public array $history = [];
     public array $future = [];
 
@@ -61,11 +62,7 @@ class BuilderEditor extends Component
             data_set($this, $property, array_values(array_filter(array_map('trim', $features))));
         }
 
-        if (
-            str_starts_with($property, 'sections.')
-            || str_starts_with($property, 'theme.')
-            || in_array($property, ['pageName', 'pageSlug', 'pageStatus'], true)
-        ) {
+        if (str_starts_with($property, 'sections.') || str_starts_with($property, 'theme.') || in_array($property, ['pageName', 'pageSlug', 'pageStatus'], true)) {
             $this->markDirty();
         }
     }
@@ -77,6 +74,18 @@ class BuilderEditor extends Component
         $this->site->update(['settings' => $settings]);
         $this->site->refresh();
         $this->showOnboarding = false;
+    }
+
+    public function selectSection(?int $index): void
+    {
+        if ($index === null) {
+            $this->selectedSection = null;
+            return;
+        }
+
+        abort_unless(isset($this->sections[$index]), 404);
+        $this->selectedSection = $index;
+        $this->dispatch('builder-section-selected', section: $index);
     }
 
     public function selectPage(int $pageId): void
@@ -96,6 +105,7 @@ class BuilderEditor extends Component
             'is_visible' => $section->is_visible,
         ])->values()->all();
 
+        $this->selectedSection = count($this->sections) ? 0 : null;
         $this->history = [];
         $this->future = [];
         $this->dirty = false;
@@ -106,15 +116,12 @@ class BuilderEditor extends Component
     {
         abort_unless(isset($this->sections[$sectionIndex]), 404);
 
-        $allowed = [
-            'title', 'subtitle', 'body', 'description', 'label', 'button_label', 'button_url',
-            'caption', 'alt', 'address', 'question', 'answer', 'name', 'role', 'quote',
-            'price', 'excerpt', 'url',
-        ];
+        $allowed = ['title', 'subtitle', 'body', 'description', 'label', 'button_label', 'button_url', 'caption', 'alt', 'address', 'question', 'answer', 'name', 'role', 'quote', 'price', 'excerpt', 'url'];
         abort_unless(in_array($field, $allowed, true), 422);
 
         $value = trim(strip_tags($value));
         $this->checkpoint();
+        $this->selectedSection = $sectionIndex;
 
         if ($itemIndex !== null) {
             abort_unless(isset($this->sections[$sectionIndex]['content']['items'][$itemIndex]), 404);
@@ -135,70 +142,27 @@ class BuilderEditor extends Component
     public function createPageFromPreset(string $preset): void
     {
         $presets = [
-            'recommended' => [
-                'name' => 'Nova página',
-                'slug' => 'nova-pagina',
-                'sections' => ['hero', 'feature_grid', 'cta'],
-            ],
-            'landing' => [
-                'name' => 'Landing Page',
-                'slug' => 'landing-page',
-                'sections' => ['hero', 'feature_grid', 'testimonials', 'faq', 'cta'],
-            ],
-            'services' => [
-                'name' => 'Serviços',
-                'slug' => 'servicos',
-                'sections' => ['hero', 'text', 'feature_grid', 'testimonials', 'cta'],
-            ],
-            'about' => [
-                'name' => 'Sobre nós',
-                'slug' => 'sobre-nos',
-                'sections' => ['hero', 'text', 'feature_grid', 'testimonials', 'cta'],
-            ],
-            'contact' => [
-                'name' => 'Contactos',
-                'slug' => 'contactos',
-                'sections' => ['hero', 'contact_form', 'map', 'cta'],
-            ],
-            'pricing' => [
-                'name' => 'Preços',
-                'slug' => 'precos',
-                'sections' => ['hero', 'pricing', 'faq', 'cta'],
-            ],
+            'recommended' => ['name' => 'Nova página', 'slug' => 'nova-pagina', 'sections' => ['hero', 'feature_grid', 'cta']],
+            'landing' => ['name' => 'Landing Page', 'slug' => 'landing-page', 'sections' => ['hero', 'feature_grid', 'testimonials', 'faq', 'cta']],
+            'services' => ['name' => 'Serviços', 'slug' => 'servicos', 'sections' => ['hero', 'text', 'feature_grid', 'testimonials', 'cta']],
+            'about' => ['name' => 'Sobre nós', 'slug' => 'sobre-nos', 'sections' => ['hero', 'text', 'feature_grid', 'testimonials', 'cta']],
+            'contact' => ['name' => 'Contactos', 'slug' => 'contactos', 'sections' => ['hero', 'contact_form', 'map', 'cta']],
+            'pricing' => ['name' => 'Preços', 'slug' => 'precos', 'sections' => ['hero', 'pricing', 'faq', 'cta']],
         ];
 
         abort_unless(isset($presets[$preset]), 422);
         $definition = $presets[$preset];
-
         $this->checkpoint();
-
         $slug = Str::slug($definition['slug']);
         $baseSlug = $slug;
         $counter = 2;
-        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $baseSlug.'-'.$counter++;
-        }
+        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) $slug = $baseSlug.'-'.$counter++;
 
         $page = DB::transaction(function () use ($definition, $slug) {
-            $page = $this->site->pages()->create([
-                'name' => $definition['name'],
-                'slug' => $slug,
-                'status' => 'draft',
-                'is_homepage' => false,
-                'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
-            ]);
-
+            $page = $this->site->pages()->create(['name' => $definition['name'], 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1]);
             foreach ($definition['sections'] as $index => $type) {
-                $page->sections()->create([
-                    'type' => $type,
-                    'label' => Str::headline($type),
-                    'content' => $this->defaultContent($type),
-                    'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
-                    'sort_order' => $index,
-                    'is_visible' => true,
-                ]);
+                $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
             }
-
             return $page;
         });
 
@@ -210,35 +174,14 @@ class BuilderEditor extends Component
     {
         $this->checkpoint();
         $source = $this->site->pages()->with('sections')->findOrFail($this->pageId);
-
         $slug = $source->slug.'-copia';
         $baseSlug = $slug;
         $counter = 2;
-        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $baseSlug.'-'.$counter++;
-        }
+        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) $slug = $baseSlug.'-'.$counter++;
 
         $page = DB::transaction(function () use ($source, $slug) {
-            $page = $this->site->pages()->create([
-                'name' => $source->name.' (cópia)',
-                'slug' => $slug,
-                'status' => 'draft',
-                'is_homepage' => false,
-                'seo' => $source->seo,
-                'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
-            ]);
-
-            foreach ($source->sections as $section) {
-                $page->sections()->create([
-                    'type' => $section->type,
-                    'label' => $section->label,
-                    'content' => $section->content,
-                    'settings' => $section->settings,
-                    'sort_order' => $section->sort_order,
-                    'is_visible' => $section->is_visible,
-                ]);
-            }
-
+            $page = $this->site->pages()->create(['name' => $source->name.' (cópia)', 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'seo' => $source->seo, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1]);
+            foreach ($source->sections as $section) $page->sections()->create(['type' => $section->type, 'label' => $section->label, 'content' => $section->content, 'settings' => $section->settings, 'sort_order' => $section->sort_order, 'is_visible' => $section->is_visible]);
             return $page;
         });
 
@@ -251,7 +194,6 @@ class BuilderEditor extends Component
         $this->checkpoint();
         $page = $this->site->pages()->findOrFail($this->pageId);
         abort_if($page->is_homepage, 422, 'A homepage não pode ser eliminada.');
-
         $page->delete();
         $fallback = $this->site->pages()->orderBy('sort_order')->firstOrFail();
         $this->site->load('pages.sections');
@@ -260,22 +202,11 @@ class BuilderEditor extends Component
 
     public function addSection(string $type): void
     {
-        $allowed = [
-            'hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq',
-            'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts',
-            'social_links', 'video', 'map', 'newsletter', 'cta',
-        ];
+        $allowed = ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'];
         abort_unless(in_array($type, $allowed, true), 422);
-
         $this->checkpoint();
-        $this->sections[] = [
-            'id' => null,
-            'type' => $type,
-            'label' => Str::headline($type),
-            'content' => $this->defaultContent($type),
-            'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
-            'is_visible' => true,
-        ];
+        $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
+        $this->selectedSection = count($this->sections) - 1;
         $this->markDirty();
     }
 
@@ -287,28 +218,19 @@ class BuilderEditor extends Component
         $copy['id'] = null;
         $copy['label'] = ($copy['label'] ?? Str::headline($copy['type'])).' (cópia)';
         array_splice($this->sections, $index + 1, 0, [$copy]);
+        $this->selectedSection = $index + 1;
         $this->markDirty();
     }
 
     public function addItem(int $sectionIndex): void
     {
         abort_unless(isset($this->sections[$sectionIndex]), 404);
-
-        $templates = [
-            'feature_grid' => ['title' => 'Novo benefício', 'description' => 'Descreve este benefício.'],
-            'testimonials' => ['name' => 'Cliente', 'role' => 'Função', 'quote' => 'Escreve aqui o testemunho.', 'image' => ''],
-            'faq' => ['question' => 'Nova pergunta?', 'answer' => 'Escreve a resposta.'],
-            'gallery' => ['url' => '', 'alt' => '', 'caption' => ''],
-            'pricing' => ['name' => 'Novo plano', 'price' => '49 €', 'description' => 'Descrição do plano.', 'features' => ['Funcionalidade 1', 'Funcionalidade 2'], 'button_label' => 'Escolher', 'button_url' => '#'],
-            'blog_posts' => ['title' => 'Novo artigo', 'excerpt' => 'Resumo do artigo.', 'url' => '#', 'image' => ''],
-            'social_links' => ['label' => 'Nova rede', 'url' => '#'],
-        ];
-
+        $templates = ['feature_grid' => ['title' => 'Novo benefício', 'description' => 'Descreve este benefício.'], 'testimonials' => ['name' => 'Cliente', 'role' => 'Função', 'quote' => 'Escreve aqui o testemunho.', 'image' => ''], 'faq' => ['question' => 'Nova pergunta?', 'answer' => 'Escreve a resposta.'], 'gallery' => ['url' => '', 'alt' => '', 'caption' => ''], 'pricing' => ['name' => 'Novo plano', 'price' => '49 €', 'description' => 'Descrição do plano.', 'features' => ['Funcionalidade 1', 'Funcionalidade 2'], 'button_label' => 'Escolher', 'button_url' => '#'], 'blog_posts' => ['title' => 'Novo artigo', 'excerpt' => 'Resumo do artigo.', 'url' => '#', 'image' => ''], 'social_links' => ['label' => 'Nova rede', 'url' => '#']];
         $type = $this->sections[$sectionIndex]['type'];
         abort_unless(isset($templates[$type]), 422);
-
         $this->checkpoint();
         $this->sections[$sectionIndex]['content']['items'][] = $templates[$type];
+        $this->selectedSection = $sectionIndex;
         $this->markDirty();
     }
 
@@ -325,33 +247,25 @@ class BuilderEditor extends Component
         abort_unless(in_array($direction, ['up', 'down'], true), 422);
         $items = $this->sections[$sectionIndex]['content']['items'] ?? [];
         $target = $direction === 'up' ? $itemIndex - 1 : $itemIndex + 1;
-
         if (! isset($items[$itemIndex]) || $target < 0 || $target >= count($items)) return;
-
         $this->checkpoint();
         [$items[$itemIndex], $items[$target]] = [$items[$target], $items[$itemIndex]];
         $this->sections[$sectionIndex]['content']['items'] = $items;
+        $this->selectedSection = $sectionIndex;
         $this->markDirty();
     }
 
     public function reorderSections(array $orderedIds): void
     {
         if (count($orderedIds) !== count($this->sections)) return;
-
         $currentIds = collect($this->sections)->map(fn ($section, $index) => (string) ($section['id'] ?? 'new-'.$index))->values()->all();
         $orderedIds = array_map('strval', $orderedIds);
-
-        if (count(array_unique($orderedIds)) !== count($orderedIds) || array_diff($orderedIds, $currentIds) || array_diff($currentIds, $orderedIds)) {
-            abort(422, 'Ordem das secções inválida.');
-        }
-
+        if (count(array_unique($orderedIds)) !== count($orderedIds) || array_diff($orderedIds, $currentIds) || array_diff($currentIds, $orderedIds)) abort(422, 'Ordem das secções inválida.');
         if ($currentIds === $orderedIds) return;
-
         $this->checkpoint();
-        $lookup = collect($this->sections)->mapWithKeys(function (array $section, int $index) {
-            return [(string) ($section['id'] ?? 'new-'.$index) => $section];
-        });
+        $lookup = collect($this->sections)->mapWithKeys(function (array $section, int $index) { return [(string) ($section['id'] ?? 'new-'.$index) => $section]; });
         $this->sections = array_values(array_map(fn (string $id) => $lookup[$id], $orderedIds));
+        $this->selectedSection = 0;
         $this->markDirty();
         $this->dispatch('builder-sections-reordered');
     }
@@ -361,6 +275,7 @@ class BuilderEditor extends Component
         abort_unless(isset($this->sections[$index]), 404);
         $this->checkpoint();
         $this->sections[$index]['is_visible'] = $visible;
+        $this->selectedSection = $index;
         $this->markDirty();
     }
 
@@ -370,6 +285,7 @@ class BuilderEditor extends Component
         $this->checkpoint();
         unset($this->sections[$index]);
         $this->sections = array_values($this->sections);
+        $this->selectedSection = count($this->sections) ? min($index, count($this->sections) - 1) : null;
         $this->markDirty();
     }
 
@@ -378,9 +294,9 @@ class BuilderEditor extends Component
         abort_unless(in_array($direction, ['up', 'down'], true), 422);
         $target = $direction === 'up' ? $index - 1 : $index + 1;
         if ($target < 0 || $target >= count($this->sections)) return;
-
         $this->checkpoint();
         [$this->sections[$index], $this->sections[$target]] = [$this->sections[$target], $this->sections[$index]];
+        $this->selectedSection = $target;
         $this->markDirty();
     }
 
@@ -404,35 +320,18 @@ class BuilderEditor extends Component
         $slug = Str::slug($this->pageSlug ?: $this->pageName);
 
         DB::transaction(function () use ($page, $slug) {
-            $page->update([
-                'name' => trim($this->pageName) ?: 'Sem título',
-                'slug' => $slug ?: 'pagina',
-                'status' => in_array($this->pageStatus, ['draft', 'published'], true) ? $this->pageStatus : 'draft',
-            ]);
-
+            $page->update(['name' => trim($this->pageName) ?: 'Sem título', 'slug' => $slug ?: 'pagina', 'status' => in_array($this->pageStatus, ['draft', 'published'], true) ? $this->pageStatus : 'draft']);
             $keepIds = [];
             foreach ($this->sections as $index => $data) {
-                $section = ! empty($data['id'])
-                    ? $page->sections()->findOrFail($data['id'])
-                    : new SiteSection(['site_page_id' => $page->id]);
-
-                $section->fill([
-                    'type' => $data['type'],
-                    'label' => $data['label'] ?? Str::headline($data['type']),
-                    'content' => $data['content'] ?? [],
-                    'settings' => $data['settings'] ?? [],
-                    'sort_order' => $index,
-                    'is_visible' => (bool) ($data['is_visible'] ?? true),
-                ]);
+                $section = ! empty($data['id']) ? $page->sections()->findOrFail($data['id']) : new SiteSection(['site_page_id' => $page->id]);
+                $section->fill(['type' => $data['type'], 'label' => $data['label'] ?? Str::headline($data['type']), 'content' => $data['content'] ?? [], 'settings' => $data['settings'] ?? [], 'sort_order' => $index, 'is_visible' => (bool) ($data['is_visible'] ?? true)]);
                 $section->save();
                 $keepIds[] = $section->id;
                 $this->sections[$index]['id'] = $section->id;
             }
-
             $query = $page->sections();
             if ($keepIds) $query->whereNotIn('id', $keepIds);
             $query->delete();
-
             $this->site->update(['theme' => $this->theme]);
         });
 
@@ -472,13 +371,7 @@ class BuilderEditor extends Component
 
     private function currentSnapshot(): array
     {
-        return [
-            'sections' => $this->sections,
-            'pageName' => $this->pageName,
-            'pageSlug' => $this->pageSlug,
-            'pageStatus' => $this->pageStatus,
-            'theme' => $this->theme,
-        ];
+        return ['sections' => $this->sections, 'pageName' => $this->pageName, 'pageSlug' => $this->pageSlug, 'pageStatus' => $this->pageStatus, 'theme' => $this->theme];
     }
 
     private function restoreSnapshot(array $snapshot): void
@@ -488,46 +381,20 @@ class BuilderEditor extends Component
         $this->pageSlug = $snapshot['pageSlug'];
         $this->pageStatus = $snapshot['pageStatus'];
         $this->theme = $snapshot['theme'];
+        $this->selectedSection = count($this->sections) ? 0 : null;
         $this->markDirty();
     }
 
     private function createDefaultPage(): SitePage
     {
-        $page = $this->site->pages()->create([
-            'name' => 'Home',
-            'slug' => 'home',
-            'status' => 'draft',
-            'is_homepage' => true,
-            'sort_order' => 0,
-        ]);
-
-        foreach (['hero', 'feature_grid', 'cta'] as $index => $type) {
-            $page->sections()->create([
-                'type' => $type,
-                'label' => Str::headline($type),
-                'content' => $this->defaultContent($type),
-                'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
-                'sort_order' => $index,
-            ]);
-        }
-
+        $page = $this->site->pages()->create(['name' => 'Home', 'slug' => 'home', 'status' => 'draft', 'is_homepage' => true, 'sort_order' => 0]);
+        foreach (['hero', 'feature_grid', 'cta'] as $index => $type) $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index]);
         return $page;
     }
 
     private function defaultTheme(): array
     {
-        return [
-            'primary' => $this->site->primary_color ?: '#635bff',
-            'secondary' => $this->site->secondary_color ?: '#111827',
-            'accent' => '#8b5cf6',
-            'background' => '#ffffff',
-            'text' => '#111827',
-            'heading_font' => 'Inter',
-            'body_font' => 'Inter',
-            'radius' => 'lg',
-            'shadow' => 'sm',
-            'content_width' => '1200px',
-        ];
+        return ['primary' => $this->site->primary_color ?: '#635bff', 'secondary' => $this->site->secondary_color ?: '#111827', 'accent' => '#8b5cf6', 'background' => '#ffffff', 'text' => '#111827', 'heading_font' => 'Inter', 'body_font' => 'Inter', 'radius' => 'lg', 'shadow' => 'sm', 'content_width' => '1200px'];
     }
 
     private function defaultContent(string $type): array
