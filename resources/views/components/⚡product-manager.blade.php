@@ -43,11 +43,10 @@ new class extends Component
         $this->categoryId = $product->category_id;
         $this->description = $product->description ?? '';
         $this->price = (string) $product->price;
-        $this->isActive = $product->is_active;
-        $this->stock = $product->stock;
-        $this->minimumStock = $product->minimum_stock;
+        $this->isActive = (bool) $product->is_active;
+        $this->stock = (int) $product->stock;
+        $this->minimumStock = (int) $product->minimum_stock;
         $this->image = null;
-        $this->dispatch('product-form-opened');
     }
 
     public function save(): void
@@ -124,7 +123,6 @@ new class extends Component
 <div
     class="space-y-8"
     x-data="{ productFormOpen: false, previewImage: null, previewAlt: '' }"
-    x-on:product-form-opened.window="productFormOpen = true"
     x-on:product-form-closed.window="productFormOpen = false"
     x-on:keydown.escape.window="previewImage = null"
 >
@@ -134,7 +132,7 @@ new class extends Component
             <h1 class="mt-1 text-2xl font-semibold tracking-tight">Produtos</h1>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <button type="button" x-on:click="productFormOpen = true" class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700">Novo produto</button>
+            <button type="button" x-on:click="productFormOpen = true; $nextTick(() => $refs.productForm?.scrollIntoView({ behavior: 'smooth', block: 'start' }))" class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700">Novo produto</button>
             <a href="{{ route('admin.site.stock', $this->currentSite()) }}" wire:navigate class="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 hover:text-stone-900">Ir para Stock</a>
         </div>
     </div>
@@ -143,7 +141,7 @@ new class extends Component
         <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{{ session('status') }}</div>
     @endif
 
-    <form wire:submit="save" x-cloak x-show="productFormOpen" x-transition class="space-y-6 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+    <form x-ref="productForm" wire:submit="save" x-cloak x-show="productFormOpen" x-transition class="space-y-6 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold">{{ $editingProductId ? 'Editar produto' : 'Adicionar produto' }}</h2>
             <button type="button" wire:click="closeForm" class="text-sm font-medium text-stone-500 hover:text-stone-900">Fechar</button>
@@ -181,7 +179,10 @@ new class extends Component
                             <td class="px-6 py-3 text-stone-600">{{ $product->category->name }}</td>
                             <td class="px-6 py-3 text-stone-600">€ {{ number_format((float) $product->price, 2, ',', '.') }}</td>
                             <td class="px-6 py-3"><span class="font-medium {{ $product->stock <= $product->minimum_stock ? 'text-red-600' : 'text-stone-600' }}">{{ $product->stock }}</span></td>
-                            <td class="px-6 py-3 text-right"><button type="button" wire:click="edit({{ $product->id }})" class="mr-3 font-medium text-stone-700 hover:text-stone-950">Editar</button><button type="button" wire:click="delete({{ $product->id }})" wire:confirm="Eliminar este produto?" class="font-medium text-red-600 hover:text-red-800">Eliminar</button></td>
+                            <td class="px-6 py-3 text-right">
+                                <button type="button" wire:click="edit({{ $product->id }})" x-on:click="productFormOpen = true; $nextTick(() => $refs.productForm?.scrollIntoView({ behavior: 'smooth', block: 'start' }))" class="mr-3 font-medium text-stone-700 hover:text-stone-950">Editar</button>
+                                <button type="button" wire:click="delete({{ $product->id }})" wire:confirm="Eliminar este produto?" class="font-medium text-red-600 hover:text-red-800">Eliminar</button>
+                            </td>
                         </tr>
                     @empty
                         <tr><td colspan="6" class="px-6 py-10 text-center text-stone-500">Nenhum produto cadastrado.</td></tr>
