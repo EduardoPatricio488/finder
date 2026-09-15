@@ -12,6 +12,8 @@ use RuntimeException;
 
 final class WebsiteVersionRestoreService
 {
+    public function __construct(private readonly WebsiteVersionService $versions) {}
+
     public function restore(Site $site, SiteVersion $version): void
     {
         abort_unless($version->site_id === $site->id, 404);
@@ -20,6 +22,9 @@ final class WebsiteVersionRestoreService
         abort_unless(is_array($snapshot), 422);
         $pages = $snapshot['pages'] ?? null;
         abort_unless(is_array($pages), 422);
+
+        // A restore is destructive by design, so keep the current state recoverable first.
+        $this->versions->create($site->fresh(), auth()->id(), 'Backup automático antes de restaurar a versão '.$version->version_number);
 
         DB::transaction(function () use ($site, $pages, $snapshot): void {
             $site->update([
