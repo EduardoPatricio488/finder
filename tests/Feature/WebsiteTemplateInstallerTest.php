@@ -19,7 +19,7 @@ final class WebsiteTemplateInstallerTest extends TestCase
     public function test_install_replaces_existing_site_structure_with_complete_template_and_v2_documents(): void
     {
         $user = User::factory()->create();
-        $site = Site::factory()->create(['user_id' => $user->id]);
+        $site = Site::factory()->create(['owner_id' => $user->id]);
         $oldPage = $site->pages()->create([
             'name' => 'Página antiga',
             'slug' => 'antiga',
@@ -60,7 +60,7 @@ final class WebsiteTemplateInstallerTest extends TestCase
 
     public function test_install_rejects_unknown_template(): void
     {
-        $site = Site::factory()->create(['user_id' => User::factory()->create()->id]);
+        $site = Site::factory()->create(['owner_id' => User::factory()->create()->id]);
 
         $this->expectException(HttpException::class);
         app(WebsiteTemplateInstaller::class)->install($site, 'missing');
