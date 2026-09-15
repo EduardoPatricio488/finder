@@ -24,25 +24,27 @@ class WebsiteAiGenerator
             'O JSON deve ter exactamente a forma {"pages":{"home":[{"type":"hero","label":"...","content":{}}]}}. Mantém o conteúdo simples, profissional e editável. Não incluas HTML, CSS, JavaScript, URLs inventados, dados pessoais ou afirmações factuais que não estejam no briefing. Usa placeholders claros quando faltar informação.',
         ]);
 
+        $payload = [
+            'model' => env('OPENAI_MODEL', 'gpt-5-mini'),
+            'temperature' => 0.4,
+            'response_format' => ['type' => 'json_object'],
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => $systemPrompt,
+                ],
+                [
+                    'role' => 'user',
+                    'content' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                ],
+            ],
+        ];
+
         try {
             $response = Http::withToken($apiKey)
                 ->acceptJson()
                 ->timeout(30)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => env('OPENAI_MODEL', 'gpt-5-mini'),
-                    'temperature' => 0.4,
-                    'response_format' => ['type' => 'json_object'],
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => $systemPrompt,
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                        ],
-                    ],
-                );
+                ->post('https://api.openai.com/v1/chat/completions', $payload);
 
             if ($response->successful()) {
                 $pages = data_get($response->json(), 'choices.0.message.content');
