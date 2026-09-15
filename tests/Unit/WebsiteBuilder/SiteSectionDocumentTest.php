@@ -22,6 +22,30 @@ it('keeps ids stable for the same section', function (): void {
     expect(SiteSectionDocument::fromSection($section))->toBe(SiteSectionDocument::fromSection($section));
 });
 
+it('migrates rich legacy sections into editable v2 elements', function (): void {
+    $section = new SiteSection([
+        'site_page_id' => 7,
+        'type' => 'feature_grid',
+        'label' => 'Benefícios',
+        'content' => [
+            'title' => 'Porque escolher-nos',
+            'items' => [
+                ['title' => 'Rápido', 'description' => 'Entrega simples.'],
+                ['title' => 'Seguro', 'description' => 'Proteção integrada.'],
+            ],
+        ],
+        'settings' => [],
+    ]);
+    $section->id = 77;
+
+    $document = SiteSectionDocument::fromSection($section);
+    $children = $document['nodes'][0]['children'];
+
+    expect($children)->toHaveCount(5)
+        ->and(array_column($children, 'type'))->toBe(['heading', 'heading', 'text', 'heading', 'text'])
+        ->and(BuilderDocument::isValid($document))->toBeTrue();
+});
+
 it('preserves unknown data and stores the normalized v2 document alongside legacy data', function (): void {
     $section = new SiteSection(['site_page_id' => 3, 'type' => 'unknown_section_type', 'label' => 'Legacy', 'content' => ['custom_value' => 'keep', 'nested' => ['x' => true]], 'settings' => ['custom_setting' => 'keep'], 'sort_order' => 4, 'is_visible' => false]);
     $section->id = 123;
