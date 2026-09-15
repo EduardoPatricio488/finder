@@ -9,7 +9,9 @@ use Livewire\Component;
 class BuilderTemplates extends Component
 {
     public ?Site $site = null;
+
     public ?SitePage $page = null;
+
     public bool $open = false;
 
     public function mount(Site $site, int $pageId): void

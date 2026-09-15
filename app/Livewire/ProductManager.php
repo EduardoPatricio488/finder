@@ -17,16 +17,27 @@ class ProductManager extends Component
     use WithFileUploads;
 
     public string $siteSlug = '';
+
     public ?int $editingProductId = null;
+
     public string $name = '';
+
     public ?int $categoryId = null;
+
     public string $description = '';
+
     public string $price = '';
+
     public bool $isActive = true;
+
     public int $stock = 0;
+
     public int $minimumStock = 0;
+
     public $image;
+
     public $products = [];
+
     public $categories = [];
 
     public function mount(): void

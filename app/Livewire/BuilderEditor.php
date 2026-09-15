@@ -17,16 +17,27 @@ use Livewire\Component;
 class BuilderEditor extends Component
 {
     public Site $site;
+
     public ?int $pageId = null;
+
     public string $pageName = '';
+
     public string $pageSlug = '';
+
     public string $pageStatus = 'draft';
+
     public array $sections = [];
+
     public array $theme = [];
+
     public bool $dirty = false;
+
     public bool $showOnboarding = false;
+
     public ?int $selectedSection = null;
+
     public array $history = [];
+
     public array $future = [];
 
     public function mount(Site $site): void
@@ -81,6 +92,7 @@ class BuilderEditor extends Component
     {
         if ($index === null) {
             $this->selectedSection = null;
+
             return;
         }
 
@@ -167,6 +179,7 @@ class BuilderEditor extends Component
             foreach ($definition['sections'] as $index => $type) {
                 $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
             }
+
             return $page;
         });
 
@@ -187,7 +200,10 @@ class BuilderEditor extends Component
 
         $page = DB::transaction(function () use ($source, $slug) {
             $page = $this->site->pages()->create(['name' => $source->name.' (cópia)', 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'seo' => $source->seo, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1]);
-            foreach ($source->sections as $section) $page->sections()->create(['type' => $section->type, 'label' => $section->label, 'content' => $section->content, 'settings' => $section->settings, 'sort_order' => $section->sort_order, 'is_visible' => $section->is_visible]);
+            foreach ($source->sections as $section) {
+                $page->sections()->create(['type' => $section->type, 'label' => $section->label, 'content' => $section->content, 'settings' => $section->settings, 'sort_order' => $section->sort_order, 'is_visible' => $section->is_visible]);
+            }
+
             return $page;
         });
 
@@ -213,7 +229,9 @@ class BuilderEditor extends Component
         $this->checkpoint();
         $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
         $this->selectedSection = count($this->sections) - 1;
-        if ($type === 'product_grid') $this->syncProductGridItems();
+        if ($type === 'product_grid') {
+            $this->syncProductGridItems();
+        }
         $this->markDirty();
     }
 
@@ -238,6 +256,7 @@ class BuilderEditor extends Component
             $this->selectedSection = $sectionIndex;
             $this->syncProductGridItems($sectionIndex);
             $this->dispatch('builder-products-loaded', section: $sectionIndex);
+
             return;
         }
 
@@ -254,6 +273,7 @@ class BuilderEditor extends Component
         if (! isset($templates[$type])) {
             $this->selectedSection = $sectionIndex;
             $this->dispatch('builder-item-not-supported', section: $sectionIndex, type: $type);
+
             return;
         }
 
@@ -281,7 +301,9 @@ class BuilderEditor extends Component
         abort_unless($this->sections[$sectionIndex]['type'] !== 'product_grid', 422);
         $items = $this->sections[$sectionIndex]['content']['items'] ?? [];
         $target = $direction === 'up' ? $itemIndex - 1 : $itemIndex + 1;
-        if (! isset($items[$itemIndex]) || $target < 0 || $target >= count($items)) return;
+        if (! isset($items[$itemIndex]) || $target < 0 || $target >= count($items)) {
+            return;
+        }
         $this->checkpoint();
         [$items[$itemIndex], $items[$target]] = [$items[$target], $items[$itemIndex]];
         $this->sections[$sectionIndex]['content']['items'] = $items;
@@ -291,13 +313,21 @@ class BuilderEditor extends Component
 
     public function reorderSections(array $orderedIds): void
     {
-        if (count($orderedIds) !== count($this->sections)) return;
+        if (count($orderedIds) !== count($this->sections)) {
+            return;
+        }
         $currentIds = collect($this->sections)->map(fn ($section, $index) => (string) ($section['id'] ?? 'new-'.$index))->values()->all();
         $orderedIds = array_map('strval', $orderedIds);
-        if (count(array_unique($orderedIds)) !== count($orderedIds) || array_diff($orderedIds, $currentIds) || array_diff($currentIds, $orderedIds)) abort(422, 'Ordem das secções inválida.');
-        if ($currentIds === $orderedIds) return;
+        if (count(array_unique($orderedIds)) !== count($orderedIds) || array_diff($orderedIds, $currentIds) || array_diff($currentIds, $orderedIds)) {
+            abort(422, 'Ordem das secções inválida.');
+        }
+        if ($currentIds === $orderedIds) {
+            return;
+        }
         $this->checkpoint();
-        $lookup = collect($this->sections)->mapWithKeys(function (array $section, int $index) { return [(string) ($section['id'] ?? 'new-'.$index) => $section]; });
+        $lookup = collect($this->sections)->mapWithKeys(function (array $section, int $index) {
+            return [(string) ($section['id'] ?? 'new-'.$index) => $section];
+        });
         $this->sections = array_values(array_map(fn (string $id) => $lookup[$id], $orderedIds));
         $this->selectedSection = 0;
         $this->markDirty();
@@ -327,7 +357,9 @@ class BuilderEditor extends Component
     {
         abort_unless(in_array($direction, ['up', 'down'], true), 422);
         $target = $direction === 'up' ? $index - 1 : $index + 1;
-        if ($target < 0 || $target >= count($this->sections)) return;
+        if ($target < 0 || $target >= count($this->sections)) {
+            return;
+        }
         $this->checkpoint();
         [$this->sections[$index], $this->sections[$target]] = [$this->sections[$target], $this->sections[$index]];
         $this->selectedSection = $target;
@@ -336,14 +368,18 @@ class BuilderEditor extends Component
 
     public function undo(): void
     {
-        if (! $this->history) return;
+        if (! $this->history) {
+            return;
+        }
         $this->future[] = $this->currentSnapshot();
         $this->restoreSnapshot(array_pop($this->history));
     }
 
     public function redo(): void
     {
-        if (! $this->future) return;
+        if (! $this->future) {
+            return;
+        }
         $this->history[] = $this->currentSnapshot();
         $this->restoreSnapshot(array_pop($this->future));
     }
@@ -359,14 +395,18 @@ class BuilderEditor extends Component
             foreach ($this->sections as $index => $data) {
                 $section = ! empty($data['id']) ? $page->sections()->findOrFail($data['id']) : new SiteSection(['site_page_id' => $page->id]);
                 $content = $data['content'] ?? [];
-                if (($data['type'] ?? '') === 'product_grid') unset($content['items']);
+                if (($data['type'] ?? '') === 'product_grid') {
+                    unset($content['items']);
+                }
                 $section->fill(['type' => $data['type'], 'label' => $data['label'] ?? Str::headline($data['type']), 'content' => $content, 'settings' => $data['settings'] ?? [], 'sort_order' => $index, 'is_visible' => (bool) ($data['is_visible'] ?? true)]);
                 $section->save();
                 $keepIds[] = $section->id;
                 $this->sections[$index]['id'] = $section->id;
             }
             $query = $page->sections();
-            if ($keepIds) $query->whereNotIn('id', $keepIds);
+            if ($keepIds) {
+                $query->whereNotIn('id', $keepIds);
+            }
             $query->delete();
             $this->site->update(['theme' => $this->theme]);
         });
@@ -405,11 +445,14 @@ class BuilderEditor extends Component
         $last = end($this->history);
         if ($last === $snapshot) {
             $this->future = [];
+
             return;
         }
 
         $this->history[] = $snapshot;
-        if (count($this->history) > 30) array_shift($this->history);
+        if (count($this->history) > 30) {
+            array_shift($this->history);
+        }
         $this->future = [];
     }
 
@@ -438,7 +481,9 @@ class BuilderEditor extends Component
             ->get();
 
         foreach ($this->sections as $index => $section) {
-            if (($section['type'] ?? '') !== 'product_grid' || ($onlySection !== null && $onlySection !== $index)) continue;
+            if (($section['type'] ?? '') !== 'product_grid' || ($onlySection !== null && $onlySection !== $index)) {
+                continue;
+            }
 
             $this->sections[$index]['content']['items'] = $products->map(fn (Product $product): array => [
                 'product_id' => $product->id,
