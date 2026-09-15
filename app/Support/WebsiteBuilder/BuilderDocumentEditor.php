@@ -87,8 +87,9 @@ final class BuilderDocumentEditor
             return $document;
         }
 
+        $found = false;
         $moved = false;
-        self::walk($document['nodes'], function (array &$node) use ($elementId, $offset, &$moved): bool {
+        self::walk($document['nodes'], function (array &$node) use ($elementId, $offset, &$found, &$moved): bool {
             if (($node['type'] ?? null) !== 'container') {
                 return false;
             }
@@ -96,6 +97,7 @@ final class BuilderDocumentEditor
                 if (($child['id'] ?? null) !== $elementId) {
                     continue;
                 }
+                $found = true;
                 $target = $index + $offset;
                 if (! isset($node['children'][$target])) {
                     return true;
@@ -109,7 +111,7 @@ final class BuilderDocumentEditor
             return false;
         });
 
-        if (! $moved) {
+        if (! $found) {
             throw new InvalidArgumentException("Builder element [{$elementId}] cannot be moved.");
         }
 
