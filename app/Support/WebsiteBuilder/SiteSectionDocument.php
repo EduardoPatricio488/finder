@@ -47,23 +47,35 @@ final class SiteSectionDocument
 
     public static function toSectionData(array $document): array
     {
-        BuilderDocument::validate($document);
+        $document = BuilderDocument::normalize($document);
         $sections = [];
+
         foreach ($document['nodes'] as $node) {
             $legacy = $node['settings']['legacy'] ?? null;
-            if (! is_array($legacy) || ! array_key_exists('type', $legacy)) throw new InvalidArgumentException('Document node does not contain SiteSection legacy metadata.');
+            if (! is_array($legacy) || ! array_key_exists('type', $legacy)) {
+                throw new InvalidArgumentException('Document node does not contain SiteSection legacy metadata.');
+            }
+
+            $legacySettings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
+            $legacySettings['builder_document'] = $document;
+
             $section = [
                 'site_page_id' => $legacy['site_page_id'] ?? null,
                 'type' => (string) $legacy['type'],
                 'label' => $legacy['label'] ?? null,
                 'content' => is_array($legacy['content'] ?? null) ? $legacy['content'] : [],
-                'settings' => is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [],
+                'settings' => $legacySettings,
                 'sort_order' => (int) ($legacy['sort_order'] ?? 0),
                 'is_visible' => (bool) ($legacy['is_visible'] ?? true),
             ];
-            if (array_key_exists('section_id', $legacy) && $legacy['section_id'] !== null) $section['id'] = $legacy['section_id'];
+
+            if (array_key_exists('section_id', $legacy) && $legacy['section_id'] !== null) {
+                $section['id'] = $legacy['section_id'];
+            }
+
             $sections[] = $section;
         }
+
         return $sections;
     }
 
