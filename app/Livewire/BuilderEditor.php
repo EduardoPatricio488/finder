@@ -158,7 +158,9 @@ class BuilderEditor extends Component
         $slug = Str::slug($definition['slug']);
         $baseSlug = $slug;
         $counter = 2;
-        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) $slug = $baseSlug.'-'.$counter++;
+        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$counter++;
+        }
 
         $page = DB::transaction(function () use ($definition, $slug) {
             $page = $this->site->pages()->create(['name' => $definition['name'], 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1]);
@@ -179,7 +181,9 @@ class BuilderEditor extends Component
         $slug = $source->slug.'-copia';
         $baseSlug = $slug;
         $counter = 2;
-        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) $slug = $baseSlug.'-'.$counter++;
+        while ($this->site->pages()->withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$counter++;
+        }
 
         $page = DB::transaction(function () use ($source, $slug) {
             $page = $this->site->pages()->create(['name' => $source->name.' (cópia)', 'slug' => $slug, 'status' => 'draft', 'is_homepage' => false, 'seo' => $source->seo, 'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1]);
@@ -355,9 +359,7 @@ class BuilderEditor extends Component
             foreach ($this->sections as $index => $data) {
                 $section = ! empty($data['id']) ? $page->sections()->findOrFail($data['id']) : new SiteSection(['site_page_id' => $page->id]);
                 $content = $data['content'] ?? [];
-                if (($data['type'] ?? '') === 'product_grid') {
-                    unset($content['items']);
-                }
+                if (($data['type'] ?? '') === 'product_grid') unset($content['items']);
                 $section->fill(['type' => $data['type'], 'label' => $data['label'] ?? Str::headline($data['type']), 'content' => $content, 'settings' => $data['settings'] ?? [], 'sort_order' => $index, 'is_visible' => (bool) ($data['is_visible'] ?? true)]);
                 $section->save();
                 $keepIds[] = $section->id;
@@ -399,7 +401,14 @@ class BuilderEditor extends Component
 
     private function checkpoint(): void
     {
-        $this->history[] = $this->currentSnapshot();
+        $snapshot = $this->currentSnapshot();
+        $last = end($this->history);
+        if ($last === $snapshot) {
+            $this->future = [];
+            return;
+        }
+
+        $this->history[] = $snapshot;
         if (count($this->history) > 30) array_shift($this->history);
         $this->future = [];
     }
@@ -429,9 +438,7 @@ class BuilderEditor extends Component
             ->get();
 
         foreach ($this->sections as $index => $section) {
-            if (($section['type'] ?? '') !== 'product_grid' || ($onlySection !== null && $onlySection !== $index)) {
-                continue;
-            }
+            if (($section['type'] ?? '') !== 'product_grid' || ($onlySection !== null && $onlySection !== $index)) continue;
 
             $this->sections[$index]['content']['items'] = $products->map(fn (Product $product): array => [
                 'product_id' => $product->id,
@@ -449,9 +456,13 @@ class BuilderEditor extends Component
 
     private function createDefaultPage(): SitePage
     {
-        $page = $this->site->pages()->create(['name' => 'Home', 'slug' => 'home', 'status' => 'draft', 'is_homepage' => true, 'sort_order' => 0]);
-        foreach (['hero', 'feature_grid', 'cta'] as $index => $type) $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index]);
-        return $page;
+        return $this->site->pages()->create([
+            'name' => 'Home',
+            'slug' => 'home',
+            'status' => 'draft',
+            'is_homepage' => true,
+            'sort_order' => 0,
+        ]);
     }
 
     private function defaultTheme(): array
