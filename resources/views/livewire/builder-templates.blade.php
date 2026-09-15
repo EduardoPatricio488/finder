@@ -19,22 +19,34 @@
         </button>
 
         @if($open)
-            <div class="fixed inset-0 z-[80] flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click.self="$set('open', false)" role="dialog" aria-modal="true" aria-labelledby="builder-models-title">
-                <div class="w-full max-w-5xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
-                    <div class="flex items-start justify-between gap-4 border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
+            <div
+                class="fixed inset-0 z-[9999] flex items-center justify-center isolate bg-zinc-950/70 p-4 backdrop-blur-sm"
+                wire:click.self="$set('open', false)"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="builder-models-title"
+                style="z-index: 99999; isolation: isolate;"
+            >
+                <div
+                    class="relative z-[100000] flex max-h-[calc(100vh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
+                    style="z-index: 100000;"
+                >
+                    <div class="flex shrink-0 items-start justify-between gap-4 border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
                         <div>
                             <p class="text-[10px] font-black uppercase tracking-[.2em] text-indigo-600">Finder · Biblioteca</p>
                             <h2 id="builder-models-title" class="mt-1 text-2xl font-black tracking-tight">Escolhe um modelo visual</h2>
                             <p class="mt-1 max-w-2xl text-sm leading-6 text-zinc-500">Aplica uma base visual ao website e continua a editar o conteúdo no Builder. O conteúdo existente é preservado.</p>
                         </div>
-                        <button type="button" wire:click="$set('open', false)" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 text-sm font-black hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800" aria-label="Fechar biblioteca">✕</button>
+                        <button type="button" wire:click="$set('open', false)" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 text-sm font-black hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800" aria-label="Fechar biblioteca">✕</button>
                     </div>
-                    <div class="max-h-[72vh] overflow-y-auto p-6">
+
+                    <div class="min-h-0 flex-1 overflow-y-auto p-6">
                         <div class="mb-5 flex flex-wrap gap-2 text-[10px] font-black">
                             @foreach(['Todos','Negócios','Restaurantes','Portfólio','Loja','Minimalista'] as $category)
                                 <span class="rounded-full border border-zinc-200 px-3 py-1.5 text-zinc-500 dark:border-zinc-700">{{ $category }}</span>
                             @endforeach
                         </div>
+
                         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             @php
                                 $templates = [
@@ -47,6 +59,7 @@
                                     'store' => ['Loja', 'Catálogo visual com cartões e navegação superior.', 'bg-amber-50', '▥'],
                                 ];
                             @endphp
+
                             @foreach($templates as $key => [$name, $description, $preview, $icon])
                                 <button type="button" wire:click="apply('{{ $key }}')" wire:loading.attr="disabled" class="group overflow-hidden rounded-2xl border border-zinc-200 bg-white text-left transition hover:-translate-y-1 hover:border-indigo-400 hover:shadow-xl disabled:cursor-wait disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950">
                                     <div class="relative h-36 {{ $preview }} p-4 dark:opacity-90">
@@ -72,6 +85,7 @@
                                 </button>
                             @endforeach
                         </div>
+
                         <div class="mt-6 grid gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:grid-cols-3 dark:border-zinc-800 dark:bg-zinc-950">
                             <div><p class="text-[10px] font-black uppercase tracking-wider text-zinc-400">Estrutura</p><p class="mt-1 text-sm font-bold">Navegação e composição visual</p></div>
                             <div><p class="text-[10px] font-black uppercase tracking-wider text-zinc-400">Tipografia</p><p class="mt-1 text-sm font-bold">Estilos de títulos e texto</p></div>
