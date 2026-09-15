@@ -43,10 +43,11 @@ new class extends Component
         $this->categoryId = $product->category_id;
         $this->description = $product->description ?? '';
         $this->price = (string) $product->price;
-        $this->isActive = $product->is_active;
-        $this->stock = $product->stock;
-        $this->minimumStock = $product->minimum_stock;
+        $this->isActive = (bool) $product->is_active;
+        $this->stock = (int) $product->stock;
+        $this->minimumStock = (int) $product->minimum_stock;
         $this->image = null;
+
         $this->dispatch('product-form-opened');
     }
 
@@ -124,7 +125,7 @@ new class extends Component
 <div
     class="space-y-8"
     x-data="{ productFormOpen: false }"
-    x-on:product-form-opened.window="productFormOpen = true"
+    x-on:product-form-opened.window="productFormOpen = true; $nextTick(() => $refs.productForm?.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
     x-on:product-form-closed.window="productFormOpen = false"
 >
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -135,7 +136,7 @@ new class extends Component
         <div class="flex flex-wrap items-center gap-2">
             <button
                 type="button"
-                x-on:click="productFormOpen = true"
+                x-on:click="productFormOpen = true; $nextTick(() => $refs.productForm?.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
                 class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700"
             >
                 Novo produto
@@ -157,6 +158,7 @@ new class extends Component
     @endif
 
     <form
+        x-ref="productForm"
         wire:submit="save"
         x-cloak
         x-show="productFormOpen"
