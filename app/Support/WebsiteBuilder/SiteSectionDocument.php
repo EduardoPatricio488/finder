@@ -22,7 +22,6 @@ final class SiteSectionDocument
         $type = (string) ($section->type ?? '');
         $content = is_array($section->content) ? $section->content : [];
         $containerId = BuilderNodeId::stable('container', self::seed($section));
-        unset($settings['builder_document']);
 
         $node = [
             'id' => $containerId,
