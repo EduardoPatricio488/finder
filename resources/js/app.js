@@ -41,6 +41,35 @@ document.addEventListener('livewire:navigated', () => {
         saveTimer = window.setTimeout(saveBuilder, 1400);
     };
 
+    const selectVisualElement = (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target) return;
+
+        const section = target.closest('.builder-section[data-section-id]');
+        if (!section) return;
+
+        // Do not hijack real controls or the builder's own action buttons.
+        if (target.closest('button, a, input, textarea, select, [contenteditable="true"]')) return;
+
+        const sections = [...document.querySelectorAll('.builder-section[data-section-id]')];
+        const sectionIndex = sections.indexOf(section);
+        if (sectionIndex < 0) return;
+
+        const component = getBuilderComponent();
+        if (!component) return;
+
+        event.stopPropagation();
+        component.selectSection(sectionIndex);
+    };
+
+    const bootVisualSelection = () => {
+        const canvas = document.querySelector('.builder-section')?.closest('main');
+        if (!canvas || canvas.dataset.finderVisualSelectionReady === '1') return;
+
+        canvas.dataset.finderVisualSelectionReady = '1';
+        canvas.addEventListener('click', selectVisualElement, true);
+    };
+
     const bootDragAndDrop = () => {
         const sections = [...document.querySelectorAll('.builder-section[wire\\:key]')];
         if (!sections.length) return;
@@ -107,6 +136,7 @@ document.addEventListener('livewire:navigated', () => {
     };
 
     const boot = () => {
+        bootVisualSelection();
         bootDragAndDrop();
     };
 
@@ -121,6 +151,6 @@ document.addEventListener('livewire:navigated', () => {
     document.addEventListener('livewire:navigated', boot);
     document.addEventListener('DOMContentLoaded', boot);
 
-    const observer = new MutationObserver(() => bootDragAndDrop());
+    const observer = new MutationObserver(() => boot());
     observer.observe(document.body, { childList: true, subtree: true });
 })();
