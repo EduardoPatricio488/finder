@@ -7,6 +7,7 @@ use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
 use App\Livewire\CustomerAccount;
 use App\Livewire\CustomerAssistant;
+use App\Livewire\Help;
 use App\Livewire\LandingPage;
 use App\Livewire\MediaLibrary;
 use App\Livewire\MenuManager;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'verified'])
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', UserDashboard::class)->name('dashboard');
+    Route::get('ajuda', Help::class)->name('help');
     Route::get('websites/create', CreateSite::class)->name('site.create');
     Route::get('websites/{site:slug}/builder', BuilderEditor::class)->name('builder.edit');
     Route::get('conta/{section?}', CustomerAccount::class)->name('account');
