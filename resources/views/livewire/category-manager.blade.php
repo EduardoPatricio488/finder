@@ -11,13 +11,13 @@
         </div>
     @endif
 
-    <form wire:submit.prevent="save" class="rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <form wire:submit="save" class="rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div class="flex flex-col gap-3 sm:flex-row">
             <div class="min-w-0 flex-1">
                 <label for="category-name" class="sr-only">Nome da categoria</label>
                 <input
                     id="category-name"
-                    wire:model="name"
+                    wire:model.live="name"
                     type="text"
                     maxlength="255"
                     autocomplete="off"
