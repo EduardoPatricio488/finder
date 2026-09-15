@@ -23,8 +23,7 @@ final class BuilderNodeId
         $prefix = match ($type) {
             null => '(?:cnt|el)',
             'container' => 'cnt',
-            'heading', 'text', 'image', 'button', 'divider', 'spacer' => 'el',
-            default => '',
+            default => ElementRegistry::has($type) ? 'el' : '',
         };
 
         return $prefix !== '' && preg_match('/^'.$prefix.'_[a-z0-9]{16}$/', $id) === 1;
@@ -34,8 +33,7 @@ final class BuilderNodeId
     {
         return match ($type) {
             'container' => 'cnt',
-            'heading', 'text', 'image', 'button', 'divider', 'spacer' => 'el',
-            default => throw new \InvalidArgumentException("Unsupported document node type [{$type}]."),
+            default => ElementRegistry::has($type) ? 'el' : throw new \InvalidArgumentException("Unsupported document node type [{$type}]."),
         };
     }
 }
