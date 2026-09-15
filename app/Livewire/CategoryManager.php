@@ -12,22 +12,22 @@ class CategoryManager extends Component
 {
     use InteractsWithSiteContext;
 
-    public string $name = '';
+    public string $categoryName = '';
 
     public function save(): void
     {
         $site = $this->currentSite();
 
-        $this->name = trim($this->name);
+        $this->categoryName = trim($this->categoryName);
 
         $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'categoryName' => ['required', 'string', 'max:255'],
         ]);
 
-        $slug = Str::slug($validated['name']);
+        $slug = Str::slug($validated['categoryName']);
 
         if ($slug === '') {
-            $this->addError('name', 'Introduza um nome de categoria válido.');
+            $this->addError('categoryName', 'Introduza um nome de categoria válido.');
 
             return;
         }
@@ -41,11 +41,11 @@ class CategoryManager extends Component
         }
 
         $site->categories()->create([
-            'name' => $validated['name'],
+            'name' => $validated['categoryName'],
             'slug' => $slug,
         ]);
 
-        $this->reset('name');
+        $this->reset('categoryName');
         $this->resetValidation();
         session()->flash('status', 'Categoria criada com sucesso.');
     }
