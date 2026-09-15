@@ -8,11 +8,9 @@ use App\Models\SitePage;
 use App\Models\SiteSubmission;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Layout('layouts.public-site')]
 #[Title('Website')]
 class PublicSite extends Component
 {
@@ -131,6 +129,11 @@ class PublicSite extends Component
 
     public function render(): mixed
     {
-        return view('livewire.public-site-renderer');
+        return view('livewire.public-site-renderer')
+            ->layout('layouts.public-site', [
+                'site' => $this->site,
+                'page' => $this->page,
+                'preview' => $this->preview,
+            ]);
     }
 }
