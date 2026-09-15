@@ -101,7 +101,7 @@ final class SiteSectionDocument
         $elements = [];
         $align = in_array($settings['align'] ?? null, ['left', 'center', 'right', 'justify'], true) ? $settings['align'] : 'left';
 
-        if (is_string($content['title'] ?? null)) {
+        if (is_string($content['title'] ?? null) && $content['title'] !== '') {
             $elements[] = self::element('heading', BuilderNodeId::stable('heading', $containerId.':title'), ['text' => $content['title'], 'level' => $section->type === 'hero' ? 'h1' : 'h2'], ['align' => $align]);
         }
 
@@ -146,6 +146,45 @@ final class SiteSectionDocument
             foreach (array_values(array_filter($content['items'], 'is_array')) as $index => $item) {
                 $elements[] = self::element('quote', BuilderNodeId::stable('quote', $containerId.':testimonial:'.$index), ['text' => (string) ($item['quote'] ?? $item['description'] ?? ''), 'author' => (string) ($item['name'] ?? '')], ['align' => $align]);
             }
+        }
+
+        if ($section->type === 'feature_grid' && is_array($content['items'] ?? null)) {
+            foreach (array_values(array_filter($content['items'], 'is_array')) as $index => $item) {
+                $elements[] = self::element('heading', BuilderNodeId::stable('heading', $containerId.':feature:'.$index), ['text' => (string) ($item['title'] ?? 'Benefício'), 'level' => 'h3'], ['align' => $align]);
+                if (! empty($item['description'])) {
+                    $elements[] = self::element('text', BuilderNodeId::stable('text', $containerId.':feature-description:'.$index), ['text' => (string) $item['description']], ['align' => $align]);
+                }
+            }
+        }
+
+        if ($section->type === 'pricing' && is_array($content['items'] ?? null)) {
+            foreach (array_values(array_filter($content['items'], 'is_array')) as $index => $item) {
+                $name = (string) ($item['name'] ?? $item['title'] ?? 'Plano');
+                $price = (string) ($item['price'] ?? '');
+                $description = (string) ($item['description'] ?? '');
+                $elements[] = self::element('heading', BuilderNodeId::stable('heading', $containerId.':price:'.$index), ['text' => $name.($price !== '' ? ' — '.$price : ''), 'level' => 'h3'], ['align' => $align]);
+                if ($description !== '') {
+                    $elements[] = self::element('text', BuilderNodeId::stable('text', $containerId.':price-description:'.$index), ['text' => $description], ['align' => $align]);
+                }
+            }
+        }
+
+        if (in_array($section->type, ['contact_form', 'newsletter'], true)) {
+            $elements[] = self::element('form', BuilderNodeId::stable('form', $containerId.':form'), ['title' => (string) ($content['title'] ?? ($section->type === 'newsletter' ? 'Subscreve a nossa newsletter' : 'Fala connosco')), 'submit_label' => (string) ($content['submit_label'] ?? 'Enviar')], ['style' => 'card']);
+        }
+
+        if ($section->type === 'cta') {
+            $elements[] = self::element('button', BuilderNodeId::stable('button', $containerId.':cta'), ['label' => (string) ($content['button_label'] ?? 'Começar agora'), 'url' => (string) ($content['button_url'] ?? '#')], ['style' => 'primary', 'align' => $align]);
+        }
+
+        foreach (['product_grid' => 'Produtos', 'product_card' => 'Produto', 'blog_posts' => 'Artigos', 'map' => 'Localização'] as $type => $fallback) {
+            if ($section->type === $type && $elements === []) {
+                $elements[] = self::element('text', BuilderNodeId::stable('text', $containerId.':'.$type), ['text' => (string) ($content['title'] ?? $fallback)], ['align' => $align]);
+            }
+        }
+
+        if ($section->type === 'card' && $elements === []) {
+            $elements[] = self::element('text', BuilderNodeId::stable('text', $containerId.':card'), ['text' => (string) ($content['body'] ?? $content['description'] ?? 'Adiciona conteúdo ao cartão.')], ['align' => $align]);
         }
 
         return $elements;
