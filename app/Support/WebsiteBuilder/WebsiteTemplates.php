@@ -69,7 +69,8 @@ final class WebsiteTemplates
             ))
             ->flatten()
             ->unique()
-            ->values();
+            ->values()
+            ->map(fn (mixed $type): string => (string) $type);
     }
 
     /** @return array{name:string,description:string,pages:list<array{name:string,slug:string,sections:list<array{type:string,label:string}>}>} */
