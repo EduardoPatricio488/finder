@@ -17,36 +17,54 @@ class ProductManager extends Component
     use WithFileUploads;
 
     public ?int $editingProductId = null;
-
     public string $name = '';
-
     public ?int $categoryId = null;
-
     public string $description = '';
-
     public string $price = '';
-
     public bool $isActive = true;
-
     public int $stock = 0;
-
     public int $minimumStock = 0;
-
     public $image;
-
     public $products = [];
-
     public $categories = [];
+
+    public string $pageBackgroundColor = '#f7f4ee';
+    public string $pageTextColor = '#1c1917';
+    public string $pageAccentColor = '#f59e0b';
 
     public function mount(): void
     {
         $this->loadData();
+        $colors = ($this->currentSite()->settings ?? [])['products_page'] ?? [];
+        $this->pageBackgroundColor = $colors['background'] ?? '#f7f4ee';
+        $this->pageTextColor = $colors['text'] ?? '#1c1917';
+        $this->pageAccentColor = $colors['accent'] ?? '#f59e0b';
+    }
+
+    public function savePageColors(): void
+    {
+        foreach (['pageBackgroundColor', 'pageTextColor', 'pageAccentColor'] as $property) {
+            if (! preg_match('/^#[0-9a-fA-F]{6}$/', $this->{$property})) {
+                $this->addError($property, 'Escolha uma cor válida.');
+                return;
+            }
+        }
+
+        $site = $this->currentSite();
+        $settings = $site->settings ?? [];
+        $settings['products_page'] = [
+            'background' => strtolower($this->pageBackgroundColor),
+            'text' => strtolower($this->pageTextColor),
+            'accent' => strtolower($this->pageAccentColor),
+        ];
+        $site->settings = $settings;
+        $site->save();
+        session()->flash('status', 'Cores da página de produtos guardadas com sucesso.');
     }
 
     public function edit(int $productId): void
     {
         $product = $this->currentSite()->products()->findOrFail($productId);
-
         $this->editingProductId = $product->id;
         $this->name = $product->name;
         $this->categoryId = $product->category_id;
@@ -61,7 +79,6 @@ class ProductManager extends Component
     public function save(): void
     {
         $site = $this->currentSite();
-
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'categoryId' => ['required', 'integer', 'exists:categories,id'],
@@ -74,12 +91,10 @@ class ProductManager extends Component
         ]);
 
         abort_unless($site->categories()->whereKey($validated['categoryId'])->exists(), 404);
-
         $product = $this->editingProductId === null
             ? new Product(['site_id' => $site->id])
             : $site->products()->findOrFail($this->editingProductId);
         $oldImage = $product->image_url;
-
         $product->fill([
             'category_id' => $validated['categoryId'],
             'name' => $validated['name'],
@@ -90,17 +105,13 @@ class ProductManager extends Component
             'stock' => $validated['stock'],
             'minimum_stock' => $validated['minimumStock'],
         ]);
-
         if ($this->image !== null) {
             $product->image_url = $this->image->store('products', 'public');
         }
-
         $product->save();
-
         if ($oldImage !== null && $this->image !== null) {
             Storage::disk('public')->delete($oldImage);
         }
-
         $this->resetForm();
         $this->loadData();
         session()->flash('status', 'Produto guardado com sucesso.');
@@ -111,11 +122,9 @@ class ProductManager extends Component
         $product = $this->currentSite()->products()->findOrFail($productId);
         $image = $product->image_url;
         $product->delete();
-
         if ($image !== null) {
             Storage::disk('public')->delete($image);
         }
-
         $this->loadData();
         session()->flash('status', 'Produto eliminado com sucesso.');
     }
@@ -130,7 +139,6 @@ class ProductManager extends Component
     private function loadData(): void
     {
         $site = $this->currentSite();
-
         $this->products = $site->products()->with('category')->latest()->get();
         $this->categories = $site->categories()->withCount('products')->orderBy('name')->get();
     }
