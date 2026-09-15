@@ -28,10 +28,18 @@ class MediaLibrary extends Component
 
     public function uploadMedia(): void
     {
-        $this->validate([
-            'upload' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
-            'altText' => ['nullable', 'string', 'max:255'],
-        ]);
+        $this->validate(
+            [
+                'upload' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
+                'altText' => ['nullable', 'string', 'max:255'],
+            ],
+            [
+                'upload.required' => 'Seleciona primeiro uma imagem do teu computador.',
+                'upload.file' => 'O ficheiro selecionado não é válido.',
+                'upload.mimes' => 'Formato não suportado. Usa JPG, PNG, WEBP, GIF ou SVG.',
+                'upload.max' => 'A imagem não pode ultrapassar 10 MB.',
+            ],
+        );
 
         $path = $this->upload->store('sites/'.$this->site->id.'/media', 'public');
         $image = @getimagesize($this->upload->getRealPath());
