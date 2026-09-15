@@ -7,7 +7,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('categories') }}" wire:navigate class="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 hover:text-stone-900">Gerir categorias</a>
-            <button type="button" wire:click="$set('editingProductId', null)" x-data x-on:click="$dispatch('open-product-form')" class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700">Novo produto</button>
+            <button type="button" wire:click="resetForm" x-data x-on:click="$dispatch('open-product-form')" class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700">Novo produto</button>
         </div>
     </div>
 
@@ -89,7 +89,7 @@
                         <tr wire:key="product-{{ $product->id }}" class="transition hover:bg-stone-50/70">
                             <td class="px-6 py-3">
                                 @if ($product->image_url)
-                                    <img src="{{ Storage::disk('public')->url($product->image_url) }}" alt="{{ $product->name }}" class="size-12 rounded-lg object-cover">
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->image_url) }}" alt="{{ $product->name }}" class="size-12 rounded-lg object-cover">
                                 @else
                                     <div class="flex size-12 items-center justify-center rounded-lg bg-stone-100 text-xs text-stone-400">Sem foto</div>
                                 @endif
@@ -117,7 +117,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-3 text-right">
-                                <button type="button" wire:click="edit({{ $product->id }})" class="mr-3 font-medium text-stone-700 hover:text-stone-950">Editar</button>
+                                <button type="button" wire:click="edit({{ $product->id }})" x-on:click="$dispatch('open-product-form')" class="mr-3 font-medium text-stone-700 hover:text-stone-950">Editar</button>
                                 <button type="button" wire:click="delete({{ $product->id }})" wire:confirm="Eliminar este produto?" class="font-medium text-red-600 hover:text-red-800">Eliminar</button>
                             </td>
                         </tr>
