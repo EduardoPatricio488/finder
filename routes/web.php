@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SiteSeoController;
 use App\Livewire\AdminAssistant;
 use App\Livewire\AdminDashboard;
 use App\Livewire\BuilderEditor;
@@ -45,6 +46,8 @@ Route::get('vendas', ProductCatalog::class)->name('sales');
 Route::get('produtos', ProductCatalog::class)->name('products');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
 Route::get('sites/{site:slug}', PublicSite::class)->name('sites.show');
+Route::get('site/{site:slug}/sitemap.xml', [SiteSeoController::class, 'sitemap'])->name('site.sitemap');
+Route::get('site/{site:slug}/robots.txt', [SiteSeoController::class, 'robots'])->name('site.robots');
 
 Route::middleware(['auth', 'verified'])
     ->get('entrada', fn () => redirect()->route('sales'))
