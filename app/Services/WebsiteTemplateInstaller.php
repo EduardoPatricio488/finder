@@ -185,7 +185,7 @@ final class WebsiteTemplateInstaller
             ],
             'social_links' => [
                 'title' => 'Segue-nos',
-                'links' => [],
+                'items' => [],
             ],
             'video' => [
                 'title' => 'Conhece melhor o nosso trabalho',
