@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\Site;
+use App\Models\SiteVersion;
+use Illuminate\Support\Facades\DB;
+
+final class WebsiteVersionService
+{
+    public function create(Site $site, ?int $userId = null, string $label = 'Versão guardada'): SiteVersion
+    {
+        return DB::transaction(function () use ($site, $userId, $label): SiteVersion {
+            $number = ((int) $site->versions()->max('version_number')) + 1;
+            $snapshot = [
+                'schema_version' => 1,
+                'site' => [
+                    'theme' => $site->theme ?? [],
+                    'settings' => $site->settings ?? [],
+                    'seo' => $site->seo ?? [],
+                ],
+                'pages' => $site->pages()->with('sections')->orderBy('sort_order')->get()->map(fn ($page): array => [
+                    'name' => $page->name,
+                    'slug' => $page->slug,
+                    'status' => $page->status,
+                    'is_homepage' => (bool) $page->is_homepage,
+                    'seo' => $page->seo ?? [],
+                    'theme' => $page->theme ?? [],
+                    'sections' => $page->sections->map(fn ($section): array => [
+                        'type' => $section->type,
+                        'label' => $section->label,
+                        'content' => $section->content ?? [],
+                        'settings' => $section->settings ?? [],
+                        'sort_order' => $section->sort_order,
+                        'is_visible' => (bool) $section->is_visible,
+                    ])->values()->all(),
+                ])->values()->all(),
+            ];
+
+            $version = $site->versions()->create([
+                'created_by' => $userId,
+                'label' => trim($label) !== '' ? trim($label) : 'Versão guardada',
+                'version_number' => $number,
+                'snapshot' => $snapshot,
+            ]);
+
+            $site->versions()->orderByDesc('version_number')->skip(30)->take(PHP_INT_MAX)->delete();
+
+            return $version;
+        });
+    }
+}
