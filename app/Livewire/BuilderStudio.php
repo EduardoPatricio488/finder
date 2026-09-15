@@ -34,6 +34,7 @@ class BuilderStudio extends Component
     public array $siteSettings = [];
     public array $pageSeo = [];
     public ?int $selectedSection = null;
+    public ?string $selectedElementId = null;
     public string $device = 'desktop';
     public string $panel = 'pages';
     public string $aiBrief = '';
@@ -77,6 +78,7 @@ class BuilderStudio extends Component
         ])->values()->all();
         $this->pageSeo = $page->seo ?: [];
         $this->selectedSection = $this->sections !== [] ? 0 : null;
+        $this->selectedElementId = null;
         $this->refreshPages();
         $this->dirty = false;
         $this->statusMessage = 'Guardado';
@@ -116,8 +118,9 @@ class BuilderStudio extends Component
             $suffix++;
         }
 
+        $name = $suffix === 2 ? $baseName : $baseName.' '.($suffix - 1);
         $page = $this->site->pages()->create([
-            'name' => $suffix === 2 ? $baseName : $baseName.' '.$suffix - 1,
+            'name' => $name,
             'slug' => $slug,
             'status' => 'draft',
             'is_homepage' => false,
@@ -323,8 +326,38 @@ class BuilderStudio extends Component
         abort_unless(is_string($containerId), 422);
         $document = BuilderDocumentEditor::addElement($document, $containerId, $type);
         $this->applyDocumentToSection($index, $document);
+        $this->selectedElementId = $this->lastElementId($document);
         $this->dirty = true;
         $this->statusMessage = 'Elemento adicionado — por guardar';
+    }
+
+    public function selectElement(string $elementId): void
+    {
+        abort_unless($this->selectedSection !== null && isset($this->sections[$this->selectedSection]), 422);
+        $document = SiteSectionDocument::fromSection($this->sectionModel($this->selectedSection));
+        abort_unless($this->findElement($document['nodes'] ?? [], $elementId) !== null, 404);
+        $this->selectedElementId = $elementId;
+    }
+
+    public function updateSelectedElement(string $field, string $value): void
+    {
+        abort_unless($this->selectedSection !== null && $this->selectedElementId !== null, 422);
+        $allowedFields = [
+            'text', 'label', 'url', 'alt', 'caption', 'title', 'author', 'button_label', 'button_url',
+        ];
+        abort_unless(in_array($field, $allowedFields, true), 422);
+        $index = $this->selectedSection;
+        $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+        $element = $this->findElement($document['nodes'] ?? [], $this->selectedElementId);
+        abort_unless(is_array($element), 404);
+
+        $content = is_array($element['content'] ?? null) ? $element['content'] : [];
+        $content[$field] = Str::limit($value, $field === 'url' ? 2000 : 2000, '');
+        $content = $this->sanitizeElementContent((string) $element['type'], $content);
+        $document = BuilderDocumentEditor::updateElement($document, $this->selectedElementId, $content, null);
+        $this->applyDocumentToSection($index, $document);
+        $this->dirty = true;
+        $this->statusMessage = 'Elemento alterado — por guardar';
     }
 
     public function removeElement(string $elementId): void
@@ -334,6 +367,9 @@ class BuilderStudio extends Component
         $document = SiteSectionDocument::fromSection($this->sectionModel($index));
         $document = BuilderDocumentEditor::removeElement($document, $elementId);
         $this->applyDocumentToSection($index, $document);
+        if ($this->selectedElementId === $elementId) {
+            $this->selectedElementId = null;
+        }
         $this->dirty = true;
     }
 
@@ -342,8 +378,9 @@ class BuilderStudio extends Component
         abort_unless($this->selectedSection !== null && isset($this->sections[$this->selectedSection]), 422);
         $index = $this->selectedSection;
         $document = SiteSectionDocument::fromSection($this->sectionModel($index));
-        $document = BuilderDocumentEditor::moveElement($document, $elementId, $offset);
+        $document = BuilderDocumentEditor::moveElement($document, $elementId, max(-10, min(10, $offset)));
         $this->applyDocumentToSection($index, $document);
+        $this->selectedElementId = $elementId;
         $this->dirty = true;
     }
 
@@ -353,6 +390,7 @@ class BuilderStudio extends Component
         abort_unless(in_array($type, $allowed, true), 422);
         $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
         $this->selectedSection = count($this->sections) - 1;
+        $this->selectedElementId = null;
         $this->dirty = true;
         $this->panel = 'inspector';
     }
@@ -365,6 +403,7 @@ class BuilderStudio extends Component
         $copy['label'] = ($copy['label'] ?: 'Secção').' (cópia)';
         array_splice($this->sections, $index + 1, 0, [$copy]);
         $this->selectedSection = $index + 1;
+        $this->selectedElementId = null;
         $this->dirty = true;
     }
 
@@ -373,6 +412,7 @@ class BuilderStudio extends Component
         abort_unless(isset($this->sections[$index]), 404);
         array_splice($this->sections, $index, 1);
         $this->selectedSection = $this->sections !== [] ? min($index, count($this->sections) - 1) : null;
+        $this->selectedElementId = null;
         $this->dirty = true;
     }
 
@@ -427,6 +467,7 @@ class BuilderStudio extends Component
     {
         abort_unless(isset($this->sections[$index]), 404);
         $this->selectedSection = $index;
+        $this->selectedElementId = null;
         $this->panel = 'inspector';
     }
 
@@ -510,6 +551,7 @@ class BuilderStudio extends Component
         }
 
         $this->selectedSection = $this->sections !== [] ? 0 : null;
+        $this->selectedElementId = null;
         $this->dirty = true;
         $this->showTemplates = false;
     }
@@ -534,46 +576,127 @@ class BuilderStudio extends Component
                 continue;
             }
 
-            $page = $this->site->pages()->updateOrCreate(
-                ['slug' => Str::slug($slug)],
-                ['name' => Str::headline($slug), 'seo' => [], 'sort_order' => $this->site->pages()->count()]
-            );
-
-            if ($page->id !== $this->pageId) {
+            $slug = Str::slug($slug);
+            if ($slug === '') {
                 continue;
             }
 
-            $sections = [];
-            foreach ($pageData as $section) {
-                if (! is_array($section) || ! is_string($section['type'] ?? null)) {
-                    continue;
-                }
+            $page = $this->site->pages()->updateOrCreate(
+                ['slug' => $slug],
+                ['name' => Str::headline($slug), 'status' => 'draft', 'seo' => [], 'sort_order' => $this->pageSortOrder($slug)]
+            );
+            $sections = $this->sanitizeAiSections($pageData);
+            $page->sections()->delete();
 
-                $type = $section['type'];
-                if (! in_array($type, ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'], true)) {
-                    continue;
-                }
-
-                $sections[] = [
-                    'id' => null,
-                    'type' => $type,
-                    'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''),
-                    'content' => is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type),
+            foreach ($sections as $index => $section) {
+                $page->sections()->create([
+                    'type' => $section['type'],
+                    'label' => $section['label'],
+                    'content' => $section['content'],
                     'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
+                    'sort_order' => $index,
                     'is_visible' => true,
-                ];
+                ]);
             }
 
-            if ($sections !== []) {
-                $this->sections = $sections;
-                $this->selectedSection = 0;
+            if ($slug === 'home') {
+                $this->site->pages()->update(['is_homepage' => false]);
+                $page->update(['is_homepage' => true]);
             }
         }
 
+        $home = $this->site->pages()->where('is_homepage', true)->first() ?? $this->site->pages()->orderBy('sort_order')->first();
+        if ($home) {
+            $this->loadPage($home->id);
+        }
+
         $this->refreshPages();
-        $this->dirty = true;
+        $this->dirty = false;
         $this->showAi = false;
-        $this->statusMessage = 'Estrutura gerada por IA — revê e guarda';
+        $this->statusMessage = 'Website gerado por IA — revê as páginas antes de publicar';
+    }
+
+    private function sanitizeAiSections(array $sections): array
+    {
+        $allowed = ['hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials', 'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing', 'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta'];
+        $result = [];
+
+        foreach (array_slice($sections, 0, 20) as $section) {
+            if (! is_array($section) || ! is_string($section['type'] ?? null) || ! in_array($section['type'], $allowed, true)) {
+                continue;
+            }
+
+            $type = $section['type'];
+            $content = is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type);
+            $result[] = [
+                'type' => $type,
+                'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''),
+                'content' => $this->sanitizeLegacyContent($content),
+            ];
+        }
+
+        return $result;
+    }
+
+    private function sanitizeLegacyContent(array $content): array
+    {
+        array_walk_recursive($content, function (&$value): void {
+            if (is_string($value)) {
+                $value = Str::limit($value, 4000, '');
+            }
+        });
+
+        return $content;
+    }
+
+    private function sanitizeElementContent(string $type, array $content): array
+    {
+        $definition = ElementRegistry::get($type);
+        $allowedKeys = array_keys($definition['default_content']);
+        $content = array_intersect_key($content, array_flip($allowedKeys));
+
+        foreach ($content as $key => &$value) {
+            if (is_string($value)) {
+                $value = Str::limit($value, 2000, '');
+            }
+        }
+
+        return $content;
+    }
+
+    private function lastElementId(array $document): ?string
+    {
+        $children = $document['nodes'][0]['children'] ?? [];
+        $last = end($children);
+
+        return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
+    }
+
+    private function findElement(array $nodes, string $elementId): ?array
+    {
+        foreach ($nodes as $node) {
+            if (($node['id'] ?? null) === $elementId) {
+                return $node;
+            }
+            if (is_array($node['children'] ?? null)) {
+                $found = $this->findElement($node['children'], $elementId);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function pageSortOrder(string $slug): int
+    {
+        $existing = $this->site->pages()->where('slug', $slug)->value('sort_order');
+        if ($existing !== null) {
+            return (int) $existing;
+        }
+
+        return ((int) $this->site->pages()->max('sort_order')) + 1;
     }
 
     private function createPageRecord(string $name, string $slug, bool $homepage = false): SitePage
