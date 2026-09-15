@@ -11,24 +11,3 @@ parameters:
         - routes/
 
     level: 3
-
-    # Laravel's dynamic Eloquent relations/attributes and Livewire computed
-    # properties are runtime-safe but are not fully inferable in these legacy
-    # components. The patterns are restricted to those framework types only.
-    ignoreErrors:
-        - identifier: property.notFound
-          message: '#Illuminate\\Database\\Eloquent\\Model::\$#'
-        - identifier: property.notFound
-          message: '#App\\Models\\Customer::\$orders_sum_total#'
-        - identifier: property.notFound
-          message: '#App\\Livewire\\ProductCatalog::\$(?:cartSubtotal|shipping|vat|cartProducts)#'
-        - identifier: method.notFound
-          message: '#Illuminate\\Database\\Eloquent\\Model::#'
-        - identifier: method.notFound
-          message: '#Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed\(\)#'
-        - identifier: assign.propertyType
-          path: 'app/Livewire/PublicSite.php'
-          message: '#PublicSite::\$page.*Illuminate\\Database\\Eloquent\\Model#'
-        - identifier: return.type
-          path: 'app/Livewire/BuilderEditor.php'
-          message: '#BuilderEditor::createDefaultPage\(\).*SitePage.*Illuminate\\Database\\Eloquent\\Model#'
