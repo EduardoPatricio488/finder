@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\WebsiteBuilder;
 
+use App\Support\WebsiteBuilder\SectionRegistry;
 use App\Support\WebsiteBuilder\WebsiteTemplates;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -42,6 +43,11 @@ final class WebsiteTemplatesTest extends TestCase
             self::assertSame(1, $homepages);
             self::assertSame($template, WebsiteTemplates::get($key));
         }
+    }
+
+    public function test_section_types_use_the_central_section_registry(): void
+    {
+        self::assertSame(SectionRegistry::types(), WebsiteTemplates::sectionTypes()->values()->all());
     }
 
     public function test_unknown_template_is_rejected(): void
