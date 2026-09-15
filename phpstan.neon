@@ -19,8 +19,6 @@ parameters:
         - identifier: property.notFound
           message: '#Illuminate\\Database\\Eloquent\\Model::\$#'
         - identifier: property.notFound
-          message: '#Illuminate\\Database\\Eloquent\\Collection.*Illuminate\\Database\\Eloquent\\Model::\$#'
-        - identifier: property.notFound
           message: '#App\\Models\\Customer::\$orders_sum_total#'
         - identifier: property.notFound
           message: '#App\\Livewire\\ProductCatalog::\$(?:cartSubtotal|shipping|vat|cartProducts)#'
