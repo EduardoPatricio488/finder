@@ -196,6 +196,16 @@ new class extends Component
             </button>
         </form>
 
+        <div class="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
+            <div>
+                <p class="text-sm font-semibold text-stone-900 dark:text-white">Gestão de stock</p>
+                <p class="mt-1 text-sm text-stone-600 dark:text-stone-300">Consulta e gere os movimentos e níveis de stock dos produtos.</p>
+            </div>
+            <a href="{{ route('admin.site.stock', $this->currentSite()) }}" wire:navigate class="shrink-0 rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-offset-2">
+                Ir para Stock
+            </a>
+        </div>
+
         <div class="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
