@@ -68,13 +68,17 @@ class ProductCatalog extends Component
 
     private function siteScoped(Builder $query): Builder
     {
-        $site = $this->site();
+        $routeSite = request()->route('site');
+
+        if (! $routeSite instanceof Site) {
+            return $query;
+        }
 
         if (! Schema::hasColumn($query->getModel()->getTable(), 'site_id')) {
             return $query;
         }
 
-        return $query->where('site_id', $site->id);
+        return $query->where('site_id', $routeSite->id);
     }
 
     public function mount(): void
@@ -151,7 +155,7 @@ class ProductCatalog extends Component
         $this->resetErrorBag('couponCode');
         $site = $this->site();
         $coupon = DB::table('coupons')
-            ->when(Schema::hasColumn('coupons', 'site_id'), fn ($query) => $query->where('site_id', $site->id))
+            ->when(request()->route('site') instanceof Site && Schema::hasColumn('coupons', 'site_id'), fn ($query) => $query->where('site_id', $site->id))
             ->whereRaw('upper(code) = ?', [strtoupper(trim($this->couponCode))])
             ->where('starts_at', '<=', now())
             ->where('ends_at', '>=', now())
