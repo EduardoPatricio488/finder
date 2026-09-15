@@ -170,13 +170,11 @@ class SiteDirectory extends Component
 
         $sites = Site::query()
             ->when($user === null, function ($query): void {
-                $query->where('is_published', true)->where('status', 'published');
+                $query->where('is_published', true);
             })
             ->when($user !== null && ! $user->isAdministrator(), function ($query) use ($user): void {
                 $query->where(function ($visible) use ($user): void {
-                    $visible->where(function ($published): void {
-                        $published->where('is_published', true)->where('status', 'published');
-                    })
+                    $visible->where('is_published', true)
                         ->orWhere('owner_id', $user->id)
                         ->orWhereHas('members', fn ($members) => $members->whereKey($user->id));
                 });
