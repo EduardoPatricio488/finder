@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\Site;
 use App\Models\User;
 use App\Services\WebsiteTemplateInstaller;
+use App\Support\WebsiteBuilder\SiteSectionDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
@@ -15,7 +16,7 @@ final class WebsiteTemplateInstallerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_install_replaces_existing_site_structure_with_complete_template(): void
+    public function test_install_replaces_existing_site_structure_with_complete_template_and_v2_documents(): void
     {
         $user = User::factory()->create();
         $site = Site::factory()->create(['user_id' => $user->id]);
@@ -47,6 +48,14 @@ final class WebsiteTemplateInstallerTest extends TestCase
         self::assertSame(['home', 'menu', 'sobre', 'contactos'], $pages->pluck('slug')->all());
         self::assertTrue($pages->every(fn ($page) => $page->sections->isNotEmpty()));
         self::assertSame(0, $site->pages()->where('slug', 'antiga')->count());
+
+        foreach ($pages as $page) {
+            foreach ($page->sections as $section) {
+                $document = SiteSectionDocument::fromSection($section);
+                self::assertSame(2, $document['schema_version']);
+                self::assertNotEmpty($document['nodes']);
+            }
+        }
     }
 
     public function test_install_rejects_unknown_template(): void
