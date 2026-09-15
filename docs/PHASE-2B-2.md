@@ -21,3 +21,5 @@ Tipos conhecidos usam `SectionRegistry`; tipos desconhecidos são preservados. `
 ## Limitações
 
 O formato legacy continua a ser a fonte de verdade para o editor e renderer. A persistência element-level e a integração do UI ficam para a Phase 2B.3.
+
+> Nota: esta camada mantém compatibilidade durante a evolução do editor.
