@@ -136,7 +136,7 @@ class SiteSettings extends Component
         }
 
         $path = parse_url($url, PHP_URL_PATH);
-        if (!is_string($path) || !Str::startsWith($path, '/storage/')) {
+        if (! is_string($path) || ! Str::startsWith($path, '/storage/')) {
             return;
         }
 
