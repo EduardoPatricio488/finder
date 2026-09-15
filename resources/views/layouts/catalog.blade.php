@@ -15,6 +15,14 @@
     </head>
     <body class="min-h-screen" style="background-color: var(--catalog-bg); color: var(--catalog-text);">
         <x-store-shell>
+            @if (request()->routeIs('sales'))
+                <div class="mx-auto max-w-7xl px-6 pt-6 text-sm font-semibold text-stone-500 lg:px-10">
+                    <span>Coisas bonitas para viver melhor.</span>
+                    @auth
+                        <span class="ml-3">Olá, {{ auth()->user()->name }}</span>
+                    @endauth
+                </div>
+            @endif
             {{ $slot }}
         </x-store-shell>
         <livewire:customer-assistant />
