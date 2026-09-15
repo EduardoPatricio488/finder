@@ -80,6 +80,10 @@ class PublicSite extends Component
         }
 
         if (! $this->preview) {
+            $sessionIdentifier = request()->hasSession()
+                ? request()->session()->getId()
+                : Str::uuid()->toString();
+
             SiteAnalyticsEvent::create([
                 'site_id' => $this->site->id,
                 'page_id' => $this->page->id,
@@ -87,7 +91,7 @@ class PublicSite extends Component
                 'path' => request()->path(),
                 'referrer' => Str::limit((string) request()->headers->get('referer'), 500, ''),
                 'device_type' => $this->deviceType(request()->userAgent()),
-                'session_hash' => hash('sha256', (string) request()->session()->getId()),
+                'session_hash' => hash('sha256', $sessionIdentifier),
                 'occurred_at' => now(),
             ]);
         }
