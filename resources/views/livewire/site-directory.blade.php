@@ -50,7 +50,7 @@
         <header class="mb-24 flex flex-col items-start justify-between gap-10 md:flex-row md:items-end">
             <div class="max-w-2xl text-left">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-800">✨ Comunidade Finder</div>
-                <h1 class="text-6xl font-black tracking-tighter text-stone-950 sm:text-7xl leading-[0.9]">Os seus sites, <br><span class="italic text-stone-300">num só lugar.</span></h1>
+                <h1 class="text-6xl font-black tracking-tighter text-stone-950 sm:text-7xl leading-[0.9]">Os seus sites, <span class="italic text-stone-300">num só lugar.</span></h1>
                 <p class="mt-8 text-xl font-medium leading-relaxed text-stone-500">Gere os seus projetos ou descubra o que a comunidade está a construir.</p>
             </div>
 
