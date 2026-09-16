@@ -1,4 +1,5 @@
 name: tests
+# CI validates the PR head against the repository's production test suite.
 
 on:
   push:
