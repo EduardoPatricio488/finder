@@ -42,7 +42,7 @@ it('reads and writes a builder document back to the same section', function () {
     $service->write($section, $document);
     $section->refresh();
 
-    $savedDocument = json_decode($section->settings['builder_document'], true, 512, JSON_THROW_ON_ERROR);
+    $savedDocument = $section->settings['builder_document'];
     $savedTextElement = collect($savedDocument['nodes'][0]['children'])
         ->firstWhere('type', 'text');
     $reloadedDocument = SiteSectionDocument::fromSection($section);
