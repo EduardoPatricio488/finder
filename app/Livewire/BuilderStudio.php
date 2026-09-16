@@ -325,31 +325,598 @@ class BuilderStudio extends Component
         $this->inspectorTab = 'content';
     }
 
-    public function updateSelectedElement(string $field, string $value): void
-    {
-        // Um blur de contenteditable pode chegar depois de uma actualização/rerender do Livewire.
-        // Se a selecção já não existir, ignoramos esse update obsoleto em vez de devolver 422.
-        if ($this->selectedSection === null || $this->selectedElementId === null) {
-            return;
-        }
+   public function updateSelectedElement(string $field, string $value, ?string $elementId = null, ?int $sectionIndex = null): void
+{
+    $elementId = $elementId ?? $this->selectedElementId;
+    $index = $sectionIndex ?? $this->selectedSection;
+    abort_unless($index !== null && isset($this->sections[$index]) && $elementId !== null, 422);
+    abort_unless(in_array($field, ['text', 'label', 'url', 'alt', 'caption', 'title', 'author', 'button_label', 'button_url'], true), 422);
+    $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+    $element = $this->findElement($document['nodes'] ?? [], $elementId);
+    abort_unless(is_array($element), 404);
+    $content = is_array($element['content'] ?? null) ? $element['content'] : [];
+    $content[$field] = Str::limit($value, 2000, '');
+    $content = $this->sanitizeElementContent((string) $element['type'], $content);
+    $document = BuilderDocumentEditor::updateElement($document, $elementId, $content, null);
+    $this->applyDocumentToSection($index, $document);
+    $this->selectedSection = $index;
+    $this->selectedElementId = $elementId;
+    $this->dirty = true;
+    $this->statusMessage = 'Elemento alterado — por guardar';
+}
 
-        abort_unless(in_array($field, ['text', 'label', 'url', 'alt', 'caption', 'title', 'author', 'button_label', 'button_url'], true), 422);
-        $index = $this->selectedSection;
-        $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+public function updateSelectedElementSetting(string $key, string $value, ?string $elementId = null, ?int $sectionIndex = null): void
+{
+    $elementId = $elementId ?? $this->selectedElementId;
+    $index = $sectionIndex ?? $this->selectedSection;
+    abort_unless($index !== null && isset($this->sections[$index]) && $elementId !== null, 422);
+    abort_unless(in_array($key, ['font_size', 'padding', 'margin', 'align', 'width', 'visibility'], true), 422);
+    $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+    $element = $this->findElement($document['nodes'] ?? [], $elementId);
+    abort_unless(is_array($element), 404);
+    $settings = is_array($element['settings'] ?? null) ? $element['settings'] : [];
+    ResponsiveStyles::setForDevice($settings, $this->device, $key, trim($value));
+    $document = BuilderDocumentEditor::updateElement($document, $elementId, null, $settings);
+    $this->applyDocumentToSection($index, $document);
+    $this->selectedSection = $index;
+    $this->selectedElementId = $elementId;
+    $this->dirty = true;
+    $this->statusMessage = 'Estilo ('.$this->device.') alterado — por guardar';
+}
+
+    /** Devolve os estilos responsivos actuais do elemento seleccionado, resolvidos para o dispositivo activo. */
+    public function selectedElementStyles(): array
+    {
+        if ($this->selectedSection === null || $this->selectedElementId === null) {
+            return [];
+        }
+        $document = SiteSectionDocument::fromSection($this->sectionModel($this->selectedSection));
         $element = $this->findElement($document['nodes'] ?? [], $this->selectedElementId);
-        abort_unless(is_array($element), 404);
-        $content = is_array($element['content'] ?? null) ? $element['content'] : [];
-        $content[$field] = Str::limit($value, 2000, '');
-        $content = $this->sanitizeElementContent((string) $element['type'], $content);
-        $document = BuilderDocumentEditor::updateElement($document, $this->selectedElementId, $content, null);
-        $this->applyDocumentToSection($index, $document);
-        $this->dirty = true;
-        $this->statusMessage = 'Elemento alterado — por guardar';
+        if (! is_array($element)) {
+            return [];
+        }
+        $settings = is_array($element['settings'] ?? null) ? $element['settings'] : [];
+
+        return ResponsiveStyles::forDevice($settings, $this->device);
     }
 
-    public function updateSelectedElementSetting(string $key, string $value): void
+    public function removeElement(string $elementId, ?int $sectionIndex = null): void
+{
+    $index = $sectionIndex ?? $this->selectedSection;
+    abort_unless($index !== null && isset($this->sections[$index]), 422);
+    $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+    $document = BuilderDocumentEditor::removeElement($document, $elementId);
+    $this->applyDocumentToSection($index, $document);
+    if ($this->selectedElementId === $elementId) {
+        $this->selectedElementId = null;
+    }
+    $this->selectedSection = $index;
+    $this->dirty = true;
+}
+
+    public function moveElement(string $elementId, int $offset): void
     {
-        abort_unless($this->selectedSection !== null && $this->selectedElementId !== null, 422);
-        abort_unless(in_array($key, ['font_size', 'padding', 'margin', 'align', 'width', 'visibility'], true), 422);
+        abort_unless($this->selectedSection !== null && isset($this->sections[$this->selectedSection]), 422);
         $index = $this->selectedSection;
         $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+        $document = BuilderDocumentEditor::moveElement($document, $elementId, max(-10, min(10, $offset)));
+        $this->applyDocumentToSection($index, $document);
+        $this->selectedElementId = $elementId;
+        $this->dirty = true;
+    }
+
+    public function addSection(string $type): void
+    {
+        abort_unless(WebsiteTemplates::sectionTypes()->contains($type), 422);
+        $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
+        $this->selectedSection = count($this->sections) - 1;
+        $this->selectedElementId = null;
+        $this->dirty = true;
+        $this->panel = 'inspector';
+    }
+
+    /** Insere uma nova secção logo a seguir ao índice indicado (usado no "+" flutuante entre secções). */
+    public function insertSectionAfter(int $index, string $type): void
+    {
+        abort_unless(WebsiteTemplates::sectionTypes()->contains($type), 422);
+        $section = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
+        array_splice($this->sections, $index + 1, 0, [$section]);
+        $this->selectedSection = $index + 1;
+        $this->selectedElementId = null;
+        $this->dirty = true;
+        $this->panel = 'inspector';
+    }
+
+    public function duplicateSection(int $index): void
+    {
+        abort_unless(isset($this->sections[$index]), 404);
+        $copy = $this->sections[$index];
+        $copy['id'] = null;
+        $copy['label'] = ($copy['label'] ?: 'Secção').' (cópia)';
+        array_splice($this->sections, $index + 1, 0, [$copy]);
+        $this->selectedSection = $index + 1;
+        $this->selectedElementId = null;
+        $this->dirty = true;
+    }
+
+    public function deleteSection(int $index): void
+    {
+        abort_unless(isset($this->sections[$index]), 404);
+        array_splice($this->sections, $index, 1);
+        $this->selectedSection = $this->sections !== [] ? min($index, count($this->sections) - 1) : null;
+        $this->selectedElementId = null;
+        $this->dirty = true;
+    }
+
+    public function moveSection(int $index, string $direction): void
+    {
+        abort_unless(in_array($direction, ['up', 'down'], true), 422);
+        $target = $direction === 'up' ? $index - 1 : $index + 1;
+        if (! isset($this->sections[$index], $this->sections[$target])) {
+            return;
+        }
+        [$this->sections[$index], $this->sections[$target]] = [$this->sections[$target], $this->sections[$index]];
+        $this->selectedSection = $target;
+        $this->dirty = true;
+    }
+
+    public function toggleSection(int $index): void
+    {
+        abort_unless(isset($this->sections[$index]), 404);
+        $this->sections[$index]['is_visible'] = ! (bool) $this->sections[$index]['is_visible'];
+        $this->dirty = true;
+    }
+
+    /** Pede à IA para regenerar apenas o conteúdo desta secção, mantendo o tipo. */
+    public function regenerateSectionWithAi(int $index): void
+    {
+        abort_unless(isset($this->sections[$index]), 404);
+        $type = (string) $this->sections[$index]['type'];
+        $brief = [
+            'business_name' => $this->site->name,
+            'description' => 'Website: '.$this->site->name.'. Gera conteúdo apenas para uma secção do tipo "'.$type.'", coerente com o resto do negócio.',
+            'category' => $this->site->type,
+            'tone' => 'profissional',
+        ];
+        $result = app(WebsiteAiGenerator::class)->generateSection($brief, $type);
+        $content = is_array($result['content'] ?? null) ? $result['content'] : $this->defaultContent($type);
+        $this->sections[$index]['content'] = $this->sanitizeLegacyContent($content);
+        if (is_string($result['label'] ?? null) && trim($result['label']) !== '') {
+            $this->sections[$index]['label'] = Str::limit($result['label'], 120, '');
+        }
+        $this->dirty = true;
+        $this->statusMessage = 'Secção regenerada por IA — por guardar';
+    }
+
+    /** Catálogo de secções agrupado por categoria, filtrado pela pesquisa actual. */
+    public function sectionCatalog(): array
+    {
+        $catalog = [
+            'hero' => ['label' => 'Hero', 'category' => 'Introdução', 'description' => 'Primeira impressão com título e chamada à ação.'],
+            'text' => ['label' => 'Texto', 'category' => 'Conteúdo', 'description' => 'Bloco de texto livre.'],
+            'image' => ['label' => 'Imagem', 'category' => 'Media', 'description' => 'Imagem em destaque.'],
+            'button' => ['label' => 'Botão', 'category' => 'Ação', 'description' => 'Chamada à ação isolada.'],
+            'feature_grid' => ['label' => 'Benefícios', 'category' => 'Conteúdo', 'description' => 'Grelha de vantagens.'],
+            'card' => ['label' => 'Cartão', 'category' => 'Conteúdo', 'description' => 'Destaque com título e descrição.'],
+            'testimonials' => ['label' => 'Testemunhos', 'category' => 'Prova social', 'description' => 'Opiniões de clientes.'],
+            'faq' => ['label' => 'FAQ', 'category' => 'Conteúdo', 'description' => 'Perguntas frequentes.'],
+            'gallery' => ['label' => 'Galeria', 'category' => 'Media', 'description' => 'Conjunto de imagens.'],
+            'contact_form' => ['label' => 'Formulário', 'category' => 'Conversão', 'description' => 'Formulário de contacto.'],
+            'pricing' => ['label' => 'Preços', 'category' => 'Conversão', 'description' => 'Planos e preços.'],
+            'product_grid' => ['label' => 'Produtos', 'category' => 'Conversão', 'description' => 'Catálogo de produtos.'],
+            'blog_posts' => ['label' => 'Artigos', 'category' => 'Conteúdo', 'description' => 'Últimos artigos do blog.'],
+            'social_links' => ['label' => 'Redes sociais', 'category' => 'Prova social', 'description' => 'Ligações para redes sociais.'],
+            'video' => ['label' => 'Vídeo', 'category' => 'Media', 'description' => 'Vídeo incorporado.'],
+            'map' => ['label' => 'Mapa', 'category' => 'Conversão', 'description' => 'Localização e morada.'],
+            'newsletter' => ['label' => 'Newsletter', 'category' => 'Conversão', 'description' => 'Subscrição de email.'],
+            'cta' => ['label' => 'CTA', 'category' => 'Ação', 'description' => 'Chamada à ação de destaque.'],
+        ];
+
+        return $this->filterCatalog($catalog);
+    }
+
+    /** Catálogo de elementos internos (dentro da secção), agrupado e filtrado. */
+    public function elementCatalog(): array
+    {
+        $catalog = [];
+        foreach (ElementRegistry::all() as $type => $definition) {
+            $catalog[$type] = ['label' => $definition['label'], 'category' => $definition['category'], 'description' => $definition['description']];
+        }
+
+        return $this->filterCatalog($catalog, $this->elementQuery);
+    }
+
+    private function filterCatalog(array $catalog, ?string $query = null): array
+    {
+        $query = mb_strtolower(trim($query ?? $this->sectionQuery));
+        $grouped = [];
+        foreach ($catalog as $type => $meta) {
+            if ($query !== '' && ! str_contains(mb_strtolower($meta['label']), $query) && ! str_contains(mb_strtolower($meta['category']), $query)) {
+                continue;
+            }
+            $grouped[$meta['category']][$type] = $meta;
+        }
+
+        return $grouped;
+    }
+
+    /** Score simples (0-100) de "prontidão" do website, usado como indicador visual antes de publicar. */
+    public function readinessScore(): int
+    {
+        $score = 15;
+
+        if (count($this->pages) > 1) {
+            $score += 15;
+        }
+
+        if ($this->sections !== []) {
+            $filled = collect($this->sections)->filter(function (array $section): bool {
+                if (! ($section['is_visible'] ?? true)) {
+                    return false;
+                }
+                foreach ($section['content'] ?? [] as $value) {
+                    if (is_string($value) && trim($value) !== '') {
+                        return true;
+                    }
+                }
+
+                return false;
+            })->count();
+            $score += (int) round(30 * ($filled / count($this->sections)));
+        }
+
+        if (trim((string) ($this->pageSeo['title'] ?? '')) !== '') {
+            $score += 20;
+        }
+        if (trim((string) ($this->pageSeo['description'] ?? '')) !== '') {
+            $score += 20;
+        }
+
+        return max(0, min(100, $score));
+    }
+
+    private function sectionModel(int $index): SiteSection
+    {
+        abort_unless(isset($this->sections[$index]) && is_array($this->sections[$index]), 404);
+        $data = $this->sections[$index];
+        $id = $data['id'] ?? null;
+        abort_unless(is_numeric($id), 422);
+
+        $section = new SiteSection;
+        $section->id = (int) $id;
+        $section->type = (string) ($data['type'] ?? 'text');
+        $section->label = (string) ($data['label'] ?? 'Secção');
+        $section->setAttribute('content', is_array($data['content'] ?? null) ? $data['content'] : []);
+        $section->setAttribute('settings', is_array($data['settings'] ?? null) ? $data['settings'] : []);
+        $section->is_visible = (bool) ($data['is_visible'] ?? true);
+
+        return $section;
+    }
+
+    private function applyDocumentToSection(int $index, array $document): void
+    {
+        $legacyContent = $this->sections[$index]['content'] ?? [];
+        $legacySettings = $this->sections[$index]['settings'] ?? [];
+        if (is_array($legacySettings)) {
+            unset($legacySettings['builder_document']);
+        }
+        $data = SiteSectionDocument::toSectionData($document, is_array($legacyContent) ? $legacyContent : [], is_array($legacySettings) ? $legacySettings : []);
+        $this->sections[$index]['content'] = $data['content'];
+        $this->sections[$index]['settings'] = $data['settings'];
+    }
+
+    public function updateElement(string $elementId, array $content, array $settings = []): void
+    {
+        abort_unless($this->selectedSection !== null && isset($this->sections[$this->selectedSection]), 422);
+        $index = $this->selectedSection;
+        $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+        $document = BuilderDocumentEditor::updateElement($document, $elementId, $content, $settings);
+        $this->applyDocumentToSection($index, $document);
+        $this->dirty = true;
+    }
+
+    public function selectSection(int $index): void
+    {
+        abort_unless(isset($this->sections[$index]), 404);
+        $this->selectedSection = $index;
+        $this->selectedElementId = null;
+        $this->inspectorTab = 'content';
+        $this->panel = 'inspector';
+    }
+
+    public function updatedDevice(string $device): void
+    {
+        if (! in_array($device, ['desktop', 'tablet', 'mobile'], true)) {
+            $this->device = 'desktop';
+        }
+    }
+
+    public function runPublishChecks(): void
+    {
+        if ($this->dirty) {
+            $this->save();
+        }
+        $this->publishChecks = $this->formatPublishChecks(app(WebsitePublishingService::class)->validate($this->site->fresh()));
+        $this->showPublish = true;
+    }
+
+    public function publish(): void
+    {
+        if ($this->dirty) {
+            $this->save();
+        }
+        $this->site->refresh();
+        $result = app(WebsitePublishingService::class)->validate($this->site);
+        $this->publishChecks = $this->formatPublishChecks($result);
+        if (! $result['ok']) {
+            $this->showPublish = true;
+
+            return;
+        }
+        app(WebsitePublishingService::class)->publish($this->site, auth()->id());
+        $this->site->refresh();
+        $this->showPublish = false;
+        $this->statusMessage = 'Website publicado';
+    }
+
+    private function formatPublishChecks(array $result): array
+    {
+        $checks = [];
+        foreach ($result['errors'] ?? [] as $message) {
+            $checks[] = ['level' => 'error', 'label' => 'Necessário', 'message' => $message];
+        }
+        foreach ($result['warnings'] ?? [] as $message) {
+            $checks[] = ['level' => 'warning', 'label' => 'Recomendado', 'message' => $message];
+        }
+        if ($checks === []) {
+            $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
+        }
+
+        return $checks;
+    }
+
+    public function unpublish(): void
+    {
+        app(WebsitePublishingService::class)->unpublish($this->site);
+        $this->site->refresh();
+        $this->statusMessage = 'Website retirado do ar';
+    }
+
+    public function openPreview(): void
+    {
+        $page = $this->site->pages()->findOrFail($this->pageId);
+        $this->dispatch('open-builder-preview', url: route('site.public', ['site' => $this->site->slug, 'pageSlug' => $page->slug, 'preview' => 1]));
+    }
+
+    public function updateTheme(string $key, string $value): void
+    {
+        abort_unless(in_array($key, ['primary', 'secondary', 'background', 'text', 'radius', 'font_heading', 'font_body'], true), 422);
+        $value = trim($value);
+        if (in_array($key, ['primary', 'secondary', 'background', 'text'], true) && ! preg_match('/^#[0-9a-f]{6}$/i', $value)) {
+            abort(422, 'Cor inválida.');
+        }
+        if ($key === 'radius' && ! preg_match('/^(0|[0-9]+(?:\.[0-9]+)?)(px|rem|em|%)$/', $value)) {
+            abort(422, 'Raio inválido.');
+        }
+        $this->theme[$key] = Str::limit($value, 100, '');
+        $this->dirty = true;
+    }
+
+    public function applyTemplate(string $template): void
+    {
+        abort_unless(WebsiteTemplates::has($template), 422);
+        if ($this->dirty) {
+            $this->save();
+        }
+        app(WebsiteTemplateInstaller::class)->install($this->site->fresh(), $template);
+        $this->site->refresh();
+        $home = $this->site->pages()->where('is_homepage', true)->firstOrFail();
+        $this->loadPage($home->id);
+        $this->loadVersions();
+        $this->showTemplates = false;
+        $this->statusMessage = 'Template aplicado ao website inteiro';
+    }
+
+    // --- Wizard de IA ---
+
+    public function openAiWizard(): void
+    {
+        $this->showAi = true;
+        $this->aiStep = 1;
+        if (trim($this->aiBusinessName) === '') {
+            $this->aiBusinessName = $this->site->name;
+        }
+        if (trim($this->aiCategory) === '' && filled($this->site->type)) {
+            $this->aiCategory = (string) $this->site->type;
+        }
+    }
+
+    public function closeAiWizard(): void
+    {
+        $this->showAi = false;
+        $this->aiStep = 1;
+    }
+
+    public function aiGoToStep(int $step): void
+    {
+        $this->aiStep = max(1, min(3, $step));
+    }
+
+    public function aiTogglePage(string $slug): void
+    {
+        if (in_array($slug, $this->aiPagesSelected, true)) {
+            $this->aiPagesSelected = array_values(array_diff($this->aiPagesSelected, [$slug]));
+        } else {
+            $this->aiPagesSelected[] = $slug;
+        }
+    }
+
+    public function generateWithAi(): void
+    {
+        $description = trim($this->aiDescription);
+        abort_if($description === '', 422, 'Descreve o website que queres criar.');
+        abort_if(mb_strlen($description) > 4000, 422, 'A descrição do website é demasiado longa.');
+        abort_if($this->aiPagesSelected === [], 422, 'Escolhe pelo menos uma página para gerar.');
+
+        $brief = [
+            'prompt' => $description,
+            'description' => $description,
+            'business_name' => Str::limit(trim($this->aiBusinessName) !== '' ? trim($this->aiBusinessName) : $this->site->name, 120, ''),
+            'category' => trim($this->aiCategory) !== '' ? trim($this->aiCategory) : $this->site->type,
+            'tone' => $this->aiTone,
+            'pages' => array_values($this->aiPagesSelected),
+        ];
+
+        $result = app(WebsiteAiGenerator::class)->generate($brief);
+        $pages = is_array($result['pages'] ?? null) ? $result['pages'] : [];
+        foreach ($pages as $slug => $pageData) {
+            if (! is_string($slug) || ! is_array($pageData)) {
+                continue;
+            }
+            $slug = Str::slug($slug);
+            if ($slug === '') {
+                continue;
+            }
+            $page = $this->site->pages()->updateOrCreate(['slug' => $slug], ['name' => Str::headline($slug), 'status' => 'draft', 'seo' => [], 'sort_order' => $this->pageSortOrder($slug)]);
+            $sections = $this->sanitizeAiSections($pageData);
+            $page->sections()->delete();
+            foreach ($sections as $index => $section) {
+                $created = $page->sections()->create(['type' => $section['type'], 'label' => $section['label'], 'content' => $section['content'], 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index, 'is_visible' => true]);
+                $data = SiteSectionDocument::toSectionData(SiteSectionDocument::fromSection($created));
+                $payload = $data[0] ?? null;
+                if (is_array($payload)) {
+                    $created->update(['content' => $payload['content'] ?? [], 'settings' => $payload['settings'] ?? []]);
+                }
+            }
+            if ($slug === 'home') {
+                $this->site->pages()->update(['is_homepage' => false]);
+                $page->update(['is_homepage' => true]);
+            }
+        }
+        $home = $this->site->pages()->where('is_homepage', true)->first() ?? $this->site->pages()->orderBy('sort_order')->first();
+        if ($home) {
+            $this->loadPage($home->id);
+        }
+        $this->refreshPages();
+        $this->dirty = false;
+        $this->closeAiWizard();
+        $this->statusMessage = 'Website gerado por IA — revê as páginas antes de publicar';
+    }
+
+    private function sanitizeAiSections(array $sections): array
+    {
+        $result = [];
+        foreach (array_slice($sections, 0, 20) as $section) {
+            if (! is_array($section) || ! is_string($section['type'] ?? null) || ! WebsiteTemplates::sectionTypes()->contains($section['type'])) {
+                continue;
+            }
+            $type = $section['type'];
+            $content = is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type);
+            $result[] = ['type' => $type, 'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''), 'content' => $this->sanitizeLegacyContent($content)];
+        }
+
+        return $result;
+    }
+
+    private function sanitizeLegacyContent(array $content): array
+    {
+        array_walk_recursive($content, function (&$value): void {
+            if (is_string($value)) {
+                $value = Str::limit($value, 4000, '');
+            }
+        });
+
+        return $content;
+    }
+
+    private function sanitizeElementContent(string $type, array $content): array
+    {
+        $definition = ElementRegistry::get($type);
+        $content = array_intersect_key($content, array_flip(array_keys($definition['default_content'])));
+        foreach ($content as &$value) {
+            if (is_string($value)) {
+                $value = Str::limit($value, 2000, '');
+            }
+        }
+
+        return $content;
+    }
+
+    private function lastElementId(array $document): ?string
+    {
+        $children = $document['nodes'][0]['children'] ?? [];
+        $last = end($children);
+
+        return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
+    }
+
+    private function findElement(array $nodes, string $elementId): ?array
+    {
+        foreach ($nodes as $node) {
+            if (($node['id'] ?? null) === $elementId) {
+                return $node;
+            }
+            if (is_array($node['children'] ?? null)) {
+                $found = $this->findElement($node['children'], $elementId);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function pageSortOrder(string $slug): int
+    {
+        $existing = $this->site->pages()->where('slug', $slug)->value('sort_order');
+
+        return $existing !== null ? (int) $existing : ((int) $this->site->pages()->max('sort_order')) + 1;
+    }
+
+    private function createPageRecord(string $name, string $slug, bool $homepage = false): SitePage
+    {
+        return $this->site->pages()->create(['name' => $name, 'slug' => $slug, 'status' => 'draft', 'is_homepage' => $homepage, 'sort_order' => 0, 'seo' => []]);
+    }
+
+    private function addStarterSection(SitePage $page): void
+    {
+        $page->sections()->create(['type' => 'hero', 'label' => 'Hero', 'content' => $this->defaultContent('hero'), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => 0, 'is_visible' => true]);
+    }
+
+    private function defaultTheme(): array
+    {
+        return ['primary' => '#635bff', 'secondary' => '#111827', 'background' => '#ffffff', 'text' => '#111827', 'radius' => '1rem', 'font_heading' => 'Inter', 'font_body' => 'Inter'];
+    }
+
+    private function defaultContent(string $type): array
+    {
+        return match ($type) {
+            'hero' => ['title' => 'A tua marca, apresentada de forma profissional.', 'subtitle' => 'Explica em poucas palavras o que fazes, para quem e porque é que os visitantes devem escolher-te.', 'button_label' => 'Falar connosco', 'button_url' => '#contacto'],
+            'text' => ['title' => 'Uma história que merece ser contada', 'body' => 'Apresenta aqui a tua empresa, experiência, valores ou proposta de valor.'],
+            'image' => ['url' => '', 'alt' => '', 'caption' => 'Adiciona uma imagem relevante para esta secção.'],
+            'button' => ['label' => 'Saber mais', 'url' => '#'],
+            'feature_grid' => ['title' => 'Porque escolher-nos', 'items' => [['title' => 'Experiência', 'description' => 'Mostra aquilo que sabes fazer.'], ['title' => 'Qualidade', 'description' => 'Explica o valor que entregas.'], ['title' => 'Confiança', 'description' => 'Dá uma razão clara para avançar.']]],
+            'card' => ['title' => 'Uma oferta clara', 'description' => 'Resume aqui um serviço ou vantagem importante.', 'button_label' => 'Saber mais', 'button_url' => '#'],
+            'testimonials' => ['title' => 'O que dizem os clientes', 'items' => [['name' => 'Cliente', 'quote' => 'Adiciona aqui um testemunho real.']]],
+            'faq' => ['title' => 'Perguntas frequentes', 'items' => [['question' => 'Como funciona?', 'answer' => 'Explica de forma simples o teu processo.']]],
+            'gallery' => ['title' => 'Galeria', 'items' => []],
+            'contact_form' => ['title' => 'Vamos falar?', 'description' => 'Envia uma mensagem e entraremos em contacto.', 'button_label' => 'Enviar mensagem'],
+            'product_grid' => ['title' => 'Produtos em destaque', 'description' => 'Apresenta aqui os produtos mais relevantes.', 'limit' => 6],
+            'product_card' => ['title' => 'Produto', 'description' => 'Descrição do produto.', 'price' => ''],
+            'pricing' => ['title' => 'Escolhe a opção certa', 'items' => [['name' => 'Essencial', 'price' => 'Consultar', 'description' => 'Para começar.'], ['name' => 'Profissional', 'price' => 'Consultar', 'description' => 'Para necessidades completas.']]],
+            'blog_posts' => ['title' => 'Últimos artigos', 'description' => 'Partilha conhecimento e novidades.'],
+            'social_links' => ['title' => 'Segue-nos', 'items' => []],
+            'video' => ['title' => 'Conhece melhor o nosso trabalho', 'url' => ''],
+            'map' => ['title' => 'Encontra-nos', 'address' => 'Adiciona aqui a morada.'],
+            'newsletter' => ['title' => 'Recebe as novidades', 'description' => 'Deixa o teu email para receber novidades.', 'button_label' => 'Subscrever'],
+            'cta' => ['title' => 'Pronto para dar o próximo passo?', 'description' => 'Cria uma chamada à acção clara.', 'button_label' => 'Entrar em contacto', 'button_url' => '#contacto'],
+            default => ['title' => Str::headline($type), 'description' => 'Personaliza esta secção com informação relevante.'],
+        };
+    }
+
+    public function render()
+    {
+        return view('livewire.builder-studio');
+    }
+}

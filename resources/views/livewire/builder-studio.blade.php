@@ -210,7 +210,12 @@
 
                             <div wire:loading.class="opacity-40" wire:target="regenerateSectionWithAi({{ $i }})" class="min-h-28 px-6 py-10 transition md:px-12">
                                 @if(is_array($section['settings']['builder_document'] ?? null))
-                                    @include('livewire.builder-document-renderer', ['document' => $section['settings']['builder_document'], 'device' => $device, 'selectedElementId' => $selectedElementId])
+                                    @include('livewire.builder-document-renderer', [
+    'document' => $section['settings']['builder_document'],
+    'device' => $device,
+    'selectedElementId' => $selectedElementId,
+    'sectionIndex' => $i,
+])
                                 @else
                                     @switch($section['type'])
                                         @case('hero')<div class="mx-auto max-w-3xl text-center"><h1 class="text-4xl font-black tracking-tight md:text-6xl">{{ $section['content']['title'] ?? 'Título principal' }}</h1><p class="mt-4 text-lg text-slate-600">{{ $section['content']['subtitle'] ?? '' }}</p><span class="mt-7 inline-block rounded-xl px-5 py-3 text-sm font-bold text-white" style="background:var(--finder-primary)">{{ $section['content']['button_label'] ?? 'Saber mais' }}</span></div>@break
