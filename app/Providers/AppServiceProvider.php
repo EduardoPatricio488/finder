@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Livewire\Hooks\BuilderStudioSnapshotHook;
 use App\Models\Site;
 use App\Policies\SitePolicy;
 use Carbon\CarbonImmutable;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Livewire::componentHook(BuilderStudioSnapshotHook::class);
 
         // Explicitly register the Site policy so site-management authorization
         // is deterministic in every environment, including cached production/local routes.
