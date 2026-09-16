@@ -40,7 +40,7 @@ PROMPT,
                             'content' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                         ],
                     ],
-                );
+                ]);
 
             if ($response->successful()) {
                 $pages = data_get($response->json(), 'choices.0.message.content');
