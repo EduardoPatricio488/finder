@@ -1,58 +1,298 @@
-<div x-data="{ inspectorTab: 'content', add: false, settings: false, dragging: null }" class="flex h-screen min-h-0 flex-col overflow-hidden bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-    <header class="z-40 shrink-0 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
-        <div class="flex min-h-16 items-center gap-3 px-4 lg:px-6">
-            <a href="{{ route('admin.site.dashboard', $site) }}" class="rounded-xl border border-zinc-200 px-3 py-2 text-sm font-bold hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">← Sair</a>
-            <div class="hidden min-w-0 lg:block"><p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">Finder · Website Builder</p><p class="truncate text-sm font-black">{{ $site->name }}</p></div>
+<div class="flex h-screen min-h-0 flex-col overflow-hidden bg-zinc-100 text-zinc-950 dark:bg-zinc-950 dark:text-white">
+    {{-- Top bar: only the actions the user actually needs. --}}
+    <header class="shrink-0 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <div class="flex h-16 items-center gap-3 px-4 lg:px-6">
+            <a href="{{ route('admin.site.dashboard', $site) }}"
+               class="inline-flex h-10 items-center rounded-xl border border-zinc-200 px-3 text-sm font-semibold transition hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                ← Sair
+            </a>
+
+            <div class="min-w-0">
+                <p class="truncate text-sm font-black">{{ $site->name }}</p>
+                <p class="text-xs text-zinc-400">Editar website</p>
+            </div>
+
             <div class="ml-auto flex items-center gap-2">
-                <select wire:model.live="pageId" wire:change="selectPage($event.target.value)" class="max-w-48 rounded-xl border-zinc-200 bg-white text-sm font-bold dark:border-zinc-700 dark:bg-zinc-800">
-                    @foreach($site->pages->sortBy('sort_order') as $page)<option value="{{ $page->id }}">{{ $page->name }}{{ $page->is_homepage ? ' · Home' : '' }}</option>@endforeach
-                </select>
-                <button type="button" wire:click="createPage" class="hidden rounded-xl border px-3 py-2 text-xs font-bold lg:block">+ Página</button>
-                <button type="button" wire:click="duplicatePage" class="hidden rounded-xl border px-3 py-2 text-xs font-bold xl:block">Duplicar</button>
-                <button type="button" wire:click="undo" class="rounded-xl border px-3 py-2 text-xs font-bold" @disabled(!$this->canUndo)>↶</button>
-                <button type="button" wire:click="redo" class="rounded-xl border px-3 py-2 text-xs font-bold" @disabled(!$this->canRedo)>↷</button>
-                <a href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank" class="hidden rounded-xl border px-3 py-2 text-xs font-bold md:block">Pré-visualizar</a>
-                <button type="button" wire:click="save" class="hidden rounded-xl border px-3 py-2 text-xs font-bold md:block">Guardar</button>
-                <button type="button" wire:click="publish" class="rounded-xl bg-zinc-950 px-4 py-2 text-xs font-black text-white dark:bg-white dark:text-zinc-950">Publicar</button>
+                @if($site->pages->count() > 1)
+                    <select wire:model.live="pageId" wire:change="selectPage($event.target.value)"
+                            class="hidden max-w-40 rounded-xl border-zinc-200 bg-white text-sm font-semibold sm:block dark:border-zinc-700 dark:bg-zinc-800">
+                        @foreach($site->pages->sortBy('sort_order') as $page)
+                            <option value="{{ $page->id }}">{{ $page->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
+
+                <a href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}"
+                   target="_blank"
+                   class="inline-flex h-10 items-center rounded-xl border border-zinc-200 px-3 text-sm font-semibold transition hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                    Pré-visualizar
+                </a>
+
+                <button type="button" wire:click="save"
+                        class="inline-flex h-10 items-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-bold transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700">
+                    Guardar
+                </button>
+
+                <button type="button" wire:click="publish"
+                        class="inline-flex h-10 items-center rounded-xl bg-zinc-950 px-4 text-sm font-bold text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200">
+                    Publicar
+                </button>
             </div>
         </div>
     </header>
-    <div class="flex min-h-0 flex-1 overflow-hidden">
-        <aside class="hidden h-full w-72 shrink-0 overflow-y-auto border-r border-zinc-200 bg-white lg:block dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="border-b border-zinc-100 p-5 dark:border-zinc-800"><p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">1 · Adicionar</p><h2 class="mt-1 text-lg font-black">Construir página</h2><p class="mt-1 text-xs leading-5 text-zinc-500">Adiciona blocos e depois edita cada elemento directamente na página.</p></div>
-            <div class="space-y-5 p-4">
-                @foreach(['Conteúdo'=>['hero'=>'Hero / destaque','text'=>'Texto','image'=>'Imagem','button'=>'Botão','card'=>'Cartão'],'Estrutura'=>['feature_grid'=>'Benefícios','gallery'=>'Galeria','testimonials'=>'Testemunhos','faq'=>'Perguntas frequentes','pricing'=>'Preços'],'Negócio'=>['contact_form'=>'Formulário de contacto','product_grid'=>'Produtos','blog_posts'=>'Artigos','newsletter'=>'Newsletter','cta'=>'Call to action'],'Avançado'=>['video'=>'Vídeo','map'=>'Mapa','social_links'=>'Redes sociais']] as $group=>$types)
-                    <div><p class="mb-2 px-1 text-[10px] font-black uppercase tracking-wider text-zinc-400">{{ $group }}</p><div class="grid gap-1.5">@foreach($types as $type=>$label)<button type="button" wire:click="addSection('{{ $type }}')" class="group flex items-center justify-between rounded-xl border border-zinc-200 px-3 py-3 text-left transition hover:border-indigo-300 hover:bg-indigo-50 dark:border-zinc-700 dark:hover:bg-zinc-800"><span class="text-xs font-bold">{{ $label }}</span><span class="text-zinc-300 group-hover:text-indigo-600">+</span></button>@endforeach</div></div>
-                @endforeach
-            </div>
-        </aside>
-        <main class="min-h-0 min-w-0 flex-1 overflow-y-auto">
-            <div class="border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"><div class="mx-auto flex max-w-[1440px] flex-wrap items-center gap-3"><div class="min-w-0 flex-1"><div class="flex items-center gap-2"><input wire:model.live.debounce.500ms="pageName" class="min-w-0 border-0 bg-transparent p-0 text-lg font-black outline-none focus:ring-0"><span class="rounded-full px-2 py-1 text-[9px] font-black uppercase {{ $pageStatus === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $pageStatus === 'published' ? 'Publicada' : 'Rascunho' }}</span></div><p class="text-xs text-zinc-400">/{{ trim($pageSlug, '/') }}</p></div><livewire:builder-templates :site="$site" :page-id="$pageId" :key="'builder-templates-'.$pageId" /><button type="button" wire:click="save" class="rounded-xl border px-4 py-2 text-xs font-black">Guardar agora</button><button type="button" wire:click="deletePage" class="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600">Eliminar página</button></div></div>
-            <div class="mx-auto max-w-[1440px] p-4 lg:p-8"><div class="mx-auto w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900" style="max-width: {{ $theme['content_width'] ?? '1200px' }}"><div class="min-h-[650px]">
-                @forelse($sections as $index=>$section)
-                    @php($content=$section['content'] ?? []) @php($items=$content['items'] ?? [])
-                    <section data-section-id="{{ $section['id'] ?? 'new-'.$index }}" wire:key="builder-section-{{ $section['id'] ?? 'new-'.$index }}" wire:click="selectSection({{ $index }})" class="group relative border-b border-zinc-100 transition dark:border-zinc-800 {{ $section['is_visible'] ? '' : 'opacity-40' }} {{ $selectedSection === $index ? 'ring-2 ring-inset ring-indigo-500' : 'hover:ring-1 hover:ring-indigo-300' }}">
-                        <div class="absolute left-3 top-3 z-20 hidden items-center gap-1 rounded-lg border border-zinc-200 bg-white/95 p-1 shadow-sm group-hover:flex dark:border-zinc-700 dark:bg-zinc-900/95"><button type="button" wire:click.stop="selectSection({{ $index }})" class="rounded px-2 py-1 text-[10px] font-bold">Editar</button><button type="button" wire:click.stop="moveSection({{ $index }},'up')" class="rounded px-2 py-1 text-[10px]">↑</button><button type="button" wire:click.stop="moveSection({{ $index }},'down')" class="rounded px-2 py-1 text-[10px]">↓</button><button type="button" wire:click.stop="duplicateSection({{ $index }})" class="rounded px-2 py-1 text-[10px]">Duplicar</button><button type="button" wire:click.stop="setSectionVisibility({{ $index }},{{ $section['is_visible'] ? 'false' : 'true' }})" class="rounded px-2 py-1 text-[10px]">{{ $section['is_visible'] ? 'Ocultar' : 'Mostrar' }}</button><button type="button" wire:click.stop="removeSection({{ $index }})" class="rounded px-2 py-1 text-[10px] text-red-600">Eliminar</button></div>
-                        <div class="px-6 py-14 lg:px-16">
-                            @if($section['type'] === 'hero')<div class="mx-auto max-w-4xl text-center"><p class="mb-3 text-xs font-black uppercase tracking-[.25em]" style="color: {{ $theme['primary'] ?? '#635bff' }}">{{ $content['subtitle'] ?? 'Destaque' }}</p><h1 class="text-4xl font-black tracking-tight sm:text-6xl">{{ $content['title'] ?? 'Título principal' }}</h1><p class="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-500">{{ $content['description'] ?? $content['body'] ?? 'Apresenta aqui a tua empresa, produto ou serviço.' }}</p>@if(!empty($content['button_label']))<span class="mt-7 inline-flex cursor-text rounded-xl px-5 py-3 text-sm font-black text-white" style="background: {{ $theme['primary'] ?? '#635bff' }}">{{ $content['button_label'] }}</span>@endif</div>
-                            @elseif($section['type'] === 'text')<div class="mx-auto max-w-3xl"><h2 class="text-3xl font-black">{{ $content['title'] ?? 'Título' }}</h2><p class="mt-4 whitespace-pre-line leading-7 text-zinc-500">{{ $content['body'] ?? $content['description'] ?? '' }}</p></div>
-                            @elseif($section['type'] === 'image')<div class="mx-auto max-w-4xl text-center">@if(!empty($content['url']))<img src="{{ $content['url'] }}" alt="{{ $content['alt'] ?? '' }}" class="mx-auto max-h-[480px] rounded-2xl object-cover shadow-sm">@else<div class="rounded-2xl border-2 border-dashed border-zinc-200 py-24 text-sm text-zinc-400">Seleciona esta secção para adicionar uma imagem.</div>@endif</div>
-                            @elseif($section['type'] === 'cta')<div class="rounded-3xl p-8 text-center sm:p-14" style="background: {{ $theme['background'] ?? '#f4f4f5' }}"><h2 class="text-3xl font-black">{{ $content['title'] ?? 'Pronto para começar?' }}</h2><p class="mx-auto mt-3 max-w-2xl text-zinc-500">{{ $content['description'] ?? '' }}</p><span class="mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-black text-white" style="background: {{ $theme['primary'] ?? '#635bff' }}">{{ $content['button_label'] ?? 'Começar' }}</span></div>
-                            @else<div class="mx-auto max-w-4xl"><h2 class="text-3xl font-black">{{ $content['title'] ?? \Illuminate\Support\Str::headline($section['type']) }}</h2>@if(!empty($content['description']))<p class="mt-4 text-zinc-500">{{ $content['description'] }}</p>@endif<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">@forelse($items as $item)<article class="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-700"><p class="font-black">{{ $item['title'] ?? $item['name'] ?? $item['question'] ?? $item['label'] ?? 'Item' }}</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ $item['description'] ?? $item['quote'] ?? $item['answer'] ?? $item['excerpt'] ?? $item['price'] ?? '' }}</p></article>@empty<div class="col-span-full rounded-2xl border-2 border-dashed border-zinc-200 py-12 text-center text-sm text-zinc-400">Ainda não existem itens nesta secção.</div>@endforelse</div></div>@endif
-                        </div>
-                    </section>
-                @empty<div class="flex min-h-[650px] items-center justify-center p-8 text-center"><div><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">✦</div><h2 class="mt-5 text-xl font-black">Começa a construir a tua página</h2><p class="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500">Escolhe uma secção no painel esquerdo. O conteúdo aparece aqui.</p></div></div>@endforelse
-            </div></div></div>
-        </main>
-        <aside class="hidden h-full w-[420px] shrink-0 overflow-y-auto border-l border-zinc-200 bg-white lg:block dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95"><div class="p-5"><p class="text-[10px] font-black uppercase tracking-[.18em] text-indigo-600">3 · Personalizar</p><h2 class="mt-1 text-lg font-black">Conteúdo da página</h2><p class="mt-2 text-xs leading-5 text-zinc-500">Seleciona uma secção para editar os campos.</p></div></div>
-            @if($selectedSection !== null && isset($sections[$selectedSection]))
-                @php($selectedContent=$sections[$selectedSection]['content'] ?? []) @php($selectedItems=$selectedContent['items'] ?? [])
-                <div class="space-y-4 p-5">@foreach($selectedContent as $fieldKey=>$fieldValue) @continue($fieldKey === 'items') @if(is_scalar($fieldValue) || $fieldValue === null)<div><label class="text-xs font-bold">{{ \Illuminate\Support\Str::headline(str_replace('_',' ',(string)$fieldKey)) }}</label>@if(strlen((string)$fieldValue)>100)<textarea wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.{{ $fieldKey }}" rows="4" class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-3 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-800"></textarea>@else<input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.{{ $fieldKey }}" class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-3 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-800">@endif</div>@endif @endforeach
-                    @if(!empty($selectedItems))<div class="border-t pt-4"><p class="mb-3 text-xs font-black">Itens</p>@foreach($selectedItems as $itemIndex=>$item)<div class="mb-3 rounded-xl border p-3">@foreach($item as $itemKey=>$itemValue)@if(is_scalar($itemValue) || $itemValue === null)<input wire:model.live.debounce.500ms="sections.{{ $selectedSection }}.content.items.{{ $itemIndex }}.{{ $itemKey }}" class="mb-2 w-full rounded-lg border-zinc-200 px-3 py-2 text-xs dark:border-zinc-700 dark:bg-zinc-800" placeholder="{{ \Illuminate\Support\Str::headline(str_replace('_',' ',(string)$itemKey)) }}">@endif @endforeach</div>@endforeach</div>@endif
-                    <button type="button" wire:click="addItem({{ $selectedSection }})" class="rounded-xl bg-zinc-950 px-3 py-2 text-xs font-black text-white dark:bg-white dark:text-zinc-950">+ Item</button>
+
+    <div class="min-h-0 flex-1 overflow-hidden lg:flex">
+        {{-- Website canvas --}}
+        <main class="min-h-0 flex-1 overflow-y-auto">
+            <div class="mx-auto max-w-6xl px-3 py-4 sm:px-6 lg:px-10 lg:py-8">
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <input wire:model.live.debounce.700ms="pageName"
+                               class="w-full max-w-md border-0 bg-transparent p-0 text-xl font-black outline-none ring-0 focus:ring-0"
+                               aria-label="Nome da página">
+                        <p class="mt-1 text-xs text-zinc-400">/{{ trim($pageSlug, '/') }}</p>
+                    </div>
+
+                    <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold {{ $pageStatus === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                        {{ $pageStatus === 'published' ? 'Publicada' : 'Rascunho' }}
+                    </span>
                 </div>
-            @else<div class="flex min-h-[420px] items-center justify-center p-8 text-center"><div><div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-xl dark:bg-zinc-800">✦</div><h3 class="mt-4 font-black">Seleciona uma secção</h3></div></div>@endif
+
+                <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+                     style="max-width: {{ $theme['content_width'] ?? '1200px' }}; margin-inline: auto;">
+                    @forelse($sections as $index => $section)
+                        @php
+                            $content = $section['content'] ?? [];
+                            $items = $content['items'] ?? [];
+                            $type = $section['type'];
+                            $isSelected = $selectedSection === $index;
+                        @endphp
+
+                        <section wire:key="simple-builder-section-{{ $section['id'] ?? 'new-'.$index }}"
+                                 wire:click="selectSection({{ $index }})"
+                                 class="group relative border-b border-zinc-100 transition last:border-b-0 dark:border-zinc-800 {{ $section['is_visible'] ? '' : 'opacity-40' }} {{ $isSelected ? 'ring-2 ring-inset ring-zinc-900 dark:ring-white' : 'hover:ring-1 hover:ring-zinc-300 dark:hover:ring-zinc-600' }}">
+
+                            <div class="absolute right-4 top-4 z-10 opacity-0 transition group-hover:opacity-100 {{ $isSelected ? '!opacity-100' : '' }}">
+                                <span class="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-zinc-600 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:ring-zinc-700">
+                                    Clique para editar
+                                </span>
+                            </div>
+
+                            <div class="px-6 py-16 sm:px-10 lg:px-16">
+                                @if($type === 'hero')
+                                    <div class="mx-auto max-w-3xl text-center">
+                                        <p class="mb-4 text-xs font-black uppercase tracking-[0.2em]" style="color: {{ $theme['primary'] ?? '#635bff' }}">
+                                            {{ $content['subtitle'] ?? 'A tua marca' }}
+                                        </p>
+                                        <h1 class="text-4xl font-black tracking-tight sm:text-6xl">
+                                            {{ $content['title'] ?? 'Título principal' }}
+                                        </h1>
+                                        <p class="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-500">
+                                            {{ $content['description'] ?? $content['body'] ?? 'Apresenta aqui o teu negócio e o que tens para oferecer.' }}
+                                        </p>
+                                        @if(!empty($content['button_label']))
+                                            <span class="mt-7 inline-flex rounded-xl px-5 py-3 text-sm font-black text-white" style="background: {{ $theme['primary'] ?? '#635bff' }}">
+                                                {{ $content['button_label'] }}
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                @elseif($type === 'text')
+                                    <div class="mx-auto max-w-3xl">
+                                        <h2 class="text-3xl font-black">{{ $content['title'] ?? 'Título' }}</h2>
+                                        <p class="mt-4 whitespace-pre-line text-base leading-7 text-zinc-500">
+                                            {{ $content['body'] ?? $content['description'] ?? 'Adiciona aqui a descrição.' }}
+                                        </p>
+                                    </div>
+
+                                @elseif($type === 'image')
+                                    <div class="mx-auto max-w-4xl text-center">
+                                        @if(!empty($content['url']))
+                                            <img src="{{ $content['url'] }}" alt="{{ $content['alt'] ?? '' }}" class="mx-auto max-h-[480px] rounded-2xl object-cover">
+                                        @else
+                                            <div class="rounded-2xl border-2 border-dashed border-zinc-200 px-6 py-20 text-sm text-zinc-400 dark:border-zinc-700">
+                                                Adiciona uma imagem no painel de edição.
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                @elseif($type === 'product_grid')
+                                    <div class="mx-auto max-w-5xl">
+                                        <div class="mb-8">
+                                            <h2 class="text-3xl font-black">{{ $content['title'] ?? 'Os nossos produtos' }}</h2>
+                                            <p class="mt-2 text-zinc-500">{{ $content['description'] ?? 'Escolhe os produtos que queres apresentar aos teus clientes.' }}</p>
+                                        </div>
+
+                                        @if(count($items))
+                                            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                                @foreach($items as $item)
+                                                    <article class="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+                                                        @if(!empty($item['image_url']))
+                                                            <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] ?? '' }}" class="h-48 w-full object-cover">
+                                                        @endif
+                                                        <div class="p-5">
+                                                            <h3 class="font-black">{{ $item['name'] ?? $item['title'] ?? 'Produto' }}</h3>
+                                                            @if(!empty($item['description']))
+                                                                <p class="mt-2 text-sm leading-6 text-zinc-500">{{ $item['description'] }}</p>
+                                                            @endif
+                                                            @if(isset($item['price']))
+                                                                <p class="mt-4 text-lg font-black">€ {{ number_format((float) $item['price'], 2, ',', '.') }}</p>
+                                                            @endif
+                                                        </div>
+                                                    </article>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="rounded-2xl border-2 border-dashed border-zinc-200 px-6 py-14 text-center dark:border-zinc-700">
+                                                <p class="font-bold">Ainda não tens produtos para mostrar.</p>
+                                                <p class="mt-1 text-sm text-zinc-500">Adiciona os produtos na área de Produtos do teu website.</p>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                @elseif($type === 'cta')
+                                    <div class="rounded-3xl p-8 text-center sm:p-14" style="background: {{ $theme['background'] ?? '#f4f4f5' }}">
+                                        <h2 class="text-3xl font-black">{{ $content['title'] ?? 'Fala connosco' }}</h2>
+                                        <p class="mx-auto mt-3 max-w-2xl text-zinc-500">{{ $content['description'] ?? 'Estamos disponíveis para ajudar.' }}</p>
+                                        <span class="mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-black text-white" style="background: {{ $theme['primary'] ?? '#635bff' }}">
+                                            {{ $content['button_label'] ?? 'Contactar' }}
+                                        </span>
+                                    </div>
+
+                                @else
+                                    <div class="mx-auto max-w-4xl">
+                                        <h2 class="text-3xl font-black">{{ $content['title'] ?? \Illuminate\Support\Str::headline($type) }}</h2>
+                                        @if(!empty($content['description']))
+                                            <p class="mt-3 text-zinc-500">{{ $content['description'] }}</p>
+                                        @endif
+
+                                        @if(count($items))
+                                            <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                                @foreach($items as $item)
+                                                    <article class="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-700">
+                                                        <p class="font-black">{{ $item['title'] ?? $item['name'] ?? $item['question'] ?? $item['label'] ?? 'Item' }}</p>
+                                                        <p class="mt-2 text-sm leading-6 text-zinc-500">{{ $item['description'] ?? $item['quote'] ?? $item['answer'] ?? $item['excerpt'] ?? $item['price'] ?? '' }}</p>
+                                                    </article>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        </section>
+                    @empty
+                        <div class="flex min-h-[650px] items-center justify-center px-8 text-center">
+                            <div class="max-w-md">
+                                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 text-2xl dark:bg-zinc-800">✦</div>
+                                <h2 class="mt-5 text-xl font-black">O teu website está pronto para editar</h2>
+                                <p class="mt-2 text-sm leading-6 text-zinc-500">O modelo escolhido ainda não tem conteúdo. Volta atrás e escolhe um modelo para começar.</p>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </main>
+
+        {{-- Simple editor: text, description and products only. --}}
+        <aside class="w-full shrink-0 overflow-y-auto border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 lg:w-[360px] lg:border-l lg:border-t-0">
+            <div class="border-b border-zinc-200 px-5 py-5 dark:border-zinc-800">
+                <p class="text-xs font-black uppercase tracking-wider text-zinc-400">Editar</p>
+                @if($selectedSection !== null && isset($sections[$selectedSection]))
+                    <h2 class="mt-1 text-lg font-black">{{ $sections[$selectedSection]['label'] ?? 'Secção' }}</h2>
+                    <p class="mt-1 text-sm text-zinc-500">Altera apenas o conteúdo. O design fica protegido.</p>
+                @else
+                    <h2 class="mt-1 text-lg font-black">Escolhe uma secção</h2>
+                    <p class="mt-1 text-sm text-zinc-500">Clica numa parte do website para editar o texto.</p>
+                @endif
+            </div>
+
+            @if($selectedSection !== null && isset($sections[$selectedSection]))
+                @php
+                    $selectedContent = $sections[$selectedSection]['content'] ?? [];
+                    $selectedItems = $selectedContent['items'] ?? [];
+                    $selectedType = $sections[$selectedSection]['type'];
+                @endphp
+
+                <div class="space-y-5 p-5">
+                    @foreach($selectedContent as $fieldKey => $fieldValue)
+                        @continue($fieldKey === 'items')
+                        @if(is_scalar($fieldValue) || $fieldValue === null)
+                            @php
+                                $fieldLabel = match($fieldKey) {
+                                    'title' => 'Título',
+                                    'subtitle' => 'Subtítulo',
+                                    'description', 'body' => 'Descrição',
+                                    'button_label' => 'Texto do botão',
+                                    'button_url' => 'Link do botão',
+                                    'alt' => 'Texto da imagem',
+                                    'url' => 'Imagem / URL',
+                                    default => \Illuminate\Support\Str::headline(str_replace('_', ' ', $fieldKey)),
+                                };
+                            @endphp
+
+                            @if(in_array($fieldKey, ['title', 'subtitle', 'description', 'body', 'button_label'], true))
+                                <div>
+                                    <label class="text-sm font-bold">{{ $fieldLabel }}</label>
+                                    @if(in_array($fieldKey, ['description', 'body'], true))
+                                        <textarea wire:model.live.debounce.700ms="sections.{{ $selectedSection }}.content.{{ $fieldKey }}"
+                                                  rows="4"
+                                                  class="mt-2 w-full resize-none rounded-xl border-zinc-200 bg-zinc-50 px-3 py-3 text-sm leading-6 focus:border-zinc-400 focus:ring-0 dark:border-zinc-700 dark:bg-zinc-800"></textarea>
+                                    @else
+                                        <input wire:model.live.debounce.700ms="sections.{{ $selectedSection }}.content.{{ $fieldKey }}"
+                                               class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-3 py-3 text-sm focus:border-zinc-400 focus:ring-0 dark:border-zinc-700 dark:bg-zinc-800">
+                                    @endif
+                                </div>
+                            @endif
+                        @endif
+                    @endforeach
+
+                    @if($selectedType === 'product_grid')
+                        <div class="border-t border-zinc-200 pt-5 dark:border-zinc-700">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="font-black">Produtos</h3>
+                                    <p class="mt-1 text-xs leading-5 text-zinc-500">Os produtos activos da tua loja aparecem automaticamente nesta secção.</p>
+                                </div>
+                                <a href="{{ route('admin.site.products', $site) }}"
+                                   class="shrink-0 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-bold hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                                    Gerir produtos
+                                </a>
+                            </div>
+
+                            <div class="mt-4 space-y-2">
+                                @forelse($selectedItems as $item)
+                                    <div class="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">
+                                        <p class="text-sm font-bold">{{ $item['name'] ?? $item['title'] ?? 'Produto' }}</p>
+                                        @if(!empty($item['description']))
+                                            <p class="mt-1 line-clamp-2 text-xs text-zinc-500">{{ $item['description'] }}</p>
+                                        @endif
+                                        @if(isset($item['price']))
+                                            <p class="mt-2 text-xs font-black">€ {{ number_format((float) $item['price'], 2, ',', '.') }}</p>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <p class="rounded-xl bg-zinc-50 px-3 py-4 text-center text-xs text-zinc-500 dark:bg-zinc-800">Ainda não tens produtos activos.</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="border-t border-zinc-200 pt-5 dark:border-zinc-700">
+                        <button type="button" wire:click="save"
+                                class="w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-black text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200">
+                            Guardar alterações
+                        </button>
+                    </div>
+                </div>
+            @else
+                <div class="p-5">
+                    <button type="button" wire:click="addSection('product_grid')"
+                            class="w-full rounded-xl border border-dashed border-zinc-300 px-4 py-4 text-left transition hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                        <span class="block text-sm font-black">+ Adicionar produtos</span>
+                        <span class="mt-1 block text-xs text-zinc-500">Mostra os produtos da tua loja no website.</span>
+                    </button>
+                </div>
+            @endif
         </aside>
     </div>
 </div>
