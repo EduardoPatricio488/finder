@@ -17,22 +17,37 @@ class CreateSite extends Component
     public int $step = 1;
 
     public string $creationMode = 'model';
+
     public string $type = 'business';
+
     public string $template = 'studio';
+
     public string $name = '';
+
     public string $slug = '';
+
     public string $description = '';
+
     public string $audience = '';
+
     public string $goal = 'contact';
+
     public string $style = 'Moderno';
+
     public string $additionalInfo = '';
+
     public string $primaryColor = '#635bff';
+
     public string $secondaryColor = '#111827';
+
     public string $font = 'Inter';
 
     public array $pages = ['home', 'about', 'services', 'contact'];
+
     public array $types = [];
+
     public array $templates = [];
+
     public array $pageLabels = [];
 
     public function mount(): void

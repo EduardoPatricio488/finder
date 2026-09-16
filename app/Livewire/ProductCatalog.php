@@ -19,23 +19,41 @@ use Livewire\Component;
 class ProductCatalog extends Component
 {
     public string $search = '';
+
     public string $category = '';
+
     public string $minPrice = '';
+
     public string $maxPrice = '';
+
     public string $availability = '';
+
     public string $minRating = '';
+
     public array $cart = [];
+
     public string $couponCode = '';
+
     public ?string $appliedCouponCode = null;
+
     public float $couponDiscount = 0;
+
     public string $couponMessage = '';
+
     public bool $cartOpen = false;
+
     public bool $checkoutOpen = false;
+
     public string $customerName = '';
+
     public string $customerEmail = '';
+
     public string $customerPhone = '';
+
     public string $deliveryAddress = '';
+
     public string $paymentMethod = 'mbway';
+
     public ?string $completedOrderNumber = null;
 
     private function site(): Site
