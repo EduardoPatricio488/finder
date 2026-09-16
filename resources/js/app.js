@@ -16,6 +16,7 @@ document.addEventListener('livewire:navigated', () => {
 (() => {
     let saveTimer = null;
     let saving = false;
+    let activeInlineElementId = null;
 
     const isBuilderPage = () => {
         const path = window.location.pathname.replace(/\/$/, '');
@@ -82,6 +83,9 @@ document.addEventListener('livewire:navigated', () => {
         element.dataset.finderInlineReady = '1';
 
         element.addEventListener('click', (event) => event.stopPropagation());
+        element.addEventListener('focus', () => {
+            activeInlineElementId = element.dataset.finderElementId || element.closest('[data-element-id]')?.getAttribute('data-element-id') || null;
+        });
 
         element.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -230,9 +234,29 @@ document.addEventListener('livewire:navigated', () => {
         });
     };
 
+    const bootInlineSelectionRaceFix = () => {
+        if (!isBuilderPage() || !window.Livewire?.hook) return;
+        if (window.finderBuilderInlineRaceFixReady) return;
+
+        window.finderBuilderInlineRaceFixReady = true;
+
+        Livewire.hook('commit', ({ commit }) => {
+            if (!activeInlineElementId || !commit?.calls) return;
+
+            const hasInlineUpdate = commit.calls.some((call) => call?.method === 'updateSelectedElement');
+            if (!hasInlineUpdate) return;
+
+            commit.updates = commit.updates || {};
+            if (commit.updates.selectedElementId === undefined || commit.updates.selectedElementId === null) {
+                commit.updates.selectedElementId = activeInlineElementId;
+            }
+        });
+    };
+
     const boot = () => {
         if (!isBuilderPage()) return;
 
+        bootInlineSelectionRaceFix();
         bootInlineEditing();
         bootVisualSelection();
         bootDragAndDrop();
