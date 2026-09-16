@@ -401,8 +401,8 @@ class BuilderStudio extends Component
         $section->id = (int) $id;
         $section->type = (string) ($data['type'] ?? 'text');
         $section->label = (string) ($data['label'] ?? 'Secção');
-        $section->content = is_array($data['content'] ?? null) ? $data['content'] : [];
-        $section->settings = is_array($data['settings'] ?? null) ? $data['settings'] : [];
+        $section->setAttribute('content', is_array($data['content'] ?? null) ? $data['content'] : []);
+        $section->setAttribute('settings', is_array($data['settings'] ?? null) ? $data['settings'] : []);
         $section->is_visible = (bool) ($data['is_visible'] ?? true);
 
         return $section;
