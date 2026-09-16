@@ -9,8 +9,40 @@
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @fluxAppearance
+    <style>
+        /* O Builder tem um shell de altura fixa; o canvas precisa de uma área de scroll própria. */
+        html:has(body.builder-layout),
+        body.builder-layout {
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        body.builder-layout > div:first-child {
+            height: 100dvh;
+            min-height: 0;
+        }
+
+        body.builder-layout main,
+        body.builder-layout main > div,
+        body.builder-layout main > div > div:last-child {
+            min-height: 0;
+        }
+
+        body.builder-layout main > div > div:last-child {
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body.builder-layout aside {
+            scrollbar-width: thin;
+            overscroll-behavior: contain;
+        }
+    </style>
 </head>
-<body class="h-full overflow-hidden bg-zinc-100 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-white">
+<body class="builder-layout h-full overflow-hidden bg-zinc-100 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-white">
     {{ $slot }}
 
     <div
