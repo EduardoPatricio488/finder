@@ -26,7 +26,13 @@ jobs:
             git push origin HEAD:phase-4-design-publish
             exit 0
           fi
-          git checkout --theirs .github/workflows/tests.yml
-          git add .github/workflows/tests.yml
+          conflicted=$(git diff --name-only --diff-filter=U)
+          if [ -z "$conflicted" ]; then
+            exit 1
+          fi
+          while IFS= read -r file; do
+            git checkout --ours -- "$file"
+            git add -- "$file"
+          done <<< "$conflicted"
           git commit -m 'Merge main into Website Studio'
           git push origin HEAD:phase-4-design-publish
