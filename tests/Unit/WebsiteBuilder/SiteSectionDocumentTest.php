@@ -80,7 +80,7 @@ it('preserves unknown data and stores a compact normalized v2 document alongside
     $section->id = 123;
     $document = SiteSectionDocument::fromSection($section);
     $data = SiteSectionDocument::toSectionData($document);
-    $storedDocument = json_decode($data[0]['settings']['builder_document'], true, 512, JSON_THROW_ON_ERROR);
+    $storedDocument = $data[0]['settings']['builder_document'];
 
     expect($document['nodes'][0]['settings']['section_type_known'])->toBeFalse()
         ->and($data[0]['content'])->toBe($section->content)
@@ -96,7 +96,7 @@ it('handles empty legacy data without inventing content', function (): void {
     $section = new SiteSection(['type' => 'text', 'content' => [], 'settings' => []]);
     $document = SiteSectionDocument::fromSection($section);
     $data = SiteSectionDocument::toSectionData($document);
-    $storedDocument = json_decode($data[0]['settings']['builder_document'], true, 512, JSON_THROW_ON_ERROR);
+    $storedDocument = $data[0]['settings']['builder_document'];
 
     expect(BuilderDocument::isValid($document))->toBeTrue()
         ->and($document['nodes'][0]['children'])->toBe([])
