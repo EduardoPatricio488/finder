@@ -79,10 +79,6 @@ final class SiteSectionDocument
     {
         $document = BuilderDocument::normalize($document);
         $storageDocument = self::compactLegacyPayload($document);
-        $storageDocumentJson = json_encode(
-            $storageDocument,
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR
-        );
         $sections = [];
 
         foreach ($document['nodes'] as $node) {
@@ -100,7 +96,7 @@ final class SiteSectionDocument
             }
 
             $nodeSettings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
-            $nodeSettings['builder_document'] = $storageDocumentJson;
+            $nodeSettings['builder_document'] = $storageDocument;
 
             $section = [
                 'site_page_id' => $legacy['site_page_id'] ?? null,
