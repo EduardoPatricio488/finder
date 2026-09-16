@@ -17,6 +17,7 @@
         x-data="{ saving: false, status: 'Guardado' }"
         x-on:builder-autosave.window="saving = true; status = 'A guardar…'"
         x-on:builder-autosave-finished.window="saving = false; status = 'Guardado agora'"
+        x-on:builder-autosave-error.window="saving = false; status = 'Erro ao guardar'"
         class="fixed bottom-5 right-5 z-[100] flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white/95 p-2 shadow-2xl backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95"
     >
         <span class="px-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400" x-text="status"></span>
