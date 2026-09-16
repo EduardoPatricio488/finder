@@ -49,12 +49,51 @@ final class BuilderStudioSnapshotHook extends ComponentHook
         }
     }
 
+    public function call($method, $params, $returnEarly, $metadata = null, $componentContext = null): ?callable
+    {
+        if (! $this->component instanceof BuilderStudio) {
+            return null;
+        }
+
+        if (! in_array($method, [
+            'addElement',
+            'selectElement',
+            'updateSelectedElement',
+            'updateSelectedElementSetting',
+            'removeElement',
+            'moveElement',
+            'updateElement',
+            'addSection',
+            'duplicateSection',
+            'deleteSection',
+            'toggleSectionVisibility',
+            'reorderSections',
+        ], true)) {
+            return null;
+        }
+
+        return function (): void {
+            $this->persistDocuments();
+        };
+    }
+
     public function dehydrate(): void
     {
         if (! $this->component instanceof BuilderStudio) {
             return;
         }
 
+        $this->persistDocuments();
+
+        foreach ($this->component->sections as $index => $data) {
+            if (isset($data['settings']['builder_document'])) {
+                unset($this->component->sections[$index]['settings']['builder_document']);
+            }
+        }
+    }
+
+    private function persistDocuments(): void
+    {
         $pageId = $this->component->pageId;
         if ($pageId === null) {
             return;
@@ -65,7 +104,7 @@ final class BuilderStudioSnapshotHook extends ComponentHook
             return;
         }
 
-        foreach ($this->component->sections as $index => $data) {
+        foreach ($this->component->sections as $data) {
             $document = $data['settings']['builder_document'] ?? null;
             if (! is_array($document)) {
                 continue;
@@ -81,7 +120,11 @@ final class BuilderStudioSnapshotHook extends ComponentHook
                 continue;
             }
 
-            $sectionData = SiteSectionDocument::toSectionData($document);
+            $legacyContent = is_array($data['content'] ?? null) ? $data['content'] : [];
+            $legacySettings = is_array($data['settings'] ?? null) ? $data['settings'] : [];
+            unset($legacySettings['builder_document']);
+
+            $sectionData = SiteSectionDocument::toSectionData($document, $legacyContent, $legacySettings);
             $payload = $sectionData[0] ?? null;
             if (! is_array($payload)) {
                 continue;
@@ -91,8 +134,6 @@ final class BuilderStudioSnapshotHook extends ComponentHook
                 'content' => is_array($payload['content'] ?? null) ? $payload['content'] : [],
                 'settings' => is_array($payload['settings'] ?? null) ? $payload['settings'] : [],
             ]);
-
-            unset($this->component->sections[$index]['settings']['builder_document']);
         }
     }
 }
