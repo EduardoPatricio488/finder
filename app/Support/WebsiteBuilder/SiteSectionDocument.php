@@ -88,21 +88,16 @@ final class SiteSectionDocument
                 throw new InvalidArgumentException('Document node does not contain SiteSection legacy metadata.');
             }
 
-            if ($legacyContent !== null) {
-                $legacy['content'] = $legacyContent;
-            }
-            if ($legacySettings !== null) {
-                $legacy['settings'] = $legacySettings;
-            }
-
-            $nodeSettings = is_array($legacy['settings'] ?? null) ? $legacy['settings'] : [];
+            $content = $legacyContent ?? [];
+            $settings = $legacySettings ?? [];
+            $nodeSettings = is_array($settings) ? $settings : [];
             $nodeSettings['builder_document'] = $storageDocument;
 
             $section = [
                 'site_page_id' => $legacy['site_page_id'] ?? null,
                 'type' => (string) $legacy['type'],
                 'label' => $legacy['label'] ?? null,
-                'content' => is_array($legacy['content'] ?? null) ? $legacy['content'] : [],
+                'content' => $content,
                 'settings' => $nodeSettings,
                 'sort_order' => (int) ($legacy['sort_order'] ?? 0),
                 'is_visible' => (bool) ($legacy['is_visible'] ?? true),
