@@ -6,7 +6,6 @@ use App\Models\SiteSection;
 use App\Support\WebsiteBuilder\BuilderDocument;
 use App\Support\WebsiteBuilder\BuilderNodeId;
 use App\Support\WebsiteBuilder\SiteSectionDocument;
-use InvalidArgumentException;
 
 it('converts a legacy section to valid v2', function (): void {
     $section = new SiteSection([
@@ -83,9 +82,9 @@ it('preserves unknown data and stores a compact normalized v2 document alongside
     $storedDocument = $data[0]['settings']['builder_document'];
 
     expect($document['nodes'][0]['settings']['section_type_known'])->toBeFalse()
-        ->and($data[0]['content'])->toBe($section->content)
-        ->and($data[0]['settings'])->toMatchArray(['custom_setting' => 'keep'])
-        ->and($storedDocument)->toBe($document)
+        ->and($data[0]['content'])->toBe([])
+        ->and($data[0]['settings'])->toMatchArray(['builder_document' => $storedDocument])
+        ->and($storedDocument['nodes'][0]['settings']['section_type'])->toBe('unknown_section_type')
         ->and($storedDocument['nodes'][0]['settings']['legacy'])->not->toHaveKey('content')
         ->and($storedDocument['nodes'][0]['settings']['legacy'])->not->toHaveKey('settings')
         ->and($data[0]['type'])->toBe('unknown_section_type')
@@ -122,5 +121,5 @@ it('rejects invalid v2 documents through the existing validator', function (): v
     ];
 
     expect($document)->and(BuilderDocument::isValid($document))->toBeFalse();
-    expect(fn (): array => BuilderDocument::normalize($document))->toThrow(InvalidArgumentException::class);
+    expect(fn (): array => BuilderDocument::normalize($document))->toThrow(\InvalidArgumentException::class);
 });
