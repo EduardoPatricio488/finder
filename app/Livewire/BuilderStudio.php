@@ -29,45 +29,25 @@ use Livewire\Component;
 class BuilderStudio extends Component
 {
     public Site $site;
-
     public ?int $pageId = null;
-
     public array $pages = [];
-
     public array $sections = [];
-
     public array $theme = [];
-
     public array $siteSettings = [];
-
     public array $pageSeo = [];
-
     public ?int $selectedSection = null;
-
     public ?string $selectedElementId = null;
-
     public string $device = 'desktop';
-
     public string $panel = 'pages';
-
     public string $aiBrief = '';
-
     public string $statusMessage = 'Guardado';
-
     public bool $dirty = false;
-
     public bool $showAi = false;
-
     public bool $showTemplates = false;
-
     public bool $showPublish = false;
-
     public bool $showSettings = false;
-
     public bool $showVersions = false;
-
     public array $publishChecks = [];
-
     public array $versions = [];
 
     public function mount(Site $site): void
@@ -392,10 +372,20 @@ class BuilderStudio extends Component
 
     private function sectionModel(int $index): SiteSection
     {
-        $id = $this->sections[$index]['id'] ?? null;
+        abort_unless(isset($this->sections[$index]) && is_array($this->sections[$index]), 404);
+        $data = $this->sections[$index];
+        $id = $data['id'] ?? null;
         abort_unless(is_numeric($id), 422);
 
-        return $this->site->pages()->findOrFail($this->pageId)->sections()->findOrFail((int) $id);
+        $section = new SiteSection();
+        $section->id = (int) $id;
+        $section->type = (string) ($data['type'] ?? 'text');
+        $section->label = (string) ($data['label'] ?? 'Secção');
+        $section->content = is_array($data['content'] ?? null) ? $data['content'] : [];
+        $section->settings = is_array($data['settings'] ?? null) ? $data['settings'] : [];
+        $section->is_visible = (bool) ($data['is_visible'] ?? true);
+
+        return $section;
     }
 
     private function applyDocumentToSection(int $index, array $document): void
@@ -454,7 +444,6 @@ class BuilderStudio extends Component
         $this->publishChecks = $this->formatPublishChecks($result);
         if (! $result['ok']) {
             $this->showPublish = true;
-
             return;
         }
         app(WebsitePublishingService::class)->publish($this->site, auth()->id());
@@ -475,7 +464,6 @@ class BuilderStudio extends Component
         if ($checks === []) {
             $checks[] = ['level' => 'success', 'label' => 'Tudo pronto', 'message' => 'O website passou todas as verificações de publicação.'];
         }
-
         return $checks;
     }
 
@@ -573,7 +561,6 @@ class BuilderStudio extends Component
             $content = is_array($section['content'] ?? null) ? $section['content'] : $this->defaultContent($type);
             $result[] = ['type' => $type, 'label' => Str::limit((string) ($section['label'] ?? Str::headline($type)), 120, ''), 'content' => $this->sanitizeLegacyContent($content)];
         }
-
         return $result;
     }
 
@@ -584,7 +571,6 @@ class BuilderStudio extends Component
                 $value = Str::limit($value, 4000, '');
             }
         });
-
         return $content;
     }
 
@@ -597,7 +583,6 @@ class BuilderStudio extends Component
                 $value = Str::limit($value, 2000, '');
             }
         }
-
         return $content;
     }
 
@@ -605,7 +590,6 @@ class BuilderStudio extends Component
     {
         $children = $document['nodes'][0]['children'] ?? [];
         $last = end($children);
-
         return is_array($last) && is_string($last['id'] ?? null) ? $last['id'] : null;
     }
 
@@ -622,14 +606,12 @@ class BuilderStudio extends Component
                 }
             }
         }
-
         return null;
     }
 
     private function pageSortOrder(string $slug): int
     {
         $existing = $this->site->pages()->where('slug', $slug)->value('sort_order');
-
         return $existing !== null ? (int) $existing : ((int) $this->site->pages()->max('sort_order')) + 1;
     }
 
