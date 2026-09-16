@@ -1,0 +1,41 @@
+name: Fix Builder Studio types
+
+on:
+  push:
+    branches:
+      - phase-4-design-publish
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-design-publish
+      - name: Fix typed model assignments
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/Livewire/BuilderStudio.php')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace("$section->content = is_array($data['content'] ?? null) ? $data['content'] : [];", "$section->setAttribute('content', is_array($data['content'] ?? null) ? $data['content'] : []);")
+          text = text.replace("$section->settings = is_array($data['settings'] ?? null) ? $data['settings'] : [];", "$section->setAttribute('settings', is_array($data['settings'] ?? null) ? $data['settings'] : []);")
+          path.write_text(text, encoding='utf-8')
+          PY
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: vendor/bin/pint app/Livewire/BuilderStudio.php
+      - name: Commit fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/Livewire/BuilderStudio.php
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix: satisfy Builder Studio model property types'
+          git push origin HEAD:phase-4-design-publish
