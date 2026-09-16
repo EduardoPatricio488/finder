@@ -10,44 +10,33 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @fluxAppearance
     <style>
-        /* O Builder usa um shell fixo: apenas o canvas deve fazer scroll. */
+        /* O Builder usa o scroll normal da página. Evita conflitos entre vários
+           contentores overflow dentro de flexboxes aninhados. */
         html:has(body.builder-layout),
         body.builder-layout {
-            height: 100%;
-            min-height: 0;
-            margin: 0;
-            overflow: hidden !important;
+            min-height: 100%;
+            height: auto !important;
+            overflow-y: auto !important;
+            overflow-x: hidden;
         }
 
         body.builder-layout > div:first-child {
-            height: 100dvh;
-            min-height: 0;
-            max-height: 100dvh;
+            height: auto !important;
+            min-height: 100dvh;
+            overflow: visible !important;
         }
 
         body.builder-layout main,
         body.builder-layout main > div,
-        body.builder-layout main > div > div,
-        body.builder-layout main > div > div > div {
-            min-height: 0 !important;
+        body.builder-layout main > div > div:last-child {
+            min-height: 0;
+            height: auto !important;
+            overflow: visible !important;
         }
 
-        /* O elemento com .overflow-auto é o canvas real do Builder. */
-        body.builder-layout main .overflow-auto {
-            min-height: 0 !important;
-            height: 100%;
-            flex: 1 1 0%;
-            overflow-y: scroll !important;
-            overflow-x: hidden !important;
-            overscroll-behavior-y: contain;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: auto;
-        }
-
-        /* A coluna do canvas tem de poder encolher para o scroll ficar dentro dela. */
-        body.builder-layout main > div > div:nth-child(2) {
-            min-height: 0 !important;
-            flex: 1 1 0%;
+        body.builder-layout main > div > div:last-child {
+            overscroll-behavior: auto;
+            -webkit-overflow-scrolling: auto;
         }
 
         body.builder-layout aside {
