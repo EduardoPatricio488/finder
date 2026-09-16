@@ -50,7 +50,7 @@ class BuilderStudio extends Component
 
     public string $panel = 'pages';
 
-    public string $aiBrief = '';
+    public string $inspectorTab = 'content'; // content | style | seo
 
     public string $statusMessage = 'Guardado';
 
@@ -69,6 +69,24 @@ class BuilderStudio extends Component
     public array $publishChecks = [];
 
     public array $versions = [];
+
+    // --- Pesquisa / catálogo ---
+    public string $sectionQuery = '';
+
+    public string $elementQuery = '';
+
+    // --- Wizard de IA ---
+    public int $aiStep = 1;
+
+    public string $aiBusinessName = '';
+
+    public string $aiCategory = '';
+
+    public string $aiTone = 'profissional';
+
+    public string $aiDescription = '';
+
+    public array $aiPagesSelected = ['home', 'about', 'services', 'contact'];
 
     public function mount(Site $site): void
     {
@@ -93,6 +111,7 @@ class BuilderStudio extends Component
         $this->pageSeo = $page->seo ?: [];
         $this->selectedSection = $this->sections !== [] ? 0 : null;
         $this->selectedElementId = null;
+        $this->inspectorTab = 'content';
         $this->refreshPages();
         $this->dirty = false;
         $this->statusMessage = 'Guardado';
@@ -275,12 +294,35 @@ class BuilderStudio extends Component
         $this->statusMessage = 'Elemento adicionado — por guardar';
     }
 
+    public function duplicateElement(string $elementId): void
+    {
+        abort_unless($this->selectedSection !== null && isset($this->sections[$this->selectedSection]), 422);
+        $index = $this->selectedSection;
+        $document = SiteSectionDocument::fromSection($this->sectionModel($index));
+        $element = $this->findElement($document['nodes'] ?? [], $elementId);
+        abort_unless(is_array($element), 404);
+        $containerId = $document['nodes'][0]['id'] ?? null;
+        abort_unless(is_string($containerId), 422);
+
+        // Nota: a API do BuilderDocumentEditor não expõe "inserir a seguir a X",
+        // por isso o duplicado é acrescentado ao fundo da secção com o mesmo conteúdo.
+        $document = BuilderDocumentEditor::addElement($document, $containerId, (string) $element['type']);
+        $newId = $this->lastElementId($document);
+        abort_unless($newId !== null, 422);
+        $document = BuilderDocumentEditor::updateElement($document, $newId, is_array($element['content'] ?? null) ? $element['content'] : [], is_array($element['settings'] ?? null) ? $element['settings'] : []);
+        $this->applyDocumentToSection($index, $document);
+        $this->selectedElementId = $newId;
+        $this->dirty = true;
+        $this->statusMessage = 'Elemento duplicado — por guardar';
+    }
+
     public function selectElement(string $elementId): void
     {
         abort_unless($this->selectedSection !== null && isset($this->sections[$this->selectedSection]), 422);
         $document = SiteSectionDocument::fromSection($this->sectionModel($this->selectedSection));
         abort_unless($this->findElement($document['nodes'] ?? [], $elementId) !== null, 404);
         $this->selectedElementId = $elementId;
+        $this->inspectorTab = 'content';
     }
 
     public function updateSelectedElement(string $field, string $value): void
@@ -313,7 +355,23 @@ class BuilderStudio extends Component
         $document = BuilderDocumentEditor::updateElement($document, $this->selectedElementId, null, $settings);
         $this->applyDocumentToSection($index, $document);
         $this->dirty = true;
-        $this->statusMessage = 'Estilo responsivo alterado — por guardar';
+        $this->statusMessage = 'Estilo ('.$this->device.') alterado — por guardar';
+    }
+
+    /** Devolve os estilos responsivos actuais do elemento seleccionado, resolvidos para o dispositivo activo. */
+    public function selectedElementStyles(): array
+    {
+        if ($this->selectedSection === null || $this->selectedElementId === null) {
+            return [];
+        }
+        $document = SiteSectionDocument::fromSection($this->sectionModel($this->selectedSection));
+        $element = $this->findElement($document['nodes'] ?? [], $this->selectedElementId);
+        if (! is_array($element)) {
+            return [];
+        }
+        $settings = is_array($element['settings'] ?? null) ? $element['settings'] : [];
+
+        return ResponsiveStyles::forDevice($settings, $this->device);
     }
 
     public function removeElement(string $elementId): void
@@ -345,6 +403,18 @@ class BuilderStudio extends Component
         abort_unless(WebsiteTemplates::sectionTypes()->contains($type), 422);
         $this->sections[] = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
         $this->selectedSection = count($this->sections) - 1;
+        $this->selectedElementId = null;
+        $this->dirty = true;
+        $this->panel = 'inspector';
+    }
+
+    /** Insere uma nova secção logo a seguir ao índice indicado (usado no "+" flutuante entre secções). */
+    public function insertSectionAfter(int $index, string $type): void
+    {
+        abort_unless(WebsiteTemplates::sectionTypes()->contains($type), 422);
+        $section = ['id' => null, 'type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'is_visible' => true];
+        array_splice($this->sections, $index + 1, 0, [$section]);
+        $this->selectedSection = $index + 1;
         $this->selectedElementId = null;
         $this->dirty = true;
         $this->panel = 'inspector';
@@ -388,6 +458,114 @@ class BuilderStudio extends Component
         abort_unless(isset($this->sections[$index]), 404);
         $this->sections[$index]['is_visible'] = ! (bool) $this->sections[$index]['is_visible'];
         $this->dirty = true;
+    }
+
+    /** Pede à IA para regenerar apenas o conteúdo desta secção, mantendo o tipo. */
+    public function regenerateSectionWithAi(int $index): void
+    {
+        abort_unless(isset($this->sections[$index]), 404);
+        $type = (string) $this->sections[$index]['type'];
+        $brief = [
+            'business_name' => $this->site->name,
+            'description' => 'Website: '.$this->site->name.'. Gera conteúdo apenas para uma secção do tipo "'.$type.'", coerente com o resto do negócio.',
+            'category' => $this->site->type,
+            'tone' => 'profissional',
+        ];
+        $result = app(WebsiteAiGenerator::class)->generateSection($brief, $type);
+        $content = is_array($result['content'] ?? null) ? $result['content'] : $this->defaultContent($type);
+        $this->sections[$index]['content'] = $this->sanitizeLegacyContent($content);
+        if (is_string($result['label'] ?? null) && trim($result['label']) !== '') {
+            $this->sections[$index]['label'] = Str::limit($result['label'], 120, '');
+        }
+        $this->dirty = true;
+        $this->statusMessage = 'Secção regenerada por IA — por guardar';
+    }
+
+    /** Catálogo de secções agrupado por categoria, filtrado pela pesquisa actual. */
+    public function sectionCatalog(): array
+    {
+        $catalog = [
+            'hero' => ['label' => 'Hero', 'category' => 'Introdução', 'description' => 'Primeira impressão com título e chamada à ação.'],
+            'text' => ['label' => 'Texto', 'category' => 'Conteúdo', 'description' => 'Bloco de texto livre.'],
+            'image' => ['label' => 'Imagem', 'category' => 'Media', 'description' => 'Imagem em destaque.'],
+            'button' => ['label' => 'Botão', 'category' => 'Ação', 'description' => 'Chamada à ação isolada.'],
+            'feature_grid' => ['label' => 'Benefícios', 'category' => 'Conteúdo', 'description' => 'Grelha de vantagens.'],
+            'card' => ['label' => 'Cartão', 'category' => 'Conteúdo', 'description' => 'Destaque com título e descrição.'],
+            'testimonials' => ['label' => 'Testemunhos', 'category' => 'Prova social', 'description' => 'Opiniões de clientes.'],
+            'faq' => ['label' => 'FAQ', 'category' => 'Conteúdo', 'description' => 'Perguntas frequentes.'],
+            'gallery' => ['label' => 'Galeria', 'category' => 'Media', 'description' => 'Conjunto de imagens.'],
+            'contact_form' => ['label' => 'Formulário', 'category' => 'Conversão', 'description' => 'Formulário de contacto.'],
+            'pricing' => ['label' => 'Preços', 'category' => 'Conversão', 'description' => 'Planos e preços.'],
+            'product_grid' => ['label' => 'Produtos', 'category' => 'Conversão', 'description' => 'Catálogo de produtos.'],
+            'blog_posts' => ['label' => 'Artigos', 'category' => 'Conteúdo', 'description' => 'Últimos artigos do blog.'],
+            'social_links' => ['label' => 'Redes sociais', 'category' => 'Prova social', 'description' => 'Ligações para redes sociais.'],
+            'video' => ['label' => 'Vídeo', 'category' => 'Media', 'description' => 'Vídeo incorporado.'],
+            'map' => ['label' => 'Mapa', 'category' => 'Conversão', 'description' => 'Localização e morada.'],
+            'newsletter' => ['label' => 'Newsletter', 'category' => 'Conversão', 'description' => 'Subscrição de email.'],
+            'cta' => ['label' => 'CTA', 'category' => 'Ação', 'description' => 'Chamada à ação de destaque.'],
+        ];
+
+        return $this->filterCatalog($catalog);
+    }
+
+    /** Catálogo de elementos internos (dentro da secção), agrupado e filtrado. */
+    public function elementCatalog(): array
+    {
+        $catalog = [];
+        foreach (ElementRegistry::all() as $type => $definition) {
+            $catalog[$type] = ['label' => $definition['label'], 'category' => $definition['category'], 'description' => $definition['description']];
+        }
+
+        return $this->filterCatalog($catalog, $this->elementQuery);
+    }
+
+    private function filterCatalog(array $catalog, ?string $query = null): array
+    {
+        $query = mb_strtolower(trim($query ?? $this->sectionQuery));
+        $grouped = [];
+        foreach ($catalog as $type => $meta) {
+            if ($query !== '' && ! str_contains(mb_strtolower($meta['label']), $query) && ! str_contains(mb_strtolower($meta['category']), $query)) {
+                continue;
+            }
+            $grouped[$meta['category']][$type] = $meta;
+        }
+
+        return $grouped;
+    }
+
+    /** Score simples (0-100) de "prontidão" do website, usado como indicador visual antes de publicar. */
+    public function readinessScore(): int
+    {
+        $score = 15;
+
+        if (count($this->pages) > 1) {
+            $score += 15;
+        }
+
+        if ($this->sections !== []) {
+            $filled = collect($this->sections)->filter(function (array $section): bool {
+                if (! ($section['is_visible'] ?? true)) {
+                    return false;
+                }
+                foreach ($section['content'] ?? [] as $value) {
+                    if (is_string($value) && trim($value) !== '') {
+                        return true;
+                    }
+                }
+
+                return false;
+            })->count();
+            $score += (int) round(30 * ($filled / count($this->sections)));
+        }
+
+        if (trim((string) ($this->pageSeo['title'] ?? '')) !== '') {
+            $score += 20;
+        }
+        if (trim((string) ($this->pageSeo['description'] ?? '')) !== '') {
+            $score += 20;
+        }
+
+        return max(0, min(100, $score));
     }
 
     private function sectionModel(int $index): SiteSection
@@ -435,6 +613,7 @@ class BuilderStudio extends Component
         abort_unless(isset($this->sections[$index]), 404);
         $this->selectedSection = $index;
         $this->selectedElementId = null;
+        $this->inspectorTab = 'content';
         $this->panel = 'inspector';
     }
 
@@ -531,12 +710,57 @@ class BuilderStudio extends Component
         $this->statusMessage = 'Template aplicado ao website inteiro';
     }
 
+    // --- Wizard de IA ---
+
+    public function openAiWizard(): void
+    {
+        $this->showAi = true;
+        $this->aiStep = 1;
+        if (trim($this->aiBusinessName) === '') {
+            $this->aiBusinessName = $this->site->name;
+        }
+        if (trim($this->aiCategory) === '' && filled($this->site->type)) {
+            $this->aiCategory = (string) $this->site->type;
+        }
+    }
+
+    public function closeAiWizard(): void
+    {
+        $this->showAi = false;
+        $this->aiStep = 1;
+    }
+
+    public function aiGoToStep(int $step): void
+    {
+        $this->aiStep = max(1, min(3, $step));
+    }
+
+    public function aiTogglePage(string $slug): void
+    {
+        if (in_array($slug, $this->aiPagesSelected, true)) {
+            $this->aiPagesSelected = array_values(array_diff($this->aiPagesSelected, [$slug]));
+        } else {
+            $this->aiPagesSelected[] = $slug;
+        }
+    }
+
     public function generateWithAi(): void
     {
-        $brief = trim($this->aiBrief);
-        abort_if($brief === '', 422, 'Descreve o website que queres criar.');
-        abort_if(mb_strlen($brief) > 4000, 422, 'A descrição do website é demasiado longa.');
-        $result = app(WebsiteAiGenerator::class)->generate(['prompt' => $brief, 'description' => $brief, 'business_name' => $this->site->name, 'category' => $this->site->type, 'pages' => ['home', 'about', 'services', 'contact']]);
+        $description = trim($this->aiDescription);
+        abort_if($description === '', 422, 'Descreve o website que queres criar.');
+        abort_if(mb_strlen($description) > 4000, 422, 'A descrição do website é demasiado longa.');
+        abort_if($this->aiPagesSelected === [], 422, 'Escolhe pelo menos uma página para gerar.');
+
+        $brief = [
+            'prompt' => $description,
+            'description' => $description,
+            'business_name' => Str::limit(trim($this->aiBusinessName) !== '' ? trim($this->aiBusinessName) : $this->site->name, 120, ''),
+            'category' => trim($this->aiCategory) !== '' ? trim($this->aiCategory) : $this->site->type,
+            'tone' => $this->aiTone,
+            'pages' => array_values($this->aiPagesSelected),
+        ];
+
+        $result = app(WebsiteAiGenerator::class)->generate($brief);
         $pages = is_array($result['pages'] ?? null) ? $result['pages'] : [];
         foreach ($pages as $slug => $pageData) {
             if (! is_string($slug) || ! is_array($pageData)) {
@@ -568,7 +792,7 @@ class BuilderStudio extends Component
         }
         $this->refreshPages();
         $this->dirty = false;
-        $this->showAi = false;
+        $this->closeAiWizard();
         $this->statusMessage = 'Website gerado por IA — revê as páginas antes de publicar';
     }
 

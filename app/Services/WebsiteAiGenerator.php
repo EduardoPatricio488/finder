@@ -10,6 +10,84 @@ class WebsiteAiGenerator
      * Generate a structured website blueprint. If no AI provider is configured,
      * the service deliberately falls back to the deterministic Builder blueprint.
      */
+
+        /**
+     * Gera conteúdo apenas para uma secção existente (usado no botão "Regenerar com IA").
+     */
+    public function generateSection(array $brief, string $type): array
+    {
+        $allowed = [
+            'hero', 'text', 'image', 'button', 'feature_grid', 'card', 'testimonials',
+            'faq', 'gallery', 'contact_form', 'product_grid', 'product_card', 'pricing',
+            'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta',
+        ];
+
+        if (! in_array($type, $allowed, true)) {
+            return ['type' => $type, 'label' => null, 'content' => []];
+        }
+
+        $apiKey = trim((string) config('services.openai.key', ''));
+
+        if ($apiKey !== '') {
+            $systemPrompt = implode("\n", [
+                'És o gerador de secções do Website Builder Finder. Responde apenas com JSON válido, sem comentários.',
+                'Gera o conteúdo para UMA secção do tipo "'.$type.'". O JSON deve ter exactamente a forma {"type":"'.$type.'","label":"...","content":{...}}.',
+                'Escreve em Português de Portugal, tom profissional e claro. Não inventes dados factuais, preços reais, URLs, nem informação pessoal — usa placeholders quando faltar informação.',
+            ]);
+
+            try {
+                $response = Http::withToken($apiKey)
+                    ->acceptJson()
+                    ->timeout(20)
+                    ->post('https://api.openai.com/v1/chat/completions', [
+                        'model' => (string) config('services.openai.model', 'gpt-5-mini'),
+                        'temperature' => 0.5,
+                        'response_format' => ['type' => 'json_object'],
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)],
+                        ],
+                    ]);
+
+                if ($response->successful()) {
+                    $raw = data_get($response->json(), 'choices.0.message.content');
+                    $decoded = is_string($raw) ? json_decode($raw, true) : null;
+
+                    if (is_array($decoded) && ($decoded['type'] ?? null) === $type && is_array($decoded['content'] ?? null)) {
+                        return [
+                            'type' => $type,
+                            'label' => is_string($decoded['label'] ?? null) ? mb_substr($decoded['label'], 0, 80) : null,
+                            'content' => $decoded['content'],
+                        ];
+                    }
+                }
+            } catch (\Throwable) {
+                // Nunca bloquear a edição por falha do provedor externo de IA.
+            }
+        }
+
+        return $this->sectionFallback($type, $brief);
+    }
+
+    private function sectionFallback(string $type, array $brief): array
+    {
+        $name = (string) ($brief['business_name'] ?? 'O teu negócio');
+
+        $content = match ($type) {
+            'hero' => ['title' => $name, 'subtitle' => 'Explica em poucas palavras o que fazes e porque devem escolher-te.', 'button_label' => 'Saber mais', 'button_url' => '#contacto'],
+            'text' => ['title' => 'Uma história que merece ser contada', 'body' => 'Apresenta aqui a tua empresa, experiência ou proposta de valor.'],
+            'feature_grid' => ['title' => 'Porque escolher-nos', 'items' => [['title' => 'Experiência', 'description' => 'Mostra aquilo que sabes fazer.'], ['title' => 'Qualidade', 'description' => 'Explica o valor que entregas.'], ['title' => 'Confiança', 'description' => 'Dá uma razão clara para avançar.']]],
+            'testimonials' => ['title' => 'O que dizem os clientes', 'items' => [['name' => 'Cliente', 'quote' => 'Adiciona aqui um testemunho real.']]],
+            'faq' => ['title' => 'Perguntas frequentes', 'items' => [['question' => 'Como funciona?', 'answer' => 'Explica de forma simples o teu processo.']]],
+            'pricing' => ['title' => 'Escolhe a opção certa', 'items' => [['name' => 'Essencial', 'price' => 'Consultar', 'description' => 'Para começar.'], ['name' => 'Profissional', 'price' => 'Consultar', 'description' => 'Para necessidades completas.']]],
+            'cta' => ['title' => 'Pronto para dar o próximo passo?', 'description' => 'Cria uma chamada à acção clara.', 'button_label' => 'Entrar em contacto', 'button_url' => '#contacto'],
+            'contact_form' => ['title' => 'Vamos falar?', 'description' => 'Envia uma mensagem e entraremos em contacto.', 'button_label' => 'Enviar mensagem'],
+            default => ['title' => ucfirst(str_replace('_', ' ', $type)), 'description' => 'Personaliza esta secção com informação relevante.'],
+        };
+
+        return ['type' => $type, 'label' => null, 'content' => $content];
+    }
+
     public function generate(array $brief): array
     {
         $apiKey = trim((string) config('services.openai.key', ''));
