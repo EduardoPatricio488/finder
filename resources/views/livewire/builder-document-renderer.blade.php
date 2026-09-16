@@ -9,6 +9,7 @@
             }
 
             $type = $node['type'];
+            $nodeId = (string) ($node['id'] ?? '');
             $content = is_array($node['content'] ?? null) ? $node['content'] : [];
             $settings = is_array($node['settings'] ?? null) ? $node['settings'] : [];
             $children = is_array($node['children'] ?? null) ? $node['children'] : [];
@@ -50,10 +51,10 @@
                         'h4' => 'text-xl',
                         default => 'text-3xl',
                     };
-                    echo '<'.$level.' class="font-bold tracking-tight '.$size.'">'.e((string) ($content['text'] ?? '')).'</'.$level.'>';
+                    echo '<'.$level.' wire:click.stop="selectElement(\''.e($nodeId).'\')" contenteditable="true" spellcheck="true" x-on:blur="$wire.updateSelectedElement(\'text\', $el.innerText)" class="font-bold tracking-tight '.$size.' cursor-text outline-none transition hover:ring-2 hover:ring-blue-200 focus:ring-2 focus:ring-blue-400 rounded-lg">'.e((string) ($content['text'] ?? '')).'</'.$level.'>';
                     break;
                 case 'text':
-                    echo '<p class="whitespace-pre-line leading-8 text-zinc-600 dark:text-zinc-300">'.e((string) ($content['text'] ?? '')).'</p>';
+                    echo '<p wire:click.stop="selectElement(\''.e($nodeId).'\')" contenteditable="true" spellcheck="true" x-on:blur="$wire.updateSelectedElement(\'text\', $el.innerText)" class="whitespace-pre-line leading-8 text-zinc-600 dark:text-zinc-300 cursor-text outline-none transition hover:ring-2 hover:ring-blue-200 focus:ring-2 focus:ring-blue-400 rounded-lg">'.e((string) ($content['text'] ?? '')).'</p>';
                     break;
                 case 'image':
                     $url = (string) ($content['url'] ?? '');
@@ -70,7 +71,7 @@
                     if (! preg_match('/^(https?:\/\/|\/|#)/i', $url)) {
                         $url = '#';
                     }
-                    echo '<a href="'.e($url).'" class="inline-flex rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5" style="background:var(--finder-primary)">'.e((string) ($content['label'] ?? 'Saber mais')).'</a>';
+                    echo '<a href="'.e($url).'" wire:click.stop="selectElement(\''.e($nodeId).'\')" contenteditable="true" spellcheck="true" x-on:blur="$wire.updateSelectedElement(\'label\', $el.innerText)" class="inline-flex rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 cursor-text outline-none focus:ring-2 focus:ring-blue-400" style="background:var(--finder-primary)">'.e((string) ($content['label'] ?? 'Saber mais')).'</a>';
                     break;
                 case 'divider':
                     echo '<hr class="my-4 border-zinc-200 dark:border-zinc-700">';
@@ -85,7 +86,7 @@
                     echo '<div class="'.$height.'" aria-hidden="true"></div>';
                     break;
                 case 'quote':
-                    echo '<blockquote class="border-l-4 border-[var(--finder-primary)] pl-5"><p class="text-xl leading-8">“'.e((string) ($content['text'] ?? '')).'”</p>'.(! empty($content['author']) ? '<footer class="mt-3 text-sm text-zinc-500">'.e((string) $content['author']).'</footer>' : '').'</blockquote>';
+                    echo '<blockquote class="border-l-4 border-[var(--finder-primary)] pl-5"><p wire:click.stop="selectElement(\''.e($nodeId).'\')" contenteditable="true" spellcheck="true" x-on:blur="$wire.updateSelectedElement(\'text\', $el.innerText)" class="text-xl leading-8 cursor-text outline-none hover:ring-2 hover:ring-blue-200 focus:ring-2 focus:ring-blue-400 rounded-lg">“'.e((string) ($content['text'] ?? '')).'”</p>'.(! empty($content['author']) ? '<footer class="mt-3 text-sm text-zinc-500">'.e((string) $content['author']).'</footer>' : '').'</blockquote>';
                     break;
                 case 'video':
                     $url = (string) ($content['url'] ?? '');
