@@ -17,7 +17,14 @@ document.addEventListener('livewire:navigated', () => {
     let saveTimer = null;
     let saving = false;
 
+    const isBuilderPage = () => {
+        const path = window.location.pathname.replace(/\/$/, '');
+        return /\/websites\/[^/]+\/builder$/.test(path);
+    };
+
     const getBuilderComponent = () => {
+        if (!isBuilderPage()) return null;
+
         const root = document.querySelector('[wire\\:id]');
         if (!root || !window.Livewire?.find) return null;
 
@@ -37,6 +44,8 @@ document.addEventListener('livewire:navigated', () => {
     };
 
     const scheduleSave = () => {
+        if (!isBuilderPage()) return;
+
         window.clearTimeout(saveTimer);
         saveTimer = window.setTimeout(saveBuilder, 1400);
     };
@@ -142,10 +151,14 @@ document.addEventListener('livewire:navigated', () => {
     };
 
     const bootInlineEditing = () => {
+        if (!isBuilderPage()) return;
+
         document.querySelectorAll('section[data-section-id]').forEach(makeInlineEditable);
     };
 
     const bootVisualSelection = () => {
+        if (!isBuilderPage()) return;
+
         const canvas = document.querySelector('section[data-section-id]')?.closest('main');
         if (!canvas || canvas.dataset.finderVisualSelectionReady === '1') return;
 
@@ -154,6 +167,8 @@ document.addEventListener('livewire:navigated', () => {
     };
 
     const bootDragAndDrop = () => {
+        if (!isBuilderPage()) return;
+
         const sections = [...document.querySelectorAll('section[data-section-id][wire\\:key]')];
         if (!sections.length) return;
 
@@ -216,6 +231,8 @@ document.addEventListener('livewire:navigated', () => {
     };
 
     const boot = () => {
+        if (!isBuilderPage()) return;
+
         bootInlineEditing();
         bootVisualSelection();
         bootDragAndDrop();
