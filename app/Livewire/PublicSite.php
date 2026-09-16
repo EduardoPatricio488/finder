@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\Site;
 use App\Models\SiteAnalyticsEvent;
 use App\Models\SitePage;
+use App\Models\SiteSection;
 use App\Models\SiteSubmission;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -28,9 +31,16 @@ class PublicSite extends Component
 
     public string $newsletterEmail = '';
 
-    public function mount(Site $site, ?string $pageSlug = null): void
+    public function mount(Site $site, ?string $pageSlug = null): mixed
     {
-        $this->preview = request()->boolean('preview');
+        $requestedPreview = request()->boolean('preview');
+        $directoryPreview = request()->routeIs('sites.show')
+            && auth()->user()?->isAdministrator() === true;
+        $this->preview = $requestedPreview || $directoryPreview;
+
+        if (! $this->preview && $site->isProtected() && $site->hasDedicatedHome()) {
+            return redirect()->route($site->home_route);
+        }
 
         if ($this->preview) {
             abort_unless($site->isManageableBy(auth()->user()), 403);
@@ -38,13 +48,57 @@ class PublicSite extends Component
             abort_unless($site->is_published && $site->status === 'published', 404);
         }
 
-        $this->site = $site->load(['menus.items.children.page', 'pages.sections', 'products']);
-        $this->page = $pageSlug
-            ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
-            : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
-                ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail());
+        $this->site = $site->load([
+            'menus.items.children.page',
+            'pages:id,site_id,name,slug,status,is_homepage,sort_order,seo',
+        ]);
+
+        $pages = $this->site->pages;
+        if ($pages->isEmpty()) {
+            abort_if(! $this->preview, 404);
+
+            $fallbackPage = new SitePage([
+                'name' => 'Home',
+                'slug' => 'home',
+                'status' => 'draft',
+                'is_homepage' => true,
+                'sort_order' => 0,
+            ]);
+            $fallbackPage->setRelation('sections', collect([
+                new SiteSection([
+                    'type' => 'hero',
+                    'label' => 'Destaque principal',
+                    'content' => [
+                        'title' => $this->site->name,
+                        'subtitle' => $this->site->tagline,
+                    ],
+                    'settings' => [],
+                    'is_visible' => true,
+                    'sort_order' => 0,
+                ]),
+            ]));
+            $this->page = $fallbackPage;
+        } else {
+            $pageQuery = $this->site->pages()->with('sections')->when(
+                ! $this->preview,
+                fn ($query) => $query->where('status', 'published')
+            );
+
+            $this->page = $pageSlug
+                ? $pageQuery->where('slug', $pageSlug)->firstOrFail()
+                : ($pageQuery->where('is_homepage', true)->first()
+                    ?? $pageQuery->orderBy('sort_order')->firstOrFail());
+        }
+
+        if ($this->page->sections->contains(fn (SiteSection $section): bool => $section->type === 'product_grid')) {
+            $this->site->load('products');
+        }
 
         if (! $this->preview) {
+            $sessionIdentifier = request()->hasSession()
+                ? request()->session()->getId()
+                : Str::uuid()->toString();
+
             SiteAnalyticsEvent::create([
                 'site_id' => $this->site->id,
                 'page_id' => $this->page->id,
@@ -52,10 +106,12 @@ class PublicSite extends Component
                 'path' => request()->path(),
                 'referrer' => Str::limit((string) request()->headers->get('referer'), 500, ''),
                 'device_type' => $this->deviceType(request()->userAgent()),
-                'session_hash' => hash('sha256', (string) request()->session()->getId()),
+                'session_hash' => hash('sha256', $sessionIdentifier),
                 'occurred_at' => now(),
             ]);
         }
+
+        return null;
     }
 
     public function submitContact(): void

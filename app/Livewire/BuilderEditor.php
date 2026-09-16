@@ -441,7 +441,15 @@ class BuilderEditor extends Component
 
     private function checkpoint(): void
     {
-        $this->history[] = $this->currentSnapshot();
+        $snapshot = $this->currentSnapshot();
+        $last = end($this->history);
+        if ($last === $snapshot) {
+            $this->future = [];
+
+            return;
+        }
+
+        $this->history[] = $snapshot;
         if (count($this->history) > 30) {
             array_shift($this->history);
         }
@@ -493,12 +501,13 @@ class BuilderEditor extends Component
 
     private function createDefaultPage(): SitePage
     {
-        $page = $this->site->pages()->create(['name' => 'Home', 'slug' => 'home', 'status' => 'draft', 'is_homepage' => true, 'sort_order' => 0]);
-        foreach (['hero', 'feature_grid', 'cta'] as $index => $type) {
-            $page->sections()->create(['type' => $type, 'label' => Str::headline($type), 'content' => $this->defaultContent($type), 'settings' => ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'], 'sort_order' => $index]);
-        }
-
-        return $page;
+        return $this->site->pages()->create([
+            'name' => 'Home',
+            'slug' => 'home',
+            'status' => 'draft',
+            'is_homepage' => true,
+            'sort_order' => 0,
+        ]);
     }
 
     private function defaultTheme(): array

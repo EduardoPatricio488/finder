@@ -68,13 +68,17 @@ class ProductCatalog extends Component
 
     private function siteScoped(Builder $query): Builder
     {
-        $site = $this->site();
+        $routeSite = request()->route('site');
+
+        if (! $routeSite instanceof Site) {
+            return $query;
+        }
 
         if (! Schema::hasColumn($query->getModel()->getTable(), 'site_id')) {
             return $query;
         }
 
-        return $query->where('site_id', $site->id);
+        return $query->where('site_id', $routeSite->id);
     }
 
     public function mount(): void
@@ -115,11 +119,30 @@ class ProductCatalog extends Component
         abort_unless(auth()->check(), 403);
         abort_unless($this->siteScoped(Product::query())->whereKey($productId)->exists(), 404);
 
-        $favorite = DB::table('favorite_products')->where('site_id', $this->site()->id)->where('user_id', auth()->id())->where('product_id', $productId);
+        $favorite = DB::table('favorite_products')
+            ->where('user_id', auth()->id())
+            ->where('product_id', $productId);
 
-        $favorite->exists()
-            ? $favorite->delete()
-            : DB::table('favorite_products')->insert(['site_id' => $this->site()->id, 'user_id' => auth()->id(), 'product_id' => $productId]);
+        if (Schema::hasColumn('favorite_products', 'site_id')) {
+            $favorite->where('site_id', $this->site()->id);
+        }
+
+        if ($favorite->exists()) {
+            $favorite->delete();
+
+            return;
+        }
+
+        $data = [
+            'user_id' => auth()->id(),
+            'product_id' => $productId,
+        ];
+
+        if (Schema::hasColumn('favorite_products', 'site_id')) {
+            $data['site_id'] = $this->site()->id;
+        }
+
+        DB::table('favorite_products')->insert($data);
     }
 
     public function removeFromCart(int $productId): void
@@ -151,7 +174,7 @@ class ProductCatalog extends Component
         $this->resetErrorBag('couponCode');
         $site = $this->site();
         $coupon = DB::table('coupons')
-            ->when(Schema::hasColumn('coupons', 'site_id'), fn ($query) => $query->where('site_id', $site->id))
+            ->when(request()->route('site') instanceof Site && Schema::hasColumn('coupons', 'site_id'), fn ($query) => $query->where('site_id', $site->id))
             ->whereRaw('upper(code) = ?', [strtoupper(trim($this->couponCode))])
             ->where('starts_at', '<=', now())
             ->where('ends_at', '>=', now())
@@ -317,6 +340,7 @@ class ProductCatalog extends Component
         $minimumRating = (float) $this->minRating;
         $products = $this->siteScoped(Product::query())
             ->where('is_active', true)
+            ->when(request()->routeIs('products') && $this->availability === '', fn ($query) => $query->where('stock', '>', 0))
             ->with('category')
             ->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])
             ->withAvg('reviews', 'rating')

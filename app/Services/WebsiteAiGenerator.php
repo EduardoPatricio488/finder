@@ -12,35 +12,39 @@ class WebsiteAiGenerator
      */
     public function generate(array $brief): array
     {
-        $apiKey = trim((string) config('services.openai.key', env('OPENAI_API_KEY', '')));
+        $apiKey = trim((string) config('services.openai.key', ''));
 
         if ($apiKey === '') {
             return ['pages' => $this->fallback($brief)];
         }
 
+        $systemPrompt = implode("\n", [
+            'És o gerador de estrutura do Website Builder Finder. Responde apenas com JSON válido.',
+            'Cria uma estrutura de website em Português de Portugal. Não inventes tipos de secção: usa apenas hero, text, image, button, feature_grid, card, testimonials, faq, gallery, contact_form, product_grid, product_card, pricing, blog_posts, social_links, video, map, newsletter e cta.',
+            'O JSON deve ter exactamente a forma {"pages":{"home":[{"type":"hero","label":"...","content":{}}]}}. Mantém o conteúdo simples, profissional e editável. Não incluas HTML, CSS, JavaScript, URLs inventados, dados pessoais ou afirmações factuais que não estejam no briefing. Usa placeholders claros quando faltar informação.',
+        ]);
+
+        $payload = [
+            'model' => (string) config('services.openai.model', 'gpt-5-mini'),
+            'temperature' => 0.4,
+            'response_format' => ['type' => 'json_object'],
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => $systemPrompt,
+                ],
+                [
+                    'role' => 'user',
+                    'content' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                ],
+            ],
+        ];
+
         try {
             $response = Http::withToken($apiKey)
                 ->acceptJson()
                 ->timeout(30)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => env('OPENAI_MODEL', 'gpt-5-mini'),
-                    'temperature' => 0.4,
-                    'response_format' => ['type' => 'json_object'],
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => <<<'PROMPT'
-És o gerador de estrutura do Website Builder Finder. Responde apenas com JSON válido.
-Cria uma estrutura de website em Português de Portugal. Não inventes tipos de secção: usa apenas hero, text, image, button, feature_grid, card, testimonials, faq, gallery, contact_form, product_grid, product_card, pricing, blog_posts, social_links, video, map, newsletter e cta.
-O JSON deve ter exactamente a forma {"pages":{"home":[{"type":"hero","label":"...","content":{}}]}}. Mantém o conteúdo simples, profissional e editável. Não incluas HTML, CSS, JavaScript, URLs inventados, dados pessoais ou afirmações factuais que não estejam no briefing. Usa placeholders claros quando faltar informação.
-PROMPT,
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                        ],
-                    ],
-                );
+                ->post('https://api.openai.com/v1/chat/completions', $payload);
 
             if ($response->successful()) {
                 $pages = data_get($response->json(), 'choices.0.message.content');
