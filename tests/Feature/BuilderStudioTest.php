@@ -136,10 +136,12 @@ test('builder studio can edit a v2 element through the inspector API', function 
 
     expect($elementId)->toBeString()->and(Str::startsWith($elementId, 'el_'))->toBeTrue();
 
-    $component->call('updateSelectedElement', 'text', 'Título actualizado');
+    $component->call('updateSelectedElement', 'text', 'Título atualizado');
     $component->call('save');
 
     $section->refresh();
     $document = $section->settings['builder_document'];
-    expect($document['nodes'][0]['children'][0]['content']['text'])->toBe('Título atualizado');
+    $element = collect($document['nodes'][0]['children'])->firstWhere('id', $elementId);
+
+    expect($element['content']['text'])->toBe('Título atualizado');
 });
