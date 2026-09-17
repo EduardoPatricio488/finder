@@ -18,9 +18,15 @@
             <button
                 type="button"
                 @click="open = !open"
-                class="pointer-events-auto mt-24 mr-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-xs font-black text-zinc-800 shadow-xl transition hover:-translate-y-0.5 hover:shadow-2xl"
+                class="pointer-events-auto mt-24 mr-4 flex min-h-[54px] items-center gap-3 rounded-2xl border-2 border-zinc-950 bg-zinc-950 px-5 py-3.5 text-sm font-black text-white shadow-[0_12px_35px_rgba(0,0,0,0.22)] ring-4 ring-white/80 transition duration-200 hover:-translate-y-1 hover:bg-zinc-800 hover:shadow-[0_18px_45px_rgba(0,0,0,0.28)] focus:outline-none focus:ring-4 focus:ring-zinc-300"
+                aria-label="Abrir modelos de website"
             >
-                ◈ Modelos
+                <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-base text-zinc-950 shadow-sm">◈</span>
+                <span class="flex flex-col items-start leading-none">
+                    <span class="text-[9px] font-black uppercase tracking-[0.18em] text-white/50">Design</span>
+                    <span class="mt-1">Modelos</span>
+                </span>
+                <span class="ml-1 rounded-full bg-white/10 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-white/70">Novo</span>
             </button>
 
             <div
@@ -32,7 +38,7 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="translate-x-0 opacity-100"
                 x-transition:leave-end="translate-x-4 opacity-0"
-                class="pointer-events-auto mt-24 mr-3 w-[330px] max-w-[calc(100vw-24px)] rounded-3xl border border-zinc-200 bg-white p-4 shadow-2xl"
+                class="pointer-events-auto mt-24 mr-4 w-[330px] max-w-[calc(100vw-24px)] rounded-3xl border border-zinc-200 bg-white p-4 shadow-2xl"
             >
                 <div class="flex items-start justify-between gap-3">
                     <div>
