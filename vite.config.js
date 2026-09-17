@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/builder-studio.js',
                 'resources/js/builder-interactions.js',
                 'resources/js/builder-canva.js',
+                'resources/js/builder-canva-runtime.js',
             ],
             refresh: true,
             fonts: [
