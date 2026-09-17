@@ -63,7 +63,15 @@
             @php($content = $section->content ?? [])
             @switch($section->type)
                 @case('hero')
-                    <section class="px-5 py-24 text-center sm:py-32"><div class="mx-auto max-w-4xl"><h1 class="text-4xl font-bold tracking-tight sm:text-6xl">{{ $content['title'] ?? $site->name }}</h1><p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">{{ $content['subtitle'] ?? $site->tagline }}</p>@if(!empty($content['button_label']))<a href="{{ $content['button_url'] ?? '#' }}" class="mt-8 inline-flex rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style="background: var(--finder-primary)">{{ $content['button_label'] }}</a>@endif</div></section>
+                    <section class="w-full px-5 py-24 text-center sm:py-32" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+                        <div class="w-full max-w-4xl mx-auto" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:56rem;margin-left:auto;margin-right:auto;text-align:center;">
+                            <h1 class="w-full text-center text-4xl font-bold tracking-tight sm:text-6xl" style="text-align:center;margin-left:auto;margin-right:auto;">{{ $content['title'] ?? $site->name }}</h1>
+                            <p class="w-full max-w-2xl text-center mt-6 text-lg leading-8 text-zinc-600 dark:text-zinc-300" style="text-align:center;margin-left:auto;margin-right:auto;">{{ $content['subtitle'] ?? $site->tagline }}</p>
+                            @if(!empty($content['button_label']))
+                                <a href="{{ $content['button_url'] ?? '#' }}" class="mt-8 inline-flex rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style="background: var(--finder-primary);align-self:center;">{{ $content['button_label'] }}</a>
+                            @endif
+                        </div>
+                    </section>
                     @break
                 @case('text')
                     <section class="mx-auto max-w-3xl px-5 py-16">@if(!empty($content['title']))<h2 class="text-3xl font-semibold tracking-tight">{{ $content['title'] }}</h2>@endif<p class="mt-4 whitespace-pre-line leading-8 text-zinc-600 dark:text-zinc-300">{{ $content['body'] ?? $content['description'] ?? '' }}</p></section>
@@ -105,42 +113,20 @@
                     <section class="mx-auto max-w-6xl px-5 py-16">@if(!empty($content['embed_url']))<div class="aspect-video overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800"><iframe src="{{ $content['embed_url'] }}" title="Mapa" class="h-full w-full" loading="lazy"></iframe></div>@elseif(!empty($content['address']))<div class="rounded-2xl border border-zinc-200 p-10 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">{{ $content['address'] }}</div>@endif</section>
                     @break
                 @case('contact_form')
-                    <section class="mx-auto max-w-2xl px-5 py-16"><div class="rounded-3xl border border-zinc-200 p-7 shadow-sm dark:border-zinc-800"><h2 class="text-2xl font-semibold">{{ $content['title'] ?? 'Contacta-nos' }}</h2><p class="mt-2 text-sm text-zinc-500">{{ $content['description'] ?? 'Envia-nos uma mensagem.' }}</p><form wire:submit="submitContact" class="mt-6 grid gap-4"><div><label for="contact-name" class="sr-only">Nome</label><input id="contact-name" wire:model="contactName" type="text" autocomplete="name" placeholder="Nome" class="w-full rounded-xl border border-zinc-200 px-4 py-3 outline-none"></div><div><label for="contact-email" class="sr-only">Email</label><input id="contact-email" wire:model="contactEmail" type="email" autocomplete="email" placeholder="Email" class="w-full rounded-xl border border-zinc-200 px-4 py-3 outline-none"></div><div><label for="contact-message" class="sr-only">Mensagem</label><textarea id="contact-message" wire:model="contactMessage" rows="5" placeholder="Mensagem" class="w-full rounded-xl border border-zinc-200 px-4 py-3 outline-none"></textarea></div>@error('contactName')<p class="text-sm text-red-600">{{ $message }}</p>@enderror @error('contactEmail')<p class="text-sm text-red-600">{{ $message }}</p>@enderror @error('contactMessage')<p class="text-sm text-red-600">{{ $message }}</p>@enderror<button type="submit" wire:loading.attr="disabled" class="rounded-xl px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" style="background:var(--finder-primary)">Enviar mensagem</button></form></div></section>
-                    @break
-                @case('newsletter')
-                    <section class="mx-auto max-w-3xl px-5 py-16"><div class="rounded-3xl p-8 text-center" style="background:color-mix(in srgb,var(--finder-primary) 10%,transparent)"><h2 class="text-2xl font-semibold">{{ $content['title'] ?? 'Recebe novidades' }}</h2><form wire:submit="subscribeNewsletter" class="mx-auto mt-6 flex max-w-lg gap-2"><label for="newsletter-email" class="sr-only">Email</label><input id="newsletter-email" wire:model="newsletterEmail" type="email" autocomplete="email" placeholder="O teu email" class="min-w-0 flex-1 rounded-xl border border-zinc-200 px-4 py-3 outline-none"><button type="submit" wire:loading.attr="disabled" class="rounded-xl px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" style="background:var(--finder-primary)">Subscrever</button></form>@error('newsletterEmail')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror</div></section>
-                    @break
-                @case('blog_posts')
-                    <section class="mx-auto max-w-6xl px-5 py-16"><h2 class="text-3xl font-semibold">{{ $content['title'] ?? 'Artigos' }}</h2><div class="mt-8 grid gap-5 md:grid-cols-3">@foreach($content['items'] ?? [] as $item)<article class="rounded-2xl border border-zinc-200 p-6 shadow-sm dark:border-zinc-800"><h3 class="font-semibold">{{ $item['title'] ?? '' }}</h3><p class="mt-2 text-sm leading-6 text-zinc-500">{{ $item['excerpt'] ?? $item['description'] ?? '' }}</p></article>@endforeach</div></section>
-                    @break
-                @case('cta')
-                    <section class="mx-auto max-w-5xl px-5 py-16"><div class="rounded-3xl bg-zinc-950 px-6 py-14 text-center text-white sm:px-12"><h2 class="text-3xl font-bold">{{ $content['title'] ?? '' }}</h2><p class="mx-auto mt-3 max-w-2xl text-zinc-300">{{ $content['description'] ?? '' }}</p>@if(!empty($content['button_label']))<a href="{{ $content['button_url'] ?? '#' }}" class="mt-7 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:-translate-y-0.5">{{ $content['button_label'] }}</a>@endif</div></section>
+                    <section class="mx-auto max-w-2xl px-5 py-16"><div class="rounded-3xl border border-zinc-200 p-7 shadow-sm dark:border-zinc-800"><h2 class="text-2xl font-semibold">{{ $content['title'] ?? 'Contacta-nos' }}</h2><p class="mt-2 text-sm text-zinc-500">{{ $content['description'] ?? 'Envia-nos uma mensagem.' }}</p><form wire:submit="submitContact" class="mt-6 grid gap-4"><div><label for="contact-name" class="sr-only">Nome</label><input id="contact-name" wire:model="contactName" type="text" autocomplete="name" placeholder="Nome" class="w-full rounded-xl border border-zinc-200 px-4 py-3 outline-none"></div><div><label for="contact-email" class="sr-only">Email</label><input id="contact-email" wire:model="contactEmail" type="email" autocomplete="email" placeholder="Email" class="w-full rounded-xl border border-zinc-200 px-4 py-3 outline-none"></div><div><label for="contact-message" class="sr-only">Mensagem</label><textarea id="contact-message" wire:model="contactMessage" rows="5" placeholder="Mensagem" class="w-full rounded-xl border border-zinc-200 px-4 py-3 outline-none"></textarea></div><button type="submit" class="rounded-xl px-5 py-3 text-sm font-semibold text-white" style="background: var(--finder-primary)">Enviar mensagem</button></form></div></section>
                     @break
                 @default
-                    <section class="mx-auto max-w-5xl px-5 py-16"><div class="rounded-2xl border border-dashed border-zinc-300 p-10 text-center"><h2 class="font-semibold">{{ $content['title'] ?? \Illuminate\Support\Str::headline($section->type) }}</h2><p class="mt-2 text-sm text-zinc-500">{{ $content['description'] ?? '' }}</p></div></section>
+                    <section class="mx-auto max-w-3xl px-5 py-16 text-center"><h2 class="text-2xl font-semibold">{{ $section->label }}</h2><p class="mt-3 text-zinc-600 dark:text-zinc-300">{{ $content['body'] ?? $content['description'] ?? '' }}</p></section>
             @endswitch
         @endforeach
     </main>
 
-    @if($modelLayout === 'bottom')
-        <nav class="border-t border-black/5 bg-white px-5 py-5" aria-label="Navegação principal">
-            <div class="mx-auto flex max-w-7xl flex-wrap justify-center gap-2">
-                @foreach($sitePages as $sitePage)
-                    <a href="{{ route('site.public', [$site, 'pageSlug' => $sitePage->slug]) }}" class="rounded-xl px-4 py-2.5 text-sm font-semibold transition {{ $page->id === $sitePage->id ? 'bg-zinc-950 text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950' }}">{{ $sitePage->name }}</a>
-                @endforeach
-            </div>
-        </nav>
-    @endif
-
-    @if(in_array($modelLayout, ['sidebar-left', 'sidebar-right'], true))
+    @if($modelLayout === 'sidebar-left' || $modelLayout === 'sidebar-right')
             </div>
         </div>
     @endif
 
-    <footer class="border-t border-black/5 px-5 py-10 dark:border-white/10">
-        <div class="mx-auto flex max-w-7xl flex-col gap-3 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {{ now()->year }} {{ $site->name }}</p>
-            <a href="{{ route('site.public', $site) }}" class="font-medium transition hover:text-zinc-950 dark:hover:text-white">Início</a>
-        </div>
+    <footer class="border-t border-black/5 px-5 py-10 text-center text-sm text-zinc-500">
+        <div class="mx-auto max-w-7xl">© {{ now()->year }} {{ $site->name }}. Todos os direitos reservados.</div>
     </footer>
 </div>
