@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/css/builder-canva-ultra.css',
                 'resources/css/builder-canva-ultimate.css',
                 'resources/css/builder-layers-enhancement.css',
+                'resources/css/builder-canvas-navigation.css',
                 'resources/js/app.js',
                 'resources/js/passkeys.js',
                 'resources/js/builder-studio.js',
