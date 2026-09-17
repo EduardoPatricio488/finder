@@ -85,21 +85,15 @@
                 <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button></div>
             </section>
         @elseif($step === 3)
-            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+            <section class="mx-auto max-w-2xl rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
                 <p class="text-xs font-black uppercase tracking-widest text-indigo-600">3 · Informação</p>
                 <h2 class="mt-2 text-2xl font-black">Conta-nos o essencial</h2>
-                <p class="mt-2 text-sm text-zinc-500">Estas informações ajudam a adaptar o modelo ao teu website.</p>
-                <div class="mt-7 grid gap-5 lg:grid-cols-2">
-                    <flux:input wire:model.live="name" label="Nome do negócio / website" placeholder="Ex.: Declair Studio" />
-                    <flux:input wire:model.live="slug" label="Endereço interno" placeholder="declair-studio" description="É gerado automaticamente a partir do nome." />
-                    <div class="lg:col-span-2"><flux:textarea wire:model.live="description" label="O que faz o teu negócio?" placeholder="Explica em poucas frases o que fazes, o que vendes ou que serviços prestas." rows="3" /></div>
-                    <flux:input wire:model.live="audience" label="Quem são os teus clientes?" placeholder="Ex.: pequenas empresas e profissionais" />
-                    <flux:select wire:model="goal" label="O que queres que o visitante faça?"><option value="contact">Entrar em contacto</option><option value="buy">Comprar</option><option value="quote">Pedir orçamento</option><option value="booking">Fazer uma marcação</option><option value="call">Ligar</option><option value="message">Enviar mensagem</option></flux:select>
-                    <flux:select wire:model="style" label="Estilo que queres transmitir"><option value="Minimalista">Minimalista</option><option value="Moderno">Moderno</option><option value="Premium">Premium</option><option value="Profissional">Profissional</option><option value="Criativo">Criativo</option><option value="Elegante">Elegante</option></flux:select>
-                    <flux:input wire:model="font" label="Tipo de letra" placeholder="Inter" />
-                    <div class="lg:col-span-2"><flux:textarea wire:model.live="additionalInfo" label="Há mais alguma coisa importante?" placeholder="Ex.: Quero transmitir confiança, destacar reservas, explicar uma promoção, etc." rows="3" /></div>
+                <p class="mt-2 text-sm leading-6 text-zinc-500">Só precisamos do mínimo para preparar o teu modelo pessoal.</p>
+                <div class="mt-7 space-y-5">
+                    <flux:input wire:model.live="name" label="O teu nome" placeholder="Ex.: Eduardo Patrício" autofocus />
+                    <flux:textarea wire:model.live="description" label="Fala-nos um pouco sobre ti" placeholder="Ex.: Sou programador web e trabalho com Laravel e PHP. Quero apresentar o meu trabalho e os meus projectos." rows="4" description="Uma ou duas frases são suficientes." />
                 </div>
-                <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Escolher páginas</flux:button></div>
+                <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button></div>
             </section>
         @else
             <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
