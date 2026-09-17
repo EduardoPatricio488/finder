@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', UserDashboard::class)->name('dashboard');
     Route::get('ajuda', Help::class)->name('help');
     Route::get('websites/create', CreateSite::class)->name('site.create');
+    Route::get('websites/{site:slug}/builder', fn (Site $site) => redirect()->route('admin.site.dashboard', $site))->name('builder.edit');
     Route::get('conta/{section?}', CustomerAccount::class)->name('account');
     Route::get('conta/favoritos', fn () => redirect()->route('account', ['section' => 'favorites']))->name('account.favorites');
     Route::get('encomendas/acompanhamento', OrderTracking::class)->name('orders.tracking');
