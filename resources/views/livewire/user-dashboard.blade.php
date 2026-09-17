@@ -95,7 +95,7 @@
                             <div class="mt-4 flex gap-4 text-xs font-medium text-zinc-500 dark:text-zinc-400"><span class="inline-flex items-center gap-1.5"><flux:icon name="document" class="size-3.5 text-zinc-400 dark:text-zinc-500" />{{ $site->pages_count }} páginas</span><span class="inline-flex items-center gap-1.5"><flux:icon name="shopping-bag" class="size-3.5 text-zinc-400 dark:text-zinc-500" />{{ $site->products_count }} produtos</span></div>
                             <div class="mt-5 flex gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
                                 <flux:button class="flex-1" variant="ghost" href="{{ route('admin.site.dashboard', $site) }}">Gerir</flux:button>
-                                <flux:button class="flex-1 transition hover:-translate-y-0.5" variant="primary" icon="eye" href="{{ route('site.public', ['site' => $site]) }}" target="_blank">Ver site</flux:button>
+                                <flux:button class="flex-1 transition hover:-translate-y-0.5" variant="primary" icon="eye" href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank">Ver site</flux:button>
                             </div>
                         </div>
                     </article>
