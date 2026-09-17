@@ -53,16 +53,33 @@
                 <h3 class="mt-7 text-sm font-bold">Tipo de website</h3>
                 <div class="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
                     @foreach($types as $key=>$item)
-                        <button type="button" wire:click="$set('type','{{ $key }}')" class="rounded-xl border p-3 text-left {{ $type===$key ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10' : 'border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800' }}"><span class="block text-xs font-bold">{{ $item['label'] }}</span><span class="mt-1 block text-[10px] leading-4 text-zinc-400">{{ $item['description'] }}</span></button>
+                        @php($enabled = $key === 'personal')
+                        @if($enabled)
+                            <button type="button" wire:click="$set('type','{{ $key }}')" class="rounded-xl border p-3 text-left {{ $type===$key ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10' : 'border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800' }}"><span class="block text-xs font-bold">{{ $item['label'] }}</span><span class="mt-1 block text-[10px] leading-4 text-zinc-400">{{ $item['description'] }}</span></button>
+                        @else
+                            <div class="relative cursor-not-allowed rounded-xl border border-zinc-200 bg-zinc-50 p-3 opacity-50 dark:border-zinc-700 dark:bg-zinc-800/60" aria-disabled="true">
+                                <span class="absolute right-2 top-2 rounded-full bg-zinc-200 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-zinc-500 dark:bg-zinc-700 dark:text-zinc-300">Bloqueado</span>
+                                <span class="block text-xs font-bold">{{ $item['label'] }}</span><span class="mt-1 block text-[10px] leading-4 text-zinc-400">{{ $item['description'] }}</span>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
                 <h3 class="mt-8 text-sm font-bold">Estilo visual</h3>
                 <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach($templates as $key=>$item)
-                        <button type="button" wire:click="$set('template','{{ $key }}')" class="overflow-hidden rounded-2xl border text-left {{ $template===$key ? 'border-indigo-500 ring-2 ring-indigo-500/15' : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' }}">
-                            <div class="aspect-[16/9] p-4" style="background:linear-gradient(135deg, {{ $item['accent'] ?? '#635bff' }}22, #ffffff 65%)"><div class="h-full rounded-xl border border-white/70 bg-white/70 p-3 shadow-sm"><div class="flex gap-1"><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i></div><div class="mt-4 h-2 w-2/3 rounded bg-zinc-800/70"></div><div class="mt-2 h-1.5 w-4/5 rounded bg-zinc-300"></div><div class="mt-4 h-5 w-16 rounded-md" style="background:{{ $item['accent'] ?? '#635bff' }}"></div></div></div>
-                            <div class="p-4"><div class="flex items-center justify-between"><span class="font-bold">{{ $item['label'] }}</span>@if($template===$key)<span class="text-xs font-bold text-indigo-600">✓ Seleccionado</span>@endif</div><p class="mt-1 text-xs leading-5 text-zinc-500">{{ $item['description'] }}</p></div>
-                        </button>
+                        @php($enabled = $key === 'studio')
+                        @if($enabled)
+                            <button type="button" wire:click="$set('template','{{ $key }}')" class="overflow-hidden rounded-2xl border text-left {{ $template===$key ? 'border-indigo-500 ring-2 ring-indigo-500/15' : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' }}">
+                                <div class="aspect-[16/9] p-4" style="background:linear-gradient(135deg, {{ $item['accent'] ?? '#635bff' }}22, #ffffff 65%)"><div class="h-full rounded-xl border border-white/70 bg-white/70 p-3 shadow-sm"><div class="flex gap-1"><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i></div><div class="mt-4 h-2 w-2/3 rounded bg-zinc-800/70"></div><div class="mt-2 h-1.5 w-4/5 rounded bg-zinc-300"></div><div class="mt-4 h-5 w-16 rounded-md" style="background:{{ $item['accent'] ?? '#635bff' }}"></div></div></div>
+                                <div class="p-4"><div class="flex items-center justify-between"><span class="font-bold">{{ $item['label'] }}</span>@if($template===$key)<span class="text-xs font-bold text-indigo-600">✓ Seleccionado</span>@endif</div><p class="mt-1 text-xs leading-5 text-zinc-500">{{ $item['description'] }}</p></div>
+                            </button>
+                        @else
+                            <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 opacity-50 dark:border-zinc-700 dark:bg-zinc-800/60" aria-disabled="true">
+                                <span class="absolute right-3 top-3 z-10 rounded-full bg-zinc-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-500 dark:bg-zinc-700 dark:text-zinc-300">Bloqueado</span>
+                                <div class="aspect-[16/9] p-4" style="background:linear-gradient(135deg, {{ $item['accent'] ?? '#635bff' }}22, #ffffff 65%)"><div class="h-full rounded-xl border border-white/70 bg-white/70 p-3 shadow-sm"><div class="flex gap-1"><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i><i class="size-1.5 rounded-full bg-zinc-300"></i></div><div class="mt-4 h-2 w-2/3 rounded bg-zinc-800/70"></div><div class="mt-2 h-1.5 w-4/5 rounded bg-zinc-300"></div><div class="mt-4 h-5 w-16 rounded-md" style="background:{{ $item['accent'] ?? '#635bff' }}"></div></div></div>
+                                <div class="p-4"><div class="font-bold">{{ $item['label'] }}</div><p class="mt-1 text-xs leading-5 text-zinc-500">{{ $item['description'] }}</p></div>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
                 <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button></div>
@@ -106,7 +123,6 @@
             <div class="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl dark:bg-zinc-900">
                 <div class="flex items-start justify-between gap-4"><div><p class="text-xs font-black uppercase tracking-widest text-indigo-600">Ajuda</p><h2 class="mt-2 text-2xl font-black">Como funciona?</h2></div><button type="button" @click="help=false" class="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">✕</button></div>
                 <div class="mt-6 space-y-4 text-sm"><p><strong>1. Escolhe um modelo.</strong><br><span class="text-zinc-500">Começa sempre por uma base profissional.</span></p><p><strong>2. Define o teu negócio.</strong><br><span class="text-zinc-500">As informações ajudam a preparar o website.</span></p><p><strong>3. Escolhe páginas.</strong><br><span class="text-zinc-500">A estrutura é criada automaticamente.</span></p></div>
-                <div class="mt-7 flex justify-end"><button type="button" @click="help=false" class="rounded-xl bg-zinc-950 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-zinc-950">Percebi</button></div>
             </div>
         </div>
     </div>
