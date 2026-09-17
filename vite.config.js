@@ -8,12 +8,14 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/builder-canva-pro.css',
                 'resources/js/app.js',
                 'resources/js/passkeys.js',
                 'resources/js/builder-studio.js',
                 'resources/js/builder-interactions.js',
                 'resources/js/builder-canva.js',
                 'resources/js/builder-canva-runtime.js',
+                'resources/js/builder-canva-pro.js',
             ],
             refresh: true,
             fonts: [
