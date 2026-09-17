@@ -8,10 +8,12 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/builder-surface.css',
                 'resources/js/app.js',
                 'resources/js/passkeys.js',
                 'resources/js/builder-studio.js',
                 'resources/js/builder-interactions.js',
+                'resources/js/builder-surface.js',
             ],
             refresh: true,
             fonts: [
