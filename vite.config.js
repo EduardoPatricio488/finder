@@ -23,6 +23,7 @@ export default defineConfig({
                 'resources/js/builder-canva-ultra-safe.js',
                 'resources/js/builder-canva-ultimate.js',
                 'resources/js/builder-layers-enhancement.js',
+                'resources/js/builder-canvas-navigation.js',
             ],
             refresh: true,
             fonts: [
