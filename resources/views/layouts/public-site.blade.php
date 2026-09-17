@@ -66,52 +66,21 @@
         body.finder-personal-site header nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; border-radius: 99px; background: var(--finder-primary, #635bff); transform: scaleX(0); transition: transform .2s ease; }
         body.finder-personal-site header nav a:hover::after { transform: scaleX(1); }
         body.finder-personal-site header > div > a:last-child { border-radius: 999px !important; padding-inline: 1.15rem !important; box-shadow: 0 10px 25px color-mix(in srgb, var(--finder-primary, #635bff) 20%, transparent); }
-        body.finder-personal-site main {
-            text-align: center !important;
-            width: 100vw !important;
-            max-width: 100vw !important;
-            position: relative !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-        }
+        body.finder-personal-site > * { width: 100% !important; max-width: none !important; }
+        body.finder-personal-site main { display: block !important; width: 100% !important; max-width: none !important; position: static !important; left: auto !important; transform: none !important; margin: 0 !important; padding: 0 !important; text-align: center !important; }
         body.finder-personal-site main > section { text-align: center !important; }
         body.finder-personal-site main > section > div { margin-inline: auto !important; }
         body.finder-personal-site main > section p { margin-inline: auto !important; }
         body.finder-personal-site main > section article { text-align: center !important; }
         body.finder-personal-site main > section form { text-align: left !important; margin-inline: auto !important; }
-        body.finder-personal-site main > section:first-child {
-            position: relative;
-            overflow: hidden;
-            min-height: 720px;
-            display: flex;
-            align-items: center;
-            justify-content: center !important;
-            text-align: center !important;
-            background: radial-gradient(circle at 78% 38%, color-mix(in srgb, var(--finder-primary, #635bff) 18%, transparent), transparent 20rem), linear-gradient(135deg, #fff 0%, #f7f7fb 58%, #f1f0f8 100%);
-            isolation: isolate;
-        }
-        body.finder-personal-site main > section:first-child > div {
-            position: relative;
-            z-index: 1;
-            width: min(100%, 900px) !important;
-            max-width: 900px !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            text-align: center !important;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        body.finder-personal-site main > section:first-child { position: relative; overflow: hidden; width: 100% !important; min-height: 720px; display: flex; align-items: center; justify-content: center !important; text-align: center !important; background: radial-gradient(circle at 78% 38%, color-mix(in srgb, var(--finder-primary, #635bff) 18%, transparent), transparent 20rem), linear-gradient(135deg, #fff 0%, #f7f7fb 58%, #f1f0f8 100%); isolation: isolate; }
+        body.finder-personal-site main > section:first-child > div { position: relative; z-index: 1; width: min(100%, 900px) !important; max-width: 900px !important; margin-left: auto !important; margin-right: auto !important; text-align: center !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         body.finder-personal-site main > section:first-child > div::before { content: 'PERSONAL WEBSITE'; display: inline-flex; margin-bottom: 1.35rem; padding: .45rem .75rem; border: 1px solid color-mix(in srgb, var(--finder-primary, #635bff) 16%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--finder-primary, #635bff) 5%, white); color: var(--finder-primary, #635bff); font-size: .68rem; font-weight: 800; letter-spacing: .16em; }
         body.finder-personal-site main > section:first-child h1 { width: 100%; max-width: 920px; margin-inline: auto !important; text-align: center !important; font-weight: 850 !important; letter-spacing: -.065em; line-height: .94; text-wrap: balance; }
         body.finder-personal-site main > section:first-child p { width: 100%; max-width: 680px !important; margin-inline: auto !important; text-align: center !important; color: #52525b; font-size: 1.16rem !important; line-height: 1.8 !important; }
         body.finder-personal-site main > section:first-child a { align-self: center; }
-        body.finder-personal-site main > section:first-child a,
-        body.finder-personal-site main > section:not(:first-child) a[style*="background"] { border-radius: 9999px !important; padding: .9rem 1.5rem !important; box-shadow: 0 14px 30px color-mix(in srgb, var(--finder-primary, #635bff) 22%, transparent) !important; transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
-        body.finder-personal-site main > section:first-child a:hover,
-        body.finder-personal-site main > section:not(:first-child) a[style*="background"]:hover { transform: translateY(-3px); filter: brightness(.98); box-shadow: 0 20px 42px color-mix(in srgb, var(--finder-primary, #635bff) 28%, transparent) !important; }
+        body.finder-personal-site main > section:first-child a, body.finder-personal-site main > section:not(:first-child) a[style*="background"] { border-radius: 9999px !important; padding: .9rem 1.5rem !important; box-shadow: 0 14px 30px color-mix(in srgb, var(--finder-primary, #635bff) 22%, transparent) !important; transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+        body.finder-personal-site main > section:first-child a:hover, body.finder-personal-site main > section:not(:first-child) a[style*="background"]:hover { transform: translateY(-3px); filter: brightness(.98); box-shadow: 0 20px 42px color-mix(in srgb, var(--finder-primary, #635bff) 28%, transparent) !important; }
         body.finder-personal-site main > section:not(:first-child) { position: relative; padding-top: 7rem !important; padding-bottom: 7rem !important; }
         body.finder-personal-site main > section:nth-child(2n+1):not(:first-child) { background: rgba(248,248,250,.62); border-block: 1px solid rgba(24,24,27,.045); }
         body.finder-personal-site main > section:not(:first-child) h2 { font-weight: 800 !important; letter-spacing: -.045em; line-height: 1.05; }
@@ -119,27 +88,13 @@
         body.finder-personal-site main > section:not(:first-child) article:hover { transform: translateY(-5px); box-shadow: 0 24px 55px rgba(24,24,27,.09) !important; border-color: color-mix(in srgb, var(--finder-primary, #635bff) 20%, transparent) !important; }
         body.finder-personal-site details { transition: background .2s ease; }
         body.finder-personal-site details:hover { background: rgba(255,255,255,.65); }
-        body.finder-personal-site input,
-        body.finder-personal-site textarea { border-radius: 1rem !important; border-color: rgba(24,24,27,.10) !important; background: rgba(255,255,255,.9); box-shadow: 0 5px 18px rgba(24,24,27,.035); transition: border-color .2s ease, box-shadow .2s ease; }
-        body.finder-personal-site input:focus,
-        body.finder-personal-site textarea:focus { border-color: color-mix(in srgb, var(--finder-primary, #635bff) 48%, white) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--finder-primary, #635bff) 9%, transparent), 0 8px 24px rgba(24,24,27,.05); }
+        body.finder-personal-site input, body.finder-personal-site textarea { border-radius: 1rem !important; border-color: rgba(24,24,27,.10) !important; background: rgba(255,255,255,.9); box-shadow: 0 5px 18px rgba(24,24,27,.035); transition: border-color .2s ease, box-shadow .2s ease; }
+        body.finder-personal-site input:focus, body.finder-personal-site textarea:focus { border-color: color-mix(in srgb, var(--finder-primary, #635bff) 48%, white) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--finder-primary, #635bff) 9%, transparent), 0 8px 24px rgba(24,24,27,.05); }
         body.finder-personal-site footer { border-top-color: rgba(24,24,27,.08) !important; background: #fafafa !important; }
-        @media (max-width: 640px) {
-            body.finder-personal-site main > section:first-child { min-height: 620px; padding-top: 6.5rem !important; padding-bottom: 6.5rem !important; }
-            body.finder-personal-site main > section:first-child h1 { font-size: 3.15rem !important; }
-            body.finder-personal-site main > section:first-child p { font-size: 1rem !important; line-height: 1.7 !important; }
-            body.finder-personal-site main > section:not(:first-child) { padding-top: 5rem !important; padding-bottom: 5rem !important; }
-            body.finder-personal-site main > section:first-child::before { width: 360px; height: 360px; right: -170px; top: -110px; }
-        }
+        @media (max-width: 640px) { body.finder-personal-site main > section:first-child { min-height: 620px; padding-top: 6.5rem !important; padding-bottom: 6.5rem !important; } body.finder-personal-site main > section:first-child h1 { font-size: 3.15rem !important; } body.finder-personal-site main > section:first-child p { font-size: 1rem !important; line-height: 1.7 !important; } body.finder-personal-site main > section:not(:first-child) { padding-top: 5rem !important; padding-bottom: 5rem !important; } body.finder-personal-site main > section:first-child::before { width: 360px; height: 360px; right: -170px; top: -110px; } }
         @endif
-
-        @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
-        }
-        @media (max-width: 640px) {
-            body.finder-site-typography h1 { font-size: min({{ $typeScale['h1'] }}, 2.75rem) !important; }
-        }
+        @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+        @media (max-width: 640px) { body.finder-site-typography h1 { font-size: min({{ $typeScale['h1'] }}, 2.75rem) !important; } }
     </style>
 </head>
 <body class="finder-site-typography {{ $isPersonal ? 'finder-personal-site' : '' }} min-h-screen bg-white text-zinc-950 antialiased dark:bg-zinc-950 dark:text-white">
