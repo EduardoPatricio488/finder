@@ -32,7 +32,7 @@
                         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-base">◧</span>
                         <span class="flex-1">
                             <span class="block text-xs font-black">Sidebar</span>
-                            <span class="block text-[10px] opacity-60">Modelos com navegação lateral</span>
+                            <span class="block text-[10px] opacity-60">Modelos com navegação lateral ou vertical</span>
                         </span>
                         <span class="text-xs font-black">›</span>
                     </button>
@@ -40,25 +40,27 @@
 
                 <div x-show="category === 'sidebar'" x-transition class="mt-4">
                     <div class="mb-2 flex items-center gap-2 px-1">
-                        <span class="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Sidebar</span>
+                        <span class="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Posição da Sidebar</span>
                         <span class="h-px flex-1 bg-zinc-100"></span>
                     </div>
 
-                    <div class="grid gap-2">
+                    <div class="grid grid-cols-2 gap-2">
                         @php($sidebarModels = [
-                            'sidebar-left' => ['Sidebar esquerda', 'Menu lateral à esquerda', '◧'],
-                            'sidebar-right' => ['Sidebar direita', 'Menu lateral à direita', '◨'],
+                            'sidebar-left' => ['Esquerda', 'Menu lateral esquerdo', '◧'],
+                            'sidebar-right' => ['Direita', 'Menu lateral direito', '◨'],
+                            'sidebar-top' => ['Em cima', 'Menu horizontal no topo', '▱'],
+                            'sidebar-bottom' => ['Em baixo', 'Menu horizontal em baixo', '▰'],
                         ])
 
                         @foreach($sidebarModels as $modelKey => [$modelName, $modelDescription, $modelIcon])
-                            <button type="button" wire:click="$set('theme.layout', '{{ $modelKey }}')" @click="open=false" class="group flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-lg' : 'border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50' }}">
-                                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'bg-white/10' : 'bg-zinc-100' }} text-lg">{{ $modelIcon }}</span>
-                                <span class="min-w-0 flex-1">
+                            <button type="button" wire:click="$set('theme.layout', '{{ $modelKey }}')" @click="open=false" class="group flex min-h-[104px] flex-col items-start gap-2 rounded-2xl border p-3 text-left transition {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-lg' : 'border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50' }}">
+                                <span class="flex h-9 w-9 items-center justify-center rounded-xl {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'bg-white/10' : 'bg-zinc-100' }} text-base">{{ $modelIcon }}</span>
+                                <span>
                                     <span class="block text-xs font-black">{{ $modelName }}</span>
-                                    <span class="mt-0.5 block text-[10px] {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'text-white/50' : 'text-zinc-400' }}">{{ $modelDescription }}</span>
+                                    <span class="mt-0.5 block text-[9px] {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'text-white/50' : 'text-zinc-400' }}">{{ $modelDescription }}</span>
                                 </span>
                                 @if(data_get($theme ?? [], 'layout', 'top') === $modelKey)
-                                    <span class="text-xs font-black">✓</span>
+                                    <span class="absolute hidden">✓</span>
                                 @endif
                             </button>
                         @endforeach
