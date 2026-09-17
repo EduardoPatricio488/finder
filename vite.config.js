@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/builder-canva-pro.css',
                 'resources/css/builder-canva-ultra.css',
+                'resources/css/builder-canva-ultimate.css',
                 'resources/js/app.js',
                 'resources/js/passkeys.js',
                 'resources/js/builder-studio.js',
@@ -19,6 +20,7 @@ export default defineConfig({
                 'resources/js/builder-canva-pro.js',
                 'resources/js/builder-elements-library.js',
                 'resources/js/builder-canva-ultra-safe.js',
+                'resources/js/builder-canva-ultimate.js',
             ],
             refresh: true,
             fonts: [
