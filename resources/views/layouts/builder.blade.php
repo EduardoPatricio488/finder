@@ -12,6 +12,7 @@
         'resources/css/builder-canva-pro.css',
         'resources/css/builder-canva-ultra.css',
         'resources/css/builder-canva-ultimate.css',
+        'resources/css/builder-layers-enhancement.css',
         'resources/js/app.js',
         'resources/js/builder-studio.js',
         'resources/js/builder-interactions.js',
@@ -21,6 +22,7 @@
         'resources/js/builder-elements-library.js',
         'resources/js/builder-canva-ultra-safe.js',
         'resources/js/builder-canva-ultimate.js',
+        'resources/js/builder-layers-enhancement.js',
     ])
     @fluxAppearance
 </head>
