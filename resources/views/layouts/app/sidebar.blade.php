@@ -43,7 +43,7 @@
                 </flux:sidebar.group>
                 @if($hasSite)
                     <flux:sidebar.group heading="Website" class="grid">
-                        <flux:sidebar.item icon="pencil-square" :href="route('builder.edit', $currentSite)" :current="request()->routeIs('builder.edit')" wire:navigate><span class="flex items-center gap-2">Editor visual <span class="text-[10px] text-indigo-500" title="Design">✦</span></span></flux:sidebar.item>
+                        <flux:sidebar.item icon="pencil-square" disabled class="pointer-events-none opacity-50" aria-disabled="true"><span class="flex items-center gap-2">Editor visual <span class="text-[10px] text-zinc-400" title="Indisponível">Bloqueado</span></span></flux:sidebar.item>
                         <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
                         <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>Definições</flux:sidebar.item>
