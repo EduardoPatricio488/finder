@@ -1,0 +1,39 @@
+/* Finder Builder — continuous website canvas
+   Editing chrome stays visible, but the website itself is rendered as one continuous surface. */
+
+.finder-builder-surface [wire\:key^="builder-section-"] {
+    border-bottom: 0 !important;
+    border-top: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.finder-builder-surface [wire\:key^="builder-section-"]:hover {
+    background: transparent !important;
+}
+
+.finder-builder-surface [wire\:key^="builder-section-"][data-builder-selected="true"] {
+    box-shadow: inset 3px 0 0 #18181b !important;
+}
+
+.finder-builder-surface [wire\:key^="builder-section-"] .finder-builder-quick-rail,
+.finder-builder-surface [wire\:key^="builder-section-"] .finder-builder-selection-badge {
+    z-index: 70;
+}
+
+.finder-builder-surface [data-finder-site-canvas] {
+    border-color: #e4e4e7 !important;
+}
+
+.finder-builder-surface .finder-builder-section-selected {
+    border-color: transparent !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .finder-builder-surface [wire\:key^="builder-section-"] {
+        transition: none !important;
+    }
+}
