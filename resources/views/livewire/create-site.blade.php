@@ -4,7 +4,7 @@
             <div>
                 <a href="{{ route('dashboard') }}" wire:navigate class="text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">← Finder</a>
                 <h1 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Vamos criar o teu website</h1>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">Escolhe uma base profissional, responde a algumas perguntas se quiseres usar AI e depois personaliza tudo no Builder.</p>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">Escolhe uma base profissional e depois personaliza o teu website.</p>
             </div>
             <button type="button" @click="help=true" class="flex size-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900" title="Como funciona?"><flux:icon name="question-mark-circle" class="size-5" /></button>
         </div>
@@ -20,19 +20,28 @@
             <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
                 <p class="text-xs font-black uppercase tracking-widest text-indigo-600">1 · Começar</p>
                 <h2 class="mt-2 text-2xl font-black">Como queres criar o website?</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Nenhuma opção começa numa página confusa. Todas criam uma base que podes editar completamente.</p>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Escolhe um modelo profissional para começares rapidamente.</p>
                 <div class="mt-8 grid gap-4 lg:grid-cols-3">
-                    @foreach([
-                        'ai' => ['icon'=>'sparkles','title'=>'Criar com AI','text'=>'Responde a algumas perguntas. A AI prepara uma primeira versão usando um modelo profissional.'],
-                        'model' => ['icon'=>'squares-2x2','title'=>'Escolher um modelo','text'=>'Escolhe directamente uma base profissional por tipo de negócio e personaliza-a.'],
-                        'free' => ['icon'=>'adjustments-horizontal','title'=>'Começar de forma livre','text'=>'Começa com uma estrutura recomendada. Não ficas perante uma página vazia.'],
-                    ] as $key=>$option)
-                        <button type="button" wire:click="selectCreationMode('{{ $key }}')" class="relative rounded-2xl border p-5 text-left transition {{ $creationMode===$key ? 'border-indigo-500 bg-indigo-50/70 ring-2 ring-indigo-500/15 dark:bg-indigo-500/10' : 'border-zinc-200 hover:border-zinc-300 hover:shadow-sm dark:border-zinc-700' }}">
-                            @if($creationMode===$key)<span class="absolute right-4 top-4 flex size-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-black text-white">✓</span>@endif
-                            <span class="flex size-11 items-center justify-center rounded-xl {{ $creationMode===$key ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800' }}"><flux:icon :name="$option['icon']" class="size-5" /></span>
-                            <h3 class="mt-4 font-bold">{{ $option['title'] }}</h3><p class="mt-1 text-xs leading-5 text-zinc-500">{{ $option['text'] }}</p>
-                        </button>
-                    @endforeach
+                    <div class="relative cursor-not-allowed rounded-2xl border border-zinc-200 bg-zinc-50 p-5 opacity-50 dark:border-zinc-700 dark:bg-zinc-800/60" aria-disabled="true">
+                        <span class="absolute right-4 top-4 rounded-full bg-zinc-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-500 dark:bg-zinc-700 dark:text-zinc-300">Bloqueado</span>
+                        <span class="flex size-11 items-center justify-center rounded-xl bg-zinc-200 text-zinc-400 dark:bg-zinc-700"><flux:icon name="sparkles" class="size-5" /></span>
+                        <h3 class="mt-4 font-bold">Criar com AI</h3>
+                        <p class="mt-1 text-xs leading-5 text-zinc-500">Responde a algumas perguntas. A AI prepara uma primeira versão usando um modelo profissional.</p>
+                    </div>
+
+                    <button type="button" wire:click="selectCreationMode('model')" class="relative rounded-2xl border border-indigo-500 bg-indigo-50/70 p-5 text-left ring-2 ring-indigo-500/15 dark:bg-indigo-500/10">
+                        <span class="absolute right-4 top-4 flex size-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-black text-white">✓</span>
+                        <span class="flex size-11 items-center justify-center rounded-xl bg-indigo-600 text-white"><flux:icon name="squares-2x2" class="size-5" /></span>
+                        <h3 class="mt-4 font-bold">Escolher um modelo</h3>
+                        <p class="mt-1 text-xs leading-5 text-zinc-500">Escolhe directamente uma base profissional por tipo de negócio e personaliza-a.</p>
+                    </button>
+
+                    <div class="relative cursor-not-allowed rounded-2xl border border-zinc-200 bg-zinc-50 p-5 opacity-50 dark:border-zinc-700 dark:bg-zinc-800/60" aria-disabled="true">
+                        <span class="absolute right-4 top-4 rounded-full bg-zinc-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-500 dark:bg-zinc-700 dark:text-zinc-300">Bloqueado</span>
+                        <span class="flex size-11 items-center justify-center rounded-xl bg-zinc-200 text-zinc-400 dark:bg-zinc-700"><flux:icon name="adjustments-horizontal" class="size-5" /></span>
+                        <h3 class="mt-4 font-bold">Começar de forma livre</h3>
+                        <p class="mt-1 text-xs leading-5 text-zinc-500">Começa com uma estrutura recomendada. Não ficas perante uma página vazia.</p>
+                    </div>
                 </div>
                 <div class="mt-8 flex justify-end"><flux:button variant="primary" icon:trailing="arrow-right" wire:click="next">Continuar</flux:button></div>
             </section>
@@ -41,14 +50,12 @@
                 <p class="text-xs font-black uppercase tracking-widest text-indigo-600">2 · Modelo e tipo</p>
                 <h2 class="mt-2 text-2xl font-black">Escolhe a base do teu website</h2>
                 <p class="mt-2 text-sm text-zinc-500">O modelo é apenas o ponto de partida. Depois podes alterar cores, textos, imagens, secções e páginas.</p>
-
                 <h3 class="mt-7 text-sm font-bold">Tipo de website</h3>
                 <div class="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
                     @foreach($types as $key=>$item)
                         <button type="button" wire:click="$set('type','{{ $key }}')" class="rounded-xl border p-3 text-left {{ $type===$key ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10' : 'border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800' }}"><span class="block text-xs font-bold">{{ $item['label'] }}</span><span class="mt-1 block text-[10px] leading-4 text-zinc-400">{{ $item['description'] }}</span></button>
                     @endforeach
                 </div>
-
                 <h3 class="mt-8 text-sm font-bold">Estilo visual</h3>
                 <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach($templates as $key=>$item)
@@ -64,7 +71,7 @@
             <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
                 <p class="text-xs font-black uppercase tracking-widest text-indigo-600">3 · Informação</p>
                 <h2 class="mt-2 text-2xl font-black">Conta-nos o essencial</h2>
-                <p class="mt-2 text-sm text-zinc-500">Estas respostas são especialmente importantes quando escolhes <strong>Criar com AI</strong>. Também melhoram a estrutura criada nos outros modos.</p>
+                <p class="mt-2 text-sm text-zinc-500">Estas informações ajudam a adaptar o modelo ao teu website.</p>
                 <div class="mt-7 grid gap-5 lg:grid-cols-2">
                     <flux:input wire:model.live="name" label="Nome do negócio / website" placeholder="Ex.: Declair Studio" />
                     <flux:input wire:model.live="slug" label="Endereço interno" placeholder="declair-studio" description="É gerado automaticamente a partir do nome." />
@@ -90,7 +97,7 @@
                         </button>
                     @endforeach
                 </div>
-                <div class="mt-8 rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-800/60"><p class="text-sm font-bold">O que vai acontecer?</p><p class="mt-1 text-xs leading-5 text-zinc-500">O Finder vai criar estas páginas com secções adequadas ao tipo de website e ao modelo escolhido. Depois, no Builder, podes clicar no conteúdo, editar, adicionar, remover, duplicar e reorganizar.</p></div>
+                <div class="mt-8 rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-800/60"><p class="text-sm font-bold">O que vai acontecer?</p><p class="mt-1 text-xs leading-5 text-zinc-500">O Finder vai criar estas páginas com secções adequadas ao tipo de website e ao modelo escolhido.</p></div>
                 <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="rocket-launch" wire:click="create" wire:loading.attr="disabled"><span wire:loading.remove>Criar o meu website</span><span wire:loading>A criar website…</span></flux:button></div>
             </section>
         @endif
@@ -98,7 +105,7 @@
         <div x-cloak x-show="help" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 p-4" @click.self="help=false">
             <div class="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl dark:bg-zinc-900">
                 <div class="flex items-start justify-between gap-4"><div><p class="text-xs font-black uppercase tracking-widest text-indigo-600">Ajuda</p><h2 class="mt-2 text-2xl font-black">Como funciona?</h2></div><button type="button" @click="help=false" class="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">✕</button></div>
-                <div class="mt-6 space-y-4 text-sm"><p><strong>1. Escolhe uma forma de começar.</strong><br><span class="text-zinc-500">AI, um modelo profissional ou uma estrutura recomendada.</span></p><p><strong>2. Define o teu negócio.</strong><br><span class="text-zinc-500">As respostas ajudam o Finder a preparar a estrutura e o conteúdo inicial.</span></p><p><strong>3. Escolhe páginas.</strong><br><span class="text-zinc-500">Não precisas de começar com uma página vazia.</span></p><p><strong>4. Personaliza no Builder.</strong><br><span class="text-zinc-500">Podes editar, adicionar, duplicar, reorganizar e publicar.</span></p></div>
+                <div class="mt-6 space-y-4 text-sm"><p><strong>1. Escolhe um modelo.</strong><br><span class="text-zinc-500">Começa sempre por uma base profissional.</span></p><p><strong>2. Define o teu negócio.</strong><br><span class="text-zinc-500">As informações ajudam a preparar o website.</span></p><p><strong>3. Escolhe páginas.</strong><br><span class="text-zinc-500">A estrutura é criada automaticamente.</span></p></div>
                 <div class="mt-7 flex justify-end"><button type="button" @click="help=false" class="rounded-xl bg-zinc-950 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-zinc-950">Percebi</button></div>
             </div>
         </div>
