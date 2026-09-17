@@ -53,15 +53,12 @@
                         ])
 
                         @foreach($sidebarModels as $modelKey => [$modelName, $modelDescription, $modelIcon])
-                            <button type="button" wire:click="$set('theme.layout', '{{ $modelKey }}')" @click="open=false" class="group flex min-h-[104px] flex-col items-start gap-2 rounded-2xl border p-3 text-left transition {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-lg' : 'border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50' }}">
+                            <button type="button" wire:click="$set('theme.layout', '{{ $modelKey }}'); $wire.save()" @click="open=false" class="group flex min-h-[104px] flex-col items-start gap-2 rounded-2xl border p-3 text-left transition {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-lg' : 'border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50' }}">
                                 <span class="flex h-9 w-9 items-center justify-center rounded-xl {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'bg-white/10' : 'bg-zinc-100' }} text-base">{{ $modelIcon }}</span>
                                 <span>
                                     <span class="block text-xs font-black">{{ $modelName }}</span>
                                     <span class="mt-0.5 block text-[9px] {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'text-white/50' : 'text-zinc-400' }}">{{ $modelDescription }}</span>
                                 </span>
-                                @if(data_get($theme ?? [], 'layout', 'top') === $modelKey)
-                                    <span class="absolute hidden">✓</span>
-                                @endif
                             </button>
                         @endforeach
                     </div>
