@@ -82,7 +82,7 @@
                     <article class="dash-fade-up group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900" style="animation-delay: {{ $loop->index * 60 }}ms">
                         <div class="relative h-40 overflow-hidden bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500">
                             <div class="absolute inset-0 bg-black/10"></div>
-                            <div class="absolute inset-0 opacity-25 transition duration-300 group-hover:scale-105 group-hover:opacity-30" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.6) 1px, transparent 0); background-size: 18px 18px;" aria-hidden="true"></div>
+                            <div class="absolute inset-0 opacity-25 transition duration-300 group-hover:scale-105 group-hover:opacity-30" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.6) 1px, transparent 0); background-size: 18px 18px  ;" aria-hidden="true"></div>
                             <div class="relative flex h-full flex-col justify-between p-5">
                                 <div class="flex items-start justify-between gap-3">
                                     <span class="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-zinc-700 shadow-sm dark:bg-zinc-950/80 dark:text-zinc-200"><span class="size-1.5 rounded-full {{ $site->is_published ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>{{ $site->is_published ? 'Publicado' : 'Rascunho' }}</span>
@@ -95,7 +95,7 @@
                             <div class="mt-4 flex gap-4 text-xs font-medium text-zinc-500 dark:text-zinc-400"><span class="inline-flex items-center gap-1.5"><flux:icon name="document" class="size-3.5 text-zinc-400 dark:text-zinc-500" />{{ $site->pages_count }} páginas</span><span class="inline-flex items-center gap-1.5"><flux:icon name="shopping-bag" class="size-3.5 text-zinc-400 dark:text-zinc-500" />{{ $site->products_count }} produtos</span></div>
                             <div class="mt-5 flex gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
                                 <flux:button class="flex-1" variant="ghost" href="{{ route('admin.site.dashboard', $site) }}">Gerir</flux:button>
-                                <flux:button class="flex-1 transition hover:-translate-y-0.5" variant="primary" href="{{ route('builder.edit', $site) }}" wire:navigate>Editar</flux:button>
+                                <flux:button class="flex-1 transition hover:-translate-y-0.5" variant="primary" icon="eye" href="{{ route('site.public', ['site' => $site]) }}" target="_blank">Ver site</flux:button>
                             </div>
                         </div>
                     </article>
