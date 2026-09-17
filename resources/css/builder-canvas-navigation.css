@@ -1,0 +1,45 @@
+/* Finder Studio — canvas navigation and workspace finish. */
+
+body:has(#finder-ultimate-sidebar) {
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,.95), rgba(244,244,245,.72) 42%, rgba(228,228,231,.9) 100%);
+}
+
+body:has(#finder-ultimate-sidebar) [data-finder-site-canvas] {
+    isolation: isolate;
+    transform-origin: top center;
+}
+
+body:has(#finder-ultimate-sidebar) [data-finder-site-canvas]::selection {
+    background: rgba(99,102,241,.18);
+}
+
+body:has(#finder-ultimate-sidebar) .finder-builder-section-navigator,
+body:has(#finder-ultimate-sidebar) #finder-builder-canva-dock,
+body:has(#finder-ultimate-sidebar) #finder-builder-canva-pro-tools,
+body:has(#finder-ultimate-sidebar) #finder-builder-canva-toolbar,
+body:has(#finder-ultimate-sidebar) #finder-canva-ultra-toolbar {
+    display: none !important;
+}
+
+.finder-canvas-panning,
+.finder-canvas-panning * {
+    cursor: grabbing !important;
+}
+
+body:has(#finder-ultimate-sidebar) .finder-canva-grid-active main::after,
+body:has(#finder-ultimate-sidebar) .finder-ultimate-grid main::after {
+    opacity: .82;
+}
+
+@media (max-width: 1023px) {
+    body:has(#finder-ultimate-sidebar) {
+        background: #f4f4f5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body:has(#finder-ultimate-sidebar) [data-finder-site-canvas] {
+        scroll-behavior: auto;
+    }
+}
