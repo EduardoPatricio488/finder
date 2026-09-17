@@ -7,7 +7,21 @@
     <meta name="color-scheme" content="light">
     <link rel="icon" href="/site-icon.svg" type="image/svg+xml">
     <title>{{ $title ?? 'Finder Website Studio' }}</title>
-    @vite(['resources/css/app.css', 'resources/css/builder-canva-pro.css', 'resources/css/builder-canva-ultra.css', 'resources/js/app.js', 'resources/js/builder-studio.js', 'resources/js/builder-interactions.js', 'resources/js/builder-canva.js', 'resources/js/builder-canva-runtime.js', 'resources/js/builder-canva-pro.js', 'resources/js/builder-elements-library.js', 'resources/js/builder-canva-ultra-safe.js'])
+    @vite([
+        'resources/css/app.css',
+        'resources/css/builder-canva-pro.css',
+        'resources/css/builder-canva-ultra.css',
+        'resources/css/builder-canva-ultimate.css',
+        'resources/js/app.js',
+        'resources/js/builder-studio.js',
+        'resources/js/builder-interactions.js',
+        'resources/js/builder-canva.js',
+        'resources/js/builder-canva-runtime.js',
+        'resources/js/builder-canva-pro.js',
+        'resources/js/builder-elements-library.js',
+        'resources/js/builder-canva-ultra-safe.js',
+        'resources/js/builder-canva-ultimate.js',
+    ])
     @fluxAppearance
 </head>
 <body class="min-h-full bg-zinc-100 text-zinc-950 antialiased selection:bg-zinc-950 selection:text-white dark:bg-zinc-950 dark:text-white">
