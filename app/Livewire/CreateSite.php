@@ -8,6 +8,7 @@ use App\Services\WebsiteAiGenerator;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use App\Support\Website\TemplateLibrary;
 use Livewire\Component;
 
 #[Title('Criar website')]
@@ -120,20 +121,26 @@ class CreateSite extends Component
     }
 
     public function create(WebsiteAiGenerator $generator)
-    {
-        $this->validate([
-            'name' => ['required', 'min:2', 'max:80'],
-            'slug' => ['required', 'alpha_dash', 'unique:sites,slug'],
-            'type' => ['required', 'in:'.implode(',', array_keys($this->types))],
-            'template' => ['required', 'in:'.implode(',', array_keys($this->templates))],
-            'creationMode' => ['required', 'in:ai,model,free'],
-            'primaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'secondaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'font' => ['required', 'string', 'max:40'],
-        ]);
+{
+    $this->validate([
+        'name' => ['required', 'min:2', 'max:80'],
+        'slug' => ['required', 'alpha_dash', 'unique:sites,slug'],
+        'type' => ['required', 'in:'.implode(',', array_keys($this->types))],
+        'template' => ['required', 'in:'.implode(',', array_keys($this->templates))],
+        'creationMode' => ['required', 'in:ai,model,free'],
+        'primaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+        'secondaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+        'font' => ['required', 'string', 'max:40'],
+    ]);
 
-        $plan = Plan::query()->where('name', 'Free')->first() ?? Plan::query()->first();
-        $template = config("website.templates.{$this->template}", []);
+    $plan = Plan::query()->where('name', 'Free')->first() ?? Plan::query()->first();
+    $template = config("website.templates.{$this->template}", []);
+
+    // A IA só é chamada quando o utilizador escolhe explicitamente "Criar com AI".
+    // Nos modos "Modelo" e "Livre" usamos sempre a biblioteca de sites completos,
+    // para que o resultado nunca fique com secções vazias ou genéricas.
+    $aiPages = [];
+    if ($this->creationMode === 'ai') {
         $blueprint = $generator->generate([
             'mode' => $this->creationMode,
             'type' => $this->type,
@@ -146,85 +153,99 @@ class CreateSite extends Component
             'pages' => array_values(array_unique($this->pages)),
             'additional_info' => $this->additionalInfo,
         ]);
+        $aiPages = is_array($blueprint['pages'] ?? null) ? $blueprint['pages'] : [];
+    }
 
-        $theme = [
-            'primary' => $this->primaryColor,
-            'secondary' => $this->secondaryColor,
-            'accent' => $template['accent'] ?? $this->primaryColor,
-            'background' => '#ffffff',
-            'text' => '#111827',
-            'heading_font' => $this->font,
-            'body_font' => $this->font,
-            'radius' => $this->creationMode === 'ai' ? 'lg' : 'lg',
-            'shadow' => 'sm',
-            'content_width' => '1200px',
-        ];
+    $libraryPages = TemplateLibrary::pages($this->template, [
+        'name' => $this->name,
+        'description' => $this->description,
+        'audience' => $this->audience,
+        'goal_label' => $this->goalLabel(),
+        'style' => $this->style,
+    ]);
 
-        $site = Site::create([
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'owner_id' => auth()->id(),
-            'plan_id' => $plan?->id,
-            'status' => 'draft',
-            'is_published' => false,
-            'category_label' => $this->types[$this->type]['label'] ?? 'Website',
-            'type' => $this->type,
-            'primary_color' => $this->primaryColor,
-            'secondary_color' => $this->secondaryColor,
-            'theme' => $theme,
-            'settings' => [
-                'template' => $this->template,
-                'locale' => 'pt-PT',
-                'timezone' => 'Europe/Lisbon',
-                'builder' => [
-                    'creation_mode' => $this->creationMode,
-                    'template_style' => $this->style,
-                    'brief' => [
-                        'business_name' => $this->name,
-                        'description' => $this->description,
-                        'audience' => $this->audience,
-                        'goal' => $this->goal,
-                        'additional_info' => $this->additionalInfo,
-                    ],
+    $theme = [
+        'primary' => $this->primaryColor,
+        'secondary' => $this->secondaryColor,
+        'accent' => $template['accent'] ?? $this->primaryColor,
+        'background' => '#ffffff',
+        'text' => '#111827',
+        'heading_font' => $this->font,
+        'body_font' => $this->font,
+        'radius' => 'lg',
+        'shadow' => 'sm',
+        'content_width' => '1200px',
+    ];
+
+    $site = Site::create([
+        'name' => $this->name,
+        'slug' => $this->slug,
+        'owner_id' => auth()->id(),
+        'plan_id' => $plan?->id,
+        'status' => 'draft',
+        'is_published' => false,
+        'category_label' => $this->types[$this->type]['label'] ?? 'Website',
+        'type' => $this->type,
+        'primary_color' => $this->primaryColor,
+        'secondary_color' => $this->secondaryColor,
+        'theme' => $theme,
+        'settings' => [
+            'template' => $this->template,
+            'locale' => 'pt-PT',
+            'timezone' => 'Europe/Lisbon',
+            'builder' => [
+                'creation_mode' => $this->creationMode,
+                'template_style' => $this->style,
+                'brief' => [
+                    'business_name' => $this->name,
+                    'description' => $this->description,
+                    'audience' => $this->audience,
+                    'goal' => $this->goal,
+                    'additional_info' => $this->additionalInfo,
                 ],
             ],
-            'seo' => ['title' => $this->name],
-        ]);
+        ],
+        'seo' => ['title' => $this->name],
+    ]);
 
-        $site->members()->syncWithoutDetaching([auth()->id() => ['role' => 'owner']]);
+    $site->members()->syncWithoutDetaching([auth()->id() => ['role' => 'owner']]);
 
-        foreach (array_values(array_unique($this->pages)) as $index => $pageSlug) {
-            if (! array_key_exists($pageSlug, $this->pageLabels)) {
-                continue;
-            }
-
-            $page = $site->pages()->create([
-                'name' => $this->pageLabels[$pageSlug],
-                'slug' => $pageSlug,
-                'status' => 'draft',
-                'is_homepage' => $pageSlug === 'home',
-                'sort_order' => $index,
-            ]);
-
-            foreach (($blueprint['pages'][$pageSlug] ?? $this->pageBlueprint($pageSlug)) as $sectionIndex => $section) {
-                $page->sections()->create([
-                    'type' => $section['type'],
-                    'label' => $section['label'] ?? Str::headline($section['type']),
-                    'content' => $section['content'] ?? [],
-                    'settings' => array_merge(
-                        ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
-                        $section['settings'] ?? [],
-                    ),
-                    'sort_order' => $sectionIndex,
-                    'is_visible' => true,
-                ]);
-            }
+    foreach (array_values(array_unique($this->pages)) as $index => $pageSlug) {
+        if (! array_key_exists($pageSlug, $this->pageLabels)) {
+            continue;
         }
 
-        session()->flash('status', 'Website criado. Agora podes editar tudo directamente no Builder.');
+        $page = $site->pages()->create([
+            'name' => $this->pageLabels[$pageSlug],
+            'slug' => $pageSlug,
+            'status' => 'draft',
+            'is_homepage' => $pageSlug === 'home',
+            'sort_order' => $index,
+        ]);
 
-        return redirect()->route('builder.edit', $site);
+        $sections = $aiPages[$pageSlug]
+            ?? $libraryPages[$pageSlug]
+            ?? $this->pageBlueprint($pageSlug);
+
+        foreach ($sections as $sectionIndex => $section) {
+            $page->sections()->create([
+                'type' => $section['type'],
+                'label' => $section['label'] ?? Str::headline($section['type']),
+                'content' => $section['content'] ?? [],
+                'settings' => array_merge(
+                    ['background' => 'transparent', 'padding' => 'lg', 'align' => 'left'],
+                    $section['settings'] ?? [],
+                ),
+                'sort_order' => $sectionIndex,
+                'is_visible' => true,
+            ]);
+        }
     }
+
+    session()->flash('status', 'Website criado. Agora podes editar tudo directamente no Builder.');
+
+    return redirect()->route('builder.edit', $site);
+}
 
     private function pageBlueprint(string $pageSlug): array
     {
