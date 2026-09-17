@@ -8,7 +8,7 @@ class WebsiteAiGenerator
 {
     /**
      * Generate a structured website blueprint. If no AI provider is configured,
-     * the service deliberately falls back to the deterministic Builder blueprint.
+     * the service deliberately falls back to a deterministic premium blueprint.
      */
     public function generate(array $brief): array
     {
@@ -24,15 +24,34 @@ class WebsiteAiGenerator
                 ->timeout(30)
                 ->post('https://api.openai.com/v1/chat/completions', [
                     'model' => env('OPENAI_MODEL', 'gpt-5-mini'),
-                    'temperature' => 0.4,
+                    'temperature' => 0.45,
                     'response_format' => ['type' => 'json_object'],
                     'messages' => [
                         [
                             'role' => 'system',
                             'content' => <<<'PROMPT'
-És o gerador de estrutura do Website Builder Finder. Responde apenas com JSON válido.
-Cria uma estrutura de website em Português de Portugal. Não inventes tipos de secção: usa apenas hero, text, image, button, feature_grid, card, testimonials, faq, gallery, contact_form, product_grid, product_card, pricing, blog_posts, social_links, video, map, newsletter e cta.
-O JSON deve ter exactamente a forma {"pages":{"home":[{"type":"hero","label":"...","content":{}}]}}. Mantém o conteúdo simples, profissional e editável. Não incluas HTML, CSS, JavaScript, URLs inventados, dados pessoais ou afirmações factuais que não estejam no briefing. Usa placeholders claros quando faltar informação.
+És o director criativo e copywriter sénior do Website Builder Finder. Cria websites pessoais premium, modernos e prontos a publicar. Responde apenas com JSON válido.
+
+O resultado é um portfolio pessoal, não um website empresarial genérico. Usa Português de Portugal. A estrutura deve ser elegante, editorial, minimalista e com excelente hierarquia visual. O conteúdo deve parecer escrito por um profissional, não por um gerador de templates.
+
+Usa apenas estas secções: hero, text, image, button, feature_grid, card, testimonials, faq, gallery, contact_form, product_grid, product_card, pricing, blog_posts, social_links, video, map, newsletter e cta.
+
+O JSON deve ter exactamente a forma {"pages":{"home":[{"type":"hero","label":"...","content":{}}]}}.
+
+Para um portfolio pessoal, cria exactamente estas três páginas quando elas forem pedidas:
+- home: hero forte + pequena apresentação/posicionamento + destaques baseados exclusivamente no briefing + CTA final;
+- about: apresentação pessoal mais desenvolvida, mas sem inventar factos;
+- contact: introdução curta + formulário de contacto + CTA.
+
+Na homepage, o hero deve ter um título curto e forte, um subtítulo claro e uma chamada para conhecer a pessoa/contactá-la. Usa feature_grid ou card apenas quando o briefing tiver informação suficiente para sustentar os itens. Se o briefing só tiver uma descrição curta, prefere poucas secções fortes em vez de preencher a página com conteúdo artificial.
+
+REGRA ABSOLUTA DE FACTOS: nunca inventes profissão, cargo, empresa, clientes, projetos, experiência, anos de experiência, formação, prémios, competências, localização, email, telefone, redes sociais, resultados, números ou testemunhos. Se uma informação não estiver no briefing, não a afirmes. Não uses estatísticas fictícias. Não cries testemunhos fictícios. Não cries nomes de serviços que a pessoa nunca indicou.
+
+Podes transformar a descrição fornecida em copy mais elegante, mas sem acrescentar factos. Quando faltar informação, usa linguagem neutra e aspiracional sem apresentar isso como um facto. Não uses lorem ipsum, texto de enchimento ou frases como “adiciona aqui”.
+
+Não incluas HTML, CSS, JavaScript ou URLs inventados. Para links internos usa apenas #sobre, #contacto ou URLs que existam explicitamente no briefing. Para o formulário de contacto não inventes dados de contacto.
+
+Mantém cada página curta: normalmente 2 a 4 secções. O objetivo é criar um portfolio premium, respirado e convincente, não uma página cheia de blocos.
 PROMPT,
                         ],
                         [
@@ -65,14 +84,16 @@ PROMPT,
             'blog_posts', 'social_links', 'video', 'map', 'newsletter', 'cta',
         ];
         $result = [];
+        $requestedPages = array_values(array_unique($brief['pages'] ?? ['home', 'about', 'contact']));
 
-        foreach ($pages as $slug => $sections) {
+        foreach ($requestedPages as $slug) {
+            $sections = $pages[$slug] ?? [];
             if (! is_array($sections)) {
-                continue;
+                $sections = [];
             }
 
             $result[$slug] = [];
-            foreach (array_slice($sections, 0, 20) as $section) {
+            foreach (array_slice($sections, 0, 8) as $section) {
                 if (! is_array($section) || ! in_array($section['type'] ?? '', $allowed, true)) {
                     continue;
                 }
@@ -90,44 +111,94 @@ PROMPT,
 
     private function fallback(array $brief): array
     {
-        $name = (string) ($brief['business_name'] ?? 'O teu negócio');
-        $description = (string) ($brief['description'] ?? 'Uma presença digital profissional.');
+        $name = trim((string) ($brief['business_name'] ?? 'O teu nome')) ?: 'O teu nome';
+        $description = trim((string) ($brief['description'] ?? ''));
+        $description = $description !== '' ? $description : 'Uma presença digital pessoal, simples e profissional.';
         $pages = array_values(array_unique($brief['pages'] ?? ['home', 'about', 'contact']));
         $result = [];
 
         foreach ($pages as $slug) {
             $result[$slug] = match ($slug) {
                 'home' => [
-                    ['type' => 'hero', 'content' => ['title' => $name, 'subtitle' => $description, 'button_label' => 'Saber mais', 'button_url' => '#contacto']],
-                    ['type' => 'feature_grid', 'content' => ['title' => 'O que oferecemos', 'items' => [
-                        ['title' => 'Qualidade', 'description' => 'Explica aqui o principal benefício.'],
-                        ['title' => 'Experiência', 'description' => 'Mostra a experiência que te distingue.'],
-                        ['title' => 'Confiança', 'description' => 'Ajuda os visitantes a tomar uma decisão.'],
-                    ]]],
-                    ['type' => 'cta', 'content' => ['title' => 'Vamos falar?', 'description' => 'Entra em contacto para saber mais.', 'button_label' => 'Contactar', 'button_url' => '#contacto']],
+                    [
+                        'type' => 'hero',
+                        'label' => 'Apresentação',
+                        'content' => [
+                            'title' => $name,
+                            'subtitle' => $description,
+                            'button_label' => 'Conhecer melhor',
+                            'button_url' => '#sobre',
+                        ],
+                    ],
+                    [
+                        'type' => 'text',
+                        'label' => 'Introdução',
+                        'content' => [
+                            'title' => 'Um pouco sobre mim',
+                            'body' => $description,
+                        ],
+                    ],
+                    [
+                        'type' => 'cta',
+                        'label' => 'Contacto',
+                        'content' => [
+                            'title' => 'Vamos conversar?',
+                            'description' => 'Se quiseres saber mais, entra em contacto.',
+                            'button_label' => 'Contactar',
+                            'button_url' => '#contacto',
+                        ],
+                    ],
                 ],
                 'about' => [
-                    ['type' => 'hero', 'content' => ['title' => 'Sobre nós', 'subtitle' => $description, 'button_label' => 'Contactar', 'button_url' => '#contacto']],
-                    ['type' => 'text', 'content' => ['title' => 'A nossa história', 'body' => 'Adiciona aqui a história, os valores e a experiência do teu negócio.']],
-                ],
-                'services' => [
-                    ['type' => 'hero', 'content' => ['title' => 'Serviços', 'subtitle' => 'Conhece as soluções que disponibilizamos.', 'button_label' => 'Saber mais', 'button_url' => '#contacto']],
-                    ['type' => 'feature_grid', 'content' => ['title' => 'Os nossos serviços', 'items' => [
-                        ['title' => 'Serviço principal', 'description' => 'Descrição do serviço.'],
-                        ['title' => 'Serviço adicional', 'description' => 'Descrição do serviço.'],
-                        ['title' => 'Acompanhamento', 'description' => 'Descrição do serviço.'],
-                    ]]],
-                ],
-                'products' => [
-                    ['type' => 'hero', 'content' => ['title' => 'Produtos', 'subtitle' => 'Conhece o nosso catálogo.', 'button_label' => 'Ver produtos', 'button_url' => '#produtos']],
-                    ['type' => 'product_grid', 'content' => ['title' => 'Catálogo', 'description' => 'Os teus produtos aparecem aqui.', 'limit' => 6]],
+                    [
+                        'type' => 'hero',
+                        'label' => 'Sobre mim',
+                        'content' => [
+                            'title' => 'Sobre mim',
+                            'subtitle' => $description,
+                            'button_label' => 'Entrar em contacto',
+                            'button_url' => '#contacto',
+                        ],
+                    ],
+                    [
+                        'type' => 'text',
+                        'label' => 'Perfil',
+                        'content' => [
+                            'title' => 'A minha história',
+                            'body' => $description,
+                        ],
+                    ],
                 ],
                 'contact' => [
-                    ['type' => 'hero', 'content' => ['title' => 'Contacta-nos', 'subtitle' => 'Estamos disponíveis para ajudar.', 'button_label' => 'Enviar mensagem', 'button_url' => '#formulario']],
-                    ['type' => 'contact_form', 'content' => ['title' => 'Entra em contacto', 'description' => 'Envia-nos uma mensagem.', 'button_label' => 'Enviar mensagem']],
+                    [
+                        'type' => 'hero',
+                        'label' => 'Contacto',
+                        'content' => [
+                            'title' => 'Vamos falar?',
+                            'subtitle' => 'Se tens uma questão ou queres saber mais, estou disponível para conversar.',
+                            'button_label' => 'Enviar mensagem',
+                            'button_url' => '#formulario',
+                        ],
+                    ],
+                    [
+                        'type' => 'contact_form',
+                        'label' => 'Formulário',
+                        'content' => [
+                            'title' => 'Entra em contacto',
+                            'description' => 'Envia uma mensagem através do formulário.',
+                            'button_label' => 'Enviar mensagem',
+                        ],
+                    ],
                 ],
                 default => [
-                    ['type' => 'text', 'content' => ['title' => ucfirst($slug), 'body' => 'Personaliza esta página com a informação mais importante para os teus visitantes.']],
+                    [
+                        'type' => 'text',
+                        'label' => ucfirst($slug),
+                        'content' => [
+                            'title' => ucfirst($slug),
+                            'body' => $description,
+                        ],
+                    ],
                 ],
             };
         }
