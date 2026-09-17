@@ -1,5 +1,37 @@
 /* Finder Studio — Canva-inspired editing shell. The website canvas remains visually continuous. */
 
+body:has(#finder-ultimate-sidebar) [class*="lg:grid-cols-[270px_minmax(0,1fr)_360px]"] {
+    display: block !important;
+}
+
+body:has(#finder-ultimate-sidebar) [class*="lg:grid-cols-[270px_minmax(0,1fr)_360px]"] > aside {
+    display: none !important;
+}
+
+body:has(#finder-ultimate-sidebar) [class*="lg:grid-cols-[270px_minmax(0,1fr)_360px]"] > main {
+    width: auto !important;
+    min-width: 0 !important;
+    margin-left: 84px;
+    margin-right: 344px;
+}
+
+body:has(#finder-ultimate-sidebar) [class*="lg:grid-cols-[270px_minmax(0,1fr)_360px]"] main > div:first-child {
+    display: none !important;
+}
+
+body:has(#finder-ultimate-sidebar) [data-finder-site-canvas] {
+    border-radius: 14px !important;
+    box-shadow: 0 28px 90px rgba(24,24,27,.14) !important;
+}
+
+body:has(#finder-ultimate-sidebar) [data-finder-site-canvas] > div:first-child {
+    display: none !important;
+}
+
+body:has(#finder-ultimate-sidebar) [wire\:key^="builder-section-"] {
+    min-height: 120px;
+}
+
 #finder-ultimate-sidebar {
     position: fixed;
     inset: 68px auto 0 0;
@@ -143,6 +175,11 @@
 .finder-ultimate-feedback div { padding:10px 14px;border:1px solid #e4e4e7;border-radius:999px;background:rgba(24,24,27,.95);color:#fff;font-size:10px;font-weight:900;box-shadow:0 15px 40px rgba(0,0,0,.18); }
 
 @media (max-width: 1023px) {
+    body:has(#finder-ultimate-sidebar) [class*="lg:grid-cols-[270px_minmax(0,1fr)_360px]"] > main {
+        margin-left: 0;
+        margin-right: 0;
+        padding-bottom: 76px;
+    }
     #finder-ultimate-sidebar { inset: auto 0 0 0; width:auto; height:66px; flex-direction:row; border-right:0; border-top:1px solid #e4e4e7; }
     #finder-ultimate-sidebar .fu-brand { display:none; }
     #finder-ultimate-sidebar .fu-tools { display:flex; overflow-x:auto; padding:5px; }
@@ -151,4 +188,10 @@
     #finder-ultimate-sidebar .fu-bottom button { min-width:58px; }
     #finder-ultimate-inspector { top:auto;right:8px;bottom:74px;width:min(340px,calc(100vw - 16px));max-height:60vh; }
     #finder-ultimate-zoom { right:8px;bottom:140px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #finder-ultimate-sidebar .fu-tools button,
+    #finder-ultimate-sidebar .fu-bottom button,
+    #finder-ultimate-inspector .fu-tabs button { transition:none !important; }
 }
