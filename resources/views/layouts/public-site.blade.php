@@ -66,27 +66,39 @@
         body.finder-personal-site header nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; border-radius: 99px; background: var(--finder-primary, #635bff); transform: scaleX(0); transition: transform .2s ease; }
         body.finder-personal-site header nav a:hover::after { transform: scaleX(1); }
         body.finder-personal-site header > div > a:last-child { border-radius: 999px !important; padding-inline: 1.15rem !important; box-shadow: 0 10px 25px color-mix(in srgb, var(--finder-primary, #635bff) 20%, transparent); }
-        body.finder-personal-site main { text-align: center; }
-        body.finder-personal-site main > section { text-align: center; }
-        body.finder-personal-site main > section > div { margin-inline: auto; }
-        body.finder-personal-site main > section p { margin-inline: auto; }
-        body.finder-personal-site main > section article { text-align: center; }
-        body.finder-personal-site main > section form { text-align: left; margin-inline: auto; }
+        body.finder-personal-site main { text-align: center !important; }
+        body.finder-personal-site main > section { text-align: center !important; }
+        body.finder-personal-site main > section > div { margin-inline: auto !important; }
+        body.finder-personal-site main > section p { margin-inline: auto !important; }
+        body.finder-personal-site main > section article { text-align: center !important; }
+        body.finder-personal-site main > section form { text-align: left !important; margin-inline: auto !important; }
         body.finder-personal-site main > section:first-child {
             position: relative;
             overflow: hidden;
             min-height: 720px;
             display: flex;
             align-items: center;
+            justify-content: center !important;
+            text-align: center !important;
             background: radial-gradient(circle at 78% 38%, color-mix(in srgb, var(--finder-primary, #635bff) 18%, transparent), transparent 20rem), linear-gradient(135deg, #fff 0%, #f7f7fb 58%, #f1f0f8 100%);
             isolation: isolate;
         }
-        body.finder-personal-site main > section:first-child::before { content: ''; position: absolute; width: 520px; height: 520px; right: -175px; top: -155px; border-radius: 9999px; border: 1px solid color-mix(in srgb, var(--finder-primary, #635bff) 22%, transparent); box-shadow: 0 0 0 75px color-mix(in srgb, var(--finder-primary, #635bff) 4%, transparent), 0 0 0 150px color-mix(in srgb, var(--finder-primary, #635bff) 2%, transparent); z-index: -1; }
-        body.finder-personal-site main > section:first-child::after { content: ''; position: absolute; width: 10px; height: 10px; right: 16%; bottom: 18%; border-radius: 9999px; background: var(--finder-primary, #635bff); box-shadow: 0 0 0 10px color-mix(in srgb, var(--finder-primary, #635bff) 8%, transparent), 0 0 35px color-mix(in srgb, var(--finder-primary, #635bff) 28%, transparent); }
-        body.finder-personal-site main > section:first-child > div { position: relative; z-index: 1; width: min(100%, 900px); }
+        body.finder-personal-site main > section:first-child > div {
+            position: relative;
+            z-index: 1;
+            width: min(100%, 900px) !important;
+            max-width: 900px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            text-align: center !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         body.finder-personal-site main > section:first-child > div::before { content: 'PERSONAL WEBSITE'; display: inline-flex; margin-bottom: 1.35rem; padding: .45rem .75rem; border: 1px solid color-mix(in srgb, var(--finder-primary, #635bff) 16%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--finder-primary, #635bff) 5%, white); color: var(--finder-primary, #635bff); font-size: .68rem; font-weight: 800; letter-spacing: .16em; }
-        body.finder-personal-site main > section:first-child h1 { max-width: 920px; margin-inline: auto; font-weight: 850 !important; letter-spacing: -.065em; line-height: .94; text-wrap: balance; }
-        body.finder-personal-site main > section:first-child p { max-width: 680px !important; margin-inline: auto; color: #52525b; font-size: 1.16rem !important; line-height: 1.8 !important; }
+        body.finder-personal-site main > section:first-child h1 { width: 100%; max-width: 920px; margin-inline: auto !important; text-align: center !important; font-weight: 850 !important; letter-spacing: -.065em; line-height: .94; text-wrap: balance; }
+        body.finder-personal-site main > section:first-child p { width: 100%; max-width: 680px !important; margin-inline: auto !important; text-align: center !important; color: #52525b; font-size: 1.16rem !important; line-height: 1.8 !important; }
+        body.finder-personal-site main > section:first-child a { align-self: center; }
         body.finder-personal-site main > section:first-child a,
         body.finder-personal-site main > section:not(:first-child) a[style*="background"] { border-radius: 9999px !important; padding: .9rem 1.5rem !important; box-shadow: 0 14px 30px color-mix(in srgb, var(--finder-primary, #635bff) 22%, transparent) !important; transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
         body.finder-personal-site main > section:first-child a:hover,
