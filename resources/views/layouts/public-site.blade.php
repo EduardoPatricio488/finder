@@ -66,7 +66,16 @@
         body.finder-personal-site header nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; border-radius: 99px; background: var(--finder-primary, #635bff); transform: scaleX(0); transition: transform .2s ease; }
         body.finder-personal-site header nav a:hover::after { transform: scaleX(1); }
         body.finder-personal-site header > div > a:last-child { border-radius: 999px !important; padding-inline: 1.15rem !important; box-shadow: 0 10px 25px color-mix(in srgb, var(--finder-primary, #635bff) 20%, transparent); }
-        body.finder-personal-site main { text-align: center !important; }
+        body.finder-personal-site main {
+            text-align: center !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            position: relative !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
         body.finder-personal-site main > section { text-align: center !important; }
         body.finder-personal-site main > section > div { margin-inline: auto !important; }
         body.finder-personal-site main > section p { margin-inline: auto !important; }
