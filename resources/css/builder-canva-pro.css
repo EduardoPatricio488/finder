@@ -1,0 +1,196 @@
+/* Finder Canva Pro — visual studio layer */
+
+.finder-canva-pro-root {
+    --finder-editor-accent: #635bff;
+}
+
+.finder-canva-pro-ruler-x,
+.finder-canva-pro-ruler-y {
+    position: fixed;
+    z-index: 205;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .18s ease;
+    font: 800 8px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #a1a1aa;
+}
+
+.finder-canva-pro-ruler-x {
+    top: 68px;
+    left: 270px;
+    right: 0;
+    height: 22px;
+    background: rgba(255,255,255,.92);
+    border-bottom: 1px solid #e4e4e7;
+    background-image: repeating-linear-gradient(90deg, transparent 0 7px, #e4e4e7 8px, transparent 9px 79px), repeating-linear-gradient(90deg, transparent 0 39px, #d4d4d8 40px, transparent 41px 79px);
+}
+
+.finder-canva-pro-ruler-y {
+    top: 90px;
+    left: 270px;
+    width: 22px;
+    bottom: 0;
+    background: rgba(255,255,255,.92);
+    border-right: 1px solid #e4e4e7;
+    background-image: repeating-linear-gradient(0deg, transparent 0 7px, #e4e4e7 8px, transparent 9px 79px), repeating-linear-gradient(0deg, transparent 0 39px, #d4d4d8 40px, transparent 41px 79px);
+}
+
+.finder-canva-pro-guides-on .finder-canva-pro-ruler-x,
+.finder-canva-pro-guides-on .finder-canva-pro-ruler-y { opacity: 1; }
+
+.finder-canva-pro-safe-area::after {
+    content: '';
+    position: fixed;
+    top: 90px;
+    left: 292px;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 85;
+    border: 1px dashed rgba(99,102,241,.18);
+    opacity: .9;
+}
+
+.finder-canva-pro-multi {
+    outline: 2px solid rgba(99,102,241,.75) !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 6px rgba(99,102,241,.08) !important;
+}
+
+.finder-canva-pro-hint {
+    position: fixed;
+    left: 50%;
+    bottom: 74px;
+    z-index: 260;
+    transform: translateX(-50%);
+    pointer-events: none;
+    padding: 7px 12px;
+    border: 1px solid rgba(228,228,231,.95);
+    border-radius: 999px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 14px 40px rgba(0,0,0,.12);
+    backdrop-filter: blur(16px);
+    color: #52525b;
+    font-size: 10px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.finder-canva-pro-panel {
+    width: min(360px, calc(100vw - 24px));
+    max-height: min(74vh, 720px);
+    overflow: hidden;
+    border: 1px solid #e4e4e7;
+    border-radius: 24px;
+    background: rgba(255,255,255,.98);
+    box-shadow: 0 30px 90px rgba(0,0,0,.18);
+    backdrop-filter: blur(20px);
+}
+
+.finder-canva-pro-panel .fcp-section {
+    padding: 13px 16px;
+    border-top: 1px solid #f4f4f5;
+}
+
+.finder-canva-pro-panel .fcp-section:first-of-type { border-top: 0; }
+.finder-canva-pro-panel label {
+    display: block;
+    margin-bottom: 7px;
+    color: #a1a1aa;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.finder-canva-pro-panel input[type="color"] {
+    width: 42px;
+    height: 34px;
+    padding: 2px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.finder-canva-pro-panel input[type="text"],
+.finder-canva-pro-panel select {
+    width: 100%;
+    min-height: 34px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #fff;
+    padding: 0 10px;
+    color: #18181b;
+    font-size: 11px;
+    font-weight: 800;
+    outline: none;
+}
+
+.finder-canva-pro-panel input[type="text"]:focus,
+.finder-canva-pro-panel select:focus { border-color: #a1a1aa; box-shadow: 0 0 0 3px rgba(99,102,241,.08); }
+
+.finder-canva-pro-panel .fcp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 6px;
+}
+
+.finder-canva-pro-panel button.fcp-option {
+    min-height: 34px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #fff;
+    color: #52525b;
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.finder-canva-pro-panel button.fcp-option:hover { background: #fafafa; color: #18181b; }
+.finder-canva-pro-panel button.fcp-option.is-active { border-color: #18181b; background: #18181b; color: #fff; }
+
+.finder-canva-pro-floating-tools {
+    position: fixed;
+    top: 82px;
+    left: 50%;
+    z-index: 240;
+    display: flex;
+    gap: 4px;
+    transform: translateX(-50%);
+    padding: 4px;
+    border: 1px solid #e4e4e7;
+    border-radius: 14px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 14px 45px rgba(0,0,0,.12);
+    backdrop-filter: blur(16px);
+}
+
+.finder-canva-pro-floating-tools button {
+    height: 31px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #52525b;
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.finder-canva-pro-floating-tools button:hover { background: #f4f4f5; color: #18181b; }
+.finder-canva-pro-floating-tools button.is-active { background: #18181b; color: #fff; }
+
+@media (max-width: 1023px) {
+    .finder-canva-pro-ruler-x { left: 0; }
+    .finder-canva-pro-ruler-y { left: 0; }
+    .finder-canva-pro-safe-area::after { left: 22px; }
+    .finder-canva-pro-floating-tools { top: 76px; max-width: calc(100vw - 20px); overflow-x: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .finder-canva-pro-ruler-x,
+    .finder-canva-pro-ruler-y,
+    .finder-canva-pro-panel button.fcp-option { transition: none !important; }
+}
