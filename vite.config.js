@@ -16,6 +16,7 @@ export default defineConfig({
                 'resources/js/builder-canva.js',
                 'resources/js/builder-canva-runtime.js',
                 'resources/js/builder-canva-pro.js',
+                'resources/js/builder-elements-library.js',
             ],
             refresh: true,
             fonts: [
