@@ -16,6 +16,7 @@
                 </div>
             </div>
             <div class="ml-auto flex items-center gap-1.5 sm:gap-2">
+                <livewire:builder-templates :site="$site" :page-id="$pageId" />
                 <a href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank" class="hidden h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-bold text-zinc-700 transition hover:bg-zinc-50 md:flex">
                     <span>◉</span> Pré-visualizar
                 </a>
