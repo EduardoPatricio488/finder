@@ -129,7 +129,11 @@ class PublicSite extends Component
 
     public function render(): mixed
     {
-        return view('livewire.public-site-renderer')
+        $view = $this->site->type === 'personal'
+            ? 'livewire.personal-site-renderer'
+            : 'livewire.public-site-renderer';
+
+        return view($view)
             ->layout('layouts.public-site', [
                 'site' => $this->site,
                 'page' => $this->page,
