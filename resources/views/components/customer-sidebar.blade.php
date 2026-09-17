@@ -37,13 +37,13 @@
 
         <a href="{{ route('account') }}" wire:navigate class="block px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400 hover:text-amber-700">A minha conta</a>
         <a href="{{ route('profile.edit') }}" wire:navigate class="{{ $item(request()->routeIs('profile.edit')) }}"><flux:icon.user class="size-4 shrink-0" /><span>Perfil</span></a>
-        <a href="{{ route('account.addresses') }}" wire:navigate class="{{ $item(request()->routeIs('account.addresses')) }}"><flux:icon.map-pin class="size-4 shrink-0" /><span>Moradas</span></a>
+        <a href="{{ route('account', ['section' => 'addresses']) }}" wire:navigate class="{{ $item(request()->route('account') && request()->route('section') === 'addresses') }}"><flux:icon.map-pin class="size-4 shrink-0" /><span>Moradas</span></a>
         <a href="{{ route('security.edit') }}" wire:navigate class="{{ $item(request()->routeIs('security.edit')) }}"><flux:icon.lock-closed class="size-4 shrink-0" /><span>Segurança</span></a>
-        <a href="{{ route('account.payments') }}" wire:navigate class="{{ $item(request()->routeIs('account.payments')) }}"><flux:icon.credit-card class="size-4 shrink-0" /><span>Pagamentos</span></a>
+        <a href="{{ route('account', ['section' => 'payments']) }}" wire:navigate class="{{ $item(request()->route('account') && request()->route('section') === 'payments') }}"><flux:icon.credit-card class="size-4 shrink-0" /><span>Pagamentos</span></a>
 
         <div class="my-5 border-t border-stone-200"></div>
 
-        <a href="{{ route('account.notifications') }}" wire:navigate class="{{ $item(request()->routeIs('account.notifications')) }}"><flux:icon.bell class="size-4 shrink-0" /><span>Notificações</span></a>
+        <a href="{{ route('account', ['section' => 'notifications']) }}" wire:navigate class="{{ $item(request()->route('account') && request()->route('section') === 'notifications') }}"><flux:icon.bell class="size-4 shrink-0" /><span>Notificações</span></a>
         <a href="{{ route('appearance.edit') }}" wire:navigate class="{{ $item(request()->routeIs('appearance.edit')) }}"><flux:icon.cog-6-tooth class="size-4 shrink-0" /><span>Definições</span></a>
 
         @if (auth()->user()->isAdministrator())
@@ -51,16 +51,8 @@
 
             <a href="{{ route('dashboard') }}" wire:navigate class="block px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400 hover:text-amber-700">Administração</a>
             <a href="{{ route('dashboard') }}" wire:navigate class="{{ $item(request()->routeIs('dashboard')) }}"><flux:icon.home class="size-4 shrink-0" /><span>Painel</span></a>
-            <a href="{{ route('admin.products') }}" wire:navigate class="{{ $item(request()->routeIs('admin.products')) }}"><flux:icon.cube class="size-4 shrink-0" /><span>Produtos</span></a>
-            <a href="{{ route('admin.promotions') }}" wire:navigate class="{{ $item(request()->routeIs('admin.promotions')) }}"><flux:icon.receipt-percent class="size-4 shrink-0" /><span>Promoções</span></a>
-            <a href="{{ route('admin.categories') }}" wire:navigate class="{{ $item(request()->routeIs('admin.categories')) }}"><flux:icon.tag class="size-4 shrink-0" /><span>Categorias</span></a>
-            <a href="{{ route('admin.sales') }}" wire:navigate class="{{ $item(request()->routeIs('admin.sales')) }}"><flux:icon.banknotes class="size-4 shrink-0" /><span>Vendas</span></a>
-            <a href="{{ route('admin.orders') }}" wire:navigate class="{{ $item(request()->routeIs('admin.orders')) }}"><flux:icon.clipboard-document-list class="size-4 shrink-0" /><span>Encomendas</span></a>
-            <a href="{{ route('admin.payments') }}" wire:navigate class="{{ $item(request()->routeIs('admin.payments')) }}"><flux:icon.credit-card class="size-4 shrink-0" /><span>Pagamentos</span></a>
-            <a href="{{ route('admin.customers') }}" wire:navigate class="{{ $item(request()->routeIs('admin.customers')) }}"><flux:icon.user-group class="size-4 shrink-0" /><span>Clientes</span></a>
+            <a href="{{ route('admin.websites') }}" wire:navigate class="{{ $item(request()->routeIs('admin.websites')) }}"><flux:icon.globe-alt class="size-4 shrink-0" /><span>Websites</span></a>
             <a href="{{ route('admin.users') }}" wire:navigate class="{{ $item(request()->routeIs('admin.users')) }}"><flux:icon.users class="size-4 shrink-0" /><span>Utilizadores</span></a>
-            <a href="{{ route('admin.reports') }}" wire:navigate class="{{ $item(request()->routeIs('admin.reports')) }}"><flux:icon.chart-bar class="size-4 shrink-0" /><span>Relatórios</span></a>
-            <a href="{{ route('admin.stock') }}" wire:navigate class="{{ $item(request()->routeIs('admin.stock')) }}"><flux:icon.archive-box class="size-4 shrink-0" /><span>Movimentos de stock</span></a>
             <a href="{{ route('admin.config') }}" wire:navigate class="{{ $item(request()->routeIs('admin.config')) }}"><flux:icon.cog-6-tooth class="size-4 shrink-0" /><span>Configuração</span></a>
         @endif
     </nav>
