@@ -17,22 +17,30 @@
                 <span>Modelos</span>
             </button>
 
-            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-y-2 opacity-0" x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-2 opacity-0" class="pointer-events-auto absolute top-[142px] left-1/2 w-[330px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-3xl border border-zinc-200 bg-white p-4 shadow-2xl">
+            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-y-2 opacity-0" x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-2 opacity-0" class="pointer-events-auto absolute top-[142px] left-1/2 w-[380px] max-w-[calc(100vw-24px)] -translate-x-1/2 rounded-3xl border border-zinc-200 bg-white p-4 shadow-2xl">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400">Estrutura do website</p>
+                        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400">Design do website</p>
                         <h2 class="mt-1 text-lg font-black tracking-tight">Modelos</h2>
-                        <p class="mt-1 text-[11px] leading-5 text-zinc-400">Escolhe primeiro uma categoria e depois o modelo.</p>
+                        <p class="mt-1 text-[11px] leading-5 text-zinc-400">Escolhe a estrutura ou personaliza a tipografia do website.</p>
                     </div>
                     <button type="button" @click="open=false" class="h-8 w-8 rounded-xl bg-zinc-100 text-zinc-500">×</button>
                 </div>
 
-                <div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-1.5">
+                <div class="mt-4 space-y-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-1.5">
                     <button type="button" @click="category='sidebar'" class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition" :class="category === 'sidebar' ? 'bg-zinc-950 text-white shadow-md' : 'text-zinc-700 hover:bg-white'">
                         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-base">◧</span>
                         <span class="flex-1">
                             <span class="block text-xs font-black">Sidebar</span>
-                            <span class="block text-[10px] opacity-60">Modelos com navegação lateral ou vertical</span>
+                            <span class="block text-[10px] opacity-60">Esquerda, direita, em cima ou em baixo</span>
+                        </span>
+                        <span class="text-xs font-black">›</span>
+                    </button>
+                    <button type="button" @click="category='typography'" class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition" :class="category === 'typography' ? 'bg-zinc-950 text-white shadow-md' : 'text-zinc-700 hover:bg-white'">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-base">Aa</span>
+                        <span class="flex-1">
+                            <span class="block text-xs font-black">Tipo de letra</span>
+                            <span class="block text-[10px] opacity-60">Fonte, títulos, subtítulos e texto</span>
                         </span>
                         <span class="text-xs font-black">›</span>
                     </button>
@@ -43,7 +51,6 @@
                         <span class="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Posição da Sidebar</span>
                         <span class="h-px flex-1 bg-zinc-100"></span>
                     </div>
-
                     <div class="grid grid-cols-2 gap-2">
                         @php($sidebarModels = [
                             'sidebar-left' => ['Esquerda', 'Menu lateral esquerdo', '◧'],
@@ -51,7 +58,6 @@
                             'sidebar-top' => ['Em cima', 'Menu horizontal no topo', '▱'],
                             'sidebar-bottom' => ['Em baixo', 'Menu horizontal em baixo', '▰'],
                         ])
-
                         @foreach($sidebarModels as $modelKey => [$modelName, $modelDescription, $modelIcon])
                             <button type="button" wire:click="$set('theme.layout', '{{ $modelKey }}'); $wire.save()" @click="open=false" class="group flex min-h-[104px] flex-col items-start gap-2 rounded-2xl border p-3 text-left transition {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-lg' : 'border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50' }}">
                                 <span class="flex h-9 w-9 items-center justify-center rounded-xl {{ data_get($theme ?? [], 'layout', 'top') === $modelKey ? 'bg-white/10' : 'bg-zinc-100' }} text-base">{{ $modelIcon }}</span>
@@ -62,10 +68,61 @@
                             </button>
                         @endforeach
                     </div>
+                    <div class="mt-4 rounded-2xl bg-zinc-50 p-3 text-[10px] leading-5 text-zinc-500"><strong class="text-zinc-800">Navegação automática:</strong> a sidebar usa os nomes das páginas do website e atualiza quando adicionares novas páginas.</div>
                 </div>
 
-                <div class="mt-4 rounded-2xl bg-zinc-50 p-3 text-[10px] leading-5 text-zinc-500">
-                    <strong class="text-zinc-800">Navegação automática:</strong> a sidebar usa os nomes das páginas do website e atualiza quando adicionares novas páginas.
+                <div x-show="category === 'typography'" x-cloak x-transition class="mt-4">
+                    <div class="mb-3 flex items-center gap-2 px-1">
+                        <span class="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Tipografia do website</span>
+                        <span class="h-px flex-1 bg-zinc-100"></span>
+                    </div>
+
+                    @php($fontModels = [
+                        'modern-sans' => ['Inter', 'Moderno', 'Aa', 'font-sans'],
+                        'classic-serif' => ['Georgia', 'Clássico', 'Aa', 'font-serif'],
+                        'editorial' => ['Playfair Display', 'Editorial', 'Aa', 'font-serif'],
+                        'geometric' => ['Trebuchet MS', 'Geométrico', 'Aa', 'font-sans'],
+                        'clean' => ['Arial', 'Clean', 'Aa', 'font-sans'],
+                        'friendly' => ['Verdana', 'Friendly', 'Aa', 'font-sans'],
+                    ])
+
+                    <div class="grid gap-2">
+                        @foreach($fontModels as $fontKey => [$fontName, $fontLabel, $fontExample, $fontClass])
+                            <button type="button" wire:click="$set('theme.font_family', '{{ $fontKey }}'); $wire.save()" class="group flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition {{ data_get($theme ?? [], 'font_family', 'modern-sans') === $fontKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-lg' : 'border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50' }}">
+                                <span class="flex h-12 w-14 items-center justify-center rounded-xl {{ data_get($theme ?? [], 'font_family', 'modern-sans') === $fontKey ? 'bg-white/10' : 'bg-zinc-100' }} text-xl {{ $fontClass }}">{{ $fontExample }}</span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-xs font-black">{{ $fontLabel }}</span>
+                                    <span class="mt-0.5 block text-[10px] opacity-60">{{ $fontName }}</span>
+                                </span>
+                                @if(data_get($theme ?? [], 'font_family', 'modern-sans') === $fontKey)<span class="text-xs font-black">✓</span>@endif
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                        <p class="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Tamanhos</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2">
+                            @foreach([
+                                'compact' => ['Pequeno', 'text-2xl', 'text-sm'],
+                                'balanced' => ['Normal', 'text-3xl', 'text-base'],
+                                'large' => ['Grande', 'text-4xl', 'text-lg'],
+                                'display' => ['Display', 'text-5xl', 'text-xl'],
+                            ] as $sizeKey => [$sizeName, $headingClass, $bodyClass])
+                                <button type="button" wire:click="$set('theme.typography_scale', '{{ $sizeKey }}'); $wire.save()" class="rounded-xl border p-2 text-left transition {{ data_get($theme ?? [], 'typography_scale', 'balanced') === $sizeKey ? 'border-zinc-950 bg-zinc-950 text-white' : 'border-zinc-200 bg-white hover:border-zinc-400' }}">
+                                    <span class="block text-[9px] font-black">{{ $sizeName }}</span>
+                                    <span class="mt-1 block truncate {{ $headingClass }} font-black">Título</span>
+                                    <span class="block truncate {{ $bodyClass }} opacity-60">Texto</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="mt-3 rounded-2xl bg-zinc-950 p-4 text-white">
+                        <p class="text-[9px] font-black uppercase tracking-[0.18em] text-white/40">Pré-visualização</p>
+                        <p class="mt-2 text-2xl font-black tracking-tight">Título principal</p>
+                        <p class="mt-1 text-sm font-semibold text-white/60">Subtítulo da página</p>
+                        <p class="mt-3 text-sm leading-6 text-white/55">Este texto mostra como a tipografia escolhida fica aplicada no website.</p>
+                    </div>
                 </div>
 
                 <button type="button" wire:click="save" @click="open=false" class="mt-3 w-full rounded-xl bg-zinc-950 px-4 py-3 text-xs font-black text-white transition hover:bg-zinc-800">Aplicar e guardar modelo</button>
