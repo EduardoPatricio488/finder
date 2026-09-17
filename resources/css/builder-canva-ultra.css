@@ -1,0 +1,125 @@
+#finder-canva-ultra-overlay {
+    position: fixed;
+    z-index: 290;
+    pointer-events: none;
+    display: none;
+    border: 1.5px solid #6366f1;
+    box-shadow: 0 0 0 9999px rgba(99,102,241,.035);
+}
+
+#finder-canva-ultra-overlay.is-visible { display: block; }
+
+#finder-canva-ultra-overlay [data-h] {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    margin: -5px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #6366f1;
+    box-shadow: 0 1px 5px rgba(0,0,0,.22);
+    pointer-events: auto;
+    cursor: nwse-resize;
+}
+
+#finder-canva-ultra-overlay [data-h="nw"],
+#finder-canva-ultra-overlay [data-h="se"] { cursor: nwse-resize; }
+#finder-canva-ultra-overlay [data-h="ne"],
+#finder-canva-ultra-overlay [data-h="sw"] { cursor: nesw-resize; }
+#finder-canva-ultra-overlay [data-h="n"],
+#finder-canva-ultra-overlay [data-h="s"] { left: 50%; cursor: ns-resize; }
+#finder-canva-ultra-overlay [data-h="e"],
+#finder-canva-ultra-overlay [data-h="w"] { top: 50%; cursor: ew-resize; }
+#finder-canva-ultra-overlay [data-h="nw"] { left: 0; top: 0; }
+#finder-canva-ultra-overlay [data-h="n"] { top: 0; }
+#finder-canva-ultra-overlay [data-h="ne"] { right: 0; top: 0; }
+#finder-canva-ultra-overlay [data-h="e"] { right: 0; }
+#finder-canva-ultra-overlay [data-h="se"] { right: 0; bottom: 0; }
+#finder-canva-ultra-overlay [data-h="s"] { bottom: 0; }
+#finder-canva-ultra-overlay [data-h="sw"] { left: 0; bottom: 0; }
+#finder-canva-ultra-overlay [data-h="w"] { left: 0; }
+
+#finder-canva-ultra-overlay [data-h="rotate"] {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    left: 50%;
+    top: -38px;
+    transform: translateX(-50%);
+    display: grid;
+    place-items: center;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #6366f1;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    box-shadow: 0 4px 10px rgba(0,0,0,.18);
+    pointer-events: auto;
+    cursor: grab;
+}
+
+#finder-canva-ultra-toolbar {
+    position: fixed;
+    z-index: 291;
+    display: none;
+    align-items: center;
+    gap: 2px;
+    padding: 5px;
+    border: 1px solid rgba(228,228,231,.95);
+    border-radius: 14px;
+    background: rgba(255,255,255,.97);
+    box-shadow: 0 14px 40px rgba(0,0,0,.16);
+    backdrop-filter: blur(18px);
+}
+
+#finder-canva-ultra-toolbar.is-visible { display: flex; }
+
+#finder-canva-ultra-toolbar button {
+    min-width: 34px;
+    height: 30px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #52525b;
+    font-size: 9px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+#finder-canva-ultra-toolbar button:hover {
+    background: #f4f4f5;
+    color: #18181b;
+}
+
+#finder-canva-ultra-toolbar i {
+    width: 1px;
+    height: 19px;
+    margin: 0 2px;
+    background: #e4e4e7;
+}
+
+.finder-canva-ultra-selected {
+    outline: 1px solid rgba(99,102,241,.22) !important;
+    outline-offset: 2px;
+}
+
+.finder-canva-ultra-selected[contenteditable="true"] {
+    outline-style: dashed !important;
+}
+
+@media (max-width: 700px) {
+    #finder-canva-ultra-toolbar {
+        left: 10px !important;
+        right: 10px;
+        width: auto !important;
+        overflow-x: auto;
+        justify-content: center;
+    }
+    #finder-canva-ultra-toolbar button { flex: 0 0 auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #finder-canva-ultra-toolbar button { transition: none !important; }
+}
