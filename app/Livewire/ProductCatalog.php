@@ -59,19 +59,31 @@ class ProductCatalog extends Component
         return $query->where('site_id', $site->id);
     }
 
-    public function mount(): void
+    public function mount(): mixed
     {
+        $referer = (string) request()->headers->get('referer', '');
+
+        if (preg_match('#/websites/([^/]+)/builder(?:[/?#]|$)#', $referer, $matches)) {
+            $site = Site::query()->where('slug', $matches[1])->first();
+
+            if ($site !== null) {
+                return redirect()->route('admin.site.products', $site);
+            }
+        }
+
         $this->cart = session($this->cartKey(), []);
         $this->cartOpen = request()->query('cart') === '1';
 
         if (! auth()->check()) {
-            return;
+            return null;
         }
 
         $user = auth()->user();
         $this->customerName = $user->name;
         $this->customerEmail = $user->email;
         $this->customerPhone = (string) $this->site()->customers()->where('email', $user->email)->value('phone');
+
+        return null;
     }
 
     private function persistCart(): void
