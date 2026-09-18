@@ -5,7 +5,7 @@
         @php
             $currentSite = \App\Support\SiteContext::current();
             $hasSite = $currentSite !== null;
-            $isDashboard = request()->routeIs('dashboard');
+            $isDashboard = request()->routeIs('dashboard', 'admin.site.dashboard');
             $modelProfile = $hasSite ? config('website.model_profiles.'.($currentSite?->type ?? ''), []) : [];
             $isPlatformAdmin = auth()->user()?->isAdministrator() && session()->has('platform_admin_site_id');
             $availableSites = \App\Models\Site::query()->where(function ($query) {
@@ -44,8 +44,8 @@
                 @endif
                 <flux:sidebar.group heading="Loja" class="grid">
                     <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
-                    <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
-                    <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
+                    <flux:sidebar.item icon="currency-euro"  :href="route('admin.site.sales')" :current="request()->routeIs('admin.site.sales')" wire:navigate>Vendas</flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-list"  :href="route('admin.site.orders')" :current="request()->routeIs('admin.site.orders')" wire:navigate>Encomendas</flux:sidebar.item>
                     @if($hasSite)
                         <flux:sidebar.item icon="users" :href="route('users')" :current="request()->routeIs('users')" wire:navigate>Utilizadores</flux:sidebar.item>
                     @endif
