@@ -32,3 +32,4 @@ class EnsureSiteAccess
 
         return $next($request);
     }
+}
