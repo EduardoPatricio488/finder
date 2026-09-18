@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\FinderNotificationService;
 use App\Models\Site;
 use App\Services\StoreMailService;
 use App\Support\SiteContext;
@@ -190,6 +191,7 @@ class ProductCatalog extends Component
 
         $this->closeManageProductModal();
         session()->flash('status', 'Produto atualizado com sucesso.');
+        app(FinderNotificationService::class)->productChanged($site, 'Foi atualizado o produto "'.$product->name.'".');
     }
 
     public function closeProductModal(): void
@@ -250,6 +252,7 @@ class ProductCatalog extends Component
         $this->productModalOpen = false;
         $this->resetProductForm();
         session()->flash('status', 'Produto adicionado com sucesso.');
+        app(FinderNotificationService::class)->productChanged($site, 'Foi adicionado o produto "'.$product->name.'".');
     }
 
     private function resetProductForm(): void
