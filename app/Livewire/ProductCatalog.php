@@ -73,7 +73,7 @@ class ProductCatalog extends Component
     public string $paymentMethod = 'mbway';
     public ?string $completedOrderNumber = null;
 
-    private function site(): Site { return SiteContext::storefront(); }
+    private function site(): Site { return SiteContext::current(); }
     private function cartKey(): string { return 'catalog_cart_'.$this->site()->id; }
 
     private function siteScoped(Builder $query): Builder
