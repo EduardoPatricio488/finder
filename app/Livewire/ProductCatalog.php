@@ -24,6 +24,7 @@ class ProductCatalog extends Component
     use WithFileUploads;
 
     public string $search = '';
+    public ?int $selectedSiteId = null;
     public string $category = '';
     public string $minPrice = '';
     public string $maxPrice = '';
@@ -73,7 +74,17 @@ class ProductCatalog extends Component
     public string $paymentMethod = 'mbway';
     public ?string $completedOrderNumber = null;
 
-    private function site(): Site { return SiteContext::current(); }
+    private function site(): Site
+    {
+        if ($this->selectedSiteId !== null) {
+            $site = SiteContext::manageableSitesQuery(auth()->user())->find($this->selectedSiteId);
+            abort_unless($site instanceof Site, 404);
+
+            return $site;
+        }
+
+        return SiteContext::current();
+    }
     private function cartKey(): string { return 'catalog_cart_'.$this->site()->id; }
 
     private function siteScoped(Builder $query): Builder
@@ -90,14 +101,55 @@ class ProductCatalog extends Component
             $site = Site::query()->where('slug', $matches[1])->first();
             if ($site !== null) return redirect()->route('admin.site.products', $site);
         }
+        if (! auth()->check()) return null;
+
+        $user = auth()->user();
+        $availableSites = SiteContext::manageableSitesQuery($user)->orderBy('sort_order')->orderBy('name')->get(['id']);
+        $sessionSiteId = session('current_site_id');
+        $this->selectedSiteId = $availableSites->contains('id', $sessionSiteId)
+            ? (int) $sessionSiteId
+            : ($availableSites->first()?->id);
+
+        abort_unless($this->selectedSiteId !== null, 404);
+
+        session()->put('current_site_id', $this->selectedSiteId);
+
         $this->cart = session($this->cartKey(), []);
         $this->cartOpen = request()->query('cart') === '1';
-        if (! auth()->check()) return null;
-        $user = auth()->user();
         $this->customerName = $user->name;
         $this->customerEmail = $user->email;
         $this->customerPhone = (string) $this->site()->customers()->where('email', $user->email)->value('phone');
         return null;
+    }
+
+    public function updatedSelectedSiteId($siteId): void
+    {
+        $siteId = (int) $siteId;
+        abort_unless(SiteContext::manageableSitesQuery(auth()->user())->whereKey($siteId)->exists(), 404);
+
+        $this->selectedSiteId = $siteId;
+        session()->put('current_site_id', $siteId);
+
+        $this->reset([
+            'search',
+            'category',
+            'minPrice',
+            'maxPrice',
+            'availability',
+            'minRating',
+            'catalogFilter',
+            'selectedProducts',
+        ]);
+        $this->sortBy = 'name';
+        $this->selectAllProducts = false;
+        $this->closeProductModal();
+        $this->closeManageProductModal();
+        $this->closeQuickStockModal();
+        $this->closeStockHistory();
+        $this->closeImageGallery();
+
+        $user = auth()->user();
+        $this->customerPhone = (string) $this->site()->customers()->where('email', $user->email)->value('phone');
     }
 
     public function openCategoriesModal(): void
@@ -727,7 +779,12 @@ class ProductCatalog extends Component
 
     public function render(): mixed
     {
-        $site = $this->site(); $minimumRating = (float) $this->minRating;
+        $site = $this->site();
+        $availableSites = SiteContext::manageableSitesQuery(auth()->user())
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+        $minimumRating = (float) $this->minRating;
         $products = $this->siteScoped(Product::query())->where('is_active', true)->with('category')->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])->withAvg('reviews', 'rating')->withCount('reviews')
             ->when($this->search !== '', fn ($query) => $query->where(fn ($query) => $query->where('name', 'like', '%'.$this->search.'%')->orWhere('description', 'like', '%'.$this->search.'%')->orWhere('sku', 'like', '%'.$this->search.'%')->orWhere('price', 'like', '%'.$this->search.'%')->orWhere('tags', 'like', '%'.$this->search.'%')->orWhereHas('category', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))))
             ->when($this->category !== '', fn ($query) => $query->whereHas('category', fn ($query) => $query->where('slug', $this->category)))
@@ -752,6 +809,7 @@ class ProductCatalog extends Component
                 ->where('is_active', true)->sum(DB::raw('price * stock')),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
+            'availableSites' => $availableSites,
             'categories' => $this->siteScoped(Category::query())->withCount('products')->orderBy('name')->get(),
             'stockHistory' => $this->stockProductId ? $this->siteScoped(Product::query())->find($this->stockProductId)?->stockMovements()->with('user')->latest()->limit(30)->get() : collect(),
         ]);
