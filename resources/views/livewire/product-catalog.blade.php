@@ -78,6 +78,19 @@
                 </select>
             </div>
             <div class="mt-3 flex flex-wrap gap-3">
+                <select wire:model.live="catalogFilter" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                    <option value="">Todos os produtos</option>
+                    <option value="sem_imagem">Sem imagem</option>
+                    <option value="sem_descricao">Sem descrição</option>
+                </select>
+                <select wire:model.live="sortBy" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                    <option value="name">Ordenar: Nome</option>
+                    <option value="newest">Mais recentes</option>
+                    <option value="price_asc">Preço mais baixo</option>
+                    <option value="price_desc">Preço mais alto</option>
+                    <option value="stock">Maior stock</option>
+                    <option value="rating">Melhor avaliação</option>
+                </select>
                 <input wire:model.live="minPrice" type="number" min="0" step=".01" placeholder="Preço mín." class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950 sm:w-36">
                 <input wire:model.live="maxPrice" type="number" min="0" step=".01" placeholder="Preço máx." class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950 sm:w-36">
                 <select wire:model.live="minRating" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
@@ -266,9 +279,13 @@
                 @if(count($imageGalleryPhotos) > 1)
                     <div class="mt-4 flex max-w-full gap-2 overflow-x-auto pb-2">
                         @foreach($imageGalleryPhotos as $thumbIndex => $photo)
-                            <button type="button" wire:click="$set('imageGalleryIndex', {{ $thumbIndex }})" class="shrink-0 rounded-lg {{ $imageGalleryIndex === $thumbIndex ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-100' }}">
-                                <img src="{{ asset('storage/'.$photo) }}" alt="" class="size-16 rounded-lg object-cover">
-                            </button>
+                            <div class="relative shrink-0">
+                                <button type="button" wire:click="$set('imageGalleryIndex', {{ $thumbIndex }})" class="rounded-lg {{ $imageGalleryIndex === $thumbIndex ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-100' }}">
+                                    <img src="{{ asset('storage/'.$photo) }}" alt="" class="size-16 rounded-lg object-cover">
+                                </button>
+                                <button type="button" wire:click="setPrimaryImage({{ $stockProductId ?? 0 }}, {{ $thumbIndex }})" class="absolute bottom-1 left-1 rounded bg-zinc-950/70 px-1.5 py-0.5 text-[10px] text-white">Principal</button>
+                                <button type="button" wire:click="deleteProductImage({{ $stockProductId ?? 0 }}, {{ $thumbIndex }})" class="absolute right-1 top-1 rounded bg-red-600/90 p-1 text-white" aria-label="Eliminar fotografia"><flux:icon name="trash" class="size-3"/></button>
+                            </div>
                         @endforeach
                     </div>
                 @endif
@@ -321,6 +338,10 @@
                         <div>
                             <label class="mb-2 block text-sm font-semibold">Stock mínimo</label>
                             <input wire:model.live="productMinimumStock" type="number" min="0" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 @error('productMinimumStock') border-red-500 ring-2 ring-red-500/10 @enderror">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold">SKU</label>
+                            <input wire:model="productSku" type="text" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950" placeholder="Ex.: PROD-001">
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-semibold">Descrição</label>
@@ -392,6 +413,10 @@
                             @enderror
 
                         </div>
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold">SKU</label>
+                            <input wire:model="productSku" type="text" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950" placeholder="Ex.: PROD-001">
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-semibold">Descrição</label>
