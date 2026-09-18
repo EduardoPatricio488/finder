@@ -255,6 +255,9 @@ class ProductCatalog extends Component
         $this->closeManageProductModal();
         session()->flash('status', 'Produto atualizado com sucesso.');
         app(FinderNotificationService::class)->productChanged($site, 'Foi atualizado o produto "'.$product->name.'".');
+        if ($product->stock > 0 && $product->stock <= $product->minimum_stock) {
+            app(FinderNotificationService::class)->lowStock($site, 'O produto "'.$product->name.'" está com stock baixo ('.$product->stock.' unidades).');
+        }
     }
 
     public function closeProductModal(): void
@@ -316,6 +319,9 @@ class ProductCatalog extends Component
         $this->resetProductForm();
         session()->flash('status', 'Produto adicionado com sucesso.');
         app(FinderNotificationService::class)->productChanged($site, 'Foi adicionado o produto "'.$product->name.'".');
+        if ($product->stock > 0 && $product->stock <= $product->minimum_stock) {
+            app(FinderNotificationService::class)->lowStock($site, 'O produto "'.$product->name.'" foi criado com stock baixo ('.$product->stock.' unidades).');
+        }
     }
 
     private function resetProductForm(): void
@@ -451,10 +457,16 @@ class ProductCatalog extends Component
             ->when($this->minPrice !== '', fn ($query) => $query->where('price', '>=', (float) $this->minPrice))
             ->when($this->maxPrice !== '', fn ($query) => $query->where('price', '<=', (float) $this->maxPrice))
             ->when($this->availability === 'disponivel', fn ($query) => $query->where('stock', '>', 0))
+            ->when($this->availability === 'baixo', fn ($query) => $query->whereColumn('stock', '<=', 'minimum_stock')->where('stock', '>', 0))
             ->when($this->availability === 'esgotado', fn ($query) => $query->where('stock', 0))
             ->when($this->minRating !== '', fn ($query) => $query->whereHas('reviews', fn ($query) => $query->where('rating', '>=', $minimumRating)))
             ->orderBy('name')->get();
 
-        return view('livewire.product-catalog', ['products' => $products, 'site' => $site, 'categories' => $this->siteScoped(Category::query())->orderBy('name')->get()]);
+        return view('livewire.product-catalog', [
+            'products' => $products,
+            'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
+            'site' => $site,
+            'categories' => $this->siteScoped(Category::query())->orderBy('name')->get(),
+        ]);
     }
 }
