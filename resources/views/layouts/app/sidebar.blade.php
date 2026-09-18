@@ -16,6 +16,10 @@
                 $routeName = 'admin.site.'.$name;
                 return Route::has($routeName) ? route($routeName, $target) : '#';
             };
+            $modelProfile = $hasSite
+                ? config('website.model_profiles.'.$currentSite->type, [])
+                : [];
+            $modelSidebar = $modelProfile['sidebar'] ?? [];
         @endphp
 
         @if($isPlatformAdmin)
@@ -30,26 +34,58 @@
             <div class="px-3 pb-3">
                 <flux:dropdown position="bottom" align="start">
                     <button type="button" class="flex w-full items-center justify-between gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-left text-sm text-white">
-                        <span class="min-w-0">@if($hasSite)<span class="block truncate font-semibold">{{ $currentSite->name }}</span><span class="mt-0.5 block text-xs text-zinc-400">{{ $currentSite->statusLabel() }}</span>@else<span class="block truncate font-semibold text-zinc-400 italic">Selecionar Projeto</span>@endif</span><flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
+                        <span class="min-w-0">
+                            @if($hasSite)
+                                <span class="block truncate font-semibold">{{ $currentSite->name }}</span>
+                                <span class="mt-0.5 block text-xs text-zinc-400">{{ $currentSite->statusLabel() }} · {{ $modelProfile['label'] ?? ($currentSite->category_label ?? 'Website') }}</span>
+                            @else
+                                <span class="block truncate font-semibold text-zinc-400 italic">Selecionar Projeto</span>
+                            @endif
+                        </span>
+                        <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
                     </button>
                     <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
                 </flux:dropdown>
             </div>
+
             <flux:sidebar.nav>
                 <flux:sidebar.group heading="Finder Hub" class="grid">
                     <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus websites</flux:sidebar.item>
                     @if(auth()->user()?->isAdministrator())<flux:sidebar.item icon="shield-check" :href="route('admin.websites')" :current="request()->routeIs('admin.websites')" wire:navigate>Administração</flux:sidebar.item>@endif
-                    @if($hasSite)<flux:sidebar.item icon="home" :href="$siteRoute('dashboard')" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>@endif
+                    @if($hasSite)<flux:sidebar.item icon="home" :href="$siteRoute('dashboard').'#model-content'" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>@endif
                 </flux:sidebar.group>
+
                 @if($hasSite)
+                    <flux:sidebar.group heading="{{ $modelProfile['label'] ?? 'Website' }}" class="grid">
+                        @foreach($modelSidebar as $item)
+                            @php
+                                $itemRoute = $item['route'] ?? null;
+                                $itemAnchor = $item['anchor'] ?? null;
+                                $itemHref = $itemRoute
+                                    ? $siteRoute($itemRoute)
+                                    : ($itemAnchor ? $siteRoute('dashboard').'#'.$itemAnchor : $siteRoute('dashboard'));
+                            @endphp
+                            <flux:sidebar.item icon="{{ $item['icon'] ?? 'chevron-right' }}" :href="$itemHref" :current="$itemRoute ? request()->routeIs('admin.site.'.$itemRoute) : false" wire:navigate>
+                                {{ $item['label'] }}
+                            </flux:sidebar.item>
+                        @endforeach
+                    </flux:sidebar.group>
+
                     <flux:sidebar.group heading="Website" class="grid">
-                        <flux:sidebar.item icon="pencil-square" disabled class="pointer-events-none opacity-50" aria-disabled="true"><span class="flex items-center gap-2">Editor visual <span class="text-[10px] text-zinc-400" title="Indisponível">Bloqueado</span></span></flux:sidebar.item>
                         <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
                         <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>Definições</flux:sidebar.item>
                     </flux:sidebar.group>
-                    <flux:sidebar.group heading="Catálogo" class="grid"><flux:sidebar.item icon="shopping-bag" :href="$siteRoute('products')" :current="request()->routeIs('admin.site.products')" wire:navigate>Produtos</flux:sidebar.item><flux:sidebar.item icon="tag" :href="$siteRoute('categories')" :current="request()->routeIs('admin.site.categories')" wire:navigate>Categorias</flux:sidebar.item></flux:sidebar.group>
-                    <flux:sidebar.group heading="Vendas & Clientes" class="grid"><flux:sidebar.item icon="clipboard-document-list" :href="$siteRoute('orders')" :current="request()->routeIs('admin.site.orders')" wire:navigate>Encomendas</flux:sidebar.item><flux:sidebar.item icon="users" :href="$siteRoute('users')" :current="request()->routeIs('admin.site.users')" wire:navigate>Utilizadores</flux:sidebar.item></flux:sidebar.group>
+
+                    @if($currentSite->type === 'online_store')
+                        <flux:sidebar.group heading="Vendas" class="grid">
+                            <flux:sidebar.item icon="presentation-chart-line" :href="$siteRoute('sales')" :current="request()->routeIs('admin.site.sales')" wire:navigate>Vendas</flux:sidebar.item>
+                            <flux:sidebar.item icon="currency-euro" :href="$siteRoute('payments')" :current="request()->routeIs('admin.site.payments')" wire:navigate>Pagamentos</flux:sidebar.item>
+                            <flux:sidebar.item icon="archive-box" :href="$siteRoute('stock')" :current="request()->routeIs('admin.site.stock')" wire:navigate>Stock</flux:sidebar.item>
+                            <flux:sidebar.item icon="tag" :href="$siteRoute('promotions')" :current="request()->routeIs('admin.site.promotions')" wire:navigate>Promoções</flux:sidebar.item>
+                        </flux:sidebar.group>
+                    @endif
+
                     <flux:sidebar.group heading="Inteligência" class="grid">
                         @can('access-reports', $currentSite)
                             <flux:sidebar.item icon="chart-bar" :href="$siteRoute('reports')" :current="request()->routeIs('admin.site.reports')" wire:navigate>Relatórios</flux:sidebar.item>
@@ -68,6 +104,7 @@
                     <div class="px-4 py-8 text-center"><p class="text-xs font-bold uppercase tracking-widest text-zinc-500">Cria ou seleciona um website para começar.</p><flux:button :href="route('site.create')" size="sm" class="mt-4 !rounded-xl" variant="primary">Criar website</flux:button></div>
                 @endif
             </flux:sidebar.nav>
+
             <flux:spacer /><flux:sidebar.nav><flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
