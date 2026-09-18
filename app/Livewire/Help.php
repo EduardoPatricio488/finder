@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Support\SiteContext;
 use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -16,7 +17,8 @@ class Help extends Component
         return view('livewire.help', [
             'hasDashboard' => Route::has('dashboard'),
             'hasSiteCreate' => Route::has('site.create'),
-            'hasBuilder' => Route::has('builder.edit'),
+            'hasBuilder' => Route::has('builder.edit') && SiteContext::current() !== null,
+            'currentSite' => SiteContext::current(),
         ]);
     }
 }
