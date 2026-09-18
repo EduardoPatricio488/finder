@@ -5,7 +5,6 @@
         @php
             $currentSite = \App\Support\SiteContext::current();
             $hasSite = $currentSite !== null;
-            $isDashboard = request()->routeIs('dashboard');
             $isPlatformAdmin = auth()->user()?->isAdministrator() && session()->has('platform_admin_site_id');
             $availableSites = \App\Models\Site::query()->where(function ($query) {
                 $query->where('owner_id', auth()->id())->orWhereHas('members', fn ($members) => $members->whereKey(auth()->id()));
@@ -33,23 +32,6 @@
             </div>
         @endif
 
-        @if($isDashboard)
-            <header class="sticky top-0 z-40 border-b border-zinc-200 bg-zinc-50/95 backdrop-blur-xl dark:border-zinc-700 dark:bg-zinc-900/95 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
-                <div class="mx-auto flex min-h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-                    <a href="{{ route('home') }}" wire:navigate class="shrink-0"><x-app-logo :sidebar="false" /></a>
-                    <nav class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="Navegação principal">
-                        <a href="{{ route('dashboard') }}" wire:navigate class="shrink-0 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white dark:bg-white dark:text-zinc-900">Meus websites</a>
-                        <a href="{{ route('site.create') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Criar website</a>
-                        <a href="{{ route('products') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Produtos</a>
-                        <a href="{{ route('sales') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Vendas</a>
-                        <a href="{{ route('orders.tracking') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Encomendas</a>
-                        <a href="{{ route('account') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Conta</a>
-                        <a href="{{ route('customer.assistant') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Assistente IA</a>
-                    </nav>
-                    <div class="hidden shrink-0 lg:block"><x-desktop-user-menu :name="auth()->user()->name" /></div>
-                </div>
-            </header>
-        @else
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
             <flux:sidebar.header><x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate /><flux:sidebar.collapse class="lg:hidden" /></flux:sidebar.header>
             <div class="px-3 pb-3">
@@ -142,9 +124,7 @@
             <flux:spacer /><flux:sidebar.nav><flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
         @endif
-        @if(! $isDashboard)
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
-        @endif
         {{ $slot }}
         @if($hasSite && auth()->user()->can('access-ai', $currentSite))<livewire:admin-assistant />@endif
         @persist('toast')<flux:toast.group><flux:toast /></flux:toast.group>@endpersist
