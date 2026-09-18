@@ -34,6 +34,8 @@ use App\Livewire\UserDashboard;
 use App\Livewire\UserManager;
 use App\Models\Site;
 use App\Models\SiteAdminAuditLog;
+use App\Models\SiteMedia;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->name('home');
@@ -107,6 +109,15 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('configuracao', SiteSettings::class)->name('settings');
         Route::get('definicoes', SiteDefinitions::class)->name('definitions');
         Route::get('media', MediaLibrary::class)->name('media');
+        Route::get('media/{media}', function (Site $site, SiteMedia $media) {
+            abort_unless((int) $media->site_id === (int) $site->id, 404);
+            abort_unless(Storage::disk($media->disk ?: 'public')->exists($media->path), 404);
+
+            return response()->file(Storage::disk($media->disk ?: 'public')->path($media->path), [
+                'Content-Type' => $media->mime_type ?: 'application/octet-stream',
+                'Cache-Control' => 'public, max-age=3600',
+            ]);
+        })->name('media.file');
         Route::get('analytics', SiteAnalytics::class)->middleware('can:access-reports,site')->name('analytics');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
