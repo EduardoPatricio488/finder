@@ -17,9 +17,10 @@ class SiteSubmissions extends Component
 
     public string $status = 'all';
 
-    public function mount(Site $site): void
+    public function mount(): void
     {
-        abort_unless($site->isManageableBy(auth()->user()), 403);
+        $site = \App\Support\SiteContext::current();
+        abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
     }
 
