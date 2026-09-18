@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Site;
 use App\Models\User;
+use App\Support\SiteContext;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,6 +13,12 @@ use Livewire\Component;
 class UserManager extends Component
 {
     public ?Site $site = null;
+
+    public function mount(): void
+    {
+        $this->site = SiteContext::current();
+        abort_unless($this->site instanceof Site, 404);
+    }
 
     public ?int $editingUserId = null;
 
