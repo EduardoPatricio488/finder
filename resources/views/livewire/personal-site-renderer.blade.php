@@ -179,6 +179,40 @@
         <main><section id="formulario" class="px-5 pb-20 pt-20 sm:px-8 sm:pb-28 sm:pt-28"><div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-24"><div><p class="text-xs font-bold uppercase tracking-[0.18em]" style="color: var(--finder-primary)">Contactos</p><h1 class="mt-4 text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">Vamos falar.</h1><p class="mt-6 max-w-md text-lg leading-8 text-zinc-600">Se quiseres saber mais, envia uma mensagem através do formulário. Não é necessário partilhar informação pessoal nesta página.</p><div class="mt-10 space-y-4"><div class="flex items-start gap-3 rounded-2xl border border-black/5 bg-white p-4"><span class="mt-0.5 h-2 w-2 shrink-0 rounded-full" style="background: var(--finder-primary)"></span><div><p class="text-sm font-semibold">Disponibilidade</p><p class="mt-0.5 text-sm text-zinc-500">{{ $availabilityNote }}</p></div></div>@if($audience !== '')<div class="flex items-start gap-3 rounded-2xl border border-black/5 bg-white p-4"><span class="mt-0.5 h-2 w-2 shrink-0 rounded-full" style="background: var(--finder-primary)"></span><div><p class="text-sm font-semibold">Trabalho com</p><p class="mt-0.5 text-sm text-zinc-500">{{ $audience }}</p></div></div>@endif</div></div><div class="rounded-[2rem] border border-black/5 bg-white p-6 shadow-xl shadow-zinc-900/5 sm:p-9"><form wire:submit="submitContact" class="grid gap-5"><div><label for="personal-contact-name" class="mb-2 block text-sm font-semibold">Nome</label><input id="personal-contact-name" wire:model="contactName" type="text" autocomplete="name" placeholder="O teu nome" class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 outline-none transition focus:border-zinc-400 focus:bg-white"></div><div><label for="personal-contact-email" class="mb-2 block text-sm font-semibold">Email</label><input id="personal-contact-email" wire:model="contactEmail" type="email" autocomplete="email" placeholder="o-teu@email.com" class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 outline-none transition focus:border-zinc-400 focus:bg-white"></div><div><label for="personal-contact-message" class="mb-2 block text-sm font-semibold">Mensagem</label><textarea id="personal-contact-message" wire:model="contactMessage" rows="6" placeholder="Como posso ajudar?" class="w-full resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 outline-none transition focus:border-zinc-400 focus:bg-white"></textarea></div><button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl px-5 py-3.5 text-sm font-semibold text-white transition hover:-translate-y-0.5" style="background: var(--finder-primary)">{{ $goalLabel }}</button></form></div></div></section></main>
     @endif
 
+    @if($mediaByPlacement->isNotEmpty())
+        <section class="border-t border-black/5 bg-white px-5 py-16 sm:px-8 sm:py-20">
+            <div class="mx-auto max-w-6xl">
+                <p class="text-xs font-bold uppercase tracking-[0.18em]" style="color: var(--finder-primary)">Imagens do website</p>
+                <h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Conteúdo visual aplicado</h2>
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">As imagens da Biblioteca de Media aparecem automaticamente na área onde foram aplicadas.</p>
+                <div class="mt-10 space-y-10">
+                    @foreach($mediaByPlacement as $placement => $items)
+                        <div>
+                            <div class="mb-4 flex items-center justify-between gap-3">
+                                <h3 class="text-lg font-semibold">{{ match($placement) {
+                                    'logo' => 'Logótipo', 'hero' => 'Capa / Hero principal', 'about' => 'Sobre mim / Sobre nós',
+                                    'experience' => 'Experiência', 'education' => 'Formação', 'skills' => 'Competências',
+                                    'projects' => 'Projetos', 'services' => 'Serviços', 'testimonials' => 'Testemunhos',
+                                    'gallery' => 'Galeria', 'contact' => 'Contacto', 'background' => 'Fundo de uma secção',
+                                    'footer' => 'Rodapé', default => 'Media'
+                                } }}</h3>
+                                <span class="text-xs font-semibold text-zinc-400">{{ $items->count() }} {{ $items->count() === 1 ? 'imagem' : 'imagens' }}</span>
+                            </div>
+                            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                @foreach($items as $item)
+                                    <figure class="overflow-hidden rounded-3xl border border-black/5 bg-[#f8f8f6] shadow-sm">
+                                        <img src="{{ route('admin.site.media.file', ['site' => $site, 'media' => $item->id]) }}" alt="{{ $item->alt_text ?: $item->original_name }}" class="aspect-[4/3] w-full object-cover" loading="lazy" decoding="async">
+                                        <figcaption class="px-4 py-3 text-xs font-semibold text-zinc-500">{{ $item->alt_text ?: $item->original_name }}</figcaption>
+                                    </figure>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
     <footer class="border-t border-black/5 bg-white px-5 py-8 sm:px-8">
         <div class="mx-auto flex max-w-6xl flex-col gap-4 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
             <p>© {{ now()->year }} {{ $displayName }}</p>
