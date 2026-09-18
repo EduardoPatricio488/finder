@@ -1,6 +1,9 @@
 <div>
 <div class="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-    <div class="mb-2"><x-site-workspace-selector :current-site="$site" route-name="menus" /></div>
+    <div class="mb-2">
+        <h1 class="mb-3 text-2xl font-black tracking-tight text-zinc-950 dark:text-white">Menus</h1>
+        <x-site-workspace-selector :current-site="$site" route-name="menus" />
+    </div>
 
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
