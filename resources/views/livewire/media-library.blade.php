@@ -1,4 +1,6 @@
 <div class="mx-auto max-w-7xl space-y-6 p-6">
+    <div class="mb-2"><x-site-workspace-selector :current-site="$site" route-name="media" /></div>
+
     <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
             <p class="text-sm font-semibold text-indigo-600">{{ $site->name }}</p>
