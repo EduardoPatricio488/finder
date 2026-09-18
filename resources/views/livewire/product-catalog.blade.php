@@ -75,9 +75,12 @@
                             <th class="px-5 py-4">Stock</th>
                             <th class="px-5 py-4">Preço</th>
                             <th class="px-5 py-4">
-                                <span class="inline-flex items-center gap-1" title="Avaliação feita pelos clientes no site.">
+                                <span class="group relative inline-flex cursor-help items-center gap-1">
                                     Avaliação
                                     <flux:icon name="information-circle" class="size-4 text-zinc-400" />
+                                    <span class="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-64 -translate-y-1 rounded-lg bg-zinc-900 px-3 py-2 text-left text-xs font-medium normal-case tracking-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-white dark:text-zinc-900">
+                                        Avaliação feita pelos clientes no site.
+                                    </span>
                                 </span>
                             </th>
                             <th class="px-5 py-4 text-right">Ação</th>
