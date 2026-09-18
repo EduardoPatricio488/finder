@@ -137,11 +137,11 @@
                     <button type="button" wire:click="$set('cartOpen', false)" class="rounded-full bg-zinc-100 px-3 py-2 font-bold">✕</button>
                 </div>
 
-                @if($cartProducts->isEmpty())
+                @if($this->cartProducts->isEmpty())
                     <div class="py-20 text-center text-zinc-500">O teu carrinho está vazio.</div>
                 @else
                     <div class="mt-8 space-y-4">
-                        @foreach($cartProducts as $product)
+                        @foreach($this->cartProducts as $product)
                             <div class="rounded-2xl border border-zinc-200 p-4">
                                 <div class="flex items-start justify-between gap-4">
                                     <div><p class="font-bold">{{ $product->name }}</p><p class="mt-1 text-sm text-zinc-500">{{ number_format((float)$product->price, 2, ',', '.') }} €</p></div>
