@@ -19,22 +19,10 @@
             $modelProfile = $hasSite
                 ? config('website.model_profiles.'.$currentSite->type, [])
                 : [];
-            $modelSidebar = $modelProfile['sidebar'] ?? [];
             $modelFields = $modelProfile['fields'] ?? [];
             $modelFieldValues = $hasSite ? (data_get($currentSite->settings, 'model_content', []) ?? []) : [];
-            $modelFieldByKey = collect($modelFields)->keyBy('key');
-            $modelCompletionKey = function (array $item) use ($modelFieldByKey): ?string {
-                if (! empty($item['field']) && $modelFieldByKey->has($item['field'])) {
-                    return $item['field'];
-                }
-
-                $anchor = str_replace('model-', '', (string) ($item['anchor'] ?? ''));
-                if ($anchor === 'profile') {
-                    return $modelFieldByKey->keys()->first();
-                }
-
-                return $modelFieldByKey->has($anchor) ? $anchor : null;
-            };
+            $modelFilled = collect($modelFields)->filter(fn ($field) => filled($modelFieldValues[$field['key']] ?? null))->count();
+            $modelTotal = count($modelFields);
         @endphp
 
         @if($isPlatformAdmin)
@@ -71,12 +59,11 @@
                 </flux:sidebar.group>
 
                 @if($hasSite)
-
                     <flux:sidebar.group heading="Dados do site" class="grid">
                         <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('dashboard').'#model-content'" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>
                             <span class="flex min-w-0 flex-1 items-center gap-2">
                                 <span class="truncate">Configuração do modelo</span>
-                                <span class="ms-auto shrink-0 text-[10px] font-semibold text-zinc-400">{{ $modelFilled ?? 0 }}/{{ $modelTotal ?? count($modelFields) }} preenchidos</span>
+                                <span class="ms-auto shrink-0 text-[10px] font-semibold text-zinc-400">{{ $modelFilled }}/{{ $modelTotal }} preenchidos</span>
                             </span>
                         </flux:sidebar.item>
                     </flux:sidebar.group>
