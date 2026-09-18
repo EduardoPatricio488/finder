@@ -52,6 +52,14 @@ class ProductCatalog extends Component
     public string $couponMessage = '';
     public bool $cartOpen = false;
     public bool $checkoutOpen = false;
+    public bool $quickStockModalOpen = false;
+    public bool $stockHistoryModalOpen = false;
+    public ?int $stockProductId = null;
+    public string $stockProductName = '';
+    public int $stockChange = 0;
+    public string $stockReason = '';
+    public array $selectedProducts = [];
+    public bool $selectAllProducts = false;
     public string $customerName = '';
     public string $customerEmail = '';
     public string $customerPhone = '';
@@ -104,6 +112,127 @@ class ProductCatalog extends Component
             return;
         }
 
+    }
+
+    public function updatedSelectAllProducts(bool $value): void
+    {
+        $this->selectedProducts = $value
+            ? $this->siteScoped(Product::query())->pluck('id')->map(fn ($id) => (string) $id)->all()
+            : [];
+    }
+
+    public function updatedSelectedProducts(): void
+    {
+        $this->selectAllProducts = false;
+    }
+
+    public function openQuickStockModal(int $productId): void
+    {
+        $product = $this->siteScoped(Product::query())->findOrFail($productId);
+        $this->stockProductId = $product->id;
+        $this->stockProductName = (string) $product->name;
+        $this->stockChange = 0;
+        $this->stockReason = '';
+        $this->resetValidation();
+        $this->quickStockModalOpen = true;
+    }
+
+    public function closeQuickStockModal(): void
+    {
+        $this->quickStockModalOpen = false;
+        $this->stockProductId = null;
+        $this->stockProductName = '';
+        $this->stockChange = 0;
+        $this->stockReason = '';
+    }
+
+    public function saveQuickStock(): void
+    {
+        $data = $this->validate([
+            'stockChange' => ['required', 'integer', 'not_in:0'],
+            'stockReason' => ['nullable', 'string', 'max:255'],
+        ]);
+        $product = $this->siteScoped(Product::query())->findOrFail($this->stockProductId);
+        $newStock = $product->stock + $data['stockChange'];
+        abort_if($newStock < 0, 422, 'O stock não pode ficar negativo.');
+        $product->update(['stock' => $newStock]);
+        $product->stockMovements()->create([
+            'site_id' => $this->site()->id,
+            'user_id' => auth()->id(),
+            'type' => $data['stockChange'] > 0 ? 'entrada' : 'saida',
+            'quantity' => $data['stockChange'],
+            'note' => $data['stockReason'] ?: 'Alteração rápida de stock',
+        ]);
+        $this->closeQuickStockModal();
+        session()->flash('status', 'Stock atualizado com sucesso.');
+        app(FinderNotificationService::class)->productChanged($this->site(), 'O stock de "'.$product->name.'" foi alterado para '.$newStock.'.');
+        if ($newStock > 0 && $newStock <= $product->minimum_stock) {
+            app(FinderNotificationService::class)->lowStock($this->site(), 'O produto "'.$product->name.'" está com stock baixo ('.$newStock.' unidades).');
+        }
+    }
+
+    public function openStockHistory(int $productId): void
+    {
+        $product = $this->siteScoped(Product::query())->findOrFail($productId);
+        $this->stockProductId = $product->id;
+        $this->stockProductName = (string) $product->name;
+        $this->stockHistoryModalOpen = true;
+    }
+
+    public function closeStockHistory(): void
+    {
+        $this->stockHistoryModalOpen = false;
+        $this->stockProductId = null;
+        $this->stockProductName = '';
+    }
+
+    public function duplicateProduct(int $productId): void
+    {
+        $product = $this->siteScoped(Product::query())->findOrFail($productId);
+        $copy = $product->replicate();
+        $copy->name = $product->name.' (cópia)';
+        $copy->slug = Str::slug($copy->name).'-'.Str::lower(Str::random(5));
+        $copy->stock = 0;
+        $copy->image_url = $product->image_url;
+        $copy->images = $product->images;
+        $copy->save();
+        session()->flash('status', 'Produto duplicado com sucesso.');
+    }
+
+    public function deleteProduct(int $productId): void
+    {
+        $product = $this->siteScoped(Product::query())->findOrFail($productId);
+        abort_if($product->orderItems()->exists(), 422, 'Este produto já tem vendas e não pode ser eliminado.');
+        $product->delete();
+        session()->flash('status', 'Produto eliminado com sucesso.');
+    }
+
+    public function bulkDelete(): void
+    {
+        $ids = array_map('intval', $this->selectedProducts);
+        if ($ids === []) return;
+        $products = $this->siteScoped(Product::query())->whereIn('id', $ids)->get();
+        foreach ($products as $product) {
+            if (! $product->orderItems()->exists()) $product->delete();
+        }
+        $this->selectedProducts = [];
+        $this->selectAllProducts = false;
+        session()->flash('status', 'Produtos seleccionados processados.');
+    }
+
+    public function exportProducts(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $products = $this->siteScoped(Product::query())->with('category')->orderBy('name')->get();
+        $filename = 'produtos-'.Str::slug($this->site()->name).'-'.now()->format('Y-m-d').'.csv';
+        return response()->streamDownload(function () use ($products): void {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($handle, ['Nome', 'SKU', 'Categoria', 'Preço', 'Stock', 'Stock mínimo', 'Descrição'], ';');
+            foreach ($products as $product) {
+                fputcsv($handle, [$product->name, $product->sku, $product->category?->name, $product->price, $product->stock, $product->minimum_stock, $product->description], ';');
+            }
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function openProductModal(): void
@@ -467,6 +596,7 @@ class ProductCatalog extends Component
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'categories' => $this->siteScoped(Category::query())->orderBy('name')->get(),
+            'stockHistory' => $this->stockProductId ? $this->siteScoped(Product::query())->find($this->stockProductId)?->stockMovements()->with('user')->latest()->limit(30)->get() : collect(),
         ]);
     }
 }
