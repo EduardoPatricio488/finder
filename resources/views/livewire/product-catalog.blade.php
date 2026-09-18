@@ -9,7 +9,7 @@
                 </div>
                 <a href="{{ route('admin.site.products', $site) }}" wire:navigate class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
                     <flux:icon name="plus" class="size-4" />
-                    Gerir produtos
+                    Adicionar produto
                 </a>
             </div>
         </div>
