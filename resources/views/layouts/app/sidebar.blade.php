@@ -47,13 +47,19 @@
             </div>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group heading="Principal" class="grid">
-                    <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus Websites</flux:sidebar.item>
-                    <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
-                    <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
-                    <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
-                    <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
-                </flux:sidebar.group>
+                <flux:sidebar.group heading="Website" class="grid">
+    <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus Websites</flux:sidebar.item>
+</flux:sidebar.group>
+
+<flux:sidebar.group heading="Loja" class="grid">
+    <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
+    <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
+    <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
+</flux:sidebar.group>
+
+<flux:sidebar.group heading="Conta" class="grid">
+    <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
+</flux:sidebar.group>
 
                 @if($hasSite && ! $isDashboard)
                     <flux:sidebar.group heading="Website" class="grid">
