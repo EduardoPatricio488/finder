@@ -1,11 +1,14 @@
 <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950">
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mb-5">
+            <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Loja</p>
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Produtos</h1>
+        </div>
+
         <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
             <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Loja</p>
-                    <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Produtos</h1>
-                    <div class="mt-4 max-w-md">
+                    <div class="max-w-md">
                         <label for="product-site-selector" class="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Website / Workspace</label>
                         <select id="product-site-selector" wire:model.live="selectedSiteId" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold text-zinc-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white">
                             @foreach($availableSites as $availableSite)
