@@ -1,0 +1,64 @@
+<div class="space-y-8">
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+            <p class="text-sm font-medium text-stone-500">Administração</p>
+            <h1 class="mt-1 text-3xl font-black tracking-tight text-stone-950 dark:text-white">Produtos</h1>
+            <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Gere os produtos deste website.</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.site.categories', ['site' => request()->route('site')]) }}" wire:navigate class="rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">Gerir categorias</a>
+            <button type="button" wire:click="resetForm" class="rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white">Novo produto</button>
+        </div>
+    </div>
+
+    <x-site-workspace-selector :current-site="$this->currentSite()" route-name="products" />
+
+    @if (session('status'))
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</div>
+    @endif
+
+    <section class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div class="border-b border-stone-200 p-6 dark:border-zinc-800">
+            <h2 class="text-lg font-bold text-stone-950 dark:text-white">Produtos</h2>
+            <p class="mt-1 text-sm text-stone-500">{{ $products->count() }} produto(s) associado(s) a este website.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[760px] text-left text-sm">
+                <thead class="border-b bg-stone-50 text-xs uppercase text-stone-500 dark:border-zinc-800 dark:bg-zinc-950">
+                    <tr><th class="px-6 py-3">Foto</th><th class="px-6 py-3">Produto</th><th class="px-6 py-3">Categoria</th><th class="px-6 py-3">Preço</th><th class="px-6 py-3">Stock</th><th class="px-6 py-3 text-right">Ações</th></tr>
+                </thead>
+                <tbody class="divide-y divide-stone-100 dark:divide-zinc-800">
+                    @forelse ($products as $product)
+                        <tr wire:key="product-{{ $product->id }}">
+                            <td class="px-6 py-3">@if($product->image_url)<img src="{{ Storage::disk('public')->url($product->image_url) }}" class="size-12 rounded-lg object-cover" alt="{{ $product->name }}">@else<span class="text-xs text-stone-400">Sem foto</span>@endif</td>
+                            <td class="px-6 py-3 font-semibold text-stone-900 dark:text-white">{{ $product->name }}</td>
+                            <td class="px-6 py-3">{{ $product->category?->name ?? 'Sem categoria' }}</td>
+                            <td class="px-6 py-3">€ {{ number_format((float) $product->price, 2, ',', '.') }}</td>
+                            <td class="px-6 py-3">{{ $product->stock }}</td>
+                            <td class="px-6 py-3 text-right"><button wire:click="edit({{ $product->id }})" class="mr-3 font-semibold">Editar</button><button wire:click="delete({{ $product->id }})" wire:confirm="Eliminar este produto?" class="font-semibold text-red-600">Eliminar</button></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="px-6 py-12 text-center text-stone-500">Ainda não existem produtos.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    @if ($editingProductId !== null || $name !== '' || $categoryId !== null)
+        <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="flex items-center justify-between"><h2 class="text-lg font-semibold text-stone-950 dark:text-white">{{ $editingProductId ? 'Editar produto' : 'Novo produto' }}</h2><button type="button" wire:click="resetForm" class="text-sm text-stone-500">Fechar</button></div>
+            <form wire:submit="save" class="mt-6 grid gap-5 md:grid-cols-2">
+                <input wire:model="name" placeholder="Nome" class="rounded-lg border-stone-300 px-3 py-2">
+                <select wire:model="categoryId" class="rounded-lg border-stone-300 px-3 py-2"><option value="">Categoria</option>@foreach($categories as $category)<option value="{{ $category->id }}">{{ $category->name }}</option>@endforeach</select>
+                <input wire:model="price" type="number" min="0" step="0.01" placeholder="Preço" class="rounded-lg border-stone-300 px-3 py-2">
+                <input wire:model="image" type="file" accept="image/*">
+                <input wire:model="stock" type="number" min="0" placeholder="Stock" class="rounded-lg border-stone-300 px-3 py-2">
+                <input wire:model="minimumStock" type="number" min="0" placeholder="Stock mínimo" class="rounded-lg border-stone-300 px-3 py-2">
+                <textarea wire:model="description" placeholder="Descrição" rows="3" class="md:col-span-2 rounded-lg border-stone-300 px-3 py-2"></textarea>
+                <label><input wire:model="isActive" type="checkbox"> Produto ativo</label>
+                <div class="md:col-span-2 flex justify-end"><button type="submit" class="rounded-lg bg-stone-900 px-4 py-2 font-semibold text-white">Guardar produto</button></div>
+            </form>
+        </section>
+    @endif
+</div>
