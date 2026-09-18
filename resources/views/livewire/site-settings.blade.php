@@ -87,8 +87,10 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <flux:button type="submit" variant="primary" icon="check" class="!rounded-xl !bg-indigo-600">Guardar configuração</flux:button>
-                        @if($modelFilled > 0)
+                        @if($modelContentApplied)
                             <flux:button type="button" wire:click="applyModelContent" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
+                        @else
+                            <flux:button type="button" disabled icon="lock-closed" class="!rounded-xl opacity-50 cursor-not-allowed" title="Guarda primeiro a configuração para poderes aplicar no site">Aplicar no site</flux:button>
                         @endif
                         <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">
                             Ver site <span aria-hidden="true">↗</span>
