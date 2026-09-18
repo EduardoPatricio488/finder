@@ -249,12 +249,6 @@
                         <div>
                             <label class="mb-2 block text-sm font-semibold">Stock mínimo</label>
                             <input wire:model.live="productMinimumStock" type="number" min="0" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 @error('productMinimumStock') border-red-500 ring-2 ring-red-500/10 @enderror">
-                            @error('productMinimumStock')
-                                <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400">
-                                    <flux:icon name="exclamation-circle" class="size-4" />
-                                    {{ $message }}
-                                </p>
-                            @enderror
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-semibold">Descrição</label>
