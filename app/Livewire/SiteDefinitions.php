@@ -32,9 +32,10 @@ class SiteDefinitions extends Component
     public $faviconUpload = null;
     public $ogImageUpload = null;
     public string $contactName = '';
-    public function mount(Site $site): void
+    public function mount(): void
     {
-        abort_unless($site->isManageableBy(auth()->user()), 403);
+        $site = SiteContext::current();
+        abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
 
         $this->site = $site;
         $this->availableSites = SiteContext::manageableSitesQuery(auth()->user())->orderBy('sort_order')->orderBy('name')->get(['id', 'name', 'slug', 'status']);
