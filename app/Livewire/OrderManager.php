@@ -30,6 +30,6 @@ class OrderManager extends Component
 
     public function render(): mixed
     {
-        return view('livewire.order-manager', ['orders' => $this->currentSite()->orders()->with(['customer', 'items'])->when($this->status !== '', fn ($query) => $query->where('status', $this->status))->latest('sold_at')->get()]);
+        return view('livewire.order-tracking', ['orders' => $this->currentSite()->orders()->with(['customer', 'items'])->when($this->status !== '', fn ($query) => $query->where('status', $this->status))->latest('sold_at')->get()]);
     }
 }
