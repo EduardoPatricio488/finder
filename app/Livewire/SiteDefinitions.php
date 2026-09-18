@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\Site;
 use Illuminate\Support\Facades\Storage;
-use App\Support\SiteContext;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -31,14 +30,6 @@ class SiteDefinitions extends Component
     public $faviconUpload = null;
     public $ogImageUpload = null;
     public string $contactName = '';
-    public $availableSites = [];
-
-    public function switchSite(int $siteId): void
-    {
-        $target = SiteContext::manageableSitesQuery(auth()->user())->whereKey($siteId)->firstOrFail();
-        $this->redirectRoute('admin.site.definitions', $target, navigate: true);
-    }
-
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
