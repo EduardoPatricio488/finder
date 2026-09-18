@@ -55,7 +55,7 @@
             </div>
             <div class="flex gap-2">
                 @if($filter !== 'all') <flux:button variant="ghost" wire:click="clearFilter">Ver todos</flux:button> @endif
-                <flux:button variant="ghost" icon="plus" href="{{ route('site.create') }}" wire:navigate>Novo website</flux:button>
+
             </div>
         </div>
 
