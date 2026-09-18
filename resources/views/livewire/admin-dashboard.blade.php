@@ -7,7 +7,7 @@
                     <div class="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 shadow-inner"><flux:icon name="sparkles" variant="solid" class="size-7" /></div>
                     <div><h4 class="text-sm font-black uppercase italic tracking-tighter text-stone-900 dark:text-white">Finder Free: Desbloqueia o teu potencial</h4><p class="text-xs font-medium text-stone-500">O teu limite é de 5 produtos. Atualiza para o Plano Pro e ganha IA e Relatórios.</p></div>
                 </div>
-                <flux:button href="{{ route('admin.site.upgrade') }}" variant="primary" class="!rounded-xl !bg-stone-950 !px-6 shadow-lg shadow-stone-950/20">Fazer Upgrade Agora</flux:button>
+                <flux:button href="{{ route('site.manage.upgrade') }}" variant="primary" class="!rounded-xl !bg-stone-950 !px-6 shadow-lg shadow-stone-950/20">Fazer Upgrade Agora</flux:button>
             </div>
         </div>
     @endif
@@ -35,7 +35,7 @@
 
         <a href="{{ route('sales') }}" class="group relative block overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-sky-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"><div class="flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Receita Hoje</span><flux:icon name="currency-euro" class="size-4 text-sky-500" /></div><p class="mt-4 text-4xl font-black tracking-tighter text-stone-950 dark:text-white">{{ number_format($revenue, 2, ',', '.') }} €</p><p class="mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">{{ $sales }} venda(s) hoje</p><p class="mt-4 text-xs font-bold text-sky-700 transition group-hover:translate-x-1 dark:text-sky-400">Abrir vendas →</p></a>
 
-        <a href="{{ route('admin.site.stock') }}" class="group relative block overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-red-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"><div class="flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Stock baixo</span><flux:icon name="exclamation-triangle" class="size-4 text-red-500" /></div><p class="mt-4 text-4xl font-black tracking-tighter text-stone-950 dark:text-white">{{ $lowStockProducts->count() }}</p><p class="mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Artigos a verificar</p><p class="mt-4 text-xs font-bold text-red-700 transition group-hover:translate-x-1 dark:text-red-400">Ver stock →</p></a>
+        <a href="{{ route('site.manage.stock') }}" class="group relative block overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-red-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"><div class="flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Stock baixo</span><flux:icon name="exclamation-triangle" class="size-4 text-red-500" /></div><p class="mt-4 text-4xl font-black tracking-tighter text-stone-950 dark:text-white">{{ $lowStockProducts->count() }}</p><p class="mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Artigos a verificar</p><p class="mt-4 text-xs font-bold text-red-700 transition group-hover:translate-x-1 dark:text-red-400">Ver stock →</p></a>
     </div>
 
     <div class="grid gap-8 lg:grid-cols-2">
