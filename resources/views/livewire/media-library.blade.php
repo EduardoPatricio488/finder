@@ -1,15 +1,46 @@
 <div class="mx-auto max-w-7xl space-y-6 p-6">
-    <div class="flex flex-wrap items-end justify-between gap-4">
+    <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
             <p class="text-sm font-semibold text-indigo-600">{{ $site->name }}</p>
             <h1 class="text-3xl font-bold tracking-tight">Biblioteca de media</h1>
             <p class="mt-1 text-sm text-zinc-500">Imagens e ficheiros deste website, isolados por tenant.</p>
         </div>
+        <div class="flex flex-wrap items-center justify-end gap-2">
+    @if(session('media-applied'))
+        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">{{ session('media-applied') }}</span>
+    @endif
+    @if($mediaApplied)
+        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">✓ Aplicado no site</span>
+    @else
+        <span class="rounded-xl bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Ainda não aplicado ao site</span>
+    @endif
+    <flux:button type="button" wire:click="applyMedia" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
+    <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">Ver site <span aria-hidden="true">↗</span></a>
+</div>
     </div>
 
     @if(session('status'))
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ session('status') }}</div>
     @endif
+
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div>
+            <p class="text-sm font-bold">Aplicação no website</p>
+            <p class="text-xs text-zinc-500">Guarda os ficheiros e, quando terminares, aplica as alterações no site.</p>
+        </div>
+        <div class="flex flex-wrap items-center justify-end gap-2">
+    @if(session('media-applied'))
+        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">{{ session('media-applied') }}</span>
+    @endif
+    @if($mediaApplied)
+        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">✓ Aplicado no site</span>
+    @else
+        <span class="rounded-xl bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Ainda não aplicado ao site</span>
+    @endif
+    <flux:button type="button" wire:click="applyMedia" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
+    <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">Ver site <span aria-hidden="true">↗</span></a>
+</div>
+    </div>
 
     <div class="grid gap-6 lg:grid-cols-[360px_1fr]">
         <form wire:submit="uploadMedia" class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
