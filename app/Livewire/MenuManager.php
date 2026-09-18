@@ -15,9 +15,6 @@ class MenuManager extends Component
 
     public ?int $menuId = null;
 
-    /** @var array<int, string> */
-    public array $menuNames = [];
-
     public string $menuName = 'Menu principal';
 
     public string $menuLocation = 'header';
@@ -56,7 +53,6 @@ class MenuManager extends Component
         }
 
         $this->ensureRequiredMenuItems();
-        $this->syncMenuNames();
     }
 
     public function updatedMenuId($value): void
@@ -85,27 +81,18 @@ class MenuManager extends Component
             'menuLocation' => ['required', 'string', 'max:40'],
         ]);
 
-        $currentMenu = $this->menuId ? $this->site->menus()->find($this->menuId) : null;
-        $menu = $currentMenu && $currentMenu->name === $this->menuName
-            ? $currentMenu
-            : $this->site->menus()->where('name', $this->menuName)->first();
+        $menu = $this->menuId ? $this->site->menus()->find($this->menuId) : null;
 
-        if (! $menu) {
-            $menu = $this->site->menus()->create([
-                'name' => $this->menuName,
-                'location' => $this->menuLocation,
-            ]);
-        } else {
-            $menu->update([
-                'name' => $this->menuName,
-                'location' => $this->menuLocation,
-            ]);
-        }
+        abort_unless($menu, 422, 'O menu principal ainda não está disponível.');
+
+        $menu->update([
+            'name' => $this->menuName,
+            'location' => $this->menuLocation,
+        ]);
 
         $this->menuId = $menu->id;
         $this->ensureRequiredMenuItems();
         $this->menuApplied = false;
-        $this->syncMenuNames();
         session()->flash('status', 'Menu guardado. Agora podes aplicar as alterações no site.');
     }
 
@@ -183,14 +170,6 @@ class MenuManager extends Component
         $this->site->refresh();
         $this->menuApplied = true;
         session()->flash('menu-applied', 'A navegação foi aplicada no site.');
-    }
-
-    private function syncMenuNames(): void
-    {
-        $this->menuNames = $this->site->menus()
-            ->orderBy('id')
-            ->pluck('name', 'id')
-            ->all();
     }
 
     private function ensureRequiredMenuItems(): void
@@ -279,7 +258,7 @@ class MenuManager extends Component
         return view('livewire.menu-manager', [
             'pages' => $this->availablePages(),
             'items' => $menu?->items ?? collect(),
-            'menus' => $this->site->menus()->with('items.page')->orderBy('id')->get(),
+            'menus' => collect(),
         ]);
     }
 }
