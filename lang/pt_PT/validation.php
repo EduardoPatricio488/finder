@@ -19,6 +19,9 @@ return [
         'string' => 'O campo :attribute tem de ter pelo menos :min caracteres.',
     ],
     'in' => 'O valor selecionado para :attribute é inválido.',
+    'lt' => [
+        'numeric' => 'O campo :attribute tem de ser inferior a :value.',
+    ],
     'attributes' => [
         'productName' => 'nome do produto',
         'productDescription' => 'descrição',
