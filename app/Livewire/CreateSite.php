@@ -41,7 +41,10 @@ class CreateSite extends Component
         $this->types = config('website.types', []);
         $this->templates = config('website.templates', []);
         $this->pageLabels = config('website.pages', []);
-        $this->pages = ['home', 'about', 'contact'];
+        $this->pages = array_values(array_unique(array_filter($this->pages, fn ($page) => array_key_exists($page, $this->pageLabels))));
+        if ($this->pages === []) {
+            $this->pages = ['home'];
+        }
         $this->creationMode = 'ai';
         $this->type = 'personal';
         $this->template = 'studio';
@@ -54,13 +57,13 @@ class CreateSite extends Component
 
     public function updatedType(string $value): void
     {
-        abort_unless($value === 'personal', 422);
+        abort_unless(array_key_exists($value, config('website.types', [])), 422);
 
-        $this->type = 'personal';
-        $this->template = 'studio';
-        $this->pages = ['home', 'about', 'contact'];
-        $this->style = config('website.templates.studio.style', 'Moderno');
-        $this->primaryColor = config('website.templates.studio.accent', '#635bff');
+        $this->type = $value;
+        $this->template = $this->recommendedTemplate($value);
+        $this->pages = config("website.recommended_pages.{$value}", ['home', 'contact']);
+        $this->style = config("website.templates.{$this->template}.style", 'Moderno');
+        $this->primaryColor = config("website.templates.{$this->template}.accent", '#635bff');
     }
 
     public function selectCreationMode(string $mode): void
@@ -77,8 +80,8 @@ class CreateSite extends Component
 
         if ($this->step === 2) {
             $this->validate([
-                'type' => ['required', 'in:personal'],
-                'template' => ['required', 'in:studio'],
+                'type' => ['required', 'in:'.implode(',', array_keys(config('website.types', [])))],
+                'template' => ['required', 'in:'.implode(',', array_keys(config('website.templates', [])))],
             ]);
         }
 
@@ -103,7 +106,17 @@ class CreateSite extends Component
 
     public function togglePage(string $page): void
     {
-        return;
+        abort_unless(array_key_exists($page, config('website.pages', [])), 422);
+
+        if (in_array($page, $this->pages, true)) {
+            if (count($this->pages) > 1) {
+                $this->pages = array_values(array_diff($this->pages, [$page]));
+            }
+
+            return;
+        }
+
+        $this->pages[] = $page;
     }
 
     public function create(WebsiteAiGenerator $generator)
@@ -111,8 +124,8 @@ class CreateSite extends Component
         $this->validate([
             'name' => ['required', 'min:2', 'max:80'],
             'slug' => ['required', 'alpha_dash', 'unique:sites,slug'],
-            'type' => ['required', 'in:personal'],
-            'template' => ['required', 'in:studio'],
+            'type' => ['required', 'in:'.implode(',', array_keys(config('website.types', [])))],
+            'template' => ['required', 'in:'.implode(',', array_keys(config('website.templates', [])))],
             'creationMode' => ['required', 'in:ai'],
             'primaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'secondaryColor' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
@@ -127,8 +140,8 @@ class CreateSite extends Component
 
         $blueprint = $generator->generate([
             'mode' => 'ai',
-            'type' => 'personal',
-            'template' => 'studio',
+            'type' => $this->type,
+            'template' => $this->template,
             'business_name' => $this->name,
             'description' => $this->description,
             'audience' => '',
@@ -193,7 +206,7 @@ class CreateSite extends Component
 
         $site->members()->syncWithoutDetaching([auth()->id() => ['role' => 'owner']]);
 
-        foreach (['home', 'about', 'contact'] as $index => $pageSlug) {
+        foreach ($this->pages as $index => $pageSlug) {
             if (! array_key_exists($pageSlug, $this->pageLabels)) {
                 continue;
             }
@@ -225,7 +238,7 @@ class CreateSite extends Component
             }
         }
 
-        session()->flash('status', 'Website pessoal criado com AI Premium.');
+        session()->flash('status', ($this->types[$this->type]['label'] ?? 'Website').' criado com AI Premium.');
 
         return redirect()->route('builder.edit', $site);
     }
@@ -248,6 +261,18 @@ class CreateSite extends Component
                 ['type' => 'contact_form', 'content' => ['title' => 'Vamos conversar', 'description' => 'Envia uma mensagem.', 'button_label' => 'Enviar mensagem']],
             ],
             default => [],
+        };
+    }
+
+    private function recommendedTemplate(string $type): string
+    {
+        return match ($type) {
+            'online_store' => 'commerce',
+            'business', 'agency', 'clinic', 'lawyer', 'real_estate' => 'professional',
+            'portfolio', 'photographer' => 'creative',
+            'restaurant', 'hotel', 'beauty', 'cafe' => 'elegant',
+            'landing', 'startup' => 'launch',
+            default => 'studio',
         };
     }
 
