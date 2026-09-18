@@ -298,7 +298,7 @@
     @endif
 
     @if($categoriesModalOpen)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeCategoriesModal">
+        <div class="fixed inset-0 z-[110] flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeCategoriesModal">
             <div class="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-zinc-900" wire:click.stop>
                 <div class="flex items-start justify-between border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
                     <div>
@@ -342,7 +342,7 @@
     @endif
 
     @if($productModalOpen)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeProductModal">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeProductModal">
             <div class="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-zinc-900" wire:click.stop>
                 <div class="flex items-start justify-between border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
                     <div>
