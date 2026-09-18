@@ -18,16 +18,28 @@ class SiteContext
         if ($routeSite instanceof Site) {
             abort_unless($routeSite->isManageableBy($request->user()), 404);
 
+            if ($request->hasSession()) {
+                $request->session()->put('current_site_id', $routeSite->id);
+            }
+
             return $routeSite;
         }
 
         $user = $request->user();
         abort_unless($user instanceof User, 403);
 
+        $selectedSiteId = $request->hasSession() ? $request->session()->get('current_site_id') : null;
+
         $site = self::manageableSitesQuery($user)
-            ->orderBy('sort_order')
-            ->orderBy('name')
+            ->when($selectedSiteId, fn ($query) => $query->whereKey($selectedSiteId))
             ->first();
+
+        if (! $site instanceof Site) {
+            $site = self::manageableSitesQuery($user)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->first();
+        }
 
         abort_unless($site instanceof Site, 404);
 
