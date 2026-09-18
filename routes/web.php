@@ -10,6 +10,7 @@ use App\Livewire\Help;
 use App\Livewire\LandingPage;
 use App\Livewire\MediaLibrary;
 use App\Livewire\MenuManager;
+use App\Livewire\Notifications;
 use App\Livewire\OrderManager;
 use App\Livewire\OrderTracking;
 use App\Livewire\PaymentManager;
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'verified'])
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', UserDashboard::class)->name('dashboard');
     Route::get('ajuda', Help::class)->name('help');
+    Route::get('notificacoes', Notifications::class)->name('notifications');
     Route::get('websites/create', CreateSite::class)->name('site.create');
     Route::get('websites/{site:slug}/builder', fn (Site $site) => redirect()->route('site.public', ['site' => $site, 'preview' => 1]))->name('builder.edit');
     Route::get('conta/{section?}', CustomerAccount::class)->name('account');
