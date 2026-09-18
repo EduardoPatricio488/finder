@@ -15,7 +15,7 @@ class CustomerAccount extends Component
     public string $email = '';
     public string $currentPassword = '';
     public string $newPassword = '';
-    public string $newPasswordConfirmation = '';
+    public string $newPassword_confirmation = '';
 
     public function mount(): void
     {
@@ -39,10 +39,6 @@ class CustomerAccount extends Component
         $user->name = $validated['name'];
         $user->email = $validated['email'];
 
-        if ($emailChanged && method_exists($user, 'email_verified_at')) {
-            $user->email_verified_at = null;
-        }
-
         $user->save();
 
         session()->flash('account-status', 'Dados da conta atualizados com sucesso.');
@@ -62,7 +58,7 @@ class CustomerAccount extends Component
             'password' => Hash::make($this->newPassword),
         ]);
 
-        $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation']);
+        $this->reset(['currentPassword', 'newPassword', 'newPassword_confirmation']);
 
         session()->flash('password-status', 'Palavra-passe alterada com sucesso.');
     }
