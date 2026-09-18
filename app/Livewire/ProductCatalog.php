@@ -149,7 +149,7 @@ class ProductCatalog extends Component
             'productCategoryId' => ['required', 'integer'],
             'productCustomCategory' => ['nullable', 'string', 'max:255'],
             'productStock' => ['required', 'integer', 'min:0'],
-            'productMinimumStock' => ['required', 'integer', 'min:0'],
+            'productMinimumStock' => ['required', 'integer', 'min:0', 'lt:productStock'],
             'productIsActive' => ['boolean'],
             'productImages' => ['nullable', 'array', 'max:10'],
             'productImages.*' => ['image', 'max:10240'],
