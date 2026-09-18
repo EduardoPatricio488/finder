@@ -103,113 +103,83 @@ final class TemplateLibrary
     // ================= COMMERCE (loja online) =================
 
     private static function commerce(array $c): array
-{
-    $name = $c['name'];
+    {
+        $name = $c['name'];
+        $description = $c['description'] ?: 'Uma loja online criada para apresentar os produtos de forma simples, clara e elegante.';
+        $headline = $c['headline'] ?: $description;
+        $about = $c['about'] ?: '';
+        $featured = $c['featured_products'] ?: '';
+        $shipping = $c['shipping'] ?: '';
+        $returns = $c['returns'] ?: '';
+        $contactEmail = $c['contact_email'] ?: '';
 
-    return [
-        'home' => [
-            self::hero(
-                $name,
-                $c['description'] ?: 'Peças escolhidas a dedo, qualidade garantida e entrega rápida à tua porta.',
-                'Ver produtos'
-            ),
-            self::features('Porque comprar aqui', [
-                ['title' => 'Envio rápido', 'description' => 'Processamos e enviamos a tua encomenda em 24 a 48 horas úteis.'],
-                ['title' => 'Qualidade garantida', 'description' => 'Cada peça é escolhida com critério — sem surpresas desagradáveis.'],
-                ['title' => 'Devolução fácil', 'description' => 'Tens 14 dias após a receção para trocar ou devolver, sem complicações.'],
-                ['title' => 'Pagamento seguro', 'description' => 'Cartão, MB Way ou transferência — sempre com total segurança.'],
+        $brandText = $about !== ''
+            ? $about
+            : 'Conhece a marca, explora a coleção e escolhe os produtos que fazem sentido para ti.';
+
+        $productText = $featured !== ''
+            ? $featured
+            : 'Os produtos disponíveis aparecem aqui automaticamente a partir do catálogo da loja.';
+
+        $shippingText = $shipping !== ''
+            ? $shipping
+            : 'As condições de envio são apresentadas de acordo com a configuração real da loja.';
+
+        $returnsText = $returns !== ''
+            ? $returns
+            : 'Consulta as condições de trocas e devoluções definidas pela loja antes de finalizar a compra.';
+
+        return [
+            'home' => [
+                self::hero($name, $headline, 'Ver produtos'),
+                self::text('A coleção', $productText),
+                self::productGrid('Produtos em destaque', 'Explora o catálogo disponível na loja.'),
+                self::text('A marca', $brandText),
+                self::cta('Encontra o que procuras', 'Explora os produtos disponíveis e conhece melhor a nossa marca.', 'Ver produtos'),
+            ],
+            'products' => [
+                self::hero('Produtos', 'Explora o catálogo da loja e encontra o que procuras.', 'Ver produtos'),
+                self::productGrid('Catálogo', 'Os produtos reais da loja são apresentados automaticamente nesta página.'),
+            ],
+            'about' => [
+                self::hero('Sobre a marca', $brandText, 'Ver produtos'),
+                self::text('A nossa história', $about !== '' ? $about : $description),
+                self::productGrid('Da nossa coleção', 'Conhece alguns dos produtos disponíveis na loja.'),
+                self::cta('Conhece a coleção', 'Quando estiveres pronto, explora os produtos disponíveis.', 'Ver produtos'),
+            ],
+            'contact' => [
+                self::hero('Contactos', 'Precisas de ajuda com um produto ou uma encomenda? Entra em contacto.', 'Contactar'),
+                [
+                    'type' => 'contact_form',
+                    'label' => 'Contacto',
+                    'content' => [
+                        'title' => 'Fala connosco',
+                        'description' => $contactEmail !== '' ? "Envia a tua mensagem ou contacta-nos através de {$contactEmail}." : 'Envia a tua mensagem através do formulário.',
+                        'button_label' => 'Enviar mensagem',
+                    ],
+                ],
+                self::text('Envios e entregas', $shippingText),
+                self::text('Trocas e devoluções', $returnsText),
+            ],
+            'faq' => self::faqPage([
+                ['question' => 'Como posso saber mais sobre um produto?', 'answer' => 'Consulta a página do produto ou entra em contacto connosco para esclarecer dúvidas.'],
+                ['question' => 'Onde encontro as condições de envio?', 'answer' => $shippingText],
+                ['question' => 'Onde encontro as condições de troca e devolução?', 'answer' => $returnsText],
             ]),
-            self::productGrid('Mais vendidos', 'Os produtos preferidos de quem já comprou connosco.'),
-            self::features('Números que falam por nós', [
-                ['title' => '+5.000', 'description' => 'Encomendas entregues com sucesso.'],
-                ['title' => '4,8/5', 'description' => 'Avaliação média dos nossos clientes.'],
-                ['title' => '24-48h', 'description' => 'Tempo médio de envio da encomenda.'],
-                ['title' => '14 dias', 'description' => 'Para trocas e devoluções, sem perguntas.'],
-            ]),
-            self::testimonials([
-                ['name' => 'Cliente frequente', 'quote' => 'Encomendei três vezes e todas correram na perfeição. Entrega rápida e produto tal como descrito.'],
-                ['name' => 'Primeira compra', 'quote' => 'Não conhecia a marca, mas a qualidade surpreendeu-me. Já recomendei a amigas.'],
-                ['name' => 'Cliente habitual', 'quote' => 'O apoio ao cliente foi impecável quando precisei de trocar um artigo. Recomendo sem hesitar.'],
-            ]),
-            self::text(
-                'A nossa promessa',
-                "Cada peça que vendemos passa por um processo de seleção cuidado — só chega até ti aquilo que nós próprios usaríamos. Acreditamos que comprar online deve ser tão simples e seguro como comprar numa loja de confiança."
-            ),
-            self::cta('Pronta para renovar o teu guarda-roupa?', 'Explora a coleção completa e encontra a tua próxima peça favorita.', 'Ver produtos'),
-        ],
-        'about' => [
-            self::hero('Sobre nós', "$name nasceu da vontade de tornar a moda acessível, sem abdicar da qualidade.", 'Ver produtos'),
-            self::text(
-                'Como tudo começou',
-                'Cansámo-nos de ver preços altos para qualidade duvidosa. Decidimos criar uma loja onde cada peça é escolhida com cuidado e onde o cliente sente que está a fazer um bom investimento — não apenas mais uma compra.'
-            ),
-            self::features('Os nossos valores', [
-                ['title' => 'Qualidade em primeiro lugar', 'description' => 'Preferimos vender menos peças, mas com a certeza de que valem o preço.'],
-                ['title' => 'Transparência total', 'description' => 'O que vês é o que recebes — sem letras pequenas nem surpresas.'],
-                ['title' => 'Cliente no centro', 'description' => 'Cada dúvida ou problema é resolvido com rapidez e cuidado genuíno.'],
-            ]),
-            self::features('Números que mostram o compromisso', [
-                ['title' => '+5.000', 'description' => 'Clientes satisfeitos até hoje.'],
-                ['title' => '98%', 'description' => 'Taxa de satisfação nas avaliações.'],
-                ['title' => '3 anos', 'description' => 'De experiência a vender online.'],
-            ]),
-            self::cta('Ainda tens dúvidas sobre nós?', 'Fala connosco — respondemos com todo o gosto.', 'Contactar'),
-        ],
-        'services' => [
-            self::hero('Como funciona', 'Do carrinho à tua porta, em poucos passos simples.', 'Ver produtos'),
-            self::features('O processo de compra', [
-                ['title' => '1. Escolhe os produtos', 'description' => 'Navega pelo catálogo e adiciona ao carrinho o que precisares.'],
-                ['title' => '2. Finaliza a encomenda', 'description' => 'Pagamento simples e seguro, com confirmação imediata por email.'],
-                ['title' => '3. Acompanha o envio', 'description' => 'Recebes uma ligação de rastreio assim que a encomenda sai do armazém.'],
-                ['title' => '4. Recebe em casa', 'description' => 'A tua encomenda chega dentro do prazo indicado, embalada com cuidado.'],
-            ]),
-            self::cta('Alguma dúvida sobre o processo?', 'A nossa equipa está disponível para esclarecer tudo antes de comprares.', 'Contactar'),
-        ],
-        'products' => [
-            self::hero('Catálogo', 'Explora tudo o que temos disponível, escolhido com cuidado para ti.', 'Ver produtos'),
-            self::productGrid('Todos os produtos', 'Os teus produtos activos aparecem automaticamente aqui — adiciona-os na secção "Produtos" do menu.'),
-            self::features('O que garantimos em cada peça', [
-                ['title' => 'Materiais de qualidade', 'description' => 'Seleccionamos fornecedores com padrões de qualidade elevados.'],
-                ['title' => 'Tamanhos reais', 'description' => 'As medidas indicadas correspondem sempre ao produto real.'],
-                ['title' => 'Fotos verdadeiras', 'description' => 'O que vês nas fotos é exactamente o que recebes em casa.'],
-            ]),
-            self::cta('Não encontraste o que procuravas?', 'Fala connosco — ajudamos-te a encontrar a peça certa.', 'Contactar'),
-        ],
-        'gallery' => [
-            self::hero('Os nossos produtos em destaque', 'Uma seleção visual do que temos para ti.', 'Ver produtos'),
-            self::productGrid('Destaques da coleção', 'Algumas das peças mais admiradas pelos nossos clientes.'),
-            self::gallery(),
-        ],
-        'pricing' => [
-            self::hero('Envio e entregas', 'Transparência total sobre prazos e custos de envio.', 'Ver produtos'),
-            self::pricingSection('Opções de envio', 'Escolhe a opção que melhor se adapta a ti.'),
-            self::features('Perguntas comuns sobre envios', [
-                ['title' => 'Envio grátis', 'description' => 'Encomendas acima de 50 € têm envio gratuito para Portugal Continental.'],
-                ['title' => 'Envio internacional', 'description' => 'Enviamos também para fora de Portugal — consulta prazos no checkout.'],
-                ['title' => 'Rastreio incluído', 'description' => 'Todas as encomendas incluem número de seguimento.'],
-            ]),
-        ],
-        'faq' => self::faqPage([
-            ['question' => 'Quais os prazos de entrega?', 'answer' => 'Normalmente entre 2 a 5 dias úteis, dependendo da tua localização.'],
-            ['question' => 'Posso trocar ou devolver um produto?', 'answer' => 'Sim, tens 14 dias após a receção para solicitar troca ou devolução, sem custos adicionais.'],
-            ['question' => 'Que métodos de pagamento aceitam?', 'answer' => 'Cartão de crédito/débito, MB Way e transferência bancária.'],
-            ['question' => 'Como sei o meu tamanho certo?', 'answer' => 'Cada produto tem uma tabela de medidas na sua página — consulta antes de finalizar a compra.'],
-            ['question' => 'Posso alterar a morada depois de comprar?', 'answer' => 'Sim, desde que a encomenda ainda não tenha sido expedida. Contacta-nos o mais rápido possível.'],
-        ]),
-        'contact' => [
-            self::hero('Contacta-nos', 'Dúvidas sobre uma encomenda ou um produto? Estamos aqui para ajudar.', 'Enviar mensagem'),
-            ['type' => 'contact_form', 'content' => ['title' => 'Fala connosco', 'description' => 'Preenche o formulário e respondemos em até 24 horas úteis.', 'button_label' => 'Enviar mensagem']],
-            self::features('Outras formas de nos encontrar', [
-                ['title' => 'Email', 'description' => 'Escreve-nos a qualquer hora — respondemos assim que possível.'],
-                ['title' => 'Redes sociais', 'description' => 'Segue-nos para novidades, promoções e lançamentos.'],
-                ['title' => 'Horário de apoio', 'description' => 'Segunda a sexta, das 9h às 18h.'],
-            ]),
-            ['type' => 'map', 'content' => ['address' => '', 'embed_url' => '']],
-        ],
-        'blog' => self::blogPage('Novidades e inspiração', 'Lançamentos, promoções e dicas de estilo para tirares mais partido das tuas compras.'),
-        'default' => self::studio($c)['default'],
-    ];
-}
+            'gallery' => [
+                self::hero('Galeria', 'Uma seleção visual da marca e dos produtos.', 'Ver produtos'),
+                self::gallery(),
+                self::productGrid('Produtos', 'Explora os produtos reais disponíveis na loja.'),
+            ],
+            'blog' => self::blogPage('Novidades da loja', 'Conteúdo e novidades da marca podem ser publicados aqui.'),
+            'services' => [],
+            'pricing' => [],
+            'default' => [
+                self::hero($name, $description, 'Ver produtos'),
+                self::productGrid('Produtos', 'Explora o catálogo da loja.'),
+            ],
+        ];
+    }
 
     // ================= ELEGANT (restaurante / hotel / beleza) =================
 
