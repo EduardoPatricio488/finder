@@ -57,6 +57,7 @@
                     <option value="education">Formação</option>
                     <option value="skills">Competências</option>
                     <option value="projects">Projetos</option>
+                    <option value="products">Produtos</option>
                     <option value="services">Serviços</option>
                     <option value="testimonials">Testemunhos</option>
                     <option value="gallery">Galeria</option>
