@@ -31,6 +31,10 @@ class ProductCatalog extends Component
     public string $minRating = '';
     public bool $productModalOpen = false;
     public bool $manageProductModalOpen = false;
+    public bool $imageGalleryOpen = false;
+    public string $imageGalleryName = '';
+    public array $imageGalleryPhotos = [];
+    public int $imageGalleryIndex = 0;
     public ?int $manageProductId = null;
     public string $productName = '';
     public string $productDescription = '';
@@ -113,6 +117,45 @@ class ProductCatalog extends Component
                 ['name' => $name],
             );
         }
+    }
+
+    public function openImageGallery(int $productId, int $index = 0): void
+    {
+        $product = $this->siteScoped(Product::query())->findOrFail($productId);
+        $photos = $product->images ?: ($product->image_url ? [$product->image_url] : []);
+
+        abort_if($photos === [], 404);
+
+        $this->imageGalleryName = (string) $product->name;
+        $this->imageGalleryPhotos = array_values($photos);
+        $this->imageGalleryIndex = max(0, min($index, count($this->imageGalleryPhotos) - 1));
+        $this->imageGalleryOpen = true;
+    }
+
+    public function closeImageGallery(): void
+    {
+        $this->imageGalleryOpen = false;
+        $this->imageGalleryPhotos = [];
+        $this->imageGalleryName = '';
+        $this->imageGalleryIndex = 0;
+    }
+
+    public function nextImage(): void
+    {
+        if ($this->imageGalleryPhotos === []) {
+            return;
+        }
+
+        $this->imageGalleryIndex = ($this->imageGalleryIndex + 1) % count($this->imageGalleryPhotos);
+    }
+
+    public function previousImage(): void
+    {
+        if ($this->imageGalleryPhotos === []) {
+            return;
+        }
+
+        $this->imageGalleryIndex = ($this->imageGalleryIndex - 1 + count($this->imageGalleryPhotos)) % count($this->imageGalleryPhotos);
     }
 
     public function openManageProductModal(int $productId): void
