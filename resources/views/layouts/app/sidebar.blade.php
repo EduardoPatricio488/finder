@@ -67,7 +67,6 @@
                     @endif
                 @endif
             </flux:sidebar.nav>
-            <flux:spacer />
             <div class="px-3 pb-3">
                 <flux:sidebar.nav class="!mt-0">
                     <flux:sidebar.group heading="Conta" class="grid">
@@ -75,14 +74,17 @@
                         <flux:sidebar.item icon="bell" :href="route('notifications')" :current="request()->routeIs('notifications')" wire:navigate>Notificações</flux:sidebar.item>
                     </flux:sidebar.group>
                     <flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item>
-                    <form method="POST" action="{{ route('logout') }}" class="mt-1">
-                        @csrf
-                        <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white">
-                            <flux:icon.arrow-right-start-on-rectangle class="size-5" />
-                            <span>Logout</span>
-                        </button>
-                    </form>
                 </flux:sidebar.nav>
+            </div>
+            <flux:spacer />
+            <div class="px-3 pb-3">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white">
+                        <flux:icon.arrow-right-start-on-rectangle class="size-5" />
+                        <span>Logout</span>
+                    </button>
+                </form>
             </div>
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
