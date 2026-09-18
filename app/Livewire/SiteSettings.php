@@ -17,6 +17,8 @@ class SiteSettings extends Component
 
     public bool $modelContentApplied = false;
 
+    public bool $modelContentSaved = false;
+
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
@@ -24,6 +26,7 @@ class SiteSettings extends Component
         $this->site = $site;
         $this->modelContent = data_get($site->settings, 'model_content', []);
         $this->modelContentApplied = filled(data_get($site->settings, 'model_content_applied_at'));
+        $this->modelContentSaved = filled(data_get($site->settings, 'model_content'));
 
         $brief = data_get($site->settings, 'builder.brief', []);
 
@@ -83,12 +86,21 @@ class SiteSettings extends Component
         $this->site->update(['settings' => $settings]);
         $this->site->refresh();
 
+        $this->modelContentSaved = true;
         $this->modelContentApplied = false;
         session()->flash('model-content-saved', 'Configuração do site guardada. Agora podes aplicar os dados no site.');
     }
 
+    public function updatedModelContent(): void
+    {
+        $this->modelContentSaved = false;
+        $this->modelContentApplied = false;
+    }
+
     public function applyModelContent(): void
     {
+        abort_unless($this->modelContentSaved, 422, 'Guarda primeiro a configuração antes de a aplicar no site.');
+
         $profile = $this->modelProfile();
         $rules = [];
 
@@ -155,6 +167,7 @@ class SiteSettings extends Component
             'modelFilled' => $filled,
             'modelTotal' => count($fields),
             'modelContentApplied' => $this->modelContentApplied,
+            'modelContentSaved' => $this->modelContentSaved,
         ]);
     }
 }
