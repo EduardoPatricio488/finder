@@ -33,7 +33,24 @@
             </div>
         </div>
 
-        <div class="mt-6 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap gap-2">
+                <button type="button" wire:click="exportProducts" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                    <flux:icon name="arrow-down-tray" class="size-4" /> Exportar CSV
+                </button>
+                <a href="{{ route('categories') }}" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                    <flux:icon name="tag" class="size-4" /> Gerir categorias
+                </a>
+            </div>
+            @if(count($selectedProducts))
+                <div class="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm dark:border-indigo-500/20 dark:bg-indigo-500/10">
+                    <span class="font-semibold">{{ count($selectedProducts) }} seleccionados</span>
+                    <button type="button" wire:click="bulkDelete" wire:confirm="Eliminar os produtos seleccionados que não tenham vendas?" class="rounded-lg px-3 py-1.5 font-semibold text-red-600 hover:bg-red-100 dark:hover:bg-red-500/10">Eliminar</button>
+                </div>
+            @endif
+        </div>
+
+        <div class="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div class="flex flex-col gap-3 lg:flex-row">
                 <div class="relative flex-1">
                     <flux:icon name="magnifying-glass" class="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-zinc-400" />
@@ -75,6 +92,7 @@
                 <table class="w-full text-left text-sm">
                     <thead class="bg-zinc-50 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:bg-zinc-800/50">
                         <tr>
+                            <th class="w-12 px-5 py-4"><input type="checkbox" wire:model.live="selectAllProducts" class="rounded border-zinc-300"></th>
                             <th class="px-5 py-4">Produto</th>
                             <th class="px-5 py-4">Descrição</th>
                             <th class="px-5 py-4">Categoria</th>
@@ -95,6 +113,7 @@
                     <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                         @forelse($products as $product)
                             <tr wire:key="product-{{ $product->id }}" class="transition hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+                                <td class="px-5 py-4"><input type="checkbox" value="{{ $product->id }}" wire:model.live="selectedProducts" class="rounded border-zinc-300"></td>
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex shrink-0 items-center -space-x-2">
@@ -153,15 +172,26 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 text-right">
+                                    <div class="flex justify-end gap-1.5">
+                                    <button type="button" wire:click="openQuickStockModal({{ $product->id }})" title="Alterar stock" class="rounded-lg border border-zinc-200 p-2 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700">
+                                        <flux:icon name="arrows-up-down" class="size-4" />
+                                    </button>
+                                    <button type="button" wire:click="openStockHistory({{ $product->id }})" title="Histórico de stock" class="rounded-lg border border-zinc-200 p-2 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700">
+                                        <flux:icon name="clock" class="size-4" />
+                                    </button>
+                                    <button type="button" wire:click="duplicateProduct({{ $product->id }})" title="Duplicar" class="rounded-lg border border-zinc-200 p-2 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700">
+                                        <flux:icon name="square-2-stack" class="size-4" />
+                                    </button>
                                     <button type="button" wire:click="openManageProductModal({{ $product->id }})" class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:hover:border-indigo-500 dark:hover:text-indigo-400">
                                         <flux:icon name="pencil-square" class="size-4" />
                                         Gerir
                                     </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-5 py-16 text-center">
+                                <td colspan="8" class="px-5 py-16 text-center">
                                     <flux:icon name="cube" class="mx-auto size-10 text-zinc-300 dark:text-zinc-600" />
                                     <p class="mt-3 font-semibold text-zinc-900 dark:text-white">Nenhum produto encontrado</p>
                                     <p class="mt-1 text-sm text-zinc-500">Experimenta alterar a pesquisa ou os filtros.</p>
@@ -173,6 +203,30 @@
             </div>
         </div>
     </div>
+    @if($quickStockModalOpen)
+        <div class="fixed inset-0 z-[90] flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeQuickStockModal">
+            <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-zinc-900" wire:click.stop>
+                <div class="flex items-start justify-between">
+                    <div><p class="text-sm font-semibold text-indigo-600">Stock</p><h2 class="mt-1 text-xl font-bold text-zinc-950 dark:text-white">Alterar stock</h2><p class="mt-1 text-sm text-zinc-500">{{ $stockProductName }}</p></div>
+                    <button type="button" wire:click="closeQuickStockModal" class="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"><flux:icon name="x-mark" class="size-5"/></button>
+                </div>
+                <div class="mt-6 grid gap-4">
+                    <div><label class="text-sm font-semibold">Alteração</label><input wire:model="stockChange" type="number" class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-950" placeholder="Ex.: 10 ou -3"><p class="mt-1 text-xs text-zinc-500">Usa um valor positivo para entrada e negativo para saída.</p>@error('stockChange')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
+                    <div><label class="text-sm font-semibold">Motivo</label><input wire:model="stockReason" type="text" class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-950" placeholder="Reposição, venda, correcção..."></div>
+                </div>
+                <div class="mt-6 flex justify-end gap-2"><button type="button" wire:click="closeQuickStockModal" class="rounded-xl border px-4 py-2.5 text-sm font-semibold dark:border-zinc-700">Cancelar</button><button type="button" wire:click="saveQuickStock" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white">Guardar</button></div>
+            </div>
+        </div>
+    @endif
+    @if($stockHistoryModalOpen)
+        <div class="fixed inset-0 z-[90] flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeStockHistory">
+            <div class="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl dark:bg-zinc-900" wire:click.stop>
+                <div class="flex items-start justify-between"><div><p class="text-sm font-semibold text-indigo-600">Inventário</p><h2 class="mt-1 text-xl font-bold text-zinc-950 dark:text-white">Histórico de stock</h2><p class="mt-1 text-sm text-zinc-500">{{ $stockProductName }}</p></div><button type="button" wire:click="closeStockHistory" class="rounded-xl p-2 text-zinc-400"><flux:icon name="x-mark" class="size-5"/></button></div>
+                <div class="mt-5 overflow-hidden rounded-2xl border dark:border-zinc-800"><table class="w-full text-left text-sm"><thead class="bg-zinc-50 dark:bg-zinc-800"><tr><th class="px-4 py-3">Data</th><th class="px-4 py-3">Alteração</th><th class="px-4 py-3">Motivo</th><th class="px-4 py-3">Utilizador</th></tr></thead><tbody class="divide-y dark:divide-zinc-800">@forelse($stockHistory as $movement)<tr><td class="px-4 py-3 text-zinc-500">{{ $movement->created_at?->format('d/m/Y H:i') }}</td><td class="px-4 py-3 font-bold {{ $movement->quantity > 0 ? 'text-emerald-600' : 'text-red-600' }}">{{ $movement->quantity > 0 ? '+' : '' }}{{ $movement->quantity }}</td><td class="px-4 py-3">{{ $movement->note ?: '—' }}</td><td class="px-4 py-3 text-zinc-500">{{ $movement->user?->name ?: 'Sistema' }}</td></tr>@empty<tr><td colspan="4" class="px-4 py-8 text-center text-zinc-500">Ainda não existem movimentos.</td></tr>@endforelse</tbody></table></div>
+            </div>
+        </div>
+    @endif
+
     @if($imageGalleryOpen)
         <div class="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/90 p-4 backdrop-blur-sm" wire:click="closeImageGallery">
             <div class="relative flex h-full w-full max-w-6xl flex-col items-center justify-center" wire:click.stop>
