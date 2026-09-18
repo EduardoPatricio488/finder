@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -86,38 +85,6 @@ return new class extends Migration
             });
         }
 
-        $casaCoId = DB::table('sites')->where('slug', 'casa-co')->value('id');
-
-        if ($casaCoId === null) {
-            return;
-        }
-
-        DB::table('sites')->where('id', $casaCoId)->update([
-            'type' => 'online_store',
-            'status' => 'online',
-            'subdomain' => 'casa-co',
-            'primary_color' => '#f59e0b',
-            'secondary_color' => '#1c1917',
-            'homepage' => json_encode([
-                'hero_title' => 'Coisas bonitas para viver melhor.',
-                'hero_subtitle' => 'Uma seleção cuidada de artigos para a casa, para oferecer e para aproveitar os pequenos momentos do dia.',
-                'primary_button_label' => 'Explorar produtos',
-                'sections' => [
-                    'hero' => true,
-                    'featured_products' => true,
-                    'about' => true,
-                    'categories' => true,
-                    'newsletter' => true,
-                    'footer' => true,
-                ],
-            ]),
-        ]);
-
-        foreach (['products', 'orders', 'categories', 'customers', 'payments', 'stock_movements', 'store_configs', 'promotions', 'product_reviews'] as $tableName) {
-            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'site_id')) {
-                DB::table($tableName)->whereNull('site_id')->update(['site_id' => $casaCoId]);
-            }
-        }
     }
 
     /**
