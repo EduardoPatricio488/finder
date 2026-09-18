@@ -23,7 +23,7 @@ class PlanSelection extends Component
 
         session()->flash('status', 'Plano atualizado com sucesso! Agora tens acesso Pro.');
 
-        return redirect()->route('admin.site.dashboard');
+        return redirect()->route('site.manage.dashboard');
     }
 
     public function render()
