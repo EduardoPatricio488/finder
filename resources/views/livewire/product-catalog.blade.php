@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <div class="mt-6 grid gap-4 md:grid-cols-4">
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <p class="text-sm text-zinc-500">Produtos apresentados</p>
                 <p class="mt-2 text-2xl font-bold text-zinc-950 dark:text-white">{{ $products->count() }}</p>
@@ -31,10 +31,18 @@
                 <p class="text-sm text-amber-700 dark:text-amber-400">Stock baixo</p>
                 <p class="mt-2 text-2xl font-bold text-amber-800 dark:text-amber-300">{{ $lowStockProducts->count() }}</p>
             </div>
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm dark:border-indigo-500/20 dark:bg-indigo-500/10">
+                <p class="text-sm text-indigo-700 dark:text-indigo-400">Valor do stock</p>
+                <p class="mt-2 text-2xl font-bold text-indigo-800 dark:text-indigo-300">€ {{ number_format($stockValue, 2, ',', '.') }}</p>
+            </div>
         </div>
 
         <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap gap-2">
+                <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                    <flux:icon name="arrow-up-tray" class="size-4" /> Importar CSV
+                    <input type="file" wire:model="importFile" accept=".csv,.txt" class="hidden">
+                </label>
                 <button type="button" wire:click="exportProducts" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
                     <flux:icon name="arrow-down-tray" class="size-4" /> Exportar CSV
                 </button>
