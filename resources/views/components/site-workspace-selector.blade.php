@@ -16,7 +16,7 @@
                     'settings' => route('admin.site.settings', $siteOption),
                     'media' => route('admin.site.media', $siteOption),
                     'menus' => route('admin.site.menus', $siteOption),
-                    'users' => route('users', ['site' => $siteOption]),
+                    'users' => route('users'),
                     default => route('admin.site.dashboard', $siteOption),
                 };
             @endphp
