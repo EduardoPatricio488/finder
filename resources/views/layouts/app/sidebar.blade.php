@@ -61,11 +61,8 @@
                     </flux:sidebar.group>
 
                     <flux:sidebar.group heading="Dados do site" class="grid">
-                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('dashboard').'#model-content'" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>
-                            <span class="flex min-w-0 flex-1 items-center gap-2">
-                                <span class="truncate">Configuração do modelo</span>
-                                <span class="ms-auto shrink-0 text-[10px] font-semibold text-zinc-400">{{ $modelFilled }}/{{ $modelTotal }} preenchidos</span>
-                            </span>
+                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>
+                            Configuração do site
                         </flux:sidebar.item>
                     </flux:sidebar.group>
 
