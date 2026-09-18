@@ -17,13 +17,6 @@
                 $routeName = 'admin.site.'.$name;
                 return Route::has($routeName) ? route($routeName, $target) : '#';
             };
-            $modelProfile = $hasSite
-                ? config('website.model_profiles.'.$currentSite->type, [])
-                : [];
-            $modelFields = $modelProfile['fields'] ?? [];
-            $modelFieldValues = $hasSite ? (data_get($currentSite->settings, 'model_content', []) ?? []) : [];
-            $modelFilled = collect($modelFields)->filter(fn ($field) => filled($modelFieldValues[$field['key']] ?? null))->count();
-            $modelTotal = count($modelFields);
         @endphp
 
         @if($isPlatformAdmin)
@@ -60,15 +53,6 @@
                 </flux:sidebar.group>
 
                 @if($hasSite && ! $isDashboard)
-                    <flux:sidebar.group heading="Dados do site" class="grid">
-                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>
-                            <span class="flex min-w-0 flex-1 items-center gap-2">
-                                <span class="truncate">Configuração do modelo</span>
-                                <span class="ms-auto shrink-0 text-[10px] font-semibold text-zinc-400">{{ $modelFilled }}/{{ $modelTotal }} preenchidos</span>
-                            </span>
-                        </flux:sidebar.item>
-                    </flux:sidebar.group>
-
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
