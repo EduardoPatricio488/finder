@@ -99,7 +99,6 @@
                     </flux:sidebar.group>
 
                     <flux:sidebar.group heading="A minha conta" class="grid">
-                        <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Conta</flux:sidebar.item>
                         <flux:sidebar.item icon="sparkles" :href="route('customer.assistant')" :current="request()->routeIs('customer.assistant')" wire:navigate>Assistente IA</flux:sidebar.item>
                     </flux:sidebar.group>
 
