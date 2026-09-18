@@ -65,43 +65,26 @@
         <div class="space-y-4">
             <input wire:model.live.debounce.300ms="search" placeholder="Pesquisar ficheiros..." class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                @forelse($media as $item)
-                    @php($mediaUrl = route('admin.site.media.file', ['site' => $site, 'media' => $item->id]))
-                    <article class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                        <div class="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-950">
-                            <img src="{{ $mediaUrl }}" alt="{{ $item->alt_text }}" class="h-full w-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden');">
-                            <div class="absolute inset-0 hidden items-center justify-center p-4 text-center text-xs text-zinc-500">Não foi possível carregar esta imagem.<br>Verifica o armazenamento público do Finder.</div>
-                        </div>
-                        <div class="p-4">
-                            <p class="truncate text-sm font-semibold">{{ $item->original_name }}</p>
-                            <p class="mt-1 text-xs text-zinc-500">{{ number_format($item->size / 1024, 1) }} KB @if($item->width) · {{ $item->width }}×{{ $item->height }}@endif</p>
-                            @php
-                                $placementLabels = [
-                                    'logo' => 'Logótipo',
-                                    'hero' => 'Capa / Hero',
-                                    'about' => 'Sobre mim / Sobre nós',
-                                    'experience' => 'Experiência',
-                                    'education' => 'Formação',
-                                    'skills' => 'Competências',
-                                    'projects' => 'Projetos',
-                                    'services' => 'Serviços',
-                                    'testimonials' => 'Testemunhos',
-                                    'gallery' => 'Galeria',
-                                    'contact' => 'Contacto',
-                                    'background' => 'Fundo de secção',
-                                    'footer' => 'Rodapé',
-                                ];
-                            @endphp
-                            <div class="mt-3 rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
-                                <span class="font-bold">Aplicação:</span> {{ $placementLabels[$item->placement ?: 'gallery'] ?? 'Galeria' }}
-                            </div>
-                            <button wire:click="deleteMedia({{ $item->id }})" wire:confirm="Eliminar este ficheiro?" class="mt-3 text-xs font-semibold text-red-600">Eliminar</button>
-                        </div>
-                    </article>
-                @empty
+                @if($media->isEmpty())
                     <div class="rounded-2xl border border-dashed border-zinc-300 p-10 text-center text-sm text-zinc-500 sm:col-span-2 xl:col-span-3">Ainda não existem ficheiros.</div>
-                @endforelse
-            </div>
+                @else
+                    @foreach($media as $item)
+                        <article class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                            <div class="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-950">
+                                <img src="{{ $this->mediaUrl($item) }}" alt="{{ $item->alt_text }}" class="h-full w-full object-cover" loading="lazy" decoding="async">
+                            </div>
+                            <div class="p-4">
+                                <p class="truncate text-sm font-semibold">{{ $item->original_name }}</p>
+                                <p class="mt-1 text-xs text-zinc-500">{{ number_format($item->size / 1024, 1) }} KB @if($item->width) · {{ $item->width }}×{{ $item->height }}@endif</p>
+                                <div class="mt-3 rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
+                                    <span class="font-bold">Aplicação:</span> {{ $this->placementLabel($item->placement) }}
+                                </div>
+                                <button wire:click="deleteMedia({{ $item->id }})" wire:confirm="Eliminar este ficheiro?" class="mt-3 text-xs font-semibold text-red-600">Eliminar</button>
+                            </div>
+                        </article>
+                    @endforeach
+                @endif
+            </div>            </div>
         </div>
     </div>
 </div>
