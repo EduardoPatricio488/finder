@@ -26,7 +26,7 @@ class PlanSelection extends Component
 
     public function render()
     {
-        return view('livewire.plan-selection', [
+        return view('livewire.upgrade-selection', [
             'plans' => Plan::all(),
         ])->layout('layouts.app');
     }
