@@ -87,7 +87,7 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <flux:button type="submit" variant="primary" icon="check" class="!rounded-xl !bg-indigo-600">Guardar configuração</flux:button>
-                        @if($modelContentApplied)
+                        @if($modelContentSaved)
                             <flux:button type="button" wire:click="applyModelContent" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
                         @else
                             <flux:button type="button" disabled icon="lock-closed" class="!rounded-xl opacity-50 cursor-not-allowed" title="Guarda primeiro a configuração para poderes aplicar no site">Aplicar no site</flux:button>
