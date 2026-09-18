@@ -47,9 +47,7 @@
             </div>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group heading="Website" class="grid">
-    <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus Websites</flux:sidebar.item>
-</flux:sidebar.group>
+                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus Websites</flux:sidebar.item>
 
 <flux:sidebar.group heading="Loja" class="grid">
     <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
