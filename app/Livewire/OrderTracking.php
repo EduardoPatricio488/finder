@@ -6,7 +6,7 @@ use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.customer')]
+#[Layout('layouts.app')]
 class OrderTracking extends Component
 {
     public function render(): mixed
