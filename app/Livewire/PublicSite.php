@@ -38,7 +38,7 @@ class PublicSite extends Component
             abort_unless($site->is_published && $site->status === 'published', 404);
         }
 
-        $this->site = $site->load(['menus.items.children.page', 'pages.sections', 'products']);
+        $this->site = $site->load(['menus.items.children.page', 'pages.sections', 'products', 'media']);
         $this->page = $pageSlug
             ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
             : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
@@ -133,7 +133,13 @@ class PublicSite extends Component
             ? 'livewire.personal-site-renderer'
             : 'livewire.public-site-renderer';
 
-        return view($view)
+        $media = $this->site->media
+            ->filter(fn ($item) => filled($item->placement))
+            ->groupBy('placement');
+
+        return view($view, [
+            'mediaByPlacement' => $media,
+        ])
             ->layout('layouts.public-site', [
                 'site' => $this->site,
                 'page' => $this->page,
