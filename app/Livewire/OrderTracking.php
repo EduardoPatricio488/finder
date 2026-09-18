@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Support\SiteContext;
+
 use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -11,8 +13,11 @@ class OrderTracking extends Component
 {
     public function render(): mixed
     {
+        $site = SiteContext::current();
+
         return view('livewire.order-tracking', [
-            'orders' => Order::query()
+            'site' => $site,
+            'orders' => $site->orders()->
                 ->with(['customer', 'items', 'payments'])
                 ->whereHas('customer', fn ($query) => $query->where('email', auth()->user()->email))
                 ->latest('sold_at')
