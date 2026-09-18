@@ -95,62 +95,6 @@
         </div>
     </div>
 
-    <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="font-semibold text-zinc-950">Estrutura da navegação</h2>
-                <p class="mt-1 text-xs text-zinc-500">Organiza os links que vão aparecer no cabeçalho.</p>
-            </div>
-            <span class="text-xs font-semibold text-zinc-400">{{ $menus->count() }} {{ $menus->count() === 1 ? 'menu' : 'menus' }}</span>
-        </div>
-        <div class="mt-5 space-y-4">
-            @forelse ($menus as $savedMenu)
-                <div class="rounded-2xl border {{ $savedMenu->id === $menuId ? 'border-indigo-200 bg-indigo-50/30' : 'border-zinc-200 bg-zinc-50/70' }} p-4">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-zinc-400 shadow-sm">
-                                <flux:icon name="bars-3" class="size-4" />
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-zinc-900">{{ $savedMenu->name }}</p>
-                                <p class="text-xs text-zinc-400">{{ $savedMenu->location === 'header' ? 'Cabeçalho' : $savedMenu->location }}</p>
-                            </div>
-                        </div>
-                        <button type="button" wire:click="$set('menuId', {{ $savedMenu->id }})" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">
-                            {{ $savedMenu->id === $menuId ? 'Em edição' : 'Editar menu' }}
-                        </button>
-                    </div>
-                    @if ($savedMenu->items->isNotEmpty())
-                        <div class="mt-3 space-y-2">
-                            @foreach ($savedMenu->items->whereNull('parent_id') as $item)
-                                <div class="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
-                                    <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 text-zinc-400">
-                                        <flux:icon name="bars-2" class="size-4" />
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="truncate text-sm font-semibold text-zinc-900">{{ $item->label }}</p>
-                                        <p class="text-xs text-zinc-400">{{ $item->page ? $this->pageLabel($item->page->slug) : ($item->url ?: 'Página') }}</p>
-                                    </div>
-                                    <span class="text-[11px] font-semibold {{ $item->is_visible ? 'text-emerald-600' : 'text-zinc-400' }}">{{ $item->is_visible ? 'Visível' : 'Oculto' }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="mt-3 text-xs text-zinc-400">Este menu ainda não tem itens.</p>
-                    @endif
-                </div>
-            @empty
-                <div class="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-10 text-center">
-                    <div class="mx-auto flex size-12 items-center justify-center rounded-2xl bg-white text-zinc-400 shadow-sm">
-                        <flux:icon name="bars-3" class="size-5" />
-                    </div>
-                    <p class="mt-4 text-sm font-semibold text-zinc-800">Ainda não tens menus</p>
-                    <p class="mt-1 text-xs text-zinc-500">Guarda um menu acima e este aparecerá automaticamente nesta estrutura.</p>
-                </div>
-            @endforelse
-        </div>
-    </div>
-
     <div class="sticky bottom-4 z-20 rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-xl shadow-zinc-900/10 backdrop-blur">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
