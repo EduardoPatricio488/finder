@@ -87,7 +87,7 @@
                             <p class="line-clamp-2 min-h-10 text-sm leading-6 text-zinc-500 dark:text-zinc-400">{{ $site->description ?: 'Personaliza o teu website, adiciona páginas e publica quando estiveres pronto.' }}</p>
                             <div class="mt-4 flex gap-4 text-xs font-medium text-zinc-500"><span>{{ $site->pages_count }} páginas</span><span>{{ $site->products_count }} produtos</span></div>
                             <div class="mt-5 flex gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
-                                <flux:button class="flex-1" variant="ghost" href="{{ route('admin.site.dashboard') }}">Gerir</flux:button>
+                                <flux:button class="flex-1" variant="ghost" href="{{ route('site.manage.dashboard') }}">Gerir</flux:button>
                                 <flux:button class="flex-1" variant="primary" icon="eye" href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank">Ver site</flux:button>
                             </div>
                         </div>
