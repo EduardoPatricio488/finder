@@ -39,9 +39,10 @@ class MenuManager extends Component
     /** @var array<string, string> */
     public array $requiredLabels = [];
 
-    public function mount(Site $site): void
+    public function mount(): void
     {
-        abort_unless($site->isManageableBy(auth()->user()), 403);
+        $site = \App\Support\SiteContext::current();
+        abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
         session()->put('current_site_id', $site->id);
         $this->menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
