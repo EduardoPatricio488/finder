@@ -33,7 +33,29 @@
             @endif
 
             <div wire:loading wire:target="upload" class="mt-3 text-xs text-indigo-600">A carregar a imagem...</div>
-            <input wire:model="altText" placeholder="Texto alternativo" class="mt-4 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+            <input wire:model="altText" placeholder="Texto alternativo (ex.: Foto profissional do Eduardo)" class="mt-4 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+            <div class="mt-4">
+                <label class="mb-2 block text-sm font-semibold">Onde vai ser aplicada?</label>
+                <select wire:model="placement" class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                    <option value="logo">Logótipo</option>
+                    <option value="hero">Capa / Hero principal</option>
+                    <option value="about">Sobre mim / Sobre nós</option>
+                    <option value="experience">Experiência</option>
+                    <option value="education">Formação</option>
+                    <option value="skills">Competências</option>
+                    <option value="projects">Projetos</option>
+                    <option value="services">Serviços</option>
+                    <option value="testimonials">Testemunhos</option>
+                    <option value="gallery">Galeria</option>
+                    <option value="contact">Contacto</option>
+                    <option value="background">Fundo de uma secção</option>
+                    <option value="footer">Rodapé</option>
+                </select>
+                <p class="mt-2 text-xs leading-5 text-zinc-500">
+                    Exemplo: escolhe <strong>Projetos</strong> para indicar que esta imagem será usada numa imagem de destaque de um projeto no website.
+                </p>
+                @error('placement') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
             <button type="submit" class="mt-4 w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60" wire:loading.attr="disabled" wire:target="uploadMedia,upload">
                 <span wire:loading.remove wire:target="uploadMedia">Carregar</span>
                 <span wire:loading wire:target="uploadMedia">A guardar...</span>
@@ -53,6 +75,26 @@
                         <div class="p-4">
                             <p class="truncate text-sm font-semibold">{{ $item->original_name }}</p>
                             <p class="mt-1 text-xs text-zinc-500">{{ number_format($item->size / 1024, 1) }} KB @if($item->width) · {{ $item->width }}×{{ $item->height }}@endif</p>
+                            @php
+                                $placementLabels = [
+                                    'logo' => 'Logótipo',
+                                    'hero' => 'Capa / Hero',
+                                    'about' => 'Sobre mim / Sobre nós',
+                                    'experience' => 'Experiência',
+                                    'education' => 'Formação',
+                                    'skills' => 'Competências',
+                                    'projects' => 'Projetos',
+                                    'services' => 'Serviços',
+                                    'testimonials' => 'Testemunhos',
+                                    'gallery' => 'Galeria',
+                                    'contact' => 'Contacto',
+                                    'background' => 'Fundo de secção',
+                                    'footer' => 'Rodapé',
+                                ];
+                            @endphp
+                            <div class="mt-3 rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
+                                <span class="font-bold">Aplicação:</span> {{ $placementLabels[$item->placement ?? 'gallery'] ?? 'Galeria' }}
+                            </div>
                             <button wire:click="deleteMedia({{ $item->id }})" wire:confirm="Eliminar este ficheiro?" class="mt-3 text-xs font-semibold text-red-600">Eliminar</button>
                         </div>
                     </article>
