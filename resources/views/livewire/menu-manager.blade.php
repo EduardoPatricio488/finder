@@ -1,5 +1,7 @@
 <div>
 <div class="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div class="mb-2"><x-site-workspace-selector :current-site="$site" route-name="menus" /></div>
+
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="text-sm font-semibold text-indigo-600">{{ $site->name }}</p>
