@@ -141,14 +141,14 @@
                                                 $productPhotos = $product->images ?: ($product->image_url ? [$product->image_url] : []);
                                             @endphp
                                             @forelse(array_slice($productPhotos, 0, 2) as $photoIndex => $photo)
-                                                <button type="button" wire:click="openImageGallery({{ $product->id }}, {{ $photoIndex }})" class="shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Ver fotografias em grande">
+                                                <button type="button" wire:click="openImageGallery({{ $product->id }}, {{ $photoIndex }})" class="relative shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Ver fotografias em grande">
                                                     <img src="{{ asset('storage/'.$photo) }}" alt="{{ $product->name }}" class="size-11 rounded-xl border-2 border-white object-cover transition hover:scale-110 dark:border-zinc-900">
+                                                    @if($photoIndex === 1 && count($productPhotos) > 2)
+                                                        <span class="absolute inset-0 flex items-center justify-center rounded-xl bg-black/55 text-xs font-bold text-white">
+                                                            +{{ count($productPhotos) - 2 }}
+                                                        </span>
+                                                    @endif
                                                 </button>
-                                            @if(count($productPhotos) > 2)
-                                                <button type="button" wire:click="openImageGallery({{ $product->id }}, 0)" class="flex size-11 shrink-0 items-center justify-center rounded-xl border-2 border-white bg-zinc-100 text-xs font-bold text-zinc-700 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700" title="Ver todas as fotografias">
-                                                    +{{ count($productPhotos) - 2 }}
-                                                </button>
-                                            @endif
                                             @empty
                                                 <div class="flex size-11 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
                                                     <flux:icon name="photo" class="size-5 text-zinc-400" />
