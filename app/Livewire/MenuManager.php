@@ -31,10 +31,13 @@ class MenuManager extends Component
 
     public bool $isVisible = true;
 
+    public bool $menuApplied = false;
+
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
+        $this->menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
         $menu = $site->menus()->first();
         if ($menu) {
             $this->menuId = $menu->id;
@@ -56,7 +59,8 @@ class MenuManager extends Component
 
         $menu->update(['name' => $this->menuName, 'location' => $this->menuLocation]);
         $this->menuId = $menu->id;
-        session()->flash('status', 'Menu guardado.');
+        $this->menuApplied = false;
+        session()->flash('status', 'Menu guardado. Agora podes aplicar as alterações no site.');
     }
 
     public function addItem(): void
@@ -64,7 +68,7 @@ class MenuManager extends Component
         $this->validate([
             'label' => ['required', 'string', 'max:100'],
             'url' => ['nullable', 'string', 'max:2048'],
-            'pageId' => ['nullable', 'integer'],
+            'pageId' => ['nullable', 'integer', 'exists:site_pages,id'],
             'parentId' => ['nullable', 'integer'],
             'target' => ['required', 'in:_self,_blank'],
         ]);
@@ -77,6 +81,10 @@ class MenuManager extends Component
         $page = $this->pageId ? $this->site->pages()->findOrFail($this->pageId) : null;
         $parent = $this->parentId ? $menu->items()->findOrFail($this->parentId) : null;
 
+        if ($this->pageId) {
+            abort_unless(in_array($this->pageId, $this->availablePages()->pluck('id')->all(), true), 422, 'Esta página não está disponível na navegação.');
+        }
+
         $menu->items()->create([
             'site_page_id' => $page?->id,
             'parent_id' => $parent?->id,
@@ -87,7 +95,9 @@ class MenuManager extends Component
             'is_visible' => $this->isVisible,
         ]);
 
-        $this->reset(['label', 'url', 'pageId', 'parentId']);
+        $this->reset(['label', 'pageId', 'parentId']);
+        $this->url = '';
+        $this->menuApplied = false;
         $this->target = '_self';
         $this->isVisible = true;
     }
@@ -98,6 +108,7 @@ class MenuManager extends Component
         $item = $menu->items()->findOrFail($itemId);
         $item->children()->update(['parent_id' => $item->parent_id]);
         $item->delete();
+        $this->menuApplied = false;
     }
 
     public function toggleItem(int $itemId): void
@@ -105,6 +116,37 @@ class MenuManager extends Component
         $menu = $this->site->menus()->findOrFail($this->menuId);
         $item = $menu->items()->findOrFail($itemId);
         $item->update(['is_visible' => ! $item->is_visible]);
+        $this->menuApplied = false;
+    }
+
+    public function applyMenu(): void
+    {
+        abort_unless($this->menuId, 422, 'Guarda primeiro o menu antes de o aplicar no site.');
+
+        $settings = $this->site->settings ?? [];
+        data_set($settings, 'menu_applied_at', now()->toIso8601String());
+        $this->site->update(['settings' => $settings]);
+        $this->site->refresh();
+        $this->menuApplied = true;
+        session()->flash('menu-applied', 'A navegação foi aplicada no site.');
+    }
+
+    private function availablePages()
+    {
+        return $this->site->pages()
+            ->whereIn('slug', ['home', 'about', 'contact'])
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'slug']);
+    }
+
+    public function pageLabel(string $slug): string
+    {
+        return match ($slug) {
+            'home' => 'Início',
+            'about' => 'Sobre mim',
+            'contact' => 'Contactos',
+            default => $slug,
+        };
     }
 
     public function render(): mixed
@@ -112,7 +154,7 @@ class MenuManager extends Component
         $menu = $this->menuId ? $this->site->menus()->with('items.children')->find($this->menuId) : null;
 
         return view('livewire.menu-manager', [
-            'pages' => $this->site->pages()->get(['id', 'name', 'slug']),
+            'pages' => $this->availablePages(),
             'items' => $menu?->items ?? collect(),
         ]);
     }
