@@ -39,6 +39,7 @@ Route::get('/', LandingPage::class)->name('home');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 Route::middleware(['auth', 'verified'])->get('vendas', SalesManager::class)->name('sales');
 Route::get('produtos', ProductCatalog::class)->name('products');
+Route::get('utilizadores', UserManager::class)->name('users');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
 
 Route::middleware(['auth', 'verified'])
@@ -65,7 +66,6 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->group(function (): void {
         Route::get('/', PlatformAdminDashboard::class)->name('dashboard');
         Route::get('websites', PlatformWebsites::class)->name('websites');
-        Route::get('utilizadores', UserManager::class)->name('users');
         Route::get('configuracoes', StoreSettings::class)->name('config');
         Route::post('websites/{site:slug}/access', function (Site $site) {
             SiteAdminAuditLog::create([
@@ -126,7 +126,6 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('promocoes', PromotionManager::class)->name('promotions');
         Route::get('stock', StockMovementManager::class)->name('stock');
         Route::get('submissoes', SiteSubmissions::class)->name('submissions');
-        Route::get('utilizadores', UserManager::class)->name('users');
     });
 
 require __DIR__.'/settings.php';
