@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <div class="sticky bottom-4 z-20 rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-xl shadow-zinc-900/10 backdrop-blur">
+    <div class="rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-xl shadow-zinc-900/10 backdrop-blur">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <p class="text-sm font-semibold text-zinc-900">{{ $menuApplied ? 'A navegação está aplicada no site.' : 'As alterações ainda não estão aplicadas.' }}</p>
