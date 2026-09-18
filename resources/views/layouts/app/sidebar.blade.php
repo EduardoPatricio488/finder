@@ -20,6 +20,21 @@
                 ? config('website.model_profiles.'.$currentSite->type, [])
                 : [];
             $modelSidebar = $modelProfile['sidebar'] ?? [];
+            $modelFields = $modelProfile['fields'] ?? [];
+            $modelFieldValues = $hasSite ? (data_get($currentSite->settings, 'model_content', []) ?? []) : [];
+            $modelFieldByKey = collect($modelFields)->keyBy('key');
+            $modelCompletionKey = function (array $item) use ($modelFieldByKey): ?string {
+                if (! empty($item['field']) && $modelFieldByKey->has($item['field'])) {
+                    return $item['field'];
+                }
+
+                $anchor = str_replace('model-', '', (string) ($item['anchor'] ?? ''));
+                if ($anchor === 'profile') {
+                    return $modelFieldByKey->keys()->first();
+                }
+
+                return $modelFieldByKey->has($anchor) ? $anchor : null;
+            };
         @endphp
 
         @if($isPlatformAdmin)
@@ -56,7 +71,10 @@
                 </flux:sidebar.group>
 
                 @if($hasSite)
-                    <flux:sidebar.group heading="{{ $modelProfile['label'] ?? 'Website' }}" class="grid">
+                    <flux:sidebar.group heading="Preencher website" class="grid">
+                        <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
+                            {{ $modelProfile['label'] ?? 'Conteúdo' }}
+                        </div>
                         @foreach($modelSidebar as $item)
                             @php
                                 $itemRoute = $item['route'] ?? null;
@@ -64,9 +82,18 @@
                                 $itemHref = $itemRoute
                                     ? $siteRoute($itemRoute)
                                     : ($itemAnchor ? $siteRoute('dashboard').'#'.$itemAnchor : $siteRoute('dashboard'));
+                                $completionKey = $modelCompletionKey($item);
+                                $isFilled = $completionKey !== null && filled($modelFieldValues[$completionKey] ?? null);
                             @endphp
                             <flux:sidebar.item icon="{{ $item['icon'] ?? 'chevron-right' }}" :href="$itemHref" :current="$itemRoute ? request()->routeIs('admin.site.'.$itemRoute) : false" wire:navigate>
-                                {{ $item['label'] }}
+                                <span class="flex min-w-0 flex-1 items-center gap-2">
+                                    <span class="truncate">{{ $item['label'] }}</span>
+                                    @if($completionKey !== null)
+                                        <span class="ms-auto shrink-0 text-[10px] font-bold {{ $isFilled ? 'text-emerald-500' : 'text-zinc-400' }}" title="{{ $isFilled ? 'Preenchido' : 'Por preencher' }}">
+                                            {{ $isFilled ? '✓' : '○' }}
+                                        </span>
+                                    @endif
+                                </span>
                             </flux:sidebar.item>
                         @endforeach
                     </flux:sidebar.group>
