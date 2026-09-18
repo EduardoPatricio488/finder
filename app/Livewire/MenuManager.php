@@ -75,10 +75,13 @@ class MenuManager extends Component
     {
         $this->validate([
             'label' => ['required', 'string', 'max:100'],
-            'pageId' => ['required', 'integer', 'exists:site_pages,id'],
+            'pageId' => ['nullable', 'integer', 'exists:site_pages,id'],
+            'url' => ['nullable', 'string', 'max:2048'],
             'parentId' => ['nullable', 'integer'],
             'target' => ['required', 'in:_self,_blank'],
         ]);
+
+        abort_if(! $this->pageId && ! filled(trim($this->url)), 422, 'Indica uma página ou um endereço para o novo menu.');
 
         if (! $this->menuId) {
             $this->saveMenu();
@@ -90,17 +93,17 @@ class MenuManager extends Component
 
         if ($this->pageId) {
             abort_unless(in_array($this->pageId, $this->availablePages()->pluck('id')->all(), true), 422, 'Esta página não está disponível na navegação.');
-        }
 
-        if (in_array($page?->slug, ['home', 'about', 'contact'], true)) {
-            abort(422, 'As páginas essenciais já estão disponíveis no menu.');
+            if (in_array($page?->slug, ['home', 'about', 'contact'], true)) {
+                abort(422, 'As páginas essenciais já estão disponíveis no menu.');
+            }
         }
 
         $menu->items()->create([
             'site_page_id' => $page?->id,
             'parent_id' => $parent?->id,
             'label' => $this->label,
-            'url' => null,
+            'url' => $page?->id ? null : trim($this->url),
             'target' => $this->target,
             'sort_order' => ($menu->items()->where('parent_id', $parent?->id)->max('sort_order') ?? -1) + 1,
             'is_visible' => $this->isVisible,
