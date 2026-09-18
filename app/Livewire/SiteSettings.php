@@ -25,6 +25,7 @@ class SiteSettings extends Component
         abort_unless($site->isManageableBy(auth()->user()), 403);
 
         $this->site = $site;
+        session()->put('current_site_id', $site->id);
         $this->modelContent = data_get($site->settings, 'model_content', []);
         $this->modelContentApplied = filled(data_get($site->settings, 'model_content_applied_at'));
         $this->modelContentSaved = filled(data_get($site->settings, 'model_content'));
