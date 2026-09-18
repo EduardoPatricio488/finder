@@ -253,7 +253,24 @@
                     <button type="button" wire:click="closeQuickStockModal" class="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"><flux:icon name="x-mark" class="size-5"/></button>
                 </div>
                 <div class="mt-6 grid gap-4">
-                    <div><label class="text-sm font-semibold">Alteração</label><input wire:model="stockChange" type="number" class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-950" placeholder="Ex.: 10 ou -3"><p class="mt-1 text-xs text-zinc-500">Usa um valor positivo para entrada e negativo para saída.</p>@error('stockChange')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
+                    <div>
+                        <label class="text-sm font-semibold">Tipo de movimento</label>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <button type="button" wire:click="$set('stockType', 'entrada')" class="rounded-xl border px-4 py-3 text-sm font-bold transition {{ $stockType === 'entrada' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'border-zinc-200 text-zinc-600 hover:border-emerald-300 dark:border-zinc-700 dark:text-zinc-300' }}">
+                                <span class="block">Entrada de stock</span>
+                                <span class="mt-1 block text-xs font-normal opacity-70">Adicionar unidades</span>
+                            </button>
+                            <button type="button" wire:click="$set('stockType', 'saida')" class="rounded-xl border px-4 py-3 text-sm font-bold transition {{ $stockType === 'saida' ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400' : 'border-zinc-200 text-zinc-600 hover:border-red-300 dark:border-zinc-700 dark:text-zinc-300' }}">
+                                <span class="block">Saída de stock</span>
+                                <span class="mt-1 block text-xs font-normal opacity-70">Retirar unidades</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold">Quantidade</label>
+                        <input wire:model="stockChange" type="number" min="1" class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-950" placeholder="Ex.: 10">
+                        @error('stockChange')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
                     <div><label class="text-sm font-semibold">Motivo</label><input wire:model="stockReason" type="text" class="mt-2 w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-950" placeholder="Reposição, venda, correcção..."></div>
                 </div>
                 <div class="mt-6 flex justify-end gap-2"><button type="button" wire:click="closeQuickStockModal" class="rounded-xl border px-4 py-2.5 text-sm font-semibold dark:border-zinc-700">Cancelar</button><button type="button" wire:click="saveQuickStock" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white">Guardar</button></div>
