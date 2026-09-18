@@ -29,7 +29,15 @@ class ProductDetail extends Component
             ? $routeSite
             : $product->site;
 
-        abort_unless($site instanceof \App\Models\Site && $site->status === 'online' && $site->is_published, 404);
+        abort_unless($site instanceof \App\Models\Site, 404);
+
+        $preview = request()->boolean('preview');
+        if ($preview) {
+            abort_unless($site->isManageableBy(auth()->user()), 403);
+        } else {
+            abort_unless($site->status === 'online' && $site->is_published, 404);
+        }
+
         abort_unless((int) $product->site_id === $site->id, 404);
 
         $this->product = $product;
