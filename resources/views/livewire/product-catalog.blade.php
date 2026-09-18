@@ -134,4 +134,64 @@
             </div>
         </div>
     </div>
+    @if($productModalOpen)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeProductModal">
+            <div class="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-zinc-900" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
+                    <div>
+                        <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Novo produto</p>
+                        <h2 class="mt-1 text-xl font-bold text-zinc-950 dark:text-white">Adicionar produto</h2>
+                        <p class="mt-1 text-sm text-zinc-500">Adiciona um produto a este website.</p>
+                    </div>
+                    <button type="button" wire:click="closeProductModal" class="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Fechar">
+                        <flux:icon name="x-mark" class="size-5" />
+                    </button>
+                </div>
+                <form wire:submit="saveProduct" class="max-h-[75vh] overflow-y-auto p-6">
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div class="sm:col-span-2">
+                            <label class="mb-2 block text-sm font-semibold">Nome do produto</label>
+                            <input wire:model="productName" type="text" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950" placeholder="Nome do produto">
+                            @error('productName') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold">Categoria</label>
+                            <select wire:model="productCategoryId" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                                <option value="">Seleciona uma categoria</option>
+                                @foreach($categories as $item)<option value="{{ $item->id }}">{{ $item->name }}</option>@endforeach
+                            </select>
+                            @error('productCategoryId') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold">Preço (€)</label>
+                            <input wire:model="productPrice" type="number" min="0" step="0.01" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                            @error('productPrice') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold">Stock</label>
+                            <input wire:model="productStock" type="number" min="0" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold">Stock mínimo</label>
+                            <input wire:model="productMinimumStock" type="number" min="0" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-2 block text-sm font-semibold">Descrição</label>
+                            <textarea wire:model="productDescription" rows="3" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950"></textarea>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-2 block text-sm font-semibold">Imagem</label>
+                            <input wire:model="productImage" type="file" accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                            @error('productImage') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-800">
+                        <button type="button" wire:click="closeProductModal" class="rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-semibold dark:border-zinc-700">Cancelar</button>
+                        <button type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-700">Adicionar produto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
 </div>
