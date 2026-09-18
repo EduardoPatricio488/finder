@@ -179,6 +179,21 @@ class ProductCatalog extends Component
 
     }
 
+    public function resetFilters(): void
+    {
+        $this->reset([
+            'search',
+            'category',
+            'minPrice',
+            'maxPrice',
+            'availability',
+            'minRating',
+            'catalogFilter',
+        ]);
+
+        $this->sortBy = 'name';
+    }
+
     public function updatedSelectAllProducts(bool $value): void
     {
         $this->selectedProducts = $value
