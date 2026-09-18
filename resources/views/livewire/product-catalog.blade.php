@@ -5,6 +5,15 @@
                 <div>
                     <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Loja</p>
                     <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Produtos</h1>
+                    <div class="mt-4 max-w-md">
+                        <label for="product-site-selector" class="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Website / Workspace</label>
+                        <select id="product-site-selector" wire:model.live="selectedSiteId" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold text-zinc-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white">
+                            @foreach($availableSites as $availableSite)
+                                <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Os produtos apresentados e criados nesta página pertencem exclusivamente ao website selecionado.</p>
+                    </div>
                     <div class="mt-3 flex flex-wrap items-center gap-2">
                         @if($site)
                             <span class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
