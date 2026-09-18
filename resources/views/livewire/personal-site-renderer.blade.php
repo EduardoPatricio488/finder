@@ -253,7 +253,7 @@
                             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                                 @foreach($items as $item)
                                     <figure class="overflow-hidden rounded-3xl border border-black/5 bg-[#f8f8f6] shadow-sm">
-                                        <img src="{{ route('admin.site.media.file', ['site' => $site, 'media' => $item->id]) }}" alt="{{ $item->alt_text ?: $item->original_name }}" class="aspect-[4/3] w-full object-cover" loading="lazy" decoding="async">
+                                        <img src="{{ route('admin.site.media.file', ['media' => $item->id]) }}" alt="{{ $item->alt_text ?: $item->original_name }}" class="aspect-[4/3] w-full object-cover" loading="lazy" decoding="async">
                                         <figcaption class="px-4 py-3 text-xs font-semibold text-zinc-500">{{ $item->alt_text ?: $item->original_name }}</figcaption>
                                     </figure>
                                 @endforeach
