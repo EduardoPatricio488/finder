@@ -5,7 +5,7 @@
         @php
             $currentSite = \App\Support\SiteContext::current();
             $hasSite = $currentSite !== null;
-            $isDashboard = request()->routeIs('dashboard', 'admin.site.dashboard');
+            $isDashboard = request()->routeIs('dashboard', 'site.manage.dashboard');
             $modelProfile = $hasSite ? config('website.model_profiles.'.($currentSite?->type ?? ''), []) : [];
             $isPlatformAdmin = auth()->user()?->isAdministrator() && session()->has('platform_admin_site_id');
             $availableSites = \App\Models\Site::query()->where(function ($query) {
@@ -15,7 +15,7 @@
             $siteRoute = function (string $name, ?\App\Models\Site $site = null) use ($currentSite): string {
                 $target = $site ?? $currentSite;
                 if (! $target) return '#';
-                $routeName = 'admin.site.'.$name;
+                $routeName = 'site.manage.'.$name;
                 return Route::has($routeName) ? route($routeName) : '#';
             };
         @endphp
@@ -40,7 +40,7 @@
             </div>
             <flux:sidebar.nav>
                 @if($hasSite)
-                    <flux:sidebar.item icon="squares-2x2" :href="$siteRoute('dashboard')" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>
+                    <flux:sidebar.item icon="squares-2x2" :href="$siteRoute('dashboard')" :current="request()->routeIs('site.manage.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>
                 @endif
                 <flux:sidebar.group heading="Loja" class="grid">
                     <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
@@ -52,17 +52,17 @@
                 </flux:sidebar.group>
                 @if($hasSite && ! $isDashboard)
                     <flux:sidebar.group heading="Website" class="grid">
-                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>Configuração do site</flux:sidebar.item>
-                        <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
-                        <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
-                        <flux:sidebar.item icon="adjustments-horizontal" :href="$siteRoute('definitions')" :current="request()->routeIs('admin.site.definitions')" wire:navigate>Definições</flux:sidebar.item>
+                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('site.manage.settings')" wire:navigate>Configuração do site</flux:sidebar.item>
+                        <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('site.manage.media')" wire:navigate>Media</flux:sidebar.item>
+                        <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('site.manage.menus')" wire:navigate>Menus</flux:sidebar.item>
+                        <flux:sidebar.item icon="adjustments-horizontal" :href="$siteRoute('definitions')" :current="request()->routeIs('site.manage.definitions')" wire:navigate>Definições</flux:sidebar.item>
                     </flux:sidebar.group>
                     @if($currentSite->type === 'online_store')
                         <flux:sidebar.group heading="Vendas" class="grid">
-                            <flux:sidebar.item icon="presentation-chart-line" :href="$siteRoute('sales')" :current="request()->routeIs('admin.site.sales')" wire:navigate>Vendas</flux:sidebar.item>
-                            <flux:sidebar.item icon="currency-euro" :href="$siteRoute('payments')" :current="request()->routeIs('admin.site.payments')" wire:navigate>Pagamentos</flux:sidebar.item>
-                            <flux:sidebar.item icon="archive-box" :href="$siteRoute('stock')" :current="request()->routeIs('admin.site.stock')" wire:navigate>Stock</flux:sidebar.item>
-                            <flux:sidebar.item icon="tag" :href="$siteRoute('promotions')" :current="request()->routeIs('admin.site.promotions')" wire:navigate>Promoções</flux:sidebar.item>
+                            <flux:sidebar.item icon="presentation-chart-line" :href="$siteRoute('sales')" :current="request()->routeIs('site.manage.sales')" wire:navigate>Vendas</flux:sidebar.item>
+                            <flux:sidebar.item icon="currency-euro" :href="$siteRoute('payments')" :current="request()->routeIs('site.manage.payments')" wire:navigate>Pagamentos</flux:sidebar.item>
+                            <flux:sidebar.item icon="archive-box" :href="$siteRoute('stock')" :current="request()->routeIs('site.manage.stock')" wire:navigate>Stock</flux:sidebar.item>
+                            <flux:sidebar.item icon="tag" :href="$siteRoute('promotions')" :current="request()->routeIs('site.manage.promotions')" wire:navigate>Promoções</flux:sidebar.item>
                         </flux:sidebar.group>
                     @endif
                 @endif
