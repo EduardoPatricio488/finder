@@ -63,52 +63,32 @@
                     <flux:icon name="plus" class="size-5" />
                 </div>
                 <div>
-                    <h2 class="font-semibold text-zinc-950">Adicionar página</h2>
-                    <p class="mt-1 text-xs leading-5 text-zinc-500">Escolhe uma das três páginas disponíveis para a navegação.</p>
+                    <h2 class="font-semibold text-zinc-950">Páginas disponíveis</h2>
+                    <p class="mt-1 text-xs leading-5 text-zinc-500">Início, Sobre mim e Contactos já fazem parte do menu. Podes mudar o nome de cada uma, mas não as podes eliminar.</p>
                 </div>
             </div>
 
-            <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                <div class="sm:col-span-2">
-                    <label class="text-sm font-medium text-zinc-800">Texto apresentado no menu</label>
-                    <input wire:model="label" placeholder="Ex.: Início" class="mt-1.5 w-full rounded-xl border border-zinc-200 px-3.5 py-2.5 text-sm" />
-                    @error('label') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <label class="text-sm font-medium text-zinc-800">Página</label>
-                    <select wire:model="pageId" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
-                        <option value="">Selecionar página</option>
-                        @foreach ($pages as $page)
-                            <option value="{{ $page->id }}">{{ $this->pageLabel($page->slug) }}</option>
-                        @endforeach
-                    </select>
-                    @error('pageId') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <label class="text-sm font-medium text-zinc-800">Tipo</label>
-                    <select wire:model="parentId" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
-                        <option value="">Item principal</option>
-                        @foreach ($items as $item)
-                            @if (! $item->parent_id)
-                                <option value="{{ $item->id }}">Submenu de: {{ $item->label }}</option>
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
+            <div class="mt-6 space-y-3">
+                @foreach ($pages as $page)
+                    @php($requiredItemId = $requiredItemIds[$page->slug] ?? null)
+                    @php($requiredItem = $requiredItemId ? $items->firstWhere('id', $requiredItemId) : null)
+                    <div class="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:flex-row sm:items-center">
+                        <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-zinc-500 shadow-sm">
+                            <flux:icon name="{{ match($page->slug) { 'home' => 'home', 'about' => 'user', 'contact' => 'envelope', default => 'document-text' } }}" class="size-5" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">{{ $this->pageLabel($page->slug) }}</p>
+                            <input wire:model="requiredLabels.{{ $page->slug }}" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900" />
+                        </div>
+                        <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                            <span class="size-1.5 rounded-full bg-emerald-500"></span>
+                            Obrigatório
+                        </span>
+                    </div>
+                @endforeach
             </div>
 
-            <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
-                <label class="flex items-center gap-2 text-sm text-zinc-600">
-                    <input type="checkbox" wire:model="isVisible" class="rounded border-zinc-300" />
-                    Visível no website
-                </label>
-                <button type="button" wire:click="addItem" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
-                    <flux:icon name="plus" class="size-4" />
-                    Adicionar ao menu
-                </button>
-            </div>
+            <p class="mt-4 text-xs leading-5 text-zinc-400">Estas três páginas são criadas automaticamente e permanecem sempre no menu. Aqui só podes alterar o nome apresentado.</p>
         </div>
     </div>
 
@@ -136,7 +116,9 @@
                             {{ $item->is_visible ? 'Visível' : 'Oculto' }}
                         </span>
                         <button type="button" wire:click="toggleItem({{ $item->id }})" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">{{ $item->is_visible ? 'Ocultar' : 'Mostrar' }}</button>
-                        <button type="button" wire:click="removeItem({{ $item->id }})" wire:confirm="Eliminar este item?" class="text-xs font-semibold text-red-600 hover:text-red-800">Eliminar</button>
+                        @if (! in_array($item->id, array_values(array_filter($requiredItemIds)), true))
+                            <button type="button" wire:click="removeItem({{ $item->id }})" wire:confirm="Eliminar este item?" class="text-xs font-semibold text-red-600 hover:text-red-800">Eliminar</button>
+                        @endif
                     </div>
 
                     @foreach ($item->children as $child)
