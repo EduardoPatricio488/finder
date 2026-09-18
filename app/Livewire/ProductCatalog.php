@@ -290,7 +290,8 @@ class ProductCatalog extends Component
     public function exportProducts(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $products = $this->siteScoped(Product::query())->with('category')->orderBy('name')->get();
-        $filename = 'produtos-'.Str::slug($this->site()->name).'-'.now()->format('Y-m-d').'.csv';
+        $userName = auth()->user()?->name ?: 'Utilizador';
+        $filename = Str::slug($userName).'-produtos-'.now()->format('Y-m-d').'.csv';
         return response()->streamDownload(function () use ($products): void {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
