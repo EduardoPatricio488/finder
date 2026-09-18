@@ -62,6 +62,7 @@ class ProductCatalog extends Component
     public ?int $stockProductId = null;
     public string $stockProductName = '';
     public int $stockChange = 0;
+    public string $stockType = 'entrada';
     public string $stockReason = '';
     public array $selectedProducts = [];
     public bool $selectAllProducts = false;
@@ -274,6 +275,7 @@ class ProductCatalog extends Component
         $this->stockProductId = $product->id;
         $this->stockProductName = (string) $product->name;
         $this->stockChange = 0;
+        $this->stockType = 'entrada';
         $this->stockReason = '';
         $this->resetValidation();
         $this->quickStockModalOpen = true;
@@ -285,6 +287,7 @@ class ProductCatalog extends Component
         $this->stockProductId = null;
         $this->stockProductName = '';
         $this->stockChange = 0;
+        $this->stockType = 'entrada';
         $this->stockReason = '';
     }
 
@@ -295,14 +298,16 @@ class ProductCatalog extends Component
             'stockReason' => ['nullable', 'string', 'max:255'],
         ]);
         $product = $this->siteScoped(Product::query())->findOrFail($this->stockProductId);
-        $newStock = $product->stock + $data['stockChange'];
+        $quantity = abs((int) $data['stockChange']);
+        $signedQuantity = $this->stockType === 'saida' ? -$quantity : $quantity;
+        $newStock = $product->stock + $signedQuantity;
         abort_if($newStock < 0, 422, 'O stock não pode ficar negativo.');
         $product->update(['stock' => $newStock]);
         $product->stockMovements()->create([
             'site_id' => $this->site()->id,
             'user_id' => auth()->id(),
-            'type' => $data['stockChange'] > 0 ? 'entrada' : 'saida',
-            'quantity' => $data['stockChange'],
+            'type' => $this->stockType,
+            'quantity' => $signedQuantity,
             'note' => $data['stockReason'] ?: 'Alteração rápida de stock',
         ]);
         $this->closeQuickStockModal();
