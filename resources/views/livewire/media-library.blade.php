@@ -93,7 +93,7 @@
                                 ];
                             @endphp
                             <div class="mt-3 rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
-                                <span class="font-bold">Aplicação:</span> {{ $placementLabels[$item->placement ?? 'gallery'] ?? 'Galeria' }}
+                                <span class="font-bold">Aplicação:</span> {{ $placementLabels[$item->placement ?: 'gallery'] ?? 'Galeria' }}
                             </div>
                             <button wire:click="deleteMedia({{ $item->id }})" wire:confirm="Eliminar este ficheiro?" class="mt-3 text-xs font-semibold text-red-600">Eliminar</button>
                         </div>
