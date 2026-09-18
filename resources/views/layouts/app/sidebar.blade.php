@@ -49,11 +49,11 @@
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus Websites</flux:sidebar.item>
 
-<flux:sidebar.group heading="Loja" class="grid">
-    <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
-    <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
-    <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
-</flux:sidebar.group>
+                <flux:sidebar.group heading="Loja" class="grid">
+                    <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
+                    <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
+                </flux:sidebar.group>
 
                 @if($hasSite && ! $isDashboard)
                     <flux:sidebar.group heading="Website" class="grid">
@@ -71,21 +71,6 @@
                             <flux:sidebar.item icon="tag" :href="$siteRoute('promotions')" :current="request()->routeIs('admin.site.promotions')" wire:navigate>Promoções</flux:sidebar.item>
                         </flux:sidebar.group>
                     @endif
-
-                    <flux:sidebar.group heading="Inteligência" class="grid">
-                        @can('access-reports', $currentSite)
-                            <flux:sidebar.item icon="chart-bar" :href="$siteRoute('reports')" :current="request()->routeIs('admin.site.reports')" wire:navigate>Relatórios</flux:sidebar.item>
-                            <flux:sidebar.item icon="presentation-chart-line" :href="$siteRoute('analytics')" :current="request()->routeIs('admin.site.analytics')" wire:navigate>Analytics</flux:sidebar.item>
-                        @else
-                            <flux:sidebar.item icon="lock-closed" :href="$siteRoute('upgrade')" wire:navigate>Relatórios <span class="ms-auto text-[10px] font-semibold uppercase tracking-wide text-amber-500">Pro</span></flux:sidebar.item>
-                            <flux:sidebar.item icon="lock-closed" :href="$siteRoute('upgrade')" wire:navigate>Analytics <span class="ms-auto text-[10px] font-semibold uppercase tracking-wide text-amber-500">Pro</span></flux:sidebar.item>
-                        @endcan
-                        @can('access-ai', $currentSite)
-                            <flux:sidebar.item icon="sparkles" :href="$siteRoute('assistant')" :current="request()->routeIs('admin.site.assistant')" wire:navigate>Assistente IA</flux:sidebar.item>
-                        @else
-                            <flux:sidebar.item icon="lock-closed" :href="$siteRoute('upgrade')" wire:navigate>Assistente IA <span class="ms-auto text-[10px] font-semibold uppercase tracking-wide text-amber-500">Pro</span></flux:sidebar.item>
-                        @endcan
-                    </flux:sidebar.group>
                 @endif
             </flux:sidebar.nav>
 
@@ -107,7 +92,6 @@
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
         {{ $slot }}
-        @if($hasSite && auth()->user()->can('access-ai', $currentSite))<livewire:admin-assistant />@endif
         @persist('toast')<flux:toast.group><flux:toast /></flux:toast.group>@endpersist
         @fluxScripts
     </body>
