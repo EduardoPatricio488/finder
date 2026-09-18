@@ -29,6 +29,9 @@ class ProductCatalog extends Component
     public string $maxPrice = '';
     public string $availability = '';
     public string $minRating = '';
+    public string $sortBy = 'name';
+    public string $catalogFilter = '';
+    public $importFile;
     public bool $productModalOpen = false;
     public bool $manageProductModalOpen = false;
     public bool $imageGalleryOpen = false;
@@ -119,6 +122,68 @@ class ProductCatalog extends Component
         $this->selectedProducts = $value
             ? $this->siteScoped(Product::query())->pluck('id')->map(fn ($id) => (string) $id)->all()
             : [];
+    }
+
+    public function updatedImportFile(): void
+    {
+        $this->importProducts();
+    }
+
+    public function importProducts(): void
+    {
+        $this->validate(['importFile' => ['required', 'file', 'mimes:csv,txt', 'max:5120']]);
+        $handle = fopen($this->importFile->getRealPath(), 'r');
+        $header = fgetcsv($handle, 0, ';') ?: [];
+        $header = array_map(fn ($value) => Str::lower(trim((string) $value)), $header);
+        $map = array_flip($header);
+        $site = $this->site();
+        $count = 0;
+        while (($row = fgetcsv($handle, 0, ';')) !== false) {
+            $name = trim((string) ($row[$map['nome'] ?? -1] ?? ''));
+            if ($name === '') continue;
+            $categoryName = trim((string) ($row[$map['categoria'] ?? -1] ?? 'Outros')) ?: 'Outros';
+            $category = $site->categories()->firstOrCreate(['slug' => Str::slug($categoryName)], ['name' => $categoryName]);
+            $product = $site->products()->create([
+                'category_id' => $category->id,
+                'name' => $name,
+                'slug' => Str::slug($name).'-'.Str::lower(Str::random(5)),
+                'sku' => trim((string) ($row[$map['sku'] ?? -1] ?? '')) ?: null,
+                'price' => (float) str_replace(',', '.', (string) ($row[$map['preço'] ?? -1] ?? 0)),
+                'stock' => (int) ($row[$map['stock'] ?? -1] ?? 0),
+                'minimum_stock' => (int) ($row[$map['stock mínimo'] ?? -1] ?? 0),
+                'description' => trim((string) ($row[$map['descrição'] ?? -1] ?? '')) ?: null,
+                'is_active' => true,
+            ]);
+            $count++;
+        }
+        fclose($handle);
+        $this->reset('importFile');
+        session()->flash('status', $count.' produtos importados com sucesso.');
+    }
+
+    public function deleteProductImage(int $productId, int $index): void
+    {
+        $product = $this->siteScoped(Product::query())->findOrFail($productId);
+        $images = array_values($product->images ?: ($product->image_url ? [$product->image_url] : []));
+        if (!isset($images[$index])) return;
+        Storage::disk('public')->delete($images[$index]);
+        array_splice($images, $index, 1);
+        $product->update(['images' => $images ?: null, 'image_url' => $images[0] ?? null]);
+        $this->imageGalleryPhotos = $images;
+        $this->imageGalleryIndex = 0;
+    }
+
+    public function setPrimaryImage(int $productId, int $index): void
+    {
+        $product = $this->siteScoped(Product::query())->findOrFail($productId);
+        $images = array_values($product->images ?: ($product->image_url ? [$product->image_url] : []));
+        if (!isset($images[$index])) return;
+        $primary = $images[$index];
+        unset($images[$index]);
+        array_unshift($images, $primary);
+        $product->update(['image_url' => $images[0], 'images' => array_values($images)]);
+        $this->imageGalleryPhotos = array_values($images);
+        $this->imageGalleryIndex = 0;
     }
 
     public function updatedSelectedProducts(): void
@@ -589,10 +654,18 @@ class ProductCatalog extends Component
             ->when($this->availability === 'baixo', fn ($query) => $query->whereColumn('stock', '<=', 'minimum_stock')->where('stock', '>', 0))
             ->when($this->availability === 'esgotado', fn ($query) => $query->where('stock', 0))
             ->when($this->minRating !== '', fn ($query) => $query->whereHas('reviews', fn ($query) => $query->where('rating', '>=', $minimumRating)))
-            ->orderBy('name')->get();
+            ->when($this->catalogFilter === 'sem_imagem', fn ($query) => $query->whereNull('image_url'))
+            ->when($this->catalogFilter === 'sem_descricao', fn ($query) => $query->where(function ($q) { $q->whereNull('description')->orWhere('description', ''); }))
+            ->when($this->sortBy === 'price_asc', fn ($query) => $query->orderBy('price'))
+            ->when($this->sortBy === 'price_desc', fn ($query) => $query->orderByDesc('price'))
+            ->when($this->sortBy === 'stock', fn ($query) => $query->orderByDesc('stock'))
+            ->when($this->sortBy === 'rating', fn ($query) => $query->orderByDesc('reviews_avg_rating'))
+            ->when($this->sortBy === 'newest', fn ($query) => $query->latest())
+            ->when($this->sortBy === 'name', fn ($query) => $query->orderBy('name'))->get();
 
         return view('livewire.product-catalog', [
             'products' => $products,
+            'stockValue' => $products->sum(fn (Product $product): float => (float) $product->price * (int) $product->stock),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'categories' => $this->siteScoped(Category::query())->orderBy('name')->get(),
