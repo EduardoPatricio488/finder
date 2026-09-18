@@ -29,10 +29,21 @@
                     </div>
                     <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Gere os produtos da empresa, acompanha o stock e mantém o catálogo organizado.</p>
                 </div>
-                <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
-                    <flux:icon name="plus" class="size-4" />
-                    Adicionar produto
-                </button>
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                    @if(session('products-applied'))
+                        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">{{ session('products-applied') }}</span>
+                    @endif
+                    @if($productsApplied)
+                        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">✓ Aplicado no site</span>
+                    @else
+                        <span class="rounded-xl bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Alterações por aplicar</span>
+                    @endif
+                    <flux:button type="button" wire:click="applyProducts" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
+                    <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
+                        <flux:icon name="plus" class="size-4" />
+                        Adicionar produto
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -440,8 +451,28 @@
                             <textarea wire:model="productDescription" rows="3" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950"></textarea>
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="mb-2 block text-sm font-semibold">Imagem</label>
-                            <input wire:model="productImages" type="file" multiple accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                            <label class="mb-2 block text-sm font-semibold">Fotografias do produto</label>
+                            @if($productMedia->isNotEmpty())
+                                <div class="grid grid-cols-3 gap-3 sm:grid-cols-5">
+                                    @foreach($productMedia as $mediaItem)
+                                        <label class="group cursor-pointer">
+                                            <input type="checkbox" wire:model.live="productMediaIds" value="{{ $mediaItem->id }}" class="sr-only">
+                                            <div class="overflow-hidden rounded-xl border-2 {{ in_array($mediaItem->id, $productMediaIds) ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-zinc-200 dark:border-zinc-700' }} bg-zinc-100">
+                                                <img src="{{ route('site.manage.media.file', ['media' => $mediaItem->id]) }}" alt="{{ $mediaItem->alt_text ?: $mediaItem->original_name }}" class="aspect-square w-full object-cover transition group-hover:scale-105">
+                                            </div>
+                                            <p class="mt-1 truncate text-[11px] text-zinc-500">{{ $mediaItem->original_name }}</p>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <p class="mt-2 text-xs text-zinc-500">Seleciona as fotografias que queres aplicar a este produto.</p>
+                            @else
+                                <div class="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-4 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950">
+                                    Ainda não tens fotografias para produtos na biblioteca de media. Vai a <a href="{{ route('site.manage.media') }}" class="font-bold text-indigo-600 hover:underline">Media</a>, escolhe <strong>Produtos</strong> e carrega as fotografias.
+                                </div>
+                            @endif
+                            <details class="mt-3">
+                                <summary class="cursor-pointer text-xs font-semibold text-indigo-600">Ou carregar fotografias diretamente</summary>
+                                <input wire:model="productImages" type="file" multiple accept="image/jpeg,image/png,image/webp" class="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
                             <p class="mt-1 text-xs text-zinc-500">Podes adicionar até 10 fotografias, com até 10 MB por fotografia.</p>
                             @error('productImages') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             @error('productImages.*') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
