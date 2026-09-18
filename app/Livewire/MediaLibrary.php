@@ -74,6 +74,16 @@ class MediaLibrary extends Component
         return route('admin.site.media.file', ['site' => $this->site, 'media' => $media->id]);
     }
 
+    public function placementOptions(): array
+    {
+        return [
+            'logo' => 'Logótipo', 'hero' => 'Capa / Hero principal', 'about' => 'Sobre mim / Sobre nós',
+            'experience' => 'Experiência', 'education' => 'Formação', 'skills' => 'Competências',
+            'projects' => 'Projetos', 'services' => 'Serviços', 'testimonials' => 'Testemunhos',
+            'gallery' => 'Galeria', 'contact' => 'Contacto', 'background' => 'Fundo de uma secção', 'footer' => 'Rodapé',
+        ];
+    }
+
     public function placementLabel(?string $placement): string
     {
         return [
@@ -98,6 +108,9 @@ class MediaLibrary extends Component
             ->latest()
             ->get();
 
-        return view('livewire.media-library', compact('media'));
+        return view('livewire.media-library', [
+            'media' => $media,
+            'placementOptions' => $this->placementOptions(),
+        ]);
     }
 }
