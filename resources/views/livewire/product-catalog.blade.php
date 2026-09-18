@@ -100,7 +100,8 @@
                                         </div>
                                         <div class="min-w-0">
                                             <p class="font-semibold text-zinc-950 dark:text-white">{{ $product->name }}</p>
-                                            <p class="mt-0.5 max-w-xs truncate text-xs text-zinc-500">{{ $product->sku ?: 'Sem SKU' }}</p>
+                                            <p class="mt-0.5 max-w-md truncate text-xs text-zinc-500">{{ $product->description ?: 'Sem descrição' }}</p>
+                                            <p class="mt-0.5 max-w-xs truncate text-[11px] text-zinc-400">{{ $product->sku ?: 'Sem SKU' }}</p>
                                         </div>
                                     </div>
                                 </td>
