@@ -5,7 +5,6 @@
             <h1 class="text-3xl font-bold tracking-tight">Biblioteca de media</h1>
             <p class="mt-1 text-sm text-zinc-500">Imagens e ficheiros deste website, isolados por tenant.</p>
         </div>
-        <a href="{{ route('builder.edit', $site) }}" wire:navigate class="rounded-xl border border-zinc-200 px-4 py-2 text-sm font-semibold dark:border-zinc-700">Voltar ao editor</a>
     </div>
 
     @if(session('status'))
