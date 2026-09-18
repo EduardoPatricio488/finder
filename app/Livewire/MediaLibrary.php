@@ -18,7 +18,7 @@ class MediaLibrary extends Component
 
     public string $altText = '';
 
-    public string $placement = 'gallery';
+    public string $placement = '';
 
     public string $search = '';
 
@@ -62,7 +62,6 @@ class MediaLibrary extends Component
         ]);
 
         $this->reset(['upload', 'altText']);
-        $this->placement = 'gallery';
         session()->flash('status', 'Ficheiro adicionado à biblioteca de media.');
     }
 
