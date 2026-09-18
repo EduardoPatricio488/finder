@@ -90,16 +90,15 @@
                         @endcan
                     </flux:sidebar.group>
                 @else
-                    <flux:sidebar.group heading="Finder" class="grid">
+                    <flux:sidebar.group heading="Principal" class="grid">
                         <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus websites</flux:sidebar.item>
-                        <flux:sidebar.item icon="plus" :href="route('site.create')" :current="request()->routeIs('site.create')" wire:navigate>Criar website</flux:sidebar.item>
                         <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
                         <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
                         <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
                     </flux:sidebar.group>
 
-                    <flux:sidebar.group heading="A minha conta" class="grid">
-                        <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Conta</flux:sidebar.item>
+                    <flux:sidebar.group heading="Conta" class="grid">
+                        <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
                         <flux:sidebar.item icon="sparkles" :href="route('customer.assistant')" :current="request()->routeIs('customer.assistant')" wire:navigate>Assistente IA</flux:sidebar.item>
                     </flux:sidebar.group>
 
