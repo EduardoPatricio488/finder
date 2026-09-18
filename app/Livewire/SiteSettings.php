@@ -25,6 +25,20 @@ class SiteSettings extends Component
         $this->modelContent = data_get($site->settings, 'model_content', []);
         $this->modelContentApplied = filled(data_get($site->settings, 'model_content_applied_at'));
 
+        $brief = data_get($site->settings, 'builder.brief', []);
+
+        // Os dados introduzidos na criação do website são reutilizados
+        // automaticamente na configuração específica do modelo.
+        if ($this->site->type === 'personal') {
+            if (! filled($this->modelContent['display_name'] ?? null) && filled($brief['business_name'] ?? null)) {
+                $this->modelContent['display_name'] = trim((string) $brief['business_name']);
+            }
+
+            if (! filled($this->modelContent['bio'] ?? null) && filled($brief['description'] ?? null)) {
+                $this->modelContent['bio'] = trim((string) $brief['description']);
+            }
+        }
+
         foreach ($this->modelProfile()['fields'] as $field) {
             $key = (string) ($field['key'] ?? '');
 
