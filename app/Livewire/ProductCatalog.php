@@ -99,7 +99,7 @@ class ProductCatalog extends Component
         $referer = (string) request()->headers->get('referer', '');
         if (preg_match('~/websites/([^/]+)/builder(?:[/?#]|$)~', $referer, $matches)) {
             $site = Site::query()->where('slug', $matches[1])->first();
-            if ($site !== null) return redirect()->route('admin.site.products', $site);
+            if ($site !== null) return redirect()->route('products');
         }
         if (! auth()->check()) return null;
 
