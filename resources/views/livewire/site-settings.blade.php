@@ -64,7 +64,7 @@
                             </label>
 
                             @if($fieldType === 'textarea')
-                                <textarea id="{{ $fieldId }}-input" wire:model="modelContent.{{ $fieldKey }}" rows="5" placeholder="{{ $field['placeholder'] ?? '' }}" class="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-indigo-500 dark:focus:ring-indigo-950"></textarea>
+                                <textarea id="{{ $fieldId }}-input" wire:model.live="modelContent.{{ $fieldKey }}" rows="5" placeholder="{{ $field['placeholder'] ?? '' }}" class="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-indigo-500 dark:focus:ring-indigo-950"></textarea>
                             @else
                                 <input id="{{ $fieldId }}-input" type="{{ $fieldType === 'email' ? 'email' : ($fieldType === 'url' ? 'url' : 'text') }}" wire:model="modelContent.{{ $fieldKey }}" placeholder="{{ $field['placeholder'] ?? '' }}" class="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-indigo-500 dark:focus:ring-indigo-950" />
                             @endif
