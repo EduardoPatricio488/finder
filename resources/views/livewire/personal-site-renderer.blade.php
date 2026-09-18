@@ -94,7 +94,7 @@
                                 <div class="mt-20">
                                     <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-bold text-white" style="background: var(--finder-primary)">{{ $initial }}</div>
                                     <p class="mt-6 text-2xl font-semibold tracking-tight">{{ $site->name }}</p>
-                                    <p class="mt-3 text-sm leading-6 text-white/55">{{ IlluminateSupportStr::limit($description, 130) }}</p>
+                                    <p class="mt-3 text-sm leading-6 text-white/55">{{ \\Illuminate\\Support\\Str::limit($description, 130) }}</p>
                                 </div>
                                 <div class="mt-12 flex items-center justify-between border-t border-white/10 pt-5 text-xs text-white/45"><span>{{ $categoryLabel !== '' ? $categoryLabel : 'Personal' }}</span><span>PT-PT</span></div>
                             </div>
@@ -119,9 +119,9 @@
                 <div class="mx-auto max-w-6xl">
                     <p class="text-xs font-bold uppercase tracking-[0.18em]" style="color: var(--finder-primary)">Como posso ajudar</p><h2 class="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">O que podes esperar de trabalhar comigo.</h2>
                     <div class="mt-10 grid gap-5 sm:grid-cols-3">
-                        <div class="rounded-3xl border border-black/5 bg-white p-7 shadow-sm"><span class="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white" style="background: var(--finder-primary)">01</span><p class="mt-5 font-semibold">O que faço</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ IlluminateSupportStr::limit($description, 160) }}</p></div>
+                        <div class="rounded-3xl border border-black/5 bg-white p-7 shadow-sm"><span class="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white" style="background: var(--finder-primary)">01</span><p class="mt-5 font-semibold">O que faço</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ \\Illuminate\\Support\\Str::limit($description, 160) }}</p></div>
                         <div class="rounded-3xl border border-black/5 bg-white p-7 shadow-sm"><span class="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white" style="background: var(--finder-primary)">02</span><p class="mt-5 font-semibold">Para quem trabalho</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ $audience !== '' ? "Trabalho principalmente com {$audience}, adaptando sempre a abordagem a cada caso." : 'Trabalho com qualquer pessoa ou empresa que procure um serviço próximo e de confiança.' }}</p></div>
-                        <div class="rounded-3xl border border-black/5 bg-white p-7 shadow-sm"><span class="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white" style="background: var(--finder-primary)">03</span><p class="mt-5 font-semibold">Como trabalho</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ $additionalInfo !== '' ? IlluminateSupportStr::limit($additionalInfo, 160) : 'Comunicação clara, prazos cumpridos e atenção ao detalhe em cada etapa do processo.' }}</p></div>
+                        <div class="rounded-3xl border border-black/5 bg-white p-7 shadow-sm"><span class="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white" style="background: var(--finder-primary)">03</span><p class="mt-5 font-semibold">Como trabalho</p><p class="mt-2 text-sm leading-6 text-zinc-500">{{ $additionalInfo !== '' ? \\Illuminate\\Support\\Str::limit($additionalInfo, 160) : 'Comunicação clara, prazos cumpridos e atenção ao detalhe em cada etapa do processo.' }}</p></div>
                     </div>
                 </div>
             </section>
