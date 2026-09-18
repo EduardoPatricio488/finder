@@ -44,7 +44,7 @@
             <div class="mt-6 space-y-4">
                 <div>
                     <label class="text-sm font-medium text-zinc-800">Nome</label>
-                    <input wire:model="menuName" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+                    <input wire:model="menuName" readonly disabled class="mt-1.5 w-full cursor-not-allowed rounded-xl border border-zinc-200 bg-zinc-100 px-3.5 py-2.5 text-sm text-zinc-500 outline-none" />
                     @error('menuName') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
