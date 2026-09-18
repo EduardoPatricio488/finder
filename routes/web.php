@@ -84,7 +84,7 @@ Route::middleware(['auth', 'verified', 'admin'])
             session(['platform_admin_site_id' => $site->id]);
 
             session()->put('current_site_id', $site->id);
-            return redirect()->route('admin.site.dashboard');
+            return redirect()->route('site.manage.dashboard');
         })->name('websites.access');
         Route::post('websites/exit-access', function () {
             $siteId = session('platform_admin_site_id');
@@ -105,7 +105,7 @@ Route::middleware(['auth', 'verified', 'admin'])
     });
 
 Route::middleware(['auth', 'verified', 'site.access'])
-    ->name('admin.site.')
+    ->name('site.manage.')
     ->group(function (): void {
         Route::get('gestao', AdminDashboard::class)->name('dashboard');
         Route::get('config', StoreSettings::class)->name('config');
@@ -130,7 +130,7 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('mudar-website/{site:slug}', function (Site $site) {
             abort_unless($site->isManageableBy(auth()->user()), 403);
             session()->put('current_site_id', $site->id);
-            return redirect()->route('admin.site.dashboard');
+            return redirect()->route('site.manage.dashboard');
         })->withoutMiddleware('site.access')->name('switch');
     });
 
