@@ -23,9 +23,10 @@ class MediaLibrary extends Component
     public string $search = '';
     public bool $mediaApplied = false;
 
-    public function mount(Site $site): void
+    public function mount(): void
     {
-        abort_unless($site->isManageableBy(auth()->user()), 403);
+        $site = \App\Support\SiteContext::current();
+        abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
         session()->put('current_site_id', $site->id);
         $this->mediaApplied = filled(data_get($site->settings, 'media_applied_at'));
