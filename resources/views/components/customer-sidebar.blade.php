@@ -12,7 +12,7 @@
 >
     <div class="flex items-start justify-between gap-3">
         <a href="{{ route('sales') }}" wire:navigate class="group block">
-            <span class="block text-xl font-semibold tracking-tight transition group-hover:text-amber-800">Casa &amp; Co.</span>
+            <span class="block text-xl font-semibold tracking-tight transition group-hover:text-amber-800">Finder</span>
             <span class="mt-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-400">Área do cliente</span>
         </a>
         <button
