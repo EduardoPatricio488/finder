@@ -17,6 +17,11 @@ class FinderNotificationService
         $this->notifySiteUsers($site, 'Produto alterado', $message, 'shopping-bag');
     }
 
+    public function lowStock(Site $site, string $message): void
+    {
+        $this->notifySiteUsers($site, 'Stock baixo', $message, 'exclamation-triangle');
+    }
+
     public function saleChanged(Site $site, string $message): void
     {
         $this->notifySiteUsers($site, 'Nova atividade de vendas', $message, 'currency-euro');
