@@ -67,8 +67,7 @@ class MenuManager extends Component
     {
         $this->validate([
             'label' => ['required', 'string', 'max:100'],
-            'url' => ['nullable', 'string', 'max:2048'],
-            'pageId' => ['nullable', 'integer', 'exists:site_pages,id'],
+            'pageId' => ['required', 'integer', 'exists:site_pages,id'],
             'parentId' => ['nullable', 'integer'],
             'target' => ['required', 'in:_self,_blank'],
         ]);
@@ -89,7 +88,7 @@ class MenuManager extends Component
             'site_page_id' => $page?->id,
             'parent_id' => $parent?->id,
             'label' => $this->label,
-            'url' => $page ? null : ($this->url ?: '#'),
+            'url' => null,
             'target' => $this->target,
             'sort_order' => ($menu->items()->where('parent_id', $parent?->id)->max('sort_order') ?? -1) + 1,
             'is_visible' => $this->isVisible,
