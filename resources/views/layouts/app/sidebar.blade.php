@@ -89,7 +89,6 @@
                 @endif
             </flux:sidebar.nav>
 
-            <flux:spacer />
             <flux:sidebar.nav>
                 <flux:sidebar.group heading="Conta" class="grid">
                     <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
@@ -97,6 +96,7 @@
                 </flux:sidebar.group>
                 <flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item>
             </flux:sidebar.nav>
+            <flux:spacer />
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
         {{ $slot }}
