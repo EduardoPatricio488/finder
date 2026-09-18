@@ -14,11 +14,18 @@
             </p>
         </div>
 
-        @if(session('model-content-saved'))
-            <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                {{ session('model-content-saved') }}
-            </span>
-        @endif
+        <div class="flex flex-wrap items-center gap-2">
+            @if(session('model-content-saved'))
+                <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    {{ session('model-content-saved') }}
+                </span>
+            @endif
+            @if(session('model-content-applied'))
+                <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    {{ session('model-content-applied') }}
+                </span>
+            @endif
+        </div>
     </div>
 
     <section class="rounded-[2rem] border border-indigo-200 bg-white p-7 shadow-sm dark:border-indigo-900/60 dark:bg-zinc-900">
@@ -67,8 +74,23 @@
                 </div>
 
                 <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-5 dark:border-zinc-800">
-                    <p class="text-xs text-stone-400">Os dados ficam isolados deste website.</p>
-                    <flux:button type="submit" variant="primary" icon="check" class="!rounded-xl !bg-indigo-600">Guardar configuração</flux:button>
+                    <div class="flex flex-col gap-1">
+                        <p class="text-xs text-stone-400">Os dados ficam isolados deste website.</p>
+                        @if($modelContentApplied)
+                            <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">✓ Dados aplicados no site</p>
+                        @else
+                            <p class="text-xs font-semibold text-amber-600 dark:text-amber-400">Ainda não aplicado ao site</p>
+                        @endif
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <flux:button type="submit" variant="primary" icon="check" class="!rounded-xl !bg-indigo-600">Guardar configuração</flux:button>
+                        @if($modelFilled > 0)
+                            <flux:button type="button" wire:click="applyModelContent" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
+                        @endif
+                        <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">
+                            Ver site <span aria-hidden="true">↗</span>
+                        </a>
+                    </div>
                 </div>
             </form>
         @else
