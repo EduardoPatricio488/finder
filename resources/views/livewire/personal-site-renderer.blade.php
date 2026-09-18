@@ -27,7 +27,18 @@
 
     $currentPage = $page->slug;
     $accent = $site->theme['primary'] ?? $site->primary_color ?? '#635bff';
-    $initial = mb_strtoupper(mb_substr($site->name, 0, 1));
+    $modelContent = data_get($site->settings, 'model_content', []);
+    $modelApplied = filled(data_get($site->settings, 'model_content_applied_at'));
+    $displayName = $modelApplied && filled($modelContent['display_name'] ?? null) ? trim((string) $modelContent['display_name']) : $site->name;
+    $headline = $modelApplied && filled($modelContent['headline'] ?? null) ? trim((string) $modelContent['headline']) : '';
+    $bio = $modelApplied && filled($modelContent['bio'] ?? null) ? trim((string) $modelContent['bio']) : $description;
+    $location = $modelApplied ? trim((string) ($modelContent['location'] ?? '')) : '';
+    $contactEmail = $modelApplied ? trim((string) ($modelContent['contact_email'] ?? '')) : '';
+    $dynamicFields = $modelApplied ? collect(config('website.model_profiles.personal.fields', []))->filter(function (array $field) use ($modelContent) {
+        $key = (string) ($field['key'] ?? '');
+        return $key !== '' && $key !== 'display_name' && $key !== 'headline' && $key !== 'bio' && filled($modelContent[$key] ?? null);
+    }) : collect();
+    $initial = mb_strtoupper(mb_substr($displayName, 0, 1));
 @endphp
 
 <div class="min-h-screen bg-[#f8f8f6] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
@@ -35,7 +46,7 @@
         <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
             <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => $preview ? 1 : null]) }}" class="flex items-center gap-3 font-semibold tracking-tight">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm" style="background: var(--finder-primary)">{{ $initial }}</span>
-                <span class="max-w-[190px] truncate sm:max-w-none">{{ $site->name }}</span>
+                <span class="max-w-[190px] truncate sm:max-w-none">{{ $displayName }}</span>
             </a>
             <nav class="hidden items-center gap-1 md:flex" aria-label="Navegação principal">
                 @foreach($site->pages->sortBy('sort_order') as $sitePage)
@@ -77,8 +88,9 @@
                         <span class="h-2 w-2 rounded-full" style="background: var(--finder-primary)"></span>
                         {{ $categoryLabel !== '' ? $categoryLabel : 'Website pessoal' }}
                     </div>
-                    <h1 class="tracking-[-0.045em]">{{ $site->name }}</h1>
-                    <p class="mt-7 max-w-2xl text-zinc-600">{{ $description }}</p>
+                    <h1 class="tracking-[-0.045em]">{{ $displayName }}</h1>
+                    @if($headline !== '')<p class="mt-5 max-w-2xl text-xl font-semibold text-zinc-800">{{ $headline }}</p>@endif
+                    <p class="mt-4 max-w-2xl text-zinc-600">{{ $bio }}</p>
                     @if($audience !== '')
                         <p class="mt-3 max-w-2xl text-sm font-medium text-zinc-500">Trabalho principalmente com <span class="font-semibold text-zinc-800">{{ $audience }}</span>.</p>
                     @endif
@@ -93,8 +105,8 @@
                                 <div class="flex items-center justify-between"><span class="text-xs font-medium uppercase tracking-[0.18em] text-white/45">Olá</span><span class="h-2.5 w-2.5 rounded-full" style="background: var(--finder-primary)"></span></div>
                                 <div class="mt-20">
                                     <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-bold text-white" style="background: var(--finder-primary)">{{ $initial }}</div>
-                                    <p class="mt-6 text-2xl font-semibold tracking-tight">{{ $site->name }}</p>
-                                    <p class="mt-3 text-sm leading-6 text-white/55">{{ Str::limit($description, 130) }}</p>
+                                    <p class="mt-6 text-2xl font-semibold tracking-tight">{{ $displayName }}</p>
+                                    <p class="mt-3 text-sm leading-6 text-white/55">{{ Str::limit($bio, 130) }}</p>
                                 </div>
                                 <div class="mt-12 flex items-center justify-between border-t border-white/10 pt-5 text-xs text-white/45"><span>{{ $categoryLabel !== '' ? $categoryLabel : 'Personal' }}</span><span>PT-PT</span></div>
                             </div>
@@ -102,6 +114,25 @@
                     </div>
                 </div>
             </section>
+            @if($dynamicFields->isNotEmpty())
+                <section class="border-y border-black/5 bg-white px-5 py-16 sm:px-8 sm:py-20">
+                    <div class="mx-auto max-w-6xl">
+                        <div class="max-w-2xl">
+                            <p class="text-xs font-bold uppercase tracking-[0.18em]" style="color: var(--finder-primary)">Conteúdo profissional</p>
+                            <h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Informação adicionada no Finder.</h2>
+                        </div>
+                        <div class="mt-10 grid gap-5 md:grid-cols-2">
+                            @foreach($dynamicFields as $field)
+                                @php $value = trim((string) ($modelContent[$field['key']] ?? '')); @endphp
+                                <article id="model-{{ $field['key'] }}" class="rounded-3xl border border-black/5 bg-[#f8f8f6] p-7 shadow-sm">
+                                    <p class="text-xs font-bold uppercase tracking-[0.14em]" style="color: var(--finder-primary)">{{ $field['label'] }}</p>
+                                    <div class="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-600">{{ $value }}</div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </div>
+                </section>
+            @endif
             <section class="border-y border-black/5 bg-white px-5 py-10 sm:px-8">
                 <div class="mx-auto grid max-w-6xl gap-6 sm:grid-cols-3">
                     <div class="flex items-start gap-3"><span class="mt-1 h-2 w-2 shrink-0 rounded-full" style="background: var(--finder-primary)"></span><div><p class="text-xs font-bold uppercase tracking-wider text-zinc-400">Área</p><p class="mt-1 font-semibold">{{ $categoryLabel !== '' ? $categoryLabel : 'Trabalho independente' }}</p></div></div>
@@ -109,6 +140,14 @@
                     <div class="flex items-start gap-3"><span class="mt-1 h-2 w-2 shrink-0 rounded-full" style="background: var(--finder-primary)"></span><div><p class="text-xs font-bold uppercase tracking-wider text-zinc-400">Disponibilidade</p><p class="mt-1 font-semibold">{{ $availabilityNote }}</p></div></div>
                 </div>
             </section>
+            @if($modelApplied && ($headline !== '' || $bio !== '' || $location !== '' || $contactEmail !== ''))
+                <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
+                    <div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[.75fr_1.25fr] lg:gap-20">
+                        <div><p class="text-xs font-bold uppercase tracking-[0.18em]" style="color: var(--finder-primary)">Perfil profissional</p><h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{{ $headline !== '' ? $headline : 'Sobre mim' }}</h2></div>
+                        <div class="space-y-5"><p class="text-lg leading-8 text-zinc-600">{{ $bio }}</p>@if($location !== '')<p class="text-sm font-semibold text-zinc-500">📍 {{ $location }}</p>@endif @if($contactEmail !== '')<a href="mailto:{{ $contactEmail }}" class="inline-flex text-sm font-semibold" style="color: var(--finder-primary)">{{ $contactEmail }} →</a>@endif</div>
+                    </div>
+                </section>
+            @endif
             <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
                 <div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[.75fr_1.25fr] lg:gap-20">
                     <div><p class="text-xs font-bold uppercase tracking-[0.18em]" style="color: var(--finder-primary)">Sobre mim</p><h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Uma apresentação simples, sem ruído.</h2></div>
@@ -131,7 +170,7 @@
     @elseif($currentPage === 'about')
         <main>
             <section class="px-5 pb-16 pt-20 sm:px-8 sm:pb-24 sm:pt-28"><div class="mx-auto max-w-5xl"><p class="text-xs font-bold uppercase tracking-[0.18em]" style="color: var(--finder-primary)">{{ $categoryLabel !== '' ? $categoryLabel : 'Sobre mim' }}</p><h1 class="mt-4 max-w-4xl text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">{{ $site->name }}</h1><p class="mt-8 max-w-3xl text-xl leading-9 text-zinc-600">{{ $description }}</p></div></section>
-            <section class="bg-white px-5 py-16 sm:px-8 sm:py-24"><div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[.65fr_1.35fr] lg:gap-24"><div><span class="text-sm font-semibold text-zinc-400">01</span><h2 class="mt-2 text-2xl font-semibold">Quem sou</h2></div><div class="space-y-6 text-lg leading-9 text-zinc-600"><p>{{ $description }}</p><p>{{ $additionalInfo !== '' ? $additionalInfo : 'Este espaço foi criado para apresentar o essencial de forma clara e profissional. À medida que o conteúdo for completado, pode receber mais detalhes sobre experiência, interesses, trabalho ou projectos.' }}</p></div></div></section>
+            <section class="bg-white px-5 py-16 sm:px-8 sm:py-24"><div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[.65fr_1.35fr] lg:gap-24"><div><span class="text-sm font-semibold text-zinc-400">01</span><h2 class="mt-2 text-2xl font-semibold">Quem sou</h2></div><div class="space-y-6 text-lg leading-9 text-zinc-600"><p>{{ $bio }}</p><p>{{ $additionalInfo !== '' ? $additionalInfo : 'Este espaço foi criado para apresentar o essencial de forma clara e profissional. À medida que o conteúdo for completado, pode receber mais detalhes sobre experiência, interesses, trabalho ou projectos.' }}</p></div></div></section>
             @if($audience !== '')<section class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[.65fr_1.35fr] lg:gap-24"><div><span class="text-sm font-semibold text-zinc-400">02</span><h2 class="mt-2 text-2xl font-semibold">Para quem trabalho</h2></div><div class="text-lg leading-9 text-zinc-600"><p>Trabalho sobretudo com <span class="font-semibold text-zinc-900">{{ $audience }}</span>, adaptando sempre a forma de trabalhar às necessidades específicas de cada pessoa ou projecto.</p></div></div></section>@endif
             <section class="bg-white px-5 py-16 sm:px-8 sm:py-24"><div class="mx-auto max-w-6xl rounded-[2rem] border border-black/5 bg-[#f8f8f6] p-8 shadow-sm sm:p-12"><div class="grid gap-8 sm:grid-cols-4"><div><p class="text-sm text-zinc-400">01</p><p class="mt-2 font-semibold">Clareza</p><p class="mt-2 text-sm leading-6 text-zinc-500">Informação directa e fácil de compreender.</p></div><div><p class="text-sm text-zinc-400">02</p><p class="mt-2 font-semibold">Simplicidade</p><p class="mt-2 text-sm leading-6 text-zinc-500">Um espaço limpo, focado no que importa.</p></div><div><p class="text-sm text-zinc-400">03</p><p class="mt-2 font-semibold">Presença</p><p class="mt-2 text-sm leading-6 text-zinc-500">Uma apresentação profissional na web.</p></div><div><p class="text-sm text-zinc-400">04</p><p class="mt-2 font-semibold">{{ $style !== '' ? $style : 'Consistência' }}</p><p class="mt-2 text-sm leading-6 text-zinc-500">Um estilo próprio, mantido em cada detalhe do trabalho.</p></div></div></div></section>
             <section class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-6xl rounded-[2rem] bg-zinc-950 px-7 py-12 text-white text-center sm:px-12 sm:py-16"><h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">{{ $availabilityNote }}</h2><a href="{{ route('site.public', [$site, 'pageSlug' => 'contact', 'preview' => $preview ? 1 : null]) }}" class="mt-7 inline-flex rounded-full px-6 py-3.5 text-sm font-semibold text-white transition hover:-translate-y-0.5" style="background: var(--finder-primary)">{{ $goalLabel }} →</a></div></section>
@@ -142,7 +181,7 @@
 
     <footer class="border-t border-black/5 bg-white px-5 py-8 sm:px-8">
         <div class="mx-auto flex max-w-6xl flex-col gap-4 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {{ now()->year }} {{ $site->name }}</p>
+            <p>© {{ now()->year }} {{ $displayName }}</p>
             <p>Website criado com <span class="font-semibold text-zinc-700">Finder</span></p>
         </div>
     </footer>
