@@ -7,7 +7,6 @@
         <x-store-shell>
             {{ $slot }}
         </x-store-shell>
-        <livewire:customer-assistant />
-        @fluxScripts
+@fluxScripts
     </body>
 </html>
