@@ -104,12 +104,6 @@ class ProductCatalog extends Component
             return;
         }
 
-        if ($this->productMinimumStock >= $this->productStock) {
-            $this->addError(
-                'productMinimumStock',
-                'O stock mínimo tem de ser inferior ao stock atual.'
-            );
-        }
     }
 
     public function openProductModal(): void

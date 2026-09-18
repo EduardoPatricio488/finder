@@ -318,12 +318,7 @@
                                     {{ $message }}
                                 </p>
                             @enderror
-                            @if($productStock >= 0 && $productMinimumStock >= $productStock)
-                                <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                                    <flux:icon name="exclamation-triangle" class="size-4" />
-                                    O stock mínimo deve ser inferior ao stock atual ({{ $productStock }}).
-                                </p>
-                            @endif
+
                         </div>
                         </div>
                         <div class="sm:col-span-2">
