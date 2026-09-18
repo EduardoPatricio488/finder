@@ -38,6 +38,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', LandingPage::class)->name('home');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 Route::get('produtos', ProductCatalog::class)->name('products');
+Route::middleware(['auth', 'verified', 'site.access'])->get('vendas', SalesManager::class)->name('sales');
+Route::middleware(['auth', 'verified', 'site.access'])->get('encomendas', OrderManager::class)->name('orders');
 Route::get('utilizadores', UserManager::class)->name('users');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
 
@@ -117,8 +119,6 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
         Route::get('categorias', CategoryManager::class)->name('categories');
-        Route::get('encomendas', OrderManager::class)->name('orders');
-        Route::get('vendas', SalesManager::class)->name('sales');
         Route::get('pagamentos', PaymentManager::class)->name('payments');
         Route::get('promocoes', PromotionManager::class)->name('promotions');
         Route::get('stock', StockMovementManager::class)->name('stock');
