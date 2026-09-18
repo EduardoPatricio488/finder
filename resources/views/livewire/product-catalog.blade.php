@@ -98,6 +98,10 @@
                     <option value="4">4+ estrelas</option>
                     <option value="3">3+ estrelas</option>
                 </select>
+                <button type="button" wire:click="resetFilters" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-500 dark:hover:text-indigo-400" title="Repor todos os filtros">
+                    <flux:icon name="arrow-path" class="size-4" />
+                    Repor filtros
+                </button>
             </div>
         </div>
 
