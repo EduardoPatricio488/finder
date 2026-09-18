@@ -135,9 +135,15 @@ class ProductCatalog extends Component
             $slug = $baseSlug.'-'.$suffix++;
         }
 
-        $site->categories()->create(['name' => $validated['newCategoryName'], 'slug' => $slug]);
+        $category = $site->categories()->create(['name' => $validated['newCategoryName'], 'slug' => $slug]);
+
+        // A nova categoria fica imediatamente disponível e selecionada no formulário do produto.
+        $this->productCategoryId = $category->id;
+        $this->productCustomCategory = '';
         $this->reset('newCategoryName');
-        $this->resetValidation();
+        $this->resetValidation('newCategoryName');
+        $this->categoriesModalOpen = false;
+
         session()->flash('status', 'Categoria criada com sucesso.');
     }
 
