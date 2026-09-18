@@ -3,151 +3,99 @@
 namespace App\Livewire;
 
 use App\Models\Site;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 #[Layout('layouts.admin')]
-#[Title('Definições do website')]
+#[Title('Configuração do site')]
 class SiteSettings extends Component
 {
-    use WithFileUploads;
-
     public Site $site;
 
-    public string $name = '';
-
-    public string $slug = '';
-
-    public string $tagline = '';
-
-    public string $logoUrl = '';
-
-    public string $faviconUrl = '';
-
-    public string $seoTitle = '';
-
-    public string $seoDescription = '';
-
-    public string $ogImage = '';
-
-    public bool $robotsIndex = true;
-
-    public $logoUpload = null;
-
-    public $faviconUpload = null;
-
-    public $ogImageUpload = null;
-
-    /**
-     * Kept as a backwards-compatible Livewire property so stale browser
-     * snapshots from an older SiteSettings version cannot trigger a 500.
-     * Contact form data belongs to PublicSite and is intentionally not saved here.
-     */
-    public string $contactName = '';
+    public array $modelContent = [];
 
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
 
         $this->site = $site;
-        $this->name = $site->name;
-        $this->slug = $site->slug;
-        $this->tagline = $site->tagline ?? '';
-        $settings = $site->settings ?? [];
-        $seo = $site->seo ?? [];
-        $this->logoUrl = (string) ($settings['logo_url'] ?? '');
-        $this->faviconUrl = (string) ($settings['favicon_url'] ?? '');
-        $this->seoTitle = (string) ($seo['title'] ?? $site->name);
-        $this->seoDescription = (string) ($seo['description'] ?? $this->tagline);
-        $this->ogImage = (string) ($seo['og_image'] ?? '');
-        $this->robotsIndex = (bool) ($seo['robots_index'] ?? true);
+        $this->modelContent = data_get($site->settings, 'model_content', []);
+
+        foreach ($this->modelProfile()['fields'] as $field) {
+            $key = (string) ($field['key'] ?? '');
+
+            if ($key !== '' && ! array_key_exists($key, $this->modelContent)) {
+                $this->modelContent[$key] = '';
+            }
+        }
     }
 
-    public function save(): void
+    public function saveModelContent(): void
     {
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:sites,slug,'.$this->site->id],
-            'tagline' => ['nullable', 'string', 'max:500'],
-            'logoUpload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
-            'faviconUpload' => ['nullable', 'file', 'mimes:ico,png,jpg,jpeg,webp,svg', 'max:5120'],
-            'ogImageUpload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
-            'seoTitle' => ['nullable', 'string', 'max:255'],
-            'seoDescription' => ['nullable', 'string', 'max:500'],
-            'robotsIndex' => ['boolean'],
-        ]);
+        $profile = $this->modelProfile();
+        $rules = [];
 
-        $settings = array_merge($this->site->settings ?? [], []);
-        $seo = array_merge($this->site->seo ?? [], []);
+        foreach ($profile['fields'] as $field) {
+            $key = (string) ($field['key'] ?? '');
 
-        if ($this->logoUpload) {
-            $oldLogo = $this->logoUrl;
-            $path = $this->logoUpload->store('sites/'.$this->site->id.'/branding', 'public');
-            $this->logoUrl = Storage::disk('public')->url($path);
-            $settings['logo_url'] = $this->logoUrl;
-            $this->deleteStoredPublicFile($oldLogo);
+            if ($key === '') {
+                continue;
+            }
+
+            $rules["modelContent.{$key}"] = ($field['required'] ?? false)
+                ? ['required', 'string', 'max:5000']
+                : ['nullable', 'string', 'max:5000'];
+
+            if (($field['type'] ?? 'text') === 'email') {
+                $rules["modelContent.{$key}"][] = 'email';
+            }
+
+            if (($field['type'] ?? 'text') === 'url') {
+                $rules["modelContent.{$key}"][] = 'url';
+            }
         }
 
-        if ($this->faviconUpload) {
-            $oldFavicon = $this->faviconUrl;
-            $path = $this->faviconUpload->store('sites/'.$this->site->id.'/branding', 'public');
-            $this->faviconUrl = Storage::disk('public')->url($path);
-            $settings['favicon_url'] = $this->faviconUrl;
-            $this->deleteStoredPublicFile($oldFavicon);
-        }
+        $this->validate($rules);
 
-        if ($this->ogImageUpload) {
-            $oldOgImage = $this->ogImage;
-            $path = $this->ogImageUpload->store('sites/'.$this->site->id.'/branding', 'public');
-            $this->ogImage = Storage::disk('public')->url($path);
-            $seo['og_image'] = $this->ogImage;
-            $this->deleteStoredPublicFile($oldOgImage);
-        }
+        $settings = $this->site->settings ?? [];
+        $settings['model_content'] = collect($this->modelContent)
+            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+            ->all();
 
-        $this->site->update([
-            'name' => $validated['name'],
-            'slug' => $validated['slug'],
-            'tagline' => $validated['tagline'],
-            'settings' => array_merge($settings, [
-                'logo_url' => $this->logoUrl,
-                'favicon_url' => $this->faviconUrl,
-            ]),
-            'seo' => array_merge($seo, [
-                'title' => $validated['seoTitle'] ?: $validated['name'],
-                'description' => $validated['seoDescription'],
-                'og_image' => $this->ogImage,
-                'robots_index' => $validated['robotsIndex'],
-            ]),
-        ]);
-
+        $this->site->update(['settings' => $settings]);
         $this->site->refresh();
-        $this->reset(['logoUpload', 'faviconUpload', 'ogImageUpload']);
-        session()->flash('status', 'Definições do website guardadas.');
+
+        session()->flash('model-content-saved', 'Configuração do site guardada com sucesso.');
     }
 
-    private function deleteStoredPublicFile(string $url): void
+    private function modelProfile(): array
     {
-        if ($url === '') {
-            return;
-        }
+        $type = (string) $this->site->type;
 
-        $path = parse_url($url, PHP_URL_PATH);
-        if (!is_string($path) || !Str::startsWith($path, '/storage/')) {
-            return;
-        }
-
-        $storagePath = ltrim(Str::after($path, '/storage/'), '/');
-        if ($storagePath !== '') {
-            Storage::disk('public')->delete($storagePath);
-        }
+        return config("website.model_profiles.{$type}", [
+            'label' => config("website.types.{$type}.label", 'Website'),
+            'description' => 'Configura os conteúdos específicos deste website.',
+            'icon' => 'globe-alt',
+            'fields' => [],
+            'sidebar' => [],
+        ]);
     }
 
     public function render(): mixed
     {
-        return view('livewire.site-settings');
+        $profile = $this->modelProfile();
+        $fields = $profile['fields'] ?? [];
+
+        $filled = collect($fields)->filter(function (array $field): bool {
+            return filled($this->modelContent[$field['key']] ?? '');
+        })->count();
+
+        return view('livewire.site-settings', [
+            'modelProfile' => $profile,
+            'modelFields' => $fields,
+            'modelFilled' => $filled,
+            'modelTotal' => count($fields),
+        ]);
     }
 }
