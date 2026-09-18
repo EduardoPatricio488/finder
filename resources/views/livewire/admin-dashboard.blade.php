@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    <div class="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4 dark:border-indigo-900 dark:bg-indigo-950/30">
+    <div class="max-w-xs">
         <x-site-workspace-selector :current-site="$site" route-name="dashboard" />
     </div>
 
