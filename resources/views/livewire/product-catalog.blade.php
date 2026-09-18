@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <div class="mt-6 grid gap-4 md:grid-cols-3">
+        <div class="mt-6 grid gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <p class="text-sm text-zinc-500">Produtos apresentados</p>
                 <p class="mt-2 text-2xl font-bold text-zinc-950 dark:text-white">{{ $products->count() }}</p>
@@ -26,6 +26,10 @@
             <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <p class="text-sm text-zinc-500">Esgotados</p>
                 <p class="mt-2 text-2xl font-bold text-zinc-950 dark:text-white">{{ $products->where('stock', '<=', 0)->count() }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm dark:border-amber-500/20 dark:bg-amber-500/10">
+                <p class="text-sm text-amber-700 dark:text-amber-400">Stock baixo</p>
+                <p class="mt-2 text-2xl font-bold text-amber-800 dark:text-amber-300">{{ $lowStockProducts->count() }}</p>
             </div>
         </div>
 
@@ -44,6 +48,7 @@
                 <select wire:model.live="availability" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 lg:w-44">
                     <option value="">Disponibilidade</option>
                     <option value="disponivel">Em stock</option>
+                    <option value="baixo">Stock baixo</option>
                     <option value="esgotado">Esgotado</option>
                 </select>
             </div>
@@ -127,10 +132,15 @@
                                 </td>
                                 <td class="px-5 py-4 text-zinc-600 dark:text-zinc-300">{{ $product->category?->name ?: 'Sem categoria' }}</td>
                                 <td class="px-5 py-4">
-                                    @if($product->stock > 0)
-                                        <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">{{ $product->stock }} em stock</span>
-                                    @else
+                                    @if($product->stock <= 0)
                                         <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">Esgotado</span>
+                                    @elseif($product->stock <= $product->minimum_stock)
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                                            <flux:icon name="exclamation-triangle" class="size-3.5" />
+                                            {{ $product->stock }} — Stock baixo
+                                        </span>
+                                    @else
+                                        <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">{{ $product->stock }} em stock</span>
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 font-bold text-zinc-950 dark:text-white">€ {{ number_format($this->salePrice($product), 2, ',', '.') }}</td>
