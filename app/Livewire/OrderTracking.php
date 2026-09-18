@@ -17,7 +17,7 @@ class OrderTracking extends Component
 
         return view('livewire.order-tracking', [
             'site' => $site,
-            'orders' => $site->orders()->
+            'orders' => $site->orders()
                 ->with(['customer', 'items', 'payments'])
                 ->whereHas('customer', fn ($query) => $query->where('email', auth()->user()->email))
                 ->latest('sold_at')
