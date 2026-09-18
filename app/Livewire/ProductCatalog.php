@@ -844,6 +844,7 @@ class ProductCatalog extends Component
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'availableSites' => $availableSites,
+            'productMedia' => $site->media()->where('placement', 'products')->latest()->get(),
             'categories' => $this->siteScoped(Category::query())->withCount('products')->orderBy('name')->get(),
             'stockHistory' => $this->stockProductId ? $this->siteScoped(Product::query())->find($this->stockProductId)?->stockMovements()->with('user')->latest()->limit(30)->get() : collect(),
         ]);
