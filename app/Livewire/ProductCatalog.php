@@ -676,7 +676,7 @@ class ProductCatalog extends Component
         return view('livewire.product-catalog', [
             'products' => $products,
             'stockValue' => (float) $this->siteScoped(Product::query())
-                ->where('is_active', true)\n                ->sum(DB::raw('price * stock')),
+                ->where('is_active', true)->sum(DB::raw('price * stock')),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'categories' => $this->siteScoped(Category::query())->orderBy('name')->get(),
