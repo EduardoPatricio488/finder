@@ -18,6 +18,8 @@ class MediaLibrary extends Component
 
     public string $altText = '';
 
+    public string $placement = 'gallery';
+
     public string $search = '';
 
     public function mount(Site $site): void
@@ -32,6 +34,7 @@ class MediaLibrary extends Component
             [
                 'upload' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
                 'altText' => ['nullable', 'string', 'max:255'],
+                'placement' => ['required', 'string', 'in:logo,hero,about,experience,education,skills,projects,services,testimonials,gallery,contact,background,footer'],
             ],
             [
                 'upload.required' => 'Seleciona primeiro uma imagem do teu computador.',
@@ -53,11 +56,13 @@ class MediaLibrary extends Component
             'mime_type' => $this->upload->getMimeType(),
             'size' => $this->upload->getSize(),
             'alt_text' => $this->altText,
+            'placement' => $this->placement,
             'width' => $image[0] ?? null,
             'height' => $image[1] ?? null,
         ]);
 
         $this->reset(['upload', 'altText']);
+        $this->placement = 'gallery';
         session()->flash('status', 'Ficheiro adicionado à biblioteca de media.');
     }
 
