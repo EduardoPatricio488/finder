@@ -47,7 +47,7 @@
                     <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
                     <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
                     @if($hasSite)
-                        <flux:sidebar.item icon="users" :href="$siteRoute('users')" :current="request()->routeIs('admin.site.users')" wire:navigate>Utilizadores</flux:sidebar.item>
+                        <flux:sidebar.item icon="users" :href="route('users')" :current="request()->routeIs('users')" wire:navigate>Utilizadores</flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>
                 @if($hasSite && ! $isDashboard)
