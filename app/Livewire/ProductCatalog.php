@@ -29,6 +29,8 @@ class ProductCatalog extends Component
     public string $availability = '';
     public string $minRating = '';
     public bool $productModalOpen = false;
+    public bool $manageProductModalOpen = false;
+    public ?int $manageProductId = null;
     public string $productName = '';
     public string $productDescription = '';
     public string $productPrice = '';
@@ -110,6 +112,84 @@ class ProductCatalog extends Component
                 ['name' => $name],
             );
         }
+    }
+
+    public function openManageProductModal(int $productId): void
+    {
+        $this->ensureGenericCategories();
+        $product = $this->siteScoped(Product::query())->with('category')->findOrFail($productId);
+
+        $this->manageProductId = $product->id;
+        $this->productName = (string) $product->name;
+        $this->productDescription = (string) ($product->description ?? '');
+        $this->productPrice = (string) $product->price;
+        $this->productCategoryId = $product->category_id;
+        $this->productCustomCategory = '';
+        $this->productStock = (int) $product->stock;
+        $this->productMinimumStock = (int) $product->minimum_stock;
+        $this->productIsActive = (bool) $product->is_active;
+        $this->productImages = [];
+        $this->resetValidation();
+        $this->manageProductModalOpen = true;
+    }
+
+    public function closeManageProductModal(): void
+    {
+        $this->manageProductModalOpen = false;
+        $this->manageProductId = null;
+        $this->resetProductForm();
+    }
+
+    public function updateProduct(): void
+    {
+        $data = $this->validate([
+            'productName' => ['required', 'string', 'max:255'],
+            'productDescription' => ['nullable', 'string'],
+            'productPrice' => ['required', 'numeric', 'min:0'],
+            'productCategoryId' => ['required', 'integer'],
+            'productCustomCategory' => ['nullable', 'string', 'max:255'],
+            'productStock' => ['required', 'integer', 'min:0'],
+            'productMinimumStock' => ['required', 'integer', 'min:0'],
+            'productIsActive' => ['boolean'],
+            'productImages' => ['nullable', 'array', 'max:10'],
+            'productImages.*' => ['image', 'max:10240'],
+        ]);
+
+        $site = $this->site();
+        $product = $this->siteScoped(Product::query())->findOrFail($this->manageProductId);
+        $category = $site->categories()->findOrFail($data['productCategoryId']);
+
+        if ($category->slug === 'outros' && trim($data['productCustomCategory']) !== '') {
+            $customName = trim($data['productCustomCategory']);
+            $category = $site->categories()->firstOrCreate(
+                ['slug' => Str::slug($customName)],
+                ['name' => $customName],
+            );
+        }
+
+        $product->update([
+            'category_id' => $category->id,
+            'name' => $data['productName'],
+            'description' => $data['productDescription'],
+            'price' => $data['productPrice'],
+            'is_active' => $data['productIsActive'],
+            'stock' => $data['productStock'],
+            'minimum_stock' => $data['productMinimumStock'],
+        ]);
+
+        if ($this->productImages !== []) {
+            $paths = $product->images ?? [];
+            foreach ($this->productImages as $image) {
+                $paths[] = $image->store('products', 'public');
+            }
+            $product->update([
+                'image_url' => $paths[0] ?? null,
+                'images' => $paths,
+            ]);
+        }
+
+        $this->closeManageProductModal();
+        session()->flash('status', 'Produto atualizado com sucesso.');
     }
 
     public function closeProductModal(): void
