@@ -71,7 +71,7 @@
 
                     <form wire:submit="updatePassword" class="mt-6 max-w-2xl space-y-5">
                         <flux:input wire:model="current_password" label="Palavra-passe atual" type="password" required autocomplete="current-password" viewable />
-                        <flux:input wire:model="password" label="Nova palavra-passe" type="password" required autocomplete="new-password" passwordrules="{{ IlluminateValidationRulesPassword::defaults()->toPasswordRulesString() }}" viewable />
+                        <flux:input wire:model="password" label="Nova palavra-passe" type="password" required autocomplete="new-password"  viewable />
                         <flux:input wire:model="password_confirmation" label="Confirmar nova palavra-passe" type="password" required autocomplete="new-password" viewable />
                         <div class="flex justify-end">
                             <flux:button variant="primary" type="submit">Alterar palavra-passe</flux:button>
