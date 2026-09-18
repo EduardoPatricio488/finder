@@ -27,9 +27,9 @@ test('website administration is isolated by ownership', function () {
 
     $this->actingAs($owner);
     session(['current_site_id' => $site->id]);
-    $this->get(route('admin.site.dashboard'))->assertOk();
+    $this->get(route('site.manage.dashboard'))->assertOk();
 
     $this->actingAs($other);
     session(['current_site_id' => $site->id]);
-    $this->get(route('admin.site.dashboard'))->assertForbidden();
+    $this->get(route('site.manage.dashboard'))->assertForbidden();
 });
