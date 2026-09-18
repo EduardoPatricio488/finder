@@ -51,6 +51,8 @@ class ProductCatalog extends Component
     public int $productMinimumStock = 0;
     public bool $productIsActive = true;
     public array $productImages = [];
+    public array $productMediaIds = [];
+    public bool $productsApplied = false;
     public array $cart = [];
     public string $couponCode = '';
     public ?string $appliedCouponCode = null;
@@ -115,6 +117,7 @@ class ProductCatalog extends Component
         session()->put('current_site_id', $this->selectedSiteId);
 
         $this->cart = session($this->cartKey(), []);
+        $this->productsApplied = filled(data_get($this->site()->settings, 'products_applied_at'));
         $this->cartOpen = request()->query('cart') === '1';
         $this->customerName = $user->name;
         $this->customerEmail = $user->email;
@@ -434,6 +437,16 @@ class ProductCatalog extends Component
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
+    public function applyProducts(): void
+    {
+        $settings = $this->site()->settings ?? [];
+        data_set($settings, 'products_applied_at', now()->toIso8601String());
+        $this->site()->update(['settings' => $settings]);
+        $this->site()->refresh();
+        $this->productsApplied = true;
+        session()->flash('products-applied', 'Os produtos e respetivas imagens foram aplicados no site.');
+    }
+
     public function openProductModal(): void
     {
         $this->ensureGenericCategories();
@@ -522,6 +535,7 @@ class ProductCatalog extends Component
         $this->productMinimumStock = (int) $product->minimum_stock;
         $this->productIsActive = (bool) $product->is_active;
         $this->productImages = [];
+        $this->productMediaIds = [];
         $this->resetValidation();
         $this->manageProductModalOpen = true;
     }
@@ -545,6 +559,8 @@ class ProductCatalog extends Component
             'productMinimumStock' => ['required', 'integer', 'min:0', 'lt:productStock'],
             'productIsActive' => ['boolean'],
             'productImages' => ['nullable', 'array', 'max:10'],
+            'productMediaIds' => ['nullable', 'array', 'max:10'],
+            'productMediaIds.*' => ['integer'],
             'productImages.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:10240']
         ], [
             'productImages.array' => 'As fotografias selecionadas são inválidas.',
@@ -645,7 +661,11 @@ class ProductCatalog extends Component
             'minimum_stock' => $data['productMinimumStock'],
         ]);
 
-        if ($this->productImages !== []) {
+        if ($this->productMediaIds !== []) {
+            $media = $site->media()->whereIn('id', $this->productMediaIds)->where('placement', 'products')->get();
+            $paths = $media->pluck('path')->values()->all();
+            $product->update(['image_url' => $paths[0] ?? null, 'images' => $paths]);
+        } elseif ($this->productImages !== []) {
             $paths = [];
             foreach ($this->productImages as $image) {
                 $paths[] = $image->store('products', 'public');
@@ -674,10 +694,12 @@ class ProductCatalog extends Component
             'productCategoryId',
             'productCustomCategory',
             'productImages',
+            'productMediaIds',
             'productStock',
             'productMinimumStock',
         ]);
         $this->productIsActive = true;
+        $this->productMediaIds = [];
         $this->resetValidation();
     }
 
