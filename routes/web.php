@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->name('home');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
-Route::get('vendas', ProductCatalog::class)->name('sales');
+Route::middleware(['auth', 'verified'])->get('vendas', SalesManager::class)->name('sales');
 Route::get('produtos', ProductCatalog::class)->name('products');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
 
