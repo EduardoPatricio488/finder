@@ -166,19 +166,24 @@ class CreateSite extends Component
         $plan = Plan::query()->where('name', 'Free')->first() ?? Plan::query()->first();
         $template = config("website.templates.{$this->template}", []);
 
-        $blueprint = $generator->generate([
-            'mode' => 'ai',
-            'type' => $this->type,
-            'template' => $this->template,
-            'business_name' => $this->name,
-            'description' => $this->description,
-            'audience' => $this->type === 'online_store' ? 'Clientes que procuram produtos online' : '',
-            'goal' => $this->type === 'online_store' ? 'venda' : 'contact',
-            'style' => $this->style,
-            'pages' => $this->pages,
-            'additional_info' => $this->additionalInfoForType(),
-        ]);
-        $aiPages = is_array($blueprint['pages'] ?? null) ? $blueprint['pages'] : [];
+        // A loja online usa uma experiência própria, criada de raiz a partir do briefing.
+        // Não deixamos a IA substituir esta estrutura por um template genérico.
+        $aiPages = [];
+        if ($this->type !== 'online_store') {
+            $blueprint = $generator->generate([
+                'mode' => 'ai',
+                'type' => $this->type,
+                'template' => $this->template,
+                'business_name' => $this->name,
+                'description' => $this->description,
+                'audience' => '',
+                'goal' => 'contact',
+                'style' => $this->style,
+                'pages' => $this->pages,
+                'additional_info' => $this->additionalInfoForType(),
+            ]);
+            $aiPages = is_array($blueprint['pages'] ?? null) ? $blueprint['pages'] : [];
+        }
 
         $libraryPages = TemplateLibrary::pages($this->template, [
             'name' => $this->name,
@@ -186,6 +191,12 @@ class CreateSite extends Component
             'audience' => $this->type === 'online_store' ? 'Clientes que procuram produtos online' : '',
             'goal_label' => $this->goalLabel(),
             'style' => $this->style,
+            'headline' => $this->headline,
+            'about' => $this->about,
+            'featured_products' => $this->featuredProducts,
+            'shipping' => $this->shipping,
+            'returns' => $this->returns,
+            'contact_email' => $this->contactEmail,
         ]);
 
         $theme = [
