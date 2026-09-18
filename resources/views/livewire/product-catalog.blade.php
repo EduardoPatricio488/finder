@@ -95,15 +95,15 @@
                                             @php
                                                 $productPhotos = $product->images ?: ($product->image_url ? [$product->image_url] : []);
                                             @endphp
-                                            @forelse(array_slice($productPhotos, 0, 4) as $photo)
+                                            @forelse(array_slice($productPhotos, 0, 3) as $photo)
                                                 <img src="{{ asset('storage/'.$photo) }}" alt="{{ $product->name }}" class="size-11 rounded-xl border-2 border-white object-cover dark:border-zinc-900">
                                             @empty
                                                 <div class="flex size-11 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
                                                     <flux:icon name="photo" class="size-5 text-zinc-400" />
                                                 </div>
                                             @endforelse
-                                            @if(count($productPhotos) > 4)
-                                                <span class="flex size-11 items-center justify-center rounded-xl border-2 border-white bg-zinc-100 text-xs font-bold text-zinc-600 dark:border-zinc-900 dark:bg-zinc-800 dark:text-zinc-300">+{{ count($productPhotos) - 4 }}</span>
+                                            @if(count($productPhotos) > 3)
+                                                <span class="flex size-11 items-center justify-center rounded-xl border-2 border-white bg-zinc-100 text-xs font-bold text-zinc-600 dark:border-zinc-900 dark:bg-zinc-800 dark:text-zinc-300">3+</span>
                                             @endif
                                         </div>
                                         <div class="min-w-0">
