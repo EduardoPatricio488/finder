@@ -92,6 +92,10 @@ class CreateSite extends Component
         }
 
         if ($this->step === 3) {
+            if ($this->type === 'online_store' && trim($this->description) === '') {
+                $this->description = trim($this->about ?: $this->headline ?: 'Loja online');
+            }
+
             $rules = [
                 'name' => ['required', 'min:2', 'max:80'],
                 'description' => ['required', 'string', 'max:1000'],
@@ -138,6 +142,10 @@ class CreateSite extends Component
 
     public function create(WebsiteAiGenerator $generator)
     {
+        if ($this->type === 'online_store' && trim($this->description) === '') {
+            $this->description = trim($this->about ?: $this->headline ?: 'Loja online');
+        }
+
         $this->validate([
             'name' => ['required', 'min:2', 'max:80'],
             'slug' => ['required', 'alpha_dash', 'unique:sites,slug'],
