@@ -66,7 +66,7 @@
             <input wire:model.live.debounce.300ms="search" placeholder="Pesquisar ficheiros..." class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 @forelse($media as $item)
-                    @php($mediaUrl = Storage::disk($item->disk ?: 'public')->url($item->path))
+                    @php($mediaUrl = \Illuminate\Support\Facades\Storage::disk($item->disk ?: 'public')->url($item->path))
                     <article class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                         <div class="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-950">
                             <img src="{{ $mediaUrl }}" alt="{{ $item->alt_text }}" class="h-full w-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden');">
