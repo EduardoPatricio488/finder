@@ -81,22 +81,69 @@
             </section>
         @else
             <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
-                <p class="text-xs font-black uppercase tracking-widest text-indigo-600">4 · Páginas</p><h2 class="mt-2 text-2xl font-black">Que páginas queres começar por ter?</h2><p class="mt-2 text-sm text-zinc-500">A estrutura inicial adapta-se ao tipo de website escolhido.</p>
+                <p class="text-xs font-black uppercase tracking-widest text-indigo-600">4 · Páginas</p>
+                <h2 class="mt-2 text-2xl font-black">{{ $type === 'online_store' ? 'Estrutura da tua loja online' : 'Que páginas queres começar por ter?' }}</h2>
+                <p class="mt-2 text-sm text-zinc-500">
+                    {{ $type === 'online_store'
+                        ? 'O Finder recomenda uma estrutura preparada para catálogo, marca e contacto. Podes adicionar ou remover páginas antes de criar a loja.'
+                        : 'A estrutura inicial adapta-se ao tipo de website escolhido.' }}
+                </p>
+
                 <div class="mt-4 flex items-start gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 dark:border-indigo-900/50 dark:bg-indigo-500/10">
                     <flux:icon name="information-circle" class="mt-0.5 size-5 shrink-0 text-indigo-600 dark:text-indigo-400" />
                     <p class="text-xs leading-5 text-indigo-800 dark:text-indigo-200">
-                        <span class="font-bold">Podes adicionar mais páginas depois.</span> Começa apenas com o essencial — depois de criares o website, podes adicionar novos separadores quando quiseres.
+                        <span class="font-bold">{{ $type === 'online_store' ? 'Estrutura recomendada para ecommerce.' : 'Podes adicionar mais páginas depois.' }}</span>
+                        {{ $type === 'online_store'
+                            ? 'Início apresenta a marca, Produtos mostra o catálogo, Sobre explica a marca e Contactos facilita o apoio ao cliente.'
+                            : 'Começa apenas com o essencial — depois de criares o website, podes adicionar novos separadores quando quiseres.' }}
                     </p>
                 </div>
-                <div class="mt-7 grid gap-3 sm:grid-cols-3">
-                    @foreach(['home' => 'Início', 'about' => 'Sobre mim', 'contact' => 'Contactos'] as $key => $label)
-                        <div class="flex items-center gap-3 rounded-2xl border border-indigo-500 bg-indigo-50/60 p-4 dark:bg-indigo-500/10"><span class="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white">✓</span><span class="text-sm font-bold">{{ $label }}</span><span class="ml-auto text-[9px] font-black uppercase text-indigo-600">Essencial</span></div>
-                    @endforeach
+
+                @if($type === 'online_store')
+                    <div class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        @foreach(['home' => ['label' => 'Início', 'description' => 'Apresentação da loja e destaques.', 'icon' => 'home'], 'products' => ['label' => 'Produtos', 'description' => 'Catálogo real da loja.', 'icon' => 'archive-box'], 'about' => ['label' => 'Sobre a marca', 'description' => 'História e posicionamento.', 'icon' => 'information-circle'], 'contact' => ['label' => 'Contactos', 'description' => 'Apoio e contacto.', 'icon' => 'envelope']] as $key => $page)
+                            <button type="button" wire:click="togglePage('{{ $key }}')" class="relative flex min-h-36 flex-col rounded-2xl border p-4 text-left transition {{ in_array($key, $pages, true) ? 'border-indigo-500 bg-indigo-50/60 ring-2 ring-indigo-500/10 dark:bg-indigo-500/10' : 'border-zinc-200 bg-white hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900' }}">
+                                <span class="flex size-9 items-center justify-center rounded-xl {{ in_array($key, $pages, true) ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800' }}">
+                                    @if(in_array($key, $pages, true))
+                                        ✓
+                                    @else
+                                        <flux:icon :name="$page['icon']" class="size-4" />
+                                    @endif
+                                </span>
+                                <span class="mt-4 text-sm font-bold text-zinc-900 dark:text-white">{{ $page['label'] }}</span>
+                                <span class="mt-1 text-xs leading-5 text-zinc-500">{{ $page['description'] }}</span>
+                                <span class="mt-auto pt-3 text-[9px] font-black uppercase tracking-widest {{ in_array($key, $pages, true) ? 'text-indigo-600' : 'text-zinc-400' }}">{{ in_array($key, $pages, true) ? 'Selecionada' : 'Adicionar' }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                        @foreach(['faq' => ['label' => 'FAQ', 'description' => 'Dúvidas frequentes dos clientes.'], 'gallery' => ['label' => 'Galeria', 'description' => 'Imagens da marca ou produtos.'], 'blog' => ['label' => 'Blog', 'description' => 'Conteúdo e novidades da loja.']] as $key => $page)
+                            <button type="button" wire:click="togglePage('{{ $key }}')" class="flex items-center gap-3 rounded-2xl border p-4 text-left transition {{ in_array($key, $pages, true) ? 'border-indigo-500 bg-indigo-50/60 dark:bg-indigo-500/10' : 'border-zinc-200 bg-white hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900' }}">
+                                <span class="flex size-9 shrink-0 items-center justify-center rounded-xl {{ in_array($key, $pages, true) ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800' }}">{{ in_array($key, $pages, true) ? '✓' : '+' }}</span>
+                                <span><span class="block text-sm font-bold text-zinc-900 dark:text-white">{{ $page['label'] }}</span><span class="mt-1 block text-xs text-zinc-500">{{ $page['description'] }}</span></span>
+                            </button>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="mt-7 grid gap-3 sm:grid-cols-3">
+                        @foreach(['home' => 'Início', 'about' => 'Sobre mim', 'contact' => 'Contactos'] as $key => $label)
+                            <div class="flex items-center gap-3 rounded-2xl border border-indigo-500 bg-indigo-50/60 p-4 dark:bg-indigo-500/10"><span class="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white">✓</span><span class="text-sm font-bold">{{ $label }}</span><span class="ml-auto text-[9px] font-black uppercase text-indigo-600">Essencial</span></div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="mt-8 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 dark:border-indigo-900/50 dark:bg-indigo-500/10">
+                    <p class="text-sm font-bold">{{ $type === 'online_store' ? 'A loja fica preparada para crescer' : 'O Finder trata do resto' }}</p>
+                    <p class="mt-1 text-xs leading-5 text-zinc-500">
+                        {{ $type === 'online_store'
+                            ? 'O catálogo usa os produtos reais da loja. Páginas como FAQ, Galeria e Blog são opcionais e podem ser adicionadas agora ou mais tarde.'
+                            : 'A estrutura, textos, títulos e chamadas para ação são adaptados ao tipo de website e à informação que forneceste. Não serão inventados dados que não tenhas fornecido.' }}
+                    </p>
                 </div>
-                <div class="mt-8 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 dark:border-indigo-900/50 dark:bg-indigo-500/10"><p class="text-sm font-bold">O Finder trata do resto</p><p class="mt-1 text-xs leading-5 text-zinc-500">A estrutura, textos, títulos e chamadas para ação são adaptados ao tipo de website e à informação que forneceste. Não serão inventados dados que não tenhas fornecido.</p></div>
-                <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="rocket-launch" wire:click="create" wire:loading.attr="disabled"><span wire:loading.remove>Criar o meu website</span><span wire:loading>A criar o teu website…</span></flux:button></div>
-            </section>
-        @endif
+
+                <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="rocket-launch" wire:click="create" wire:loading.attr="disabled"><span wire:loading.remove>{{ $type === 'online_store' ? 'Criar a minha loja' : 'Criar o meu website' }}</span><span wire:loading>{{ $type === 'online_store' ? 'A criar a tua loja…' : 'A criar o teu website…' }}</span></flux:button></div>
+
 
         <div x-cloak x-show="help" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 p-4" @click.self="help=false">
             <div class="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl dark:bg-zinc-900">
