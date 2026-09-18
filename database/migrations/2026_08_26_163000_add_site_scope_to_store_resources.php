@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -38,17 +37,6 @@ return new class extends Migration
             });
         }
 
-        $casaCoId = DB::table('sites')->where('slug', 'casa-co')->value('id');
-
-        if ($casaCoId === null) {
-            return;
-        }
-
-        foreach ($tables as $tableName) {
-            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'site_id')) {
-                DB::table($tableName)->whereNull('site_id')->update(['site_id' => $casaCoId]);
-            }
-        }
     }
 
     public function down(): void
