@@ -5,11 +5,15 @@
             <h1 class="mt-1 text-3xl font-semibold tracking-tight text-zinc-950">Menus</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Define a navegação do website de forma simples. Neste website estão disponíveis apenas <strong class="font-semibold text-zinc-700">Início, Sobre mim e Contactos</strong>.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold {{ $menuApplied ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700' }}">
                 <span class="size-1.5 rounded-full {{ $menuApplied ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                 {{ $menuApplied ? 'Aplicado no site' : 'Alterações por aplicar' }}
             </span>
+            <button type="button" wire:click="applyMenu" @disabled(! $menuId) class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40">
+                <flux:icon name="check-circle" class="size-4" />
+                Aplicar no site
+            </button>
         </div>
     </div>
 
