@@ -76,7 +76,7 @@ class MediaLibrary extends Component
 
     public function mediaUrl(SiteMedia $media): string
     {
-        return route('admin.site.media.file', ['site' => $this->site, 'media' => $media->id]);
+        return route('admin.site.media.file', ['media' => $media->id]);
     }
 
     public function placementOptions(): array
