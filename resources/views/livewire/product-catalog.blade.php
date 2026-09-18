@@ -203,6 +203,9 @@
                                     <button type="button" wire:click="duplicateProduct({{ $product->id }})" title="Duplicar" class="rounded-lg border border-zinc-200 p-2 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700">
                                         <flux:icon name="square-2-stack" class="size-4" />
                                     </button>
+                                    <button type="button" wire:click="deleteProduct({{ $product->id }})" wire:confirm="Eliminar este produto? Esta ação não pode ser anulada." title="Eliminar" class="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50 dark:border-red-500/20 dark:hover:bg-red-500/10">
+                                        <flux:icon name="trash" class="size-4" />
+                                    </button>
                                     <button type="button" wire:click="openManageProductModal({{ $product->id }})" class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:hover:border-indigo-500 dark:hover:text-indigo-400">
                                         <flux:icon name="pencil-square" class="size-4" />
                                         Gerir
