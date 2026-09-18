@@ -52,7 +52,11 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('ajuda', Help::class)->name('help');
     Route::get('notificacoes', Notifications::class)->name('notifications');
     Route::get('websites/create', CreateSite::class)->name('site.create');
-    Route::get('websites/{site:slug}/builder', fn (Site $site) => redirect()->route('site.public', ['site' => $site, 'preview' => 1]))->name('builder.edit');
+    Route::get('builder', function () {
+        $site = \App\Support\SiteContext::current();
+        abort_unless($site instanceof Site, 404);
+        return redirect()->route('site.public', ['site' => $site, 'preview' => 1]);
+    })->name('builder.edit');
     Route::get('conta/{section?}', CustomerAccount::class)->name('account');
     Route::get('conta/favoritos', fn () => redirect()->route('account', ['section' => 'favorites']))->name('account.favorites');
     Route::get('encomendas/acompanhamento', OrderTracking::class)->name('orders.tracking');
