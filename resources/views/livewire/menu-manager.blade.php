@@ -1,7 +1,6 @@
 <div>
 <div class="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
     <div class="mb-2">
-        <h1 class="mb-3 text-2xl font-black tracking-tight text-zinc-950 dark:text-white">Menus</h1>
         <x-site-workspace-selector :current-site="$site" route-name="menus" />
     </div>
 
@@ -60,8 +59,7 @@
                     <p class="mt-1.5 text-xs text-zinc-400">Neste website, a navegação é apresentada no cabeçalho.</p>
                 </div>
             </div>
-
-
+        </div>
 
         <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="flex items-start gap-3">
@@ -95,10 +93,7 @@
             </div>
 
             <p class="mt-4 text-xs leading-5 text-zinc-400">Estas três páginas são criadas automaticamente e permanecem sempre no menu. Aqui só podes alterar o nome apresentado.</p>
-
-            </div>
         </div>
     </div>
-
 </div>
 </div>
