@@ -15,12 +15,15 @@ class SiteSettings extends Component
 
     public array $modelContent = [];
 
+    public bool $modelContentApplied = false;
+
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
 
         $this->site = $site;
         $this->modelContent = data_get($site->settings, 'model_content', []);
+        $this->modelContentApplied = filled(data_get($site->settings, 'model_content_applied_at'));
 
         foreach ($this->modelProfile()['fields'] as $field) {
             $key = (string) ($field['key'] ?? '');
@@ -66,7 +69,48 @@ class SiteSettings extends Component
         $this->site->update(['settings' => $settings]);
         $this->site->refresh();
 
-        session()->flash('model-content-saved', 'Configuração do site guardada com sucesso.');
+        $this->modelContentApplied = false;
+        session()->flash('model-content-saved', 'Configuração do site guardada. Agora podes aplicar os dados no site.');
+    }
+
+    public function applyModelContent(): void
+    {
+        $profile = $this->modelProfile();
+        $rules = [];
+
+        foreach ($profile['fields'] as $field) {
+            $key = (string) ($field['key'] ?? '');
+
+            if ($key === '') {
+                continue;
+            }
+
+            $rules["modelContent.{$key}"] = ($field['required'] ?? false)
+                ? ['required', 'string', 'max:5000']
+                : ['nullable', 'string', 'max:5000'];
+
+            if (($field['type'] ?? 'text') === 'email') {
+                $rules["modelContent.{$key}"][] = 'email';
+            }
+
+            if (($field['type'] ?? 'text') === 'url') {
+                $rules["modelContent.{$key}"][] = 'url';
+            }
+        }
+
+        $this->validate($rules);
+
+        $settings = $this->site->settings ?? [];
+        $settings['model_content'] = collect($this->modelContent)
+            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+            ->all();
+        $settings['model_content_applied_at'] = now()->toIso8601String();
+
+        $this->site->update(['settings' => $settings]);
+        $this->site->refresh();
+        $this->modelContentApplied = true;
+
+        session()->flash('model-content-applied', 'Os dados foram aplicados no site com sucesso.');
     }
 
     private function modelProfile(): array
@@ -96,6 +140,7 @@ class SiteSettings extends Component
             'modelFields' => $fields,
             'modelFilled' => $filled,
             'modelTotal' => count($fields),
+            'modelContentApplied' => $this->modelContentApplied,
         ]);
     }
 }
