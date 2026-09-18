@@ -29,10 +29,6 @@ class SiteContext
             ->orderBy('name')
             ->first();
 
-        if (! $site instanceof Site) {
-            $site = Site::query()->where('slug', 'casa-co')->first();
-        }
-
         abort_unless($site instanceof Site, 404);
 
         if ($request->hasSession()) {
