@@ -25,24 +25,14 @@
                 <form method="POST" action="{{ route('admin.websites.exit-access') }}">@csrf<button class="rounded-lg bg-amber-900 px-3 py-1.5 text-white">Sair deste website</button></form>
             </div>
         @endif
-
-
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
             <flux:sidebar.header><x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate /><flux:sidebar.collapse class="lg:hidden" /></flux:sidebar.header>
             <div class="px-3 pb-3">
-
-                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate class="!rounded-xl !border !border-indigo-200 !bg-indigo-50 !px-3 !py-3 !font-bold !text-indigo-700 shadow-sm transition hover:!border-indigo-300 hover:!bg-indigo-100 dark:!border-indigo-900 dark:!bg-indigo-950/50 dark:!text-indigo-300 dark:hover:!bg-indigo-950">Meus Websites</flux:sidebar.item>
+                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate class="!rounded-xl !border !border-indigo-200 !bg-indigo-50 !px-3 !py-3 !font-bold !text-indigo-700 shadow-sm transition hover:!border-indigo-300 hover:!bg-indigo-100 dark:!border-indigo-900 dark:!bg-indigo-950/50 dark:!text-indigo-300 dark:hover:!bg-indigo-950">Meus Websites</flux:sidebar.item>
                 <div class="h-3"></div>
                 <flux:dropdown position="bottom" align="start">
                     <button type="button" class="flex w-full items-center justify-between gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-left text-sm text-white">
-                        <span class="min-w-0">
-                            @if($hasSite)
-                                <span class="block truncate font-semibold">{{ $currentSite->name }}</span>
-                                <span class="mt-0.5 block text-xs text-zinc-400">{{ $currentSite->statusLabel() }} · {{ $modelProfile['label'] ?? ($currentSite->category_label ?? 'Website') }}</span>
-                            @else
-                                <span class="block truncate font-semibold text-zinc-400 italic">Selecionar Projeto</span>
-                            @endif
-                        </span>
+                        <span class="min-w-0">@if($hasSite)<span class="block truncate font-semibold">{{ $currentSite->name }}</span><span class="mt-0.5 block text-xs text-zinc-400">{{ $currentSite->statusLabel() }} · {{ $modelProfile['label'] ?? ($currentSite->category_label ?? 'Website') }}</span>@else<span class="block truncate font-semibold text-zinc-400 italic">Selecionar Projeto</span>@endif</span>
                         <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
                     </button>
                     <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
@@ -56,6 +46,9 @@
                     <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
                     <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
                     <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
+                    @if($hasSite)
+                        <flux:sidebar.item icon="users" :href="$siteRoute('users')" :current="request()->routeIs('admin.site.users')" wire:navigate>Utilizadores</flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
                 @if($hasSite && ! $isDashboard)
                     <flux:sidebar.group heading="Website" class="grid">
@@ -87,10 +80,7 @@
             <div class="px-3 pb-3">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white">
-                        <flux:icon.arrow-right-start-on-rectangle class="size-5" />
-                        <span>Logout</span>
-                    </button>
+                    <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"><flux:icon.arrow-right-start-on-rectangle class="size-5" /><span>Logout</span></button>
                 </form>
             </div>
         </flux:sidebar>
