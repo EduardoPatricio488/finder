@@ -225,7 +225,6 @@ class ProductCatalog extends Component
                 'category_id' => $category->id,
                 'name' => $name,
                 'slug' => Str::slug($name).'-'.Str::lower(Str::random(5)),
-                'sku' => trim((string) ($row[$map['sku'] ?? -1] ?? '')) ?: null,
                 'price' => (float) str_replace(',', '.', (string) ($row[$map['preço'] ?? -1] ?? 0)),
                 'stock' => (int) ($row[$map['stock'] ?? -1] ?? 0),
                 'minimum_stock' => (int) ($row[$map['stock mínimo'] ?? -1] ?? 0),
@@ -340,7 +339,6 @@ class ProductCatalog extends Component
         $copy->name = $product->name.' (cópia)';
         $copy->slug = Str::slug($copy->name).'-'.Str::lower(Str::random(5));
         $copy->stock = 0;
-        $copy->sku = null;
         $copy->image_url = $product->image_url;
         $copy->images = $product->images;
         $copy->save();
@@ -376,9 +374,9 @@ class ProductCatalog extends Component
         return response()->streamDownload(function () use ($products): void {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($handle, ['Nome', 'SKU', 'Categoria', 'Preço', 'Stock', 'Stock mínimo', 'Descrição'], ';');
+            fputcsv($handle, ['Nome', 'Categoria', 'Preço', 'Stock', 'Stock mínimo', 'Descrição'], ';');
             foreach ($products as $product) {
-                fputcsv($handle, [$product->name, $product->sku, $product->category?->name, $product->price, $product->stock, $product->minimum_stock, $product->description], ';');
+                fputcsv($handle, [$product->name, $product->category?->name, $product->price, $product->stock, $product->minimum_stock, $product->description], ';');
             }
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
@@ -549,7 +547,6 @@ class ProductCatalog extends Component
     {
         $data = $this->validate([
             'productName' => ['required', 'string', 'max:255'],
-            'productSku' => ['nullable', 'string', 'max:100'],
             'productDescription' => ['nullable', 'string'],
             'productPrice' => ['required', 'numeric', 'min:0'],
             'productCategoryId' => ['required', 'integer'],
