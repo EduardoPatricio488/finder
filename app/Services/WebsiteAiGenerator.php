@@ -18,6 +18,39 @@ class WebsiteAiGenerator
             return ['pages' => $this->fallback($brief)];
         }
 
+        $isOnlineStore = ($brief['type'] ?? '') === 'online_store';
+        $systemPrompt = <<<'PROMPT'
+És o director criativo e copywriter sénior do Website Builder Finder. Cria websites premium, modernos e prontos a publicar. Responde apenas com JSON válido.
+
+Usa Português de Portugal. Adapta a estrutura ao tipo de website indicado no briefing. O conteúdo deve parecer escrito por um profissional, não por um gerador de templates.
+
+Usa apenas estas secções: hero, text, image, button, feature_grid, card, testimonials, faq, gallery, contact_form, product_grid, product_card, pricing, blog_posts, social_links, video, map, newsletter e cta.
+
+O JSON deve ter exactamente a forma {"pages":{"home":[{"type":"hero","label":"...","content":{}}]}}.
+
+REGRA ABSOLUTA DE FACTOS: nunca inventes profissão, cargo, empresa, clientes, produtos, preços, experiência, anos de experiência, formação, competências, localização, email, telefone, redes sociais, resultados, números ou testemunhos. Se uma informação não estiver no briefing, não a afirmes. Não uses estatísticas fictícias. Não cries testemunhos fictícios. Podes melhorar a linguagem fornecida sem acrescentar factos.
+
+Não incluas HTML, CSS, JavaScript ou URLs inventados. Para links internos usa apenas #sobre, #contacto ou #produtos quando fizer sentido. Mantém cada página curta: normalmente 2 a 5 secções. Não uses lorem ipsum, texto de enchimento ou frases como “adiciona aqui”.
+PROMPT;
+
+        if ($isOnlineStore) {
+            $systemPrompt .= <<<'PROMPT'
+
+ESTE É UM WEBSITE DE LOJA ONLINE. Cria uma experiência de ecommerce clara e premium:
+- home: hero comercial + proposta da marca + product_grid + CTA;
+- products: hero curto + product_grid;
+- about: identidade da marca + história/posicionamento fornecidos;
+- contact: contacto + formulário.
+Usa product_grid para apresentar os produtos/categorias fornecidos no briefing. Se não houver produtos específicos, não inventes nomes, preços ou características: usa uma secção de catálogo genérica apenas quando o componente conseguir obter os produtos reais da loja.
+A prioridade é vender sem inventar informação. Não inventes políticas de envio, devolução, preços, descontos ou métodos de pagamento.
+PROMPT;
+        } else {
+            $systemPrompt .= <<<'PROMPT'
+
+Para um website pessoal, cria um portfolio pessoal elegante, editorial e minimalista. Quando forem pedidas home, about e contact, mantém essa estrutura e usa apenas informação existente no briefing.
+PROMPT;
+        }
+
         try {
             $response = Http::withToken($apiKey)
                 ->acceptJson()
@@ -29,30 +62,7 @@ class WebsiteAiGenerator
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => <<<'PROMPT'
-És o director criativo e copywriter sénior do Website Builder Finder. Cria websites pessoais premium, modernos e prontos a publicar. Responde apenas com JSON válido.
-
-O resultado é um portfolio pessoal, não um website empresarial genérico. Usa Português de Portugal. A estrutura deve ser elegante, editorial, minimalista e com excelente hierarquia visual. O conteúdo deve parecer escrito por um profissional, não por um gerador de templates.
-
-Usa apenas estas secções: hero, text, image, button, feature_grid, card, testimonials, faq, gallery, contact_form, product_grid, product_card, pricing, blog_posts, social_links, video, map, newsletter e cta.
-
-O JSON deve ter exactamente a forma {"pages":{"home":[{"type":"hero","label":"...","content":{}}]}}.
-
-Para um portfolio pessoal, cria exactamente estas três páginas quando elas forem pedidas:
-- home: hero forte + pequena apresentação/posicionamento + destaques baseados exclusivamente no briefing + CTA final;
-- about: apresentação pessoal mais desenvolvida, mas sem inventar factos;
-- contact: introdução curta + formulário de contacto + CTA.
-
-Na homepage, o hero deve ter um título curto e forte, um subtítulo claro e uma chamada para conhecer a pessoa/contactá-la. Usa feature_grid ou card apenas quando o briefing tiver informação suficiente para sustentar os itens. Se o briefing só tiver uma descrição curta, prefere poucas secções fortes em vez de preencher a página com conteúdo artificial.
-
-REGRA ABSOLUTA DE FACTOS: nunca inventes profissão, cargo, empresa, clientes, projetos, experiência, anos de experiência, formação, prémios, competências, localização, email, telefone, redes sociais, resultados, números ou testemunhos. Se uma informação não estiver no briefing, não a afirmes. Não uses estatísticas fictícias. Não cries testemunhos fictícios. Não cries nomes de serviços que a pessoa nunca indicou.
-
-Podes transformar a descrição fornecida em copy mais elegante, mas sem acrescentar factos. Quando faltar informação, usa linguagem neutra e aspiracional sem apresentar isso como um facto. Não uses lorem ipsum, texto de enchimento ou frases como “adiciona aqui”.
-
-Não incluas HTML, CSS, JavaScript ou URLs inventados. Para links internos usa apenas #sobre, #contacto ou URLs que existam explicitamente no briefing. Para o formulário de contacto não inventes dados de contacto.
-
-Mantém cada página curta: normalmente 2 a 4 secções. O objetivo é criar um portfolio premium, respirado e convincente, não uma página cheia de blocos.
-PROMPT,
+                            'content' => $systemPrompt,
                         ],
                         [
                             'role' => 'user',
@@ -166,6 +176,70 @@ PROMPT,
                         'content' => [
                             'title' => 'A minha história',
                             'body' => $description,
+                        ],
+                    ],
+                ],
+                'online_store' => [
+                    [
+                        'type' => 'hero',
+                        'label' => 'Loja',
+                        'content' => [
+                            'title' => $name,
+                            'subtitle' => $description,
+                            'button_label' => 'Ver produtos',
+                            'button_url' => '#produtos',
+                        ],
+                    ],
+                    [
+                        'type' => 'product_grid',
+                        'label' => 'Produtos',
+                        'content' => [
+                            'title' => 'Produtos em destaque',
+                            'description' => 'Conhece a seleção da nossa loja.',
+                            'limit' => 6,
+                        ],
+                    ],
+                    [
+                        'type' => 'cta',
+                        'label' => 'Comprar',
+                        'content' => [
+                            'title' => 'Descobre a loja',
+                            'description' => 'Explora os produtos disponíveis.',
+                            'button_label' => 'Ver produtos',
+                            'button_url' => '#produtos',
+                        ],
+                    ],
+                ],
+                'products' => [
+                    [
+                        'type' => 'hero',
+                        'label' => 'Produtos',
+                        'content' => [
+                            'title' => 'Produtos',
+                            'subtitle' => $description,
+                            'button_label' => 'Ver catálogo',
+                            'button_url' => '#produtos',
+                        ],
+                    ],
+                    [
+                        'type' => 'product_grid',
+                        'label' => 'Catálogo',
+                        'content' => [
+                            'title' => 'Catálogo',
+                            'description' => 'Produtos disponíveis na loja.',
+                            'limit' => 12,
+                        ],
+                    ],
+                ],
+                'about' => [
+                    [
+                        'type' => 'hero',
+                        'label' => 'Sobre a marca',
+                        'content' => [
+                            'title' => 'Sobre a marca',
+                            'subtitle' => $description,
+                            'button_label' => 'Ver produtos',
+                            'button_url' => '#produtos',
                         ],
                     ],
                 ],
