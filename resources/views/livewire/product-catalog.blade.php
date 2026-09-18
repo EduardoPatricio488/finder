@@ -128,7 +128,7 @@
                                     </span>
                                 </span>
                             </th>
-                            <th class="px-5 py-4 text-right">Ação</th>
+                            <th class="px-5 py-4 text-right">Ações</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -193,24 +193,28 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 text-right">
-                                    <div class="flex justify-end gap-1.5">
-                                    <button type="button" wire:click="openQuickStockModal({{ $product->id }})" title="Alterar stock" class="rounded-lg border border-zinc-200 p-2 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700">
-                                        <flux:icon name="arrows-up-down" class="size-4" />
-                                    </button>
-                                    <button type="button" wire:click="openStockHistory({{ $product->id }})" title="Histórico de stock" class="rounded-lg border border-zinc-200 p-2 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700">
-                                        <flux:icon name="clock" class="size-4" />
-                                    </button>
-                                    <button type="button" wire:click="duplicateProduct({{ $product->id }})" title="Duplicar" class="rounded-lg border border-zinc-200 p-2 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700">
-                                        <flux:icon name="square-2-stack" class="size-4" />
-                                    </button>
-                                    <button type="button" wire:click="deleteProduct({{ $product->id }})" wire:confirm="Eliminar este produto? Esta ação não pode ser anulada." title="Eliminar" class="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50 dark:border-red-500/20 dark:hover:bg-red-500/10">
-                                        <flux:icon name="trash" class="size-4" />
-                                    </button>
-                                    <button type="button" wire:click="openManageProductModal({{ $product->id }})" class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:hover:border-indigo-500 dark:hover:text-indigo-400">
-                                        <flux:icon name="pencil-square" class="size-4" />
-                                        Gerir
-                                    </button>
-                                    </div>
+                                    <flux:dropdown position="bottom" align="end">
+                                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" aria-label="Ações do produto" />
+
+                                        <flux:menu>
+                                            <flux:menu.item as="button" wire:click="openManageProductModal({{ $product->id }})" icon="pencil-square">
+                                                Gerir produto
+                                            </flux:menu.item>
+                                            <flux:menu.item as="button" wire:click="openQuickStockModal({{ $product->id }})" icon="arrows-up-down">
+                                                Alterar stock
+                                            </flux:menu.item>
+                                            <flux:menu.item as="button" wire:click="openStockHistory({{ $product->id }})" icon="clock">
+                                                Histórico de stock
+                                            </flux:menu.item>
+                                            <flux:menu.item as="button" wire:click="duplicateProduct({{ $product->id }})" icon="square-2-stack">
+                                                Duplicar
+                                            </flux:menu.item>
+                                            <flux:menu.separator />
+                                            <flux:menu.item as="button" wire:click="deleteProduct({{ $product->id }})" wire:confirm="Eliminar este produto? Esta ação não pode ser anulada." icon="trash" variant="danger">
+                                                Eliminar
+                                            </flux:menu.item>
+                                        </flux:menu>
+                                    </flux:dropdown>
                                 </td>
                             </tr>
                         @empty
