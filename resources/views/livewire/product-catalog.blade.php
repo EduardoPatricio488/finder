@@ -96,8 +96,10 @@
                                             @php
                                                 $productPhotos = $product->images ?: ($product->image_url ? [$product->image_url] : []);
                                             @endphp
-                                            @forelse(array_slice($productPhotos, 0, 3) as $photo)
-                                                <img src="{{ asset('storage/'.$photo) }}" alt="{{ $product->name }}" class="size-11 rounded-xl border-2 border-white object-cover dark:border-zinc-900">
+                                            @forelse(array_slice($productPhotos, 0, 3) as $photoIndex => $photo)
+                                                <button type="button" wire:click="openImageGallery({{ $product->id }}, {{ $photoIndex }})" class="shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Ver fotografias em grande">
+                                                    <img src="{{ asset('storage/'.$photo) }}" alt="{{ $product->name }}" class="size-11 rounded-xl border-2 border-white object-cover transition hover:scale-110 dark:border-zinc-900">
+                                                </button>
                                             @empty
                                                 <div class="flex size-11 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
                                                     <flux:icon name="photo" class="size-5 text-zinc-400" />
@@ -161,6 +163,47 @@
             </div>
         </div>
     </div>
+    @if($imageGalleryOpen)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/90 p-4 backdrop-blur-sm" wire:click="closeImageGallery">
+            <div class="relative flex h-full w-full max-w-6xl flex-col items-center justify-center" wire:click.stop>
+                <div class="absolute right-0 top-0 z-10 flex items-center gap-2">
+                    <span class="rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">{{ $imageGalleryIndex + 1 }} / {{ count($imageGalleryPhotos) }}</span>
+                    <button type="button" wire:click="closeImageGallery" class="rounded-xl bg-white/10 p-2 text-white transition hover:bg-white/20" aria-label="Fechar">
+                        <flux:icon name="x-mark" class="size-6" />
+                    </button>
+                </div>
+
+                <div class="mb-4 text-center">
+                    <p class="text-lg font-bold text-white">{{ $imageGalleryName }}</p>
+                    <p class="mt-1 text-sm text-zinc-300">Clica fora da imagem ou no X para fechar</p>
+                </div>
+
+                <div class="relative flex min-h-0 w-full flex-1 items-center justify-center">
+                    <img src="{{ asset('storage/'.($imageGalleryPhotos[$imageGalleryIndex] ?? '')) }}" alt="{{ $imageGalleryName }}" class="max-h-[75vh] max-w-full rounded-2xl object-contain shadow-2xl">
+
+                    @if(count($imageGalleryPhotos) > 1)
+                        <button type="button" wire:click="previousImage" class="absolute left-2 rounded-full bg-white/15 p-3 text-white backdrop-blur transition hover:bg-white/25 sm:left-6" aria-label="Fotografia anterior">
+                            <flux:icon name="chevron-left" class="size-6" />
+                        </button>
+                        <button type="button" wire:click="nextImage" class="absolute right-2 rounded-full bg-white/15 p-3 text-white backdrop-blur transition hover:bg-white/25 sm:right-6" aria-label="Fotografia seguinte">
+                            <flux:icon name="chevron-right" class="size-6" />
+                        </button>
+                    @endif
+                </div>
+
+                @if(count($imageGalleryPhotos) > 1)
+                    <div class="mt-4 flex max-w-full gap-2 overflow-x-auto pb-2">
+                        @foreach($imageGalleryPhotos as $thumbIndex => $photo)
+                            <button type="button" wire:click="$set('imageGalleryIndex', {{ $thumbIndex }})" class="shrink-0 rounded-lg {{ $imageGalleryIndex === $thumbIndex ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-100' }}">
+                                <img src="{{ asset('storage/'.$photo) }}" alt="" class="size-16 rounded-lg object-cover">
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
     @if($productModalOpen)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm" wire:click="closeProductModal">
             <div class="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-zinc-900" wire:click.stop>
