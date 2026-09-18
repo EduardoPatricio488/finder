@@ -16,7 +16,7 @@
                 $target = $site ?? $currentSite;
                 if (! $target) return '#';
                 $routeName = 'admin.site.'.$name;
-                return Route::has($routeName) ? route($routeName, $target) : '#';
+                return Route::has($routeName) ? route($routeName) : '#';
             };
         @endphp
         @if($isPlatformAdmin)
@@ -35,7 +35,7 @@
                         <span class="min-w-0">@if($hasSite)<span class="block truncate font-semibold">{{ $currentSite->name }}</span><span class="mt-0.5 block text-xs text-zinc-400">{{ $currentSite->statusLabel() }} · {{ $modelProfile['label'] ?? ($currentSite->category_label ?? 'Website') }}</span>@else<span class="block truncate font-semibold text-zinc-400 italic">Selecionar Projeto</span>@endif</span>
                         <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
                     </button>
-                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
+                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard')" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
                 </flux:dropdown>
             </div>
             <flux:sidebar.nav>
