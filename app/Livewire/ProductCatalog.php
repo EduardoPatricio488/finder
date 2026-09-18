@@ -545,7 +545,13 @@ class ProductCatalog extends Component
             'productMinimumStock' => ['required', 'integer', 'min:0', 'lt:productStock'],
             'productIsActive' => ['boolean'],
             'productImages' => ['nullable', 'array', 'max:10'],
-            'productImages.*' => ['image', 'max:10240'],
+            'productImages.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:10240']
+        ], [
+            'productImages.array' => 'As fotografias selecionadas são inválidas.',
+            'productImages.max' => 'Podes adicionar no máximo 10 fotografias.',
+            'productImages.*.file' => 'O ficheiro selecionado não é válido.',
+            'productImages.*.mimes' => 'Cada fotografia tem de estar em JPG, JPEG, PNG ou WEBP.',
+            'productImages.*.max' => 'Cada fotografia pode ter no máximo 10 MB.',
         ]);
 
         $site = $this->site();
@@ -607,7 +613,13 @@ class ProductCatalog extends Component
             'productMinimumStock' => ['required', 'integer', 'min:0', 'lt:productStock'],
             'productIsActive' => ['boolean'],
             'productImages' => ['nullable', 'array', 'max:10'],
-            'productImages.*' => ['image', 'max:10240'],
+            'productImages.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:10240']
+        ], [
+            'productImages.array' => 'As fotografias selecionadas são inválidas.',
+            'productImages.max' => 'Podes adicionar no máximo 10 fotografias.',
+            'productImages.*.file' => 'O ficheiro selecionado não é válido.',
+            'productImages.*.mimes' => 'Cada fotografia tem de estar em JPG, JPEG, PNG ou WEBP.',
+            'productImages.*.max' => 'Cada fotografia pode ter no máximo 10 MB.',
         ]);
 
         $site = $this->site();
