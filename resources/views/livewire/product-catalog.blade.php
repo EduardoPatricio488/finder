@@ -160,6 +160,11 @@
                                 <option value="">Seleciona uma categoria</option>
                                 @foreach($categories as $item)<option value="{{ $item->id }}">{{ $item->name }}</option>@endforeach
                             </select>
+                            @if($productCategoryId && optional($categories->firstWhere('id', $productCategoryId))->slug === 'outros')
+                                <input wire:model="productCustomCategory" type="text" class="mt-3 w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950" placeholder="Nome da nova categoria">
+                                <p class="mt-1 text-xs text-zinc-500">Escreve o nome da categoria que queres criar.</p>
+                                @error('productCustomCategory') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            @endif
                             @error('productCategoryId') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                         <div>
