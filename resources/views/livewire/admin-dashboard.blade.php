@@ -7,7 +7,7 @@
                     <div class="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 shadow-inner"><flux:icon name="sparkles" variant="solid" class="size-7" /></div>
                     <div><h4 class="text-sm font-black uppercase italic tracking-tighter text-stone-900 dark:text-white">Finder Free: Desbloqueia o teu potencial</h4><p class="text-xs font-medium text-stone-500">O teu limite é de 5 produtos. Atualiza para o Plano Pro e ganha IA e Relatórios.</p></div>
                 </div>
-                <flux:button href="{{ route('admin.site.upgrade', $site) }}" variant="primary" class="!rounded-xl !bg-stone-950 !px-6 shadow-lg shadow-stone-950/20">Fazer Upgrade Agora</flux:button>
+                <flux:button href="{{ route('admin.site.upgrade') }}" variant="primary" class="!rounded-xl !bg-stone-950 !px-6 shadow-lg shadow-stone-950/20">Fazer Upgrade Agora</flux:button>
             </div>
         </div>
     @endif
