@@ -74,7 +74,12 @@
                             <th class="px-5 py-4">Categoria</th>
                             <th class="px-5 py-4">Stock</th>
                             <th class="px-5 py-4">Preço</th>
-                            <th class="px-5 py-4">Avaliação</th>
+                            <th class="px-5 py-4">
+                                <span class="inline-flex items-center gap-1" title="Avaliação feita pelos clientes no site.">
+                                    Avaliação
+                                    <flux:icon name="information-circle" class="size-4 text-zinc-400" />
+                                </span>
+                            </th>
                             <th class="px-5 py-4 text-right">Ação</th>
                         </tr>
                     </thead>
