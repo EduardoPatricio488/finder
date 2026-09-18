@@ -52,7 +52,7 @@ class SiteContext
 
     public static function adminRoute(string $name, ?Site $site = null): string
     {
-        return route('admin.site.'.$name);
+        return route('site.manage.'.$name);
     }
 
     public static function manageableSitesQuery(User $user): Builder
