@@ -42,7 +42,6 @@ class ProductCatalog extends Component
     public int $imageGalleryIndex = 0;
     public ?int $manageProductId = null;
     public string $productName = '';
-    public string $productSku = '';
     public string $productDescription = '';
     public string $productPrice = '';
     public ?int $productCategoryId = null;
@@ -439,7 +438,6 @@ class ProductCatalog extends Component
 
         $this->manageProductId = $product->id;
         $this->productName = (string) $product->name;
-        $this->productSku = (string) ($product->sku ?? '');
         $this->productDescription = (string) ($product->description ?? '');
         $this->productPrice = (string) $product->price;
         $this->productCategoryId = $product->category_id;
@@ -463,7 +461,6 @@ class ProductCatalog extends Component
     {
         $data = $this->validate([
             'productName' => ['required', 'string', 'max:255'],
-            'productSku' => ['nullable', 'string', 'max:100'],
             'productDescription' => ['nullable', 'string'],
             'productPrice' => ['required', 'numeric', 'min:0'],
             'productCategoryId' => ['required', 'integer'],
@@ -490,7 +487,6 @@ class ProductCatalog extends Component
         $product->update([
             'category_id' => $category->id,
             'name' => $data['productName'],
-            'sku' => $data['productSku'] !== '' ? $data['productSku'] : null,
             'description' => $data['productDescription'],
             'price' => $data['productPrice'],
             'is_active' => $data['productIsActive'],
@@ -555,7 +551,6 @@ class ProductCatalog extends Component
             'category_id' => $category->id,
             'name' => $data['productName'],
             'slug' => Str::slug($data['productName']).'-'.Str::lower(Str::random(5)),
-            'sku' => $data['productSku'] !== '' ? $data['productSku'] : null,
             'description' => $data['productDescription'],
             'price' => $data['productPrice'],
             'is_active' => $data['productIsActive'],
@@ -587,7 +582,6 @@ class ProductCatalog extends Component
     {
         $this->reset([
             'productName',
-            'productSku',
             'productDescription',
             'productPrice',
             'productCategoryId',
