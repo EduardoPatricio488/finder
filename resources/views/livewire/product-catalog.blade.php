@@ -147,6 +147,12 @@
                     <span class="rounded-xl bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Alterações por aplicar</span>
                 @endif
                 <flux:button type="button" wire:click="applyProducts" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
+                @if($site)
+                    <a href="{{ route('public.site', ['site' => $site->slug]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800">
+                        <flux:icon name="arrow-top-right-on-square" class="size-4" />
+                        Ver site
+                    </a>
+                @endif
             </div>
         </div>
 
