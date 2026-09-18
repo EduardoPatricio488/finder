@@ -186,8 +186,10 @@
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-semibold">Imagem</label>
-                            <input wire:model="productImage" type="file" accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
-                            @error('productImage') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <input wire:model="productImages" type="file" multiple accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                            <p class="mt-1 text-xs text-zinc-500">Podes adicionar até 10 fotografias, com até 10 MB por fotografia.</p>
+                            @error('productImages') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            @error('productImages.*') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                     </div>
                     <div class="mt-6 flex justify-end gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-800">
