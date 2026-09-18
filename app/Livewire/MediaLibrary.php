@@ -34,7 +34,7 @@ class MediaLibrary extends Component
 
     public function uploadMedia(): void
     {
-        $this->placement = in_array($this->placement, ['logo','hero','about','experience','education','skills','projects','services','testimonials','gallery','contact','background','footer'], true)
+        $this->placement = in_array($this->placement, ['logo','hero','about','experience','education','skills','projects','products','services','testimonials','gallery','contact','background','footer'], true)
             ? $this->placement
             : 'gallery';
 
@@ -84,7 +84,7 @@ class MediaLibrary extends Component
         return [
             'logo' => 'Logótipo', 'hero' => 'Capa / Hero principal', 'about' => 'Sobre mim / Sobre nós',
             'experience' => 'Experiência', 'education' => 'Formação', 'skills' => 'Competências',
-            'projects' => 'Projetos', 'services' => 'Serviços', 'testimonials' => 'Testemunhos',
+            'projects' => 'Projetos', 'products' => 'Produtos', 'services' => 'Serviços', 'testimonials' => 'Testemunhos',
             'gallery' => 'Galeria', 'contact' => 'Contacto', 'background' => 'Fundo de uma secção', 'footer' => 'Rodapé',
         ];
     }
