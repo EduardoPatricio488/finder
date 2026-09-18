@@ -43,6 +43,7 @@ class MenuManager extends Component
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
+        session()->put('current_site_id', $site->id);
         $this->menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
         $menu = $site->menus()->first();
 
