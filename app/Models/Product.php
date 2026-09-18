@@ -16,7 +16,7 @@ class Product extends Model
 
     protected function casts(): array
     {
-        return ['price' => 'decimal:2', 'is_active' => 'boolean'];
+        return ['price' => 'decimal:2', 'is_active' => 'boolean', 'images' => 'array'];
     }
 
     public function site(): BelongsTo
