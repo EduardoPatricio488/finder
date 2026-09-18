@@ -148,7 +148,7 @@
                 @endif
                 <flux:button type="button" wire:click="applyProducts" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
                 @if($site)
-                    <a href="{{ route('public.site', ['site' => $site->slug]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800">
+                    <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800">
                         <flux:icon name="arrow-top-right-on-square" class="size-4" />
                         Ver site
                     </a>
