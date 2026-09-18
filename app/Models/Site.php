@@ -164,7 +164,7 @@ class Site extends Model
 
     public function isProtected(): bool
     {
-        return $this->slug === 'casa-co' || $this->home_route === 'sales';
+        return $this->home_route === 'sales';
     }
 
     public function isVisibleTo(?User $user): bool
