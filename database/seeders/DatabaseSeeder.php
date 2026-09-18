@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Plan;
-use App\Models\Site;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -36,16 +35,6 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
             'role' => 'administrador',
         ]);
-
-        $site = Site::create([
-            'name' => 'Casa & Co.',
-            'slug' => 'casa-e-co',
-            'owner_id' => $admin->id,
-            'plan_id' => $proPlan->id,
-            'is_published' => true,
-        ]);
-
-        $site->users()->attach($admin->id, ['role' => 'admin']);
 
         $this->command->info('Sistema SaaS inicializado com sucesso!');
         $this->command->info('Utilizador: admin@admin.com | Senha: password');
