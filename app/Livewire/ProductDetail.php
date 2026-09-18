@@ -64,11 +64,7 @@ class ProductDetail extends Component
 
         return Order::query()
             ->when(Schema::hasColumn('orders', 'site_id'), fn ($query) => $query->where(function ($query) use ($site): void {
-                $query->where('site_id', $site->id);
-
-                if ($site->slug === 'casa-co') {
-                    $query->orWhereNull('site_id');
-                }
+                $query->where('site_id', $site->id); 
             }))
             ->whereHas('customer', fn ($query) => $query->where('email', auth()->user()?->email))
             ->whereHas('items', fn ($query) => $query->where('product_id', $this->product->id))
