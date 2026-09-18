@@ -1,18 +1,9 @@
 <div class="min-h-screen bg-zinc-50 p-6 dark:bg-zinc-950">
     <div class="mx-auto max-w-6xl">
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm font-medium text-indigo-600">Website selecionado</p>
-                <h1 class="mt-1 text-2xl font-semibold tracking-tight">Definições do website</h1>
-                <p class="mt-1 text-sm text-zinc-500">Identidade, endereço e SEO de cada website, de forma independente.</p>
-            </div>
-            <div class="w-full sm:w-80">
-                <flux:select wire:change="switchSite($event.target.value)" label="Website">
-                    @foreach($availableSites as $availableSite)
-                        <option value="{{ $availableSite->id }}">{{ $availableSite->name }} — {{ $availableSite->statusLabel() }}</option>
-                    @endforeach
-                </flux:select>
-            </div>
+        <div class="mb-6">
+            <p class="text-sm font-medium text-indigo-600">{{ $site->name }}</p>
+            <h1 class="mt-1 text-2xl font-semibold tracking-tight">Definições do website</h1>
+            <p class="mt-1 text-sm text-zinc-500">Identidade, endereço e SEO deste website.</p>
         </div>
 
         <div class="mb-6 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-900/50 dark:bg-indigo-950/30">
