@@ -95,23 +95,5 @@
         </div>
     </div>
 
-    <div class="rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-xl shadow-zinc-900/10 backdrop-blur">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm font-semibold text-zinc-900">{{ $menuApplied ? 'A navegação está aplicada no site.' : 'As alterações ainda não estão aplicadas.' }}</p>
-                <p class="text-xs text-zinc-500">{{ $menuApplied ? 'Podes continuar a editar o menu e voltar a aplicar quando terminares.' : 'Guarda primeiro o menu e depois aplica-o no site.' }}</p>
-            </div>
-            <div class="flex gap-2">
-                <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" class="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50">
-                    <flux:icon name="eye" class="size-4" />
-                    Ver site
-                </a>
-                <button type="button" wire:click="applyMenu" @disabled(! $menuId) class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40">
-                    <flux:icon name="check-circle" class="size-4" />
-                    Aplicar no site
-                </button>
-            </div>
-        </div>
-    </div>
 </div>
 </div>
