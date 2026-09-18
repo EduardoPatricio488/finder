@@ -143,7 +143,8 @@
                 </div>
 
                 <div class="mt-8 flex justify-between"><flux:button icon="arrow-left" wire:click="previous">Voltar</flux:button><flux:button variant="primary" icon:trailing="rocket-launch" wire:click="create" wire:loading.attr="disabled"><span wire:loading.remove>{{ $type === 'online_store' ? 'Criar a minha loja' : 'Criar o meu website' }}</span><span wire:loading>{{ $type === 'online_store' ? 'A criar a tua loja…' : 'A criar o teu website…' }}</span></flux:button></div>
-
+            </section>
+        @endif
 
         <div x-cloak x-show="help" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 p-4" @click.self="help=false">
             <div class="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl dark:bg-zinc-900">
