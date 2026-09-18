@@ -69,6 +69,21 @@ class MediaLibrary extends Component
         session()->flash('status', 'Ficheiro adicionado à biblioteca de media.');
     }
 
+    public function mediaUrl(SiteMedia $media): string
+    {
+        return route('admin.site.media.file', ['site' => $this->site, 'media' => $media->id]);
+    }
+
+    public function placementLabel(?string $placement): string
+    {
+        return [
+            'logo' => 'Logótipo', 'hero' => 'Capa / Hero', 'about' => 'Sobre mim / Sobre nós',
+            'experience' => 'Experiência', 'education' => 'Formação', 'skills' => 'Competências',
+            'projects' => 'Projetos', 'services' => 'Serviços', 'testimonials' => 'Testemunhos',
+            'gallery' => 'Galeria', 'contact' => 'Contacto', 'background' => 'Fundo de secção', 'footer' => 'Rodapé',
+        ][$placement ?: 'gallery'] ?? 'Galeria';
+    }
+
     public function deleteMedia(int $mediaId): void
     {
         $media = $this->site->media()->findOrFail($mediaId);
