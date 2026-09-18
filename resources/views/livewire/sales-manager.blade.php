@@ -7,6 +7,7 @@
                     <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Vendas</h1>
                     <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Acompanha as vendas, encomendas e estado dos pedidos da empresa.</p>
                 </div>
+                <div class="w-full lg:max-w-sm"><x-site-workspace-selector :current-site="$site" route-name="sales" /></div>
                 <div class="rounded-2xl bg-zinc-50 px-5 py-3 dark:bg-zinc-800/70">
                     <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Total apresentado</p>
                     <p class="mt-1 text-xl font-bold text-zinc-950 dark:text-white">€ {{ number_format($sales->sum(fn($sale) => (float) $sale->total), 2, ',', '.') }}</p>
