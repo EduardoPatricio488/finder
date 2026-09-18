@@ -37,7 +37,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->name('home');
 Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
-Route::middleware(['auth', 'verified'])->get('vendas', SalesManager::class)->name('sales');
 Route::get('produtos', ProductCatalog::class)->name('products');
 Route::get('utilizadores', UserManager::class)->name('users');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
@@ -78,7 +77,8 @@ Route::middleware(['auth', 'verified', 'admin'])
             ]);
             session(['platform_admin_site_id' => $site->id]);
 
-            return redirect()->route('admin.site.dashboard', $site);
+            session()->put('current_site_id', $site->id);
+            return redirect()->route('admin.site.dashboard');
         })->name('websites.access');
         Route::post('websites/exit-access', function () {
             $siteId = session('platform_admin_site_id');
@@ -99,18 +99,16 @@ Route::middleware(['auth', 'verified', 'admin'])
     });
 
 Route::middleware(['auth', 'verified', 'site.access'])
-    ->prefix('admin/sites/{site:slug}')
     ->name('admin.site.')
     ->group(function (): void {
-        Route::get('dashboard', AdminDashboard::class)->name('dashboard');
+        Route::get('gestao', AdminDashboard::class)->name('dashboard');
         Route::get('config', StoreSettings::class)->name('config');
         Route::get('configuracao', SiteSettings::class)->name('settings');
         Route::get('definicoes', SiteDefinitions::class)->name('definitions');
         Route::get('media', MediaLibrary::class)->name('media');
-        Route::get('media/{media}', function (Site $site, SiteMedia $media) {
-            abort_unless((int) $media->site_id === (int) $site->id, 404);
+        Route::get('media/{media}', function (SiteMedia $media) {
+            abort_unless((int) $media->site_id === (int) session('current_site_id'), 404);
             abort_unless(Storage::disk($media->disk ?: 'public')->exists($media->path), 404);
-
             return response()->file(Storage::disk($media->disk ?: 'public')->path($media->path), [
                 'Content-Type' => $media->mime_type ?: 'application/octet-stream',
                 'Cache-Control' => 'public, max-age=3600',
@@ -118,7 +116,6 @@ Route::middleware(['auth', 'verified', 'site.access'])
         })->name('media.file');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
-        Route::get('produtos', ProductManager::class)->name('products');
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('encomendas', OrderManager::class)->name('orders');
         Route::get('vendas', SalesManager::class)->name('sales');
@@ -126,6 +123,11 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('promocoes', PromotionManager::class)->name('promotions');
         Route::get('stock', StockMovementManager::class)->name('stock');
         Route::get('submissoes', SiteSubmissions::class)->name('submissions');
+        Route::get('mudar-website/{site:slug}', function (Site $site) {
+            abort_unless($site->isManageableBy(auth()->user()), 403);
+            session()->put('current_site_id', $site->id);
+            return redirect()->route('admin.site.dashboard');
+        })->withoutMiddleware('site.access')->name('switch');
     });
 
 require __DIR__.'/settings.php';
