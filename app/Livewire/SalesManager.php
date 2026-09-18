@@ -6,7 +6,7 @@ use App\Livewire\Concerns\InteractsWithSiteContext;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.admin')]
+#[Layout('layouts.app')]
 class SalesManager extends Component
 {
     use InteractsWithSiteContext;
