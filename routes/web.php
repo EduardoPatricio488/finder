@@ -5,7 +5,6 @@ use App\Livewire\AdminDashboard;
 use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
 use App\Livewire\CustomerAccount;
-use App\Livewire\CustomerAssistant;
 use App\Livewire\Help;
 use App\Livewire\LandingPage;
 use App\Livewire\MediaLibrary;
@@ -58,7 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('conta/{section?}', CustomerAccount::class)->name('account');
     Route::get('conta/favoritos', fn () => redirect()->route('account', ['section' => 'favorites']))->name('account.favorites');
     Route::get('encomendas/acompanhamento', OrderTracking::class)->name('orders.tracking');
-    Route::get('assistente', CustomerAssistant::class)->name('customer.assistant');
+    
 });
 
 Route::get('site/{site:slug}/{pageSlug?}', PublicSite::class)->name('site.public');
