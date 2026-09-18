@@ -51,7 +51,7 @@ class ProductCatalog extends Component
     public function mount(): mixed
     {
         $referer = (string) request()->headers->get('referer', '');
-        if (preg_match('#/websites/([^/]+)/builder(?:[/?#]|$)#', $referer, $matches)) {
+        if (preg_match('~/websites/([^/]+)/builder(?:[/?#]|$)~', $referer, $matches)) {
             $site = Site::query()->where('slug', $matches[1])->first();
             if ($site !== null) return redirect()->route('admin.site.products', $site);
         }
