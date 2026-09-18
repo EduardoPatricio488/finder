@@ -11,13 +11,13 @@
         @foreach($sites as $siteOption)
             @php
                 $url = match($routeName) {
-                    'sales' => route('admin.site.sales', $siteOption),
-                    'orders' => route('admin.site.orders', $siteOption),
-                    'settings' => route('admin.site.settings', $siteOption),
-                    'media' => route('admin.site.media', $siteOption),
-                    'menus' => route('admin.site.menus', $siteOption),
+                    'sales' => route('admin.site.switch', ['site' => $siteOption]),
+                    'orders' => route('admin.site.switch', ['site' => $siteOption]),
+                    'settings' => route('admin.site.switch', ['site' => $siteOption]),
+                    'media' => route('admin.site.switch', ['site' => $siteOption]),
+                    'menus' => route('admin.site.switch', ['site' => $siteOption]),
                     'users' => route('users'),
-                    default => route('admin.site.dashboard', $siteOption),
+                    default => route('admin.site.switch', ['site' => $siteOption]),
                 };
             @endphp
             <option value="{{ $url }}" @selected((int) $siteOption->id === (int) $currentSite->id)>{{ $siteOption->name }}</option>
