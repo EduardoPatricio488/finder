@@ -27,6 +27,7 @@ class MediaLibrary extends Component
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
+        session()->put('current_site_id', $site->id);
         $this->mediaApplied = filled(data_get($site->settings, 'media_applied_at'));
     }
 
