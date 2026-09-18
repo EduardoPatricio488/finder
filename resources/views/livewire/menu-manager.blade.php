@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="text-sm font-semibold text-indigo-600">{{ $site->name }}</p>
-            <h1 class="mt-1 text-3xl font-semibold tracking-tight text-zinc-950">Menus</h1>
+            <h1 class="mt-1 text-4xl font-semibold tracking-tight text-zinc-950">Menus</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Define a navegação do website de forma simples. Neste website estão disponíveis apenas <strong class="font-semibold text-zinc-700">Início, Sobre mim e Contactos</strong>.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
