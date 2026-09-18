@@ -1,6 +1,5 @@
 <?php
 
-use App\Livewire\AdminAssistant;
 use App\Livewire\AdminDashboard;
 use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
@@ -21,9 +20,7 @@ use App\Livewire\ProductDetail;
 use App\Livewire\ProductManager;
 use App\Livewire\PromotionManager;
 use App\Livewire\PublicSite;
-use App\Livewire\Reports;
 use App\Livewire\SalesManager;
-use App\Livewire\SiteAnalytics;
 use App\Livewire\SiteDefinitions;
 use App\Livewire\SiteSettings;
 use App\Livewire\SiteSubmissions;
@@ -119,7 +116,6 @@ Route::middleware(['auth', 'verified', 'site.access'])
                 'Cache-Control' => 'public, max-age=3600',
             ]);
         })->name('media.file');
-        Route::get('analytics', SiteAnalytics::class)->middleware('can:access-reports,site')->name('analytics');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
         Route::get('produtos', ProductManager::class)->name('products');
@@ -131,8 +127,6 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('stock', StockMovementManager::class)->name('stock');
         Route::get('submissoes', SiteSubmissions::class)->name('submissions');
         Route::get('utilizadores', UserManager::class)->name('users');
-        Route::get('relatorios', Reports::class)->middleware('can:access-reports,site')->name('reports');
-        Route::get('assistente', AdminAssistant::class)->middleware('can:access-ai,site')->name('assistant');
     });
 
 require __DIR__.'/settings.php';
