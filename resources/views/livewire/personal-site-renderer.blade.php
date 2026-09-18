@@ -33,7 +33,7 @@
 <div class="min-h-screen bg-[#f8f8f6] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
     <header class="sticky top-0 z-40 border-b border-black/5 bg-[#f8f8f6]/90 backdrop-blur-xl">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-            <a href="{{ route('site.public', $site) }}" class="flex items-center gap-3 font-semibold tracking-tight">
+            <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => $preview ? 1 : null]) }}" class="flex items-center gap-3 font-semibold tracking-tight">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm" style="background: var(--finder-primary)">{{ $initial }}</span>
                 <span class="max-w-[190px] truncate sm:max-w-none">{{ $site->name }}</span>
             </a>
