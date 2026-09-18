@@ -35,7 +35,7 @@ class ProductDetail extends Component
         if ($preview) {
             abort_unless($site->isManageableBy(auth()->user()), 403);
         } else {
-            abort_unless($site->status === 'online' && $site->is_published, 404);
+            abort_unless($site->is_published && in_array($site->status, ['published', 'online'], true), 404);
         }
 
         abort_unless((int) $product->site_id === $site->id, 404);
