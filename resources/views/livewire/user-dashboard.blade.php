@@ -7,7 +7,16 @@
                     <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">Bom dia, {{ auth()->user()->name }}.</h1>
                     <p class="mt-2 max-w-md text-sm leading-6 text-zinc-500 dark:text-zinc-400">Cria, personaliza e gere todos os teus websites num só lugar.</p>
                 </div>
-                <flux:button variant="primary" icon="plus" href="{{ route('site.create') }}" wire:navigate>Criar website</flux:button>
+                <a href="{{ route('site.create') }}" wire:navigate class="group inline-flex items-center gap-3 rounded-2xl bg-indigo-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900">
+    <span class="flex size-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20 transition group-hover:scale-105">
+        <flux:icon name="plus" class="size-5" />
+    </span>
+    <span>
+        <span class="block text-xs font-semibold uppercase tracking-wider text-indigo-100">Novo projeto</span>
+        <span class="block text-base font-bold">Criar website</span>
+    </span>
+    <flux:icon name="arrow-right" class="size-5 transition group-hover:translate-x-1" />
+</a>
             </div>
         </div>
 
