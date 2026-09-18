@@ -21,11 +21,13 @@ class MediaLibrary extends Component
     public string $placement = 'gallery';
 
     public string $search = '';
+    public bool $mediaApplied = false;
 
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
+        $this->mediaApplied = filled(data_get($site->settings, 'media_applied_at'));
     }
 
     public function uploadMedia(): void
@@ -66,7 +68,8 @@ class MediaLibrary extends Component
         ]);
 
         $this->reset(['upload', 'altText']);
-        session()->flash('status', 'Ficheiro adicionado à biblioteca de media.');
+        $this->mediaApplied = false;
+        session()->flash('status', 'Ficheiro guardado na biblioteca de media. Agora podes aplicar as alterações no site.');
     }
 
     public function mediaUrl(SiteMedia $media): string
@@ -94,11 +97,22 @@ class MediaLibrary extends Component
         ][$placement ?: 'gallery'] ?? 'Galeria';
     }
 
+    public function applyMedia(): void
+    {
+        $settings = $this->site->settings ?? [];
+        data_set($settings, 'media_applied_at', now()->toIso8601String());
+        $this->site->update(['settings' => $settings]);
+        $this->site->refresh();
+        $this->mediaApplied = true;
+        session()->flash('media-applied', 'As imagens da biblioteca foram aplicadas no site.');
+    }
+
     public function deleteMedia(int $mediaId): void
     {
         $media = $this->site->media()->findOrFail($mediaId);
         Storage::disk($media->disk ?: 'public')->delete($media->path);
         $media->delete();
+        $this->mediaApplied = false;
     }
 
     public function render(): mixed
