@@ -40,7 +40,7 @@ Route::get('planos', UpgradeSelection::class)->name('saas.upgrade');
 Route::get('produtos', ProductCatalog::class)->name('products');
 Route::middleware(['auth', 'verified', 'site.access'])->get('vendas', SalesManager::class)->name('sales');
 Route::middleware(['auth', 'verified', 'site.access'])->get('encomendas', OrderManager::class)->name('orders');
-Route::get('utilizadores', UserManager::class)->name('users');
+Route::middleware(['auth', 'verified', 'site.access'])->get('utilizadores', UserManager::class)->name('users');
 Route::get('produtos/{product:slug}', ProductDetail::class)->name('products.show');
 
 Route::middleware(['auth', 'verified'])
