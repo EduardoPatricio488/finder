@@ -29,7 +29,8 @@ class PlatformWebsites extends Component
             'metadata' => ['source' => 'platform_websites'],
         ]);
 
-        $this->redirectRoute('admin.site.dashboard', $site);
+        session()->put('current_site_id', $site->id);
+        $this->redirectRoute('admin.site.dashboard');
     }
 
     public function render(): mixed
