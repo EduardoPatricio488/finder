@@ -63,6 +63,12 @@
         @else
             <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
                 <p class="text-xs font-black uppercase tracking-widest text-indigo-600">4 · Páginas</p><h2 class="mt-2 text-2xl font-black">Que páginas queres começar por ter?</h2><p class="mt-2 text-sm text-zinc-500">A IA prepara apenas o essencial para um website pessoal.</p>
+                <div class="mt-4 flex items-start gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 dark:border-indigo-900/50 dark:bg-indigo-500/10">
+                    <flux:icon name="information-circle" class="mt-0.5 size-5 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                    <p class="text-xs leading-5 text-indigo-800 dark:text-indigo-200">
+                        <span class="font-bold">Podes adicionar mais páginas depois.</span> Começa apenas com o essencial — depois de criares o website, podes adicionar novos separadores quando quiseres.
+                    </p>
+                </div>
                 <div class="mt-7 grid gap-3 sm:grid-cols-3">
                     @foreach(['home' => 'Início', 'about' => 'Sobre mim', 'contact' => 'Contactos'] as $key => $label)
                         <div class="flex items-center gap-3 rounded-2xl border border-indigo-500 bg-indigo-50/60 p-4 dark:bg-indigo-500/10"><span class="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white">✓</span><span class="text-sm font-bold">{{ $label }}</span><span class="ml-auto text-[9px] font-black uppercase text-indigo-600">Essencial</span></div>
