@@ -5,6 +5,7 @@
         @php
             $currentSite = \App\Support\SiteContext::current();
             $hasSite = $currentSite !== null;
+            $isDashboard = request()->routeIs('dashboard');
             $isPlatformAdmin = auth()->user()?->isAdministrator() && session()->has('platform_admin_site_id');
             $availableSites = \App\Models\Site::query()->where(function ($query) {
                 $query->where('owner_id', auth()->id())->orWhereHas('members', fn ($members) => $members->whereKey(auth()->id()));
@@ -58,7 +59,7 @@
                     @if($hasSite)<flux:sidebar.item icon="home" :href="$siteRoute('dashboard')" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>@endif
                 </flux:sidebar.group>
 
-                @if($hasSite)
+                @if($hasSite && ! $isDashboard)
                     <flux:sidebar.group heading="Dados do site" class="grid">
                         <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>
                             <span class="flex min-w-0 flex-1 items-center gap-2">
