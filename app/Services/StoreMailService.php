@@ -6,6 +6,7 @@ use App\Mail\StoreNotification;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class StoreMailService
 {
@@ -43,13 +44,37 @@ class StoreMailService
     {
         $email = $order->customer?->email;
 
-        if ($email !== null) {
+        if ($email === null) {
+            return;
+        }
+
+        try {
             Mail::to($email)->send(new StoreNotification($subject, $headline, $message, $order->order_number));
+        } catch (\Throwable $exception) {
+            Log::warning('Não foi possível enviar o email da loja ao cliente.', [
+                'order_number' => $order->order_number,
+                'email' => $email,
+                'error' => $exception->getMessage(),
+            ]);
         }
     }
 
     private function sendToAdmin(string $subject, string $headline, string $message, ?string $orderNumber): void
     {
-        Mail::to(config('mail.admin_address'))->send(new StoreNotification($subject, $headline, $message, $orderNumber));
+        $email = config('mail.admin_address');
+
+        if (! is_string($email) || trim($email) === '') {
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new StoreNotification($subject, $headline, $message, $orderNumber));
+        } catch (\Throwable $exception) {
+            Log::warning('Não foi possível enviar o email interno da loja.', [
+                'order_number' => $orderNumber,
+                'email' => $email,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 }
