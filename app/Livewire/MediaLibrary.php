@@ -18,7 +18,7 @@ class MediaLibrary extends Component
 
     public string $altText = '';
 
-    public string $placement = '';
+    public string $placement = 'gallery';
 
     public string $search = '';
 
@@ -30,6 +30,10 @@ class MediaLibrary extends Component
 
     public function uploadMedia(): void
     {
+        $this->placement = in_array($this->placement, ['logo','hero','about','experience','education','skills','projects','services','testimonials','gallery','contact','background','footer'], true)
+            ? $this->placement
+            : 'gallery';
+
         $this->validate(
             [
                 'upload' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg', 'max:10240'],
