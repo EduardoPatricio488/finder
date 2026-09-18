@@ -71,29 +71,6 @@
                 </flux:sidebar.group>
 
                 @if($hasSite)
-                    <flux:sidebar.group heading="{{ $modelProfile['label'] ?? 'Website' }}" class="grid">
-                        @foreach($modelSidebar as $item)
-                            @php
-                                $itemRoute = $item['route'] ?? null;
-                                $itemAnchor = $item['anchor'] ?? null;
-                                $itemHref = $itemRoute
-                                    ? $siteRoute($itemRoute)
-                                    : ($itemAnchor ? $siteRoute('dashboard').'#'.$itemAnchor : $siteRoute('dashboard'));
-                                $completionKey = $modelCompletionKey($item);
-                                $isFilled = $completionKey !== null && filled($modelFieldValues[$completionKey] ?? null);
-                            @endphp
-                            <flux:sidebar.item icon="{{ $item['icon'] ?? 'chevron-right' }}" :href="$itemHref" :current="$itemRoute ? request()->routeIs('admin.site.'.$itemRoute) : false" wire:navigate>
-                                <span class="flex min-w-0 flex-1 items-center gap-2">
-                                    <span class="truncate">{{ $item['label'] }}</span>
-                                    @if($completionKey !== null)
-                                        <span class="ms-auto shrink-0 text-[10px] font-bold {{ $isFilled ? 'text-emerald-500' : 'text-zinc-400' }}" title="{{ $isFilled ? 'Preenchido' : 'Por preencher' }}">
-                                            {{ $isFilled ? '✓' : '○' }}
-                                        </span>
-                                    @endif
-                                </span>
-                            </flux:sidebar.item>
-                        @endforeach
-                    </flux:sidebar.group>
 
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
