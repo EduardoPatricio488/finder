@@ -22,12 +22,9 @@ class ProductDetail extends Component
 
     public bool $canReview = false;
 
-    public function mount(Product $product): void
+    public function mount(Site $site, string $product): void
     {
-        $routeSite = request()->route('site');
-        $site = $routeSite instanceof \App\Models\Site
-            ? $routeSite
-            : $product->site;
+        $product = $site->products()->where('slug', $product)->firstOrFail();
 
         abort_unless($site instanceof \App\Models\Site, 404);
 
