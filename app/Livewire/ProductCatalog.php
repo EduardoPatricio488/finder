@@ -12,18 +12,31 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class ProductCatalog extends Component
 {
+    use WithFileUploads;
+
     public string $search = '';
     public string $category = '';
     public string $minPrice = '';
     public string $maxPrice = '';
     public string $availability = '';
     public string $minRating = '';
+    public bool $productModalOpen = false;
+    public string $productName = '';
+    public string $productDescription = '';
+    public string $productPrice = '';
+    public ?int $productCategoryId = null;
+    public int $productStock = 0;
+    public int $productMinimumStock = 0;
+    public bool $productIsActive = true;
+    public $productImage;
     public array $cart = [];
     public string $couponCode = '';
     public ?string $appliedCouponCode = null;
@@ -63,6 +76,69 @@ class ProductCatalog extends Component
         $this->customerEmail = $user->email;
         $this->customerPhone = (string) $this->site()->customers()->where('email', $user->email)->value('phone');
         return null;
+    }
+
+    public function openProductModal(): void
+    {
+        $this->resetProductForm();
+        $this->productModalOpen = true;
+    }
+
+    public function closeProductModal(): void
+    {
+        $this->productModalOpen = false;
+        $this->resetProductForm();
+    }
+
+    public function saveProduct(): void
+    {
+        $data = $this->validate([
+            'productName' => ['required', 'string', 'max:255'],
+            'productDescription' => ['nullable', 'string'],
+            'productPrice' => ['required', 'numeric', 'min:0'],
+            'productCategoryId' => ['required', 'integer'],
+            'productStock' => ['required', 'integer', 'min:0'],
+            'productMinimumStock' => ['required', 'integer', 'min:0'],
+            'productIsActive' => ['boolean'],
+            'productImage' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        $site = $this->site();
+        abort_unless($site->categories()->whereKey($data['productCategoryId'])->exists(), 404);
+
+        $product = $site->products()->create([
+            'category_id' => $data['productCategoryId'],
+            'name' => $data['productName'],
+            'slug' => Str::slug($data['productName']).'-'.Str::lower(Str::random(5)),
+            'description' => $data['productDescription'],
+            'price' => $data['productPrice'],
+            'is_active' => $data['productIsActive'],
+            'stock' => $data['productStock'],
+            'minimum_stock' => $data['productMinimumStock'],
+        ]);
+
+        if ($this->productImage !== null) {
+            $product->update(['image_url' => $this->productImage->store('products', 'public')]);
+        }
+
+        $this->productModalOpen = false;
+        $this->resetProductForm();
+        session()->flash('status', 'Produto adicionado com sucesso.');
+    }
+
+    private function resetProductForm(): void
+    {
+        $this->reset([
+            'productName',
+            'productDescription',
+            'productPrice',
+            'productCategoryId',
+            'productImage',
+            'productStock',
+            'productMinimumStock',
+        ]);
+        $this->productIsActive = true;
+        $this->resetValidation();
     }
 
     private function persistCart(): void { session()->put($this->cartKey(), $this->cart); }
