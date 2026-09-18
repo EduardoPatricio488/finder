@@ -101,7 +101,26 @@
                         @endcan
                     </flux:sidebar.group>
                 @else
-                    <div class="px-4 py-8 text-center"><p class="text-xs font-bold uppercase tracking-widest text-zinc-500">Cria ou seleciona um website para começar.</p><flux:button :href="route('site.create')" size="sm" class="mt-4 !rounded-xl" variant="primary">Criar website</flux:button></div>
+                    <flux:sidebar.group heading="Finder" class="grid">
+                        <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus websites</flux:sidebar.item>
+                        <flux:sidebar.item icon="plus" :href="route('site.create')" :current="request()->routeIs('site.create')" wire:navigate>Criar website</flux:sidebar.item>
+                        <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
+                        <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
+                    </flux:sidebar.group>
+
+                    <flux:sidebar.group heading="A minha conta" class="grid">
+                        <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Conta</flux:sidebar.item>
+                        <flux:sidebar.item icon="sparkles" :href="route('customer.assistant')" :current="request()->routeIs('customer.assistant')" wire:navigate>Assistente IA</flux:sidebar.item>
+                    </flux:sidebar.group>
+
+                    @if(auth()->user()?->isAdministrator())
+                        <flux:sidebar.group heading="Administração" class="grid">
+                            <flux:sidebar.item icon="shield-check" :href="route('admin.websites')" :current="request()->routeIs('admin.websites')" wire:navigate>Websites</flux:sidebar.item>
+                            <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>Utilizadores</flux:sidebar.item>
+                            <flux:sidebar.item icon="cog-6-tooth" :href="route('admin.config')" :current="request()->routeIs('admin.config')" wire:navigate>Configurações</flux:sidebar.item>
+                        </flux:sidebar.group>
+                    @endif
                 @endif
             </flux:sidebar.nav>
 
