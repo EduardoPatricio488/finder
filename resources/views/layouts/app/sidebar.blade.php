@@ -53,6 +53,12 @@
                 </flux:sidebar.group>
 
                 @if($hasSite && ! $isDashboard)
+                    <flux:sidebar.group heading="Dados do site" class="grid">
+                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>
+                            Configuração do site
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
