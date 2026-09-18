@@ -24,6 +24,6 @@ class SalesManager extends Component
             ->latest('sold_at')
             ->get();
 
-        return view('livewire.sales-manager', compact('sales'));
+        return view('livewire.sales-manager', ['sales' => $sales, 'site' => $this->currentSite()]);
     }
 }
