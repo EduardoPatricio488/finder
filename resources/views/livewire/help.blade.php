@@ -20,8 +20,8 @@
             </a>
         @endif
 
-        @if($hasBuilder)
-            <a href="{{ route('builder.edit') }}" wire:navigate class="rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-indigo-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        @if($hasBuilder && $currentSite)
+            <a href="{{ route('builder.edit', $currentSite) }}" wire:navigate class="rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-indigo-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <h2 class="font-semibold text-zinc-950 dark:text-white">Website Builder</h2>
                 <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Edita as páginas e personaliza o conteúdo do teu website.</p>
             </a>
