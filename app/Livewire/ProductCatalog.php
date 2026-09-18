@@ -37,7 +37,7 @@ class ProductCatalog extends Component
     public int $productStock = 0;
     public int $productMinimumStock = 0;
     public bool $productIsActive = true;
-    public $productImage;
+    public array $productImages = [];
     public array $cart = [];
     public string $couponCode = '';
     public ?string $appliedCouponCode = null;
@@ -129,7 +129,8 @@ class ProductCatalog extends Component
             'productStock' => ['required', 'integer', 'min:0'],
             'productMinimumStock' => ['required', 'integer', 'min:0'],
             'productIsActive' => ['boolean'],
-            'productImage' => ['nullable', 'image', 'max:2048'],
+            'productImages' => ['nullable', 'array', 'max:10'],
+            'productImages.*' => ['image', 'max:10240'],
         ]);
 
         $site = $this->site();
@@ -155,8 +156,15 @@ class ProductCatalog extends Component
             'minimum_stock' => $data['productMinimumStock'],
         ]);
 
-        if ($this->productImage !== null) {
-            $product->update(['image_url' => $this->productImage->store('products', 'public')]);
+        if ($this->productImages !== []) {
+            $paths = [];
+            foreach ($this->productImages as $image) {
+                $paths[] = $image->store('products', 'public');
+            }
+            $product->update([
+                'image_url' => $paths[0] ?? null,
+                'images' => $paths,
+            ]);
         }
 
         $this->productModalOpen = false;
@@ -172,7 +180,7 @@ class ProductCatalog extends Component
             'productPrice',
             'productCategoryId',
             'productCustomCategory',
-            'productImage',
+            'productImages',
             'productStock',
             'productMinimumStock',
         ]);
