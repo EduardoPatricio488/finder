@@ -120,12 +120,11 @@
                             <th class="px-5 py-4">Stock</th>
                             <th class="px-5 py-4">Preço</th>
                             <th class="px-5 py-4">
-                                <span class="group relative inline-flex cursor-help items-center gap-1">
+                                <span class="inline-flex items-center gap-1">
                                     Avaliação
-                                    <flux:icon name="information-circle" class="size-4 text-zinc-400" />
-                                    <span class="pointer-events-none absolute bottom-full left-0 z-[9999] mb-2 w-64 rounded-lg bg-zinc-900 px-3 py-2 text-left text-xs font-medium normal-case tracking-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-white dark:text-zinc-900">
-                                        Avaliação feita pelos clientes no site.
-                                    </span>
+                                    <flux:tooltip content="Avaliação feita pelos clientes no site." position="bottom">
+                                        <flux:button variant="ghost" size="sm" icon="information-circle" aria-label="Informação sobre avaliação" class="!size-5 !p-0 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300" />
+                                    </flux:tooltip>
                                 </span>
                             </th>
                             <th class="px-5 py-4 text-right">Ações</th>
