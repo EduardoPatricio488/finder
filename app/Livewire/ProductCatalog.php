@@ -33,6 +33,7 @@ class ProductCatalog extends Component
     public string $productDescription = '';
     public string $productPrice = '';
     public ?int $productCategoryId = null;
+    public string $productCustomCategory = '';
     public int $productStock = 0;
     public int $productMinimumStock = 0;
     public bool $productIsActive = true;
@@ -124,6 +125,7 @@ class ProductCatalog extends Component
             'productDescription' => ['nullable', 'string'],
             'productPrice' => ['required', 'numeric', 'min:0'],
             'productCategoryId' => ['required', 'integer'],
+            'productCustomCategory' => ['nullable', 'string', 'max:255'],
             'productStock' => ['required', 'integer', 'min:0'],
             'productMinimumStock' => ['required', 'integer', 'min:0'],
             'productIsActive' => ['boolean'],
@@ -133,8 +135,17 @@ class ProductCatalog extends Component
         $site = $this->site();
         abort_unless($site->categories()->whereKey($data['productCategoryId'])->exists(), 404);
 
+        $category = $site->categories()->findOrFail($data['productCategoryId']);
+        if ($category->slug === 'outros' && trim($data['productCustomCategory']) !== '') {
+            $customName = trim($data['productCustomCategory']);
+            $category = $site->categories()->firstOrCreate(
+                ['slug' => Str::slug($customName)],
+                ['name' => $customName],
+            );
+        }
+
         $product = $site->products()->create([
-            'category_id' => $data['productCategoryId'],
+            'category_id' => $category->id,
             'name' => $data['productName'],
             'slug' => Str::slug($data['productName']).'-'.Str::lower(Str::random(5)),
             'description' => $data['productDescription'],
@@ -160,6 +171,7 @@ class ProductCatalog extends Component
             'productDescription',
             'productPrice',
             'productCategoryId',
+            'productCustomCategory',
             'productImage',
             'productStock',
             'productMinimumStock',
