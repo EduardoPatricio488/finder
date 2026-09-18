@@ -36,7 +36,7 @@
             <input wire:model="altText" placeholder="Texto alternativo (ex.: Foto profissional do Eduardo)" class="mt-4 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950">
             <div class="mt-4">
                 <label class="mb-2 block text-sm font-semibold">Onde vai ser aplicada?</label>
-                <select wire:model.live="placement" class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                <select wire:model="placement" class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
                     <option value="logo">Logótipo</option>
                     <option value="hero">Capa / Hero principal</option>
                     <option value="about">Sobre mim / Sobre nós</option>
