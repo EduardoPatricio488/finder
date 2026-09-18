@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Site;
+use App\Services\FinderNotificationService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -84,6 +85,7 @@ class SiteSettings extends Component
             ->all();
 
         $this->site->update(['settings' => $settings]);
+        app(FinderNotificationService::class)->siteChanged($this->site, 'A configuração do website foi alterada.');
         $this->site->refresh();
 
         $this->modelContentSaved = true;
