@@ -36,6 +36,9 @@ class MenuManager extends Component
     /** @var array<string, int|null> */
     public array $requiredItemIds = [];
 
+    /** @var array<string, string> */
+    public array $requiredLabels = [];
+
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
@@ -174,6 +177,7 @@ class MenuManager extends Component
             }
 
             $this->requiredItemIds[$page->slug] = $item->id;
+            $this->requiredLabels[$page->slug] = $item->label;
         }
     }
 
@@ -183,6 +187,30 @@ class MenuManager extends Component
             ->whereIn('slug', ['home', 'about', 'contact'])
             ->orderBy('sort_order')
             ->get(['id', 'name', 'slug']);
+    }
+
+    public function updatedRequiredLabels(string $value, string $key): void
+    {
+        if (! in_array($key, ['home', 'about', 'contact'], true)) {
+            return;
+        }
+
+        $itemId = $this->requiredItemIds[$key] ?? null;
+
+        if (! $itemId) {
+            return;
+        }
+
+        $label = trim($value);
+
+        if ($label === '') {
+            $this->requiredLabels[$key] = $this->pageLabel($key);
+            return;
+        }
+
+        $menu = $this->site->menus()->findOrFail($this->menuId);
+        $menu->items()->whereKey($itemId)->update(['label' => $label]);
+        $this->menuApplied = false;
     }
 
     public function pageLabel(string $slug): string
