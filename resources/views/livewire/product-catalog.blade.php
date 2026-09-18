@@ -46,7 +46,7 @@
                 <button type="button" wire:click="exportProducts" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
                     <flux:icon name="arrow-down-tray" class="size-4" /> Exportar CSV
                 </button>
-                <a href="{{ route('categories') }}" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                <a href="{{ route('admin.site.categories', ['site' => $site]) }}" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
                     <flux:icon name="tag" class="size-4" /> Gerir categorias
                 </a>
             </div>
