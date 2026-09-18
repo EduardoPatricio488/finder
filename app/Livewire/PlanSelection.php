@@ -10,8 +10,10 @@ class PlanSelection extends Component
 {
     public Site $site;
 
-    public function mount(Site $site)
+    public function mount(): void
     {
+        $site = \App\Support\SiteContext::current();
+        abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
     }
 
@@ -21,7 +23,7 @@ class PlanSelection extends Component
 
         session()->flash('status', 'Plano atualizado com sucesso! Agora tens acesso Pro.');
 
-        return redirect()->route('admin.site.dashboard', $this->site->slug);
+        return redirect()->route('admin.site.dashboard');
     }
 
     public function render()
