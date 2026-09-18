@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Services\StoreMailService;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -137,7 +136,11 @@ class PublicSite extends Component
     public function decreaseQuantity(int $productId): void
     {
         if (! isset($this->cart[$productId])) return;
-        $this->cart[$productId] > 1 ? $this->cart[$productId]-- : unset($this->cart[$productId]);
+        if ($this->cart[$productId] > 1) {
+            $this->cart[$productId]--;
+        } else {
+            unset($this->cart[$productId]);
+        }
         session()->put($this->cartKey(), $this->cart);
     }
 
