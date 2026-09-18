@@ -59,6 +59,25 @@ class MenuManager extends Component
         $this->syncMenuNames();
     }
 
+    public function updatedMenuId($value): void
+    {
+        if (! $value) {
+            return;
+        }
+
+        $menu = $this->site->menus()->find($value);
+
+        if (! $menu) {
+            return;
+        }
+
+        $this->menuName = $menu->name;
+        $this->menuLocation = $menu->location ?: 'header';
+        $this->requiredItemIds = [];
+        $this->requiredLabels = [];
+        $this->ensureRequiredMenuItems();
+    }
+
     public function saveMenu(): void
     {
         $this->validate([
@@ -66,11 +85,10 @@ class MenuManager extends Component
             'menuLocation' => ['required', 'string', 'max:40'],
         ]);
 
-        $menu = $this->site->menus()->find($this->menuId);
-
-        if (! $menu) {
-            $menu = $this->site->menus()->where('name', $this->menuName)->first();
-        }
+        $currentMenu = $this->menuId ? $this->site->menus()->find($this->menuId) : null;
+        $menu = $currentMenu && $currentMenu->name === $this->menuName
+            ? $currentMenu
+            : $this->site->menus()->where('name', $this->menuName)->first();
 
         if (! $menu) {
             $menu = $this->site->menus()->create([
@@ -85,6 +103,7 @@ class MenuManager extends Component
         }
 
         $this->menuId = $menu->id;
+        $this->ensureRequiredMenuItems();
         $this->menuApplied = false;
         $this->syncMenuNames();
         session()->flash('status', 'Menu guardado. Agora podes aplicar as alterações no site.');
