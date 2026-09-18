@@ -30,14 +30,6 @@
                     <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Gere os produtos da empresa, acompanha o stock e mantém o catálogo organizado.</p>
                 </div>
                 <div class="flex flex-wrap items-center justify-end gap-2">
-                    @if(session('products-applied'))
-                        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">{{ session('products-applied') }}</span>
-                    @endif
-                    @if($productsApplied)
-                        <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">✓ Aplicado no site</span>
-                    @else
-                        <span class="rounded-xl bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Alterações por aplicar</span>
-                    @endif
                     <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
                         <flux:icon name="plus" class="size-4" />
                         Adicionar produto
