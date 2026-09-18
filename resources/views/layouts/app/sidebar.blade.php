@@ -71,10 +71,7 @@
                 </flux:sidebar.group>
 
                 @if($hasSite)
-                    <flux:sidebar.group heading="Preencher website" class="grid">
-                        <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
-                            {{ $modelProfile['label'] ?? 'Conteúdo' }}
-                        </div>
+                    <flux:sidebar.group heading="{{ $modelProfile['label'] ?? 'Website' }}" class="grid">
                         @foreach($modelSidebar as $item)
                             @php
                                 $itemRoute = $item['route'] ?? null;
