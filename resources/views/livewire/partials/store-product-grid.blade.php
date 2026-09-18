@@ -10,7 +10,7 @@
                 : asset('storage/'.ltrim((string) $productPhoto, '/')))
             : null;
     @endphp
-    <a href="{{ route('site.products.show', ['site' => $site, 'product' => $product->slug]) }}" class="group overflow-hidden rounded-3xl border border-black/5 bg-[#fafaf8] transition hover:-translate-y-1 hover:shadow-xl">
+    <a href="{{ route('site.products.show', ['site' => $site, 'product' => $product->slug, 'preview' => request()->boolean('preview') ? 1 : null]) }}" class="group overflow-hidden rounded-3xl border border-black/5 bg-[#fafaf8] transition hover:-translate-y-1 hover:shadow-xl">
         <div class="aspect-square overflow-hidden bg-zinc-100">
             @if($productPhotoUrl)<img src="{{ $productPhotoUrl }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">@else<div class="flex h-full items-center justify-center text-sm text-zinc-400">{{ $product->name }}</div>@endif
         </div>
