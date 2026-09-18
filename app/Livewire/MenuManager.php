@@ -33,6 +33,9 @@ class MenuManager extends Component
 
     public bool $menuApplied = false;
 
+    /** @var array<string, int|null> */
+    public array $requiredItemIds = [];
+
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
@@ -44,6 +47,8 @@ class MenuManager extends Component
             $this->menuName = $menu->name;
             $this->menuLocation = $menu->location ?: 'header';
         }
+
+        $this->ensureRequiredMenuItems();
     }
 
     public function saveMenu(): void
@@ -84,6 +89,10 @@ class MenuManager extends Component
             abort_unless(in_array($this->pageId, $this->availablePages()->pluck('id')->all(), true), 422, 'Esta página não está disponível na navegação.');
         }
 
+        if (in_array($page?->slug, ['home', 'about', 'contact'], true)) {
+            abort(422, 'As páginas essenciais já estão disponíveis no menu.');
+        }
+
         $menu->items()->create([
             'site_page_id' => $page?->id,
             'parent_id' => $parent?->id,
@@ -103,6 +112,8 @@ class MenuManager extends Component
 
     public function removeItem(int $itemId): void
     {
+        abort_if(in_array($itemId, array_values(array_filter($this->requiredItemIds)), true), 422, 'As páginas essenciais não podem ser eliminadas.');
+
         $menu = $this->site->menus()->findOrFail($this->menuId);
         $item = $menu->items()->findOrFail($itemId);
         $item->children()->update(['parent_id' => $item->parent_id]);
@@ -128,6 +139,42 @@ class MenuManager extends Component
         $this->site->refresh();
         $this->menuApplied = true;
         session()->flash('menu-applied', 'A navegação foi aplicada no site.');
+    }
+
+    private function ensureRequiredMenuItems(): void
+    {
+        $menu = $this->menuId ? $this->site->menus()->find($this->menuId) : null;
+
+        if (! $menu) {
+            $menu = $this->site->menus()->create([
+                'name' => $this->menuName,
+                'location' => 'header',
+            ]);
+            $this->menuId = $menu->id;
+        }
+
+        foreach ($this->availablePages() as $page) {
+            $item = $menu->items()->where('site_page_id', $page->id)->first();
+
+            if (! $item) {
+                $item = $menu->items()->create([
+                    'site_page_id' => $page->id,
+                    'parent_id' => null,
+                    'label' => $this->pageLabel($page->slug),
+                    'url' => null,
+                    'target' => '_self',
+                    'sort_order' => match ($page->slug) {
+                        'home' => 0,
+                        'about' => 1,
+                        'contact' => 2,
+                        default => 99,
+                    },
+                    'is_visible' => true,
+                ]);
+            }
+
+            $this->requiredItemIds[$page->slug] = $item->id;
+        }
     }
 
     private function availablePages()
