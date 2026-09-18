@@ -259,6 +259,7 @@ class ProductCatalog extends Component
         $copy->name = $product->name.' (cópia)';
         $copy->slug = Str::slug($copy->name).'-'.Str::lower(Str::random(5));
         $copy->stock = 0;
+        $copy->sku = null;
         $copy->image_url = $product->image_url;
         $copy->images = $product->images;
         $copy->save();
@@ -469,6 +470,7 @@ class ProductCatalog extends Component
     {
         $data = $this->validate([
             'productName' => ['required', 'string', 'max:255'],
+            'productSku' => ['nullable', 'string', 'max:100'],
             'productDescription' => ['nullable', 'string'],
             'productPrice' => ['required', 'numeric', 'min:0'],
             'productCategoryId' => ['required', 'integer'],
@@ -496,6 +498,7 @@ class ProductCatalog extends Component
             'category_id' => $category->id,
             'name' => $data['productName'],
             'slug' => Str::slug($data['productName']).'-'.Str::lower(Str::random(5)),
+            'sku' => $data['productSku'] !== '' ? $data['productSku'] : null,
             'description' => $data['productDescription'],
             'price' => $data['productPrice'],
             'is_active' => $data['productIsActive'],
