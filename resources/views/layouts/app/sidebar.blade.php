@@ -5,8 +5,6 @@
         @php
             $currentSite = \App\Support\SiteContext::current();
             $hasSite = $currentSite !== null;
-            $isDashboard = request()->routeIs('dashboard');
-            $showSiteSidebar = $hasSite && ! $isDashboard;
             $isPlatformAdmin = auth()->user()?->isAdministrator() && session()->has('platform_admin_site_id');
             $availableSites = \App\Models\Site::query()->where(function ($query) {
                 $query->where('owner_id', auth()->id())->orWhereHas('members', fn ($members) => $members->whereKey(auth()->id()));
@@ -18,11 +16,11 @@
                 $routeName = 'admin.site.'.$name;
                 return Route::has($routeName) ? route($routeName, $target) : '#';
             };
-            $modelProfile = $showSiteSidebar
+            $modelProfile = $hasSite
                 ? config('website.model_profiles.'.$currentSite->type, [])
                 : [];
             $modelFields = $modelProfile['fields'] ?? [];
-            $modelFieldValues = $showSiteSidebar ? (data_get($currentSite->settings, 'model_content', []) ?? []) : [];
+            $modelFieldValues = $hasSite ? (data_get($currentSite->settings, 'model_content', []) ?? []) : [];
             $modelFilled = collect($modelFields)->filter(fn ($field) => filled($modelFieldValues[$field['key']] ?? null))->count();
             $modelTotal = count($modelFields);
         @endphp
@@ -34,60 +32,46 @@
             </div>
         @endif
 
-        @if($isDashboard)
-            <header class="sticky top-0 z-40 border-b border-zinc-200 bg-zinc-50/95 backdrop-blur-xl dark:border-zinc-700 dark:bg-zinc-900/95 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
-                <div class="mx-auto flex min-h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-                    <a href="{{ route('home') }}" wire:navigate class="shrink-0"><x-app-logo :sidebar="false" /></a>
-                    <nav class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="Navegação principal">
-                        <a href="{{ route('dashboard') }}" wire:navigate class="shrink-0 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white dark:bg-white dark:text-zinc-900">Meus websites</a>
-                        <a href="{{ route('site.create') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Criar website</a>
-                        <a href="{{ route('products') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Produtos</a>
-                        <a href="{{ route('sales') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Vendas</a>
-                        <a href="{{ route('orders.tracking') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Encomendas</a>
-                        <a href="{{ route('account') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Conta</a>
-                        <a href="{{ route('customer.assistant') }}" wire:navigate class="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">Assistente IA</a>
-                    </nav>
-                    <div class="hidden shrink-0 lg:block"><x-desktop-user-menu :name="auth()->user()->name" /></div>
-                </div>
-            </header>
-        @endif
-
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }} {{ $isDashboard ? 'hidden' : '' }}">
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
             <flux:sidebar.header><x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate /><flux:sidebar.collapse class="lg:hidden" /></flux:sidebar.header>
-
-            @if($showSiteSidebar)
-                <div class="px-3 pb-3">
-                    <flux:dropdown position="bottom" align="start">
-                        <button type="button" class="flex w-full items-center justify-between gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-left text-sm text-white">
-                            <span class="min-w-0">
+            <div class="px-3 pb-3">
+                <flux:dropdown position="bottom" align="start">
+                    <button type="button" class="flex w-full items-center justify-between gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-left text-sm text-white">
+                        <span class="min-w-0">
+                            @if($hasSite)
                                 <span class="block truncate font-semibold">{{ $currentSite->name }}</span>
                                 <span class="mt-0.5 block text-xs text-zinc-400">{{ $currentSite->statusLabel() }} · {{ $modelProfile['label'] ?? ($currentSite->category_label ?? 'Website') }}</span>
-                            </span>
-                            <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
-                        </button>
-                        <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
-                    </flux:dropdown>
-                </div>
-            @endif
+                            @else
+                                <span class="block truncate font-semibold text-zinc-400 italic">Selecionar Projeto</span>
+                            @endif
+                        </span>
+                        <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
+                    </button>
+                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
+                </flux:dropdown>
+            </div>
 
             <flux:sidebar.nav>
-                @if($showSiteSidebar)
-                    <flux:sidebar.group heading="Finder Hub" class="grid">
-                        <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus websites</flux:sidebar.item>
-                        @if(auth()->user()?->isAdministrator())<flux:sidebar.item icon="shield-check" :href="route('admin.websites')" :current="request()->routeIs('admin.websites')" wire:navigate>Administração</flux:sidebar.item>@endif
-                        <flux:sidebar.item icon="home" :href="$siteRoute('dashboard').'#model-content'" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>
-                    </flux:sidebar.group>
+                <flux:sidebar.group heading="Finder Hub" class="grid">
+                    <flux:sidebar.item icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus websites</flux:sidebar.item>
+                    @if(auth()->user()?->isAdministrator())<flux:sidebar.item icon="shield-check" :href="route('admin.websites')" :current="request()->routeIs('admin.websites')" wire:navigate>Administração</flux:sidebar.item>@endif
+                    @if($hasSite)<flux:sidebar.item icon="home" :href="$siteRoute('dashboard').'#model-content'" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>@endif
+                </flux:sidebar.group>
 
+                @if($hasSite)
                     <flux:sidebar.group heading="Dados do site" class="grid">
-                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>
-                            Configuração do site
+                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('dashboard').'#model-content'" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>
+                            <span class="flex min-w-0 flex-1 items-center gap-2">
+                                <span class="truncate">Configuração do modelo</span>
+                                <span class="ms-auto shrink-0 text-[10px] font-semibold text-zinc-400">{{ $modelFilled }}/{{ $modelTotal }} preenchidos</span>
+                            </span>
                         </flux:sidebar.item>
                     </flux:sidebar.group>
 
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
-                        <flux:sidebar.item icon="adjustments-horizontal" :href="$siteRoute('definitions')" :current="request()->routeIs('admin.site.definitions')" wire:navigate>Definições</flux:sidebar.item>
+                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>Definições</flux:sidebar.item>
                     </flux:sidebar.group>
 
                     @if($currentSite->type === 'online_store')
@@ -137,8 +121,12 @@
                 @endif
             </flux:sidebar.nav>
 
-            <flux:spacer />
-            <flux:sidebar.nav><flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav>
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            <flux:spacer /><flux:sidebar.nav><flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
-        @endif
+        <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
+        {{ $slot }}
+        @if($hasSite && auth()->user()->can('access-ai', $currentSite))<livewire:admin-assistant />@endif
+        @persist('toast')<flux:toast.group><flux:toast /></flux:toast.group>@endpersist
+        @fluxScripts
+    </body>
+</html>
