@@ -133,7 +133,10 @@ class CreateSite extends Component
             'description' => ['required', 'string', 'max:1000'],
         ]);
 
-        $this->pages = ['home', 'about', 'contact'];
+        $this->pages = array_values(array_unique(array_filter($this->pages, fn ($page) => array_key_exists($page, $this->pageLabels))));
+        if ($this->pages === []) {
+            $this->pages = ['home'];
+        }
 
         $plan = Plan::query()->where('name', 'Free')->first() ?? Plan::query()->first();
         $template = config("website.templates.{$this->template}", []);
@@ -147,7 +150,7 @@ class CreateSite extends Component
             'audience' => '',
             'goal' => 'contact',
             'style' => $this->style,
-            'pages' => ['home', 'about', 'contact'],
+            'pages' => $this->pages,
             'additional_info' => '',
         ]);
         $aiPages = is_array($blueprint['pages'] ?? null) ? $blueprint['pages'] : [];
@@ -180,13 +183,13 @@ class CreateSite extends Component
             'plan_id' => $plan?->id,
             'status' => 'draft',
             'is_published' => false,
-            'category_label' => $this->types['personal']['label'] ?? 'Website pessoal',
-            'type' => 'personal',
+            'category_label' => $this->types[$this->type]['label'] ?? 'Website',
+            'type' => $this->type,
             'primary_color' => $this->primaryColor,
             'secondary_color' => $this->secondaryColor,
             'theme' => $theme,
             'settings' => [
-                'template' => 'studio',
+                'template' => $this->template,
                 'locale' => 'pt-PT',
                 'timezone' => 'Europe/Lisbon',
                 'builder' => [
