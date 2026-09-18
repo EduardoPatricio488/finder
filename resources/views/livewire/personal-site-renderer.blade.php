@@ -39,6 +39,13 @@
         return $key !== '' && $key !== 'display_name' && $key !== 'headline' && $key !== 'bio' && filled($modelContent[$key] ?? null);
     }) : collect();
     $initial = mb_strtoupper(mb_substr($displayName, 0, 1));
+
+    $menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
+    $activeMenu = $menuApplied
+        ? $site->menus->firstWhere('location', 'header')
+        : null;
+    $menuItems = $activeMenu?->items?->where('is_visible', true)->whereNull('parent_id')->values() ?? collect();
+
 @endphp
 
 <div class="min-h-screen bg-[#f8f8f6] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
@@ -49,21 +56,66 @@
                 <span class="max-w-[190px] truncate sm:max-w-none">{{ $displayName }}</span>
             </a>
             <nav class="hidden items-center gap-1 md:flex" aria-label="Navegação principal">
-                @foreach($site->pages->sortBy('sort_order') as $sitePage)
-                    <a href="{{ route('site.public', [$site, 'pageSlug' => $sitePage->slug, 'preview' => $preview ? 1 : null]) }}" class="rounded-full px-4 py-2 text-sm font-medium transition {{ $currentPage === $sitePage->slug ? 'bg-zinc-950 text-white' : 'text-zinc-600 hover:bg-white hover:text-zinc-950' }}">
-                        {{ match($sitePage->slug) { 'home' => 'Início', 'about' => 'Sobre mim', 'contact' => 'Contactos', default => $sitePage->name } }}
-                    </a>
-                @endforeach
+                @if($menuApplied && $activeMenu)
+                    @foreach($menuItems as $menuItem)
+                        @if($menuItem->children->where('is_visible', true)->isNotEmpty())
+                            <div class="group relative">
+                                <a href="{{ route('site.public', [$site, 'pageSlug' => $menuItem->page?->slug ?? 'home', 'preview' => $preview ? 1 : null]) }}" class="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition {{ $currentPage === $menuItem->page?->slug ? 'bg-zinc-950 text-white' : 'text-zinc-600 hover:bg-white hover:text-zinc-950' }}">
+                                    {{ $menuItem->label }}
+                                    <span class="text-[10px]">⌄</span>
+                                </a>
+                                <div class="invisible absolute left-1/2 top-full z-50 w-52 -translate-x-1/2 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                                    <div class="rounded-2xl border border-black/5 bg-white p-2 shadow-xl shadow-zinc-900/10">
+                                        @foreach($menuItem->children->where('is_visible', true) as $child)
+                                            @if($child->page)
+                                                <a href="{{ route('site.public', [$site, 'pageSlug' => $child->page->slug, 'preview' => $preview ? 1 : null]) }}" class="block rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950">
+                                                    {{ $child->label }}
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($menuItem->page)
+                            <a href="{{ route('site.public', [$site, 'pageSlug' => $menuItem->page->slug, 'preview' => $preview ? 1 : null]) }}" class="rounded-full px-4 py-2 text-sm font-medium transition {{ $currentPage === $menuItem->page->slug ? 'bg-zinc-950 text-white' : 'text-zinc-600 hover:bg-white hover:text-zinc-950' }}">
+                                {{ $menuItem->label }}
+                            </a>
+                        @endif
+                    @endforeach
+                @else
+                    @foreach($site->pages->sortBy('sort_order')->whereIn('slug', ['home', 'about', 'contact']) as $sitePage)
+                        <a href="{{ route('site.public', [$site, 'pageSlug' => $sitePage->slug, 'preview' => $preview ? 1 : null]) }}" class="rounded-full px-4 py-2 text-sm font-medium transition {{ $currentPage === $sitePage->slug ? 'bg-zinc-950 text-white' : 'text-zinc-600 hover:bg-white hover:text-zinc-950' }}">
+                            {{ match($sitePage->slug) { 'home' => 'Início', 'about' => 'Sobre mim', 'contact' => 'Contactos', default => $sitePage->name } }}
+                        </a>
+                    @endforeach
+                @endif
             </nav>
             <a href="{{ route('site.public', [$site, 'pageSlug' => 'contact', 'preview' => $preview ? 1 : null]) }}" class="hidden rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 sm:inline-flex" style="background: var(--finder-primary)">{{ $goalLabel }}</a>
         </div>
         <div class="overflow-x-auto border-t border-black/5 md:hidden">
             <nav class="mx-auto flex max-w-6xl min-w-max gap-1 px-5 py-2" aria-label="Navegação mobile">
-                @foreach($site->pages->sortBy('sort_order') as $sitePage)
-                    <a href="{{ route('site.public', [$site, 'pageSlug' => $sitePage->slug, 'preview' => $preview ? 1 : null]) }}" class="rounded-full px-3 py-1.5 text-xs font-medium {{ $currentPage === $sitePage->slug ? 'bg-zinc-950 text-white' : 'text-zinc-500' }}">
-                        {{ match($sitePage->slug) { 'home' => 'Início', 'about' => 'Sobre mim', 'contact' => 'Contactos', default => $sitePage->name } }}
-                    </a>
-                @endforeach
+                @if($menuApplied && $activeMenu)
+                    @foreach($menuItems as $menuItem)
+                        @if($menuItem->page)
+                            <a href="{{ route('site.public', [$site, 'pageSlug' => $menuItem->page->slug, 'preview' => $preview ? 1 : null]) }}" class="rounded-full px-3 py-1.5 text-xs font-medium {{ $currentPage === $menuItem->page->slug ? 'bg-zinc-950 text-white' : 'text-zinc-500' }}">
+                                {{ $menuItem->label }}
+                            </a>
+                        @endif
+                        @foreach($menuItem->children->where('is_visible', true) as $child)
+                            @if($child->page)
+                                <a href="{{ route('site.public', [$site, 'pageSlug' => $child->page->slug, 'preview' => $preview ? 1 : null]) }}" class="rounded-full border border-dashed border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-500">
+                                    ↳ {{ $child->label }}
+                                </a>
+                            @endif
+                        @endforeach
+                    @endforeach
+                @else
+                    @foreach($site->pages->sortBy('sort_order')->whereIn('slug', ['home', 'about', 'contact']) as $sitePage)
+                        <a href="{{ route('site.public', [$site, 'pageSlug' => $sitePage->slug, 'preview' => $preview ? 1 : null]) }}" class="rounded-full px-3 py-1.5 text-xs font-medium {{ $currentPage === $sitePage->slug ? 'bg-zinc-950 text-white' : 'text-zinc-500' }}">
+                            {{ match($sitePage->slug) { 'home' => 'Início', 'about' => 'Sobre mim', 'contact' => 'Contactos', default => $sitePage->name } }}
+                        </a>
+                    @endforeach
+                @endif
             </nav>
         </div>
     </header>
