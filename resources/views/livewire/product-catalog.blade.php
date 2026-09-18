@@ -154,16 +154,9 @@
                                                     <flux:icon name="photo" class="size-5 text-zinc-400" />
                                                 </div>
                                             @endforelse
-                                            @if(count($productPhotos) > 3)
-                                                <span class="flex size-11 items-center justify-center rounded-xl border-2 border-white bg-zinc-100 text-xs font-bold text-zinc-600 dark:border-zinc-900 dark:bg-zinc-800 dark:text-zinc-300">3+</span>
-                                            @endif
                                         </div>
                                         <div class="min-w-0">
                                             <p class="font-semibold text-zinc-950 dark:text-white">{{ $product->name }}</p>
-                                            @if($product->description)
-                                                <p class="mt-1 max-w-md text-xs leading-5 text-zinc-500 dark:text-zinc-400 line-clamp-2">{{ $product->description }}</p>
-                                            @endif
-                                            <p class="mt-0.5 max-w-xs truncate text-[11px] text-zinc-400">{{ $product->sku ?: 'Sem SKU' }}</p>
                                         </div>
                                     </div>
                                 </td>
