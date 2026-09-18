@@ -33,6 +33,8 @@ class ProductCatalog extends Component
     public string $catalogFilter = '';
     public $importFile;
     public bool $productModalOpen = false;
+    public bool $categoriesModalOpen = false;
+    public string $newCategoryName = '';
     public bool $manageProductModalOpen = false;
     public bool $imageGalleryOpen = false;
     public string $imageGalleryName = '';
@@ -96,6 +98,60 @@ class ProductCatalog extends Component
         $this->customerEmail = $user->email;
         $this->customerPhone = (string) $this->site()->customers()->where('email', $user->email)->value('phone');
         return null;
+    }
+
+    public function openCategoriesModal(): void
+    {
+        $this->reset('newCategoryName');
+        $this->resetValidation('newCategoryName');
+        $this->categoriesModalOpen = true;
+    }
+
+    public function closeCategoriesModal(): void
+    {
+        $this->categoriesModalOpen = false;
+        $this->reset('newCategoryName');
+        $this->resetValidation();
+    }
+
+    public function saveCategory(): void
+    {
+        $this->newCategoryName = trim($this->newCategoryName);
+        $validated = $this->validate([
+            'newCategoryName' => ['required', 'string', 'max:255'],
+        ], [
+            'newCategoryName.required' => 'O nome da categoria é obrigatório.',
+        ]);
+
+        $site = $this->site();
+        $slug = Str::slug($validated['newCategoryName']);
+        if ($slug === '') {
+            $this->addError('newCategoryName', 'Introduza um nome de categoria válido.');
+            return;
+        }
+
+        $baseSlug = $slug;
+        $suffix = 2;
+        while ($site->categories()->where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$suffix++;
+        }
+
+        $site->categories()->create(['name' => $validated['newCategoryName'], 'slug' => $slug]);
+        $this->reset('newCategoryName');
+        $this->resetValidation();
+        session()->flash('status', 'Categoria criada com sucesso.');
+    }
+
+    public function deleteCategory(int $categoryId): void
+    {
+        $category = $this->site()->categories()->withCount('products')->findOrFail($categoryId);
+        if ($category->products_count > 0) {
+            $this->addError('categoryDelete', 'Esta categoria tem produtos associados e não pode ser eliminada.');
+            return;
+        }
+
+        $category->delete();
+        session()->flash('status', 'Categoria eliminada com sucesso.');
     }
 
     public function updatedProductMinimumStock(): void
@@ -679,7 +735,7 @@ class ProductCatalog extends Component
                 ->where('is_active', true)->sum(DB::raw('price * stock')),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
-            'categories' => $this->siteScoped(Category::query())->orderBy('name')->get(),
+            'categories' => $this->siteScoped(Category::query())->withCount('products')->orderBy('name')->get(),
             'stockHistory' => $this->stockProductId ? $this->siteScoped(Product::query())->find($this->stockProductId)?->stockMovements()->with('user')->latest()->limit(30)->get() : collect(),
         ]);
     }
