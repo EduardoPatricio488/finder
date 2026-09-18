@@ -27,6 +27,12 @@ class CreateSite extends Component
     public string $goal = 'contact';
     public string $style = 'Moderno';
     public string $additionalInfo = '';
+    public string $headline = '';
+    public string $about = '';
+    public string $featuredProducts = '';
+    public string $shipping = '';
+    public string $returns = '';
+    public string $contactEmail = '';
     public string $primaryColor = '#635bff';
     public string $secondaryColor = '#111827';
     public string $font = 'Inter';
@@ -86,10 +92,21 @@ class CreateSite extends Component
         }
 
         if ($this->step === 3) {
-            $this->validate([
+            $rules = [
                 'name' => ['required', 'min:2', 'max:80'],
                 'description' => ['required', 'string', 'max:1000'],
-            ]);
+            ];
+
+            if ($this->type === 'online_store') {
+                $rules['headline'] = ['nullable', 'string', 'max:200'];
+                $rules['about'] = ['nullable', 'string', 'max:1000'];
+                $rules['featuredProducts'] = ['nullable', 'string', 'max:1500'];
+                $rules['shipping'] = ['nullable', 'string', 'max:1000'];
+                $rules['returns'] = ['nullable', 'string', 'max:1000'];
+                $rules['contactEmail'] = ['nullable', 'email', 'max:255'];
+            }
+
+            $this->validate($rules);
         }
 
         if ($this->step < 4) {
@@ -147,18 +164,18 @@ class CreateSite extends Component
             'template' => $this->template,
             'business_name' => $this->name,
             'description' => $this->description,
-            'audience' => '',
-            'goal' => 'contact',
+            'audience' => $this->type === 'online_store' ? 'Clientes que procuram produtos online' : '',
+            'goal' => $this->type === 'online_store' ? 'venda' : 'contact',
             'style' => $this->style,
             'pages' => $this->pages,
-            'additional_info' => '',
+            'additional_info' => $this->additionalInfoForType(),
         ]);
         $aiPages = is_array($blueprint['pages'] ?? null) ? $blueprint['pages'] : [];
 
         $libraryPages = TemplateLibrary::pages($this->template, [
             'name' => $this->name,
             'description' => $this->description,
-            'audience' => '',
+            'audience' => $this->type === 'online_store' ? 'Clientes que procuram produtos online' : '',
             'goal_label' => $this->goalLabel(),
             'style' => $this->style,
         ]);
@@ -198,9 +215,9 @@ class CreateSite extends Component
                     'brief' => [
                         'business_name' => $this->name,
                         'description' => $this->description,
-                        'audience' => '',
-                        'goal' => 'contact',
-                        'additional_info' => '',
+                        'audience' => $this->type === 'online_store' ? 'Clientes que procuram produtos online' : '',
+                        'goal' => $this->type === 'online_store' ? 'venda' : 'contact',
+                        'additional_info' => $this->additionalInfoForType(),
                     ],
                 ],
             ],
@@ -281,6 +298,22 @@ class CreateSite extends Component
 
     private function goalLabel(): string
     {
-        return 'Entrar em contacto';
+        return $this->type === 'online_store' ? 'Comprar agora' : 'Entrar em contacto';
+    }
+
+    private function additionalInfoForType(): string
+    {
+        if ($this->type !== 'online_store') {
+            return $this->additionalInfo;
+        }
+
+        return collect([
+            $this->headline !== '' ? "Mensagem principal: {$this->headline}" : null,
+            $this->about !== '' ? "Sobre a marca: {$this->about}" : null,
+            $this->featuredProducts !== '' ? "Produtos em destaque: {$this->featuredProducts}" : null,
+            $this->shipping !== '' ? "Envios e entregas: {$this->shipping}" : null,
+            $this->returns !== '' ? "Trocas e devoluções: {$this->returns}" : null,
+            $this->contactEmail !== '' ? "Email de apoio: {$this->contactEmail}" : null,
+        ])->filter()->implode("\n");
     }
 }
