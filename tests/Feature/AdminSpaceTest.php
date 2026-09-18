@@ -26,8 +26,10 @@ test('website administration is isolated by ownership', function () {
     $site = Site::factory()->create(['owner_id' => $owner->id]);
 
     $this->actingAs($owner);
-    $this->get(route('admin.site.dashboard', $site))->assertOk();
+    session(['current_site_id' => $site->id]);
+    $this->get(route('admin.site.dashboard'))->assertOk();
 
     $this->actingAs($other);
-    $this->get(route('admin.site.dashboard', $site))->assertForbidden();
+    session(['current_site_id' => $site->id]);
+    $this->get(route('admin.site.dashboard'))->assertForbidden();
 });
