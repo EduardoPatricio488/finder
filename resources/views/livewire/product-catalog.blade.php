@@ -363,10 +363,15 @@
                         </div>
                         <div>
                             <label class="mb-2 block text-sm font-semibold">Categoria</label>
-                            <select wire:model="productCategoryId" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
-                                <option value="">Seleciona uma categoria</option>
-                                @foreach($categories as $item)<option value="{{ $item->id }}">{{ $item->name }}</option>@endforeach
-                            </select>
+                            <div class="flex items-center gap-2">
+                                <select wire:model="productCategoryId" class="min-w-0 flex-1 rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                                    <option value="">Seleciona uma categoria</option>
+                                    @foreach($categories as $item)<option value="{{ $item->id }}">{{ $item->name }}</option>@endforeach
+                                </select>
+                                <button type="button" wire:click="openCategoriesModal" class="shrink-0 rounded-xl border border-zinc-200 px-3 py-2.5 text-zinc-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:text-zinc-300" title="Adicionar nova categoria" aria-label="Adicionar nova categoria">
+                                    <flux:icon name="plus" class="size-4" />
+                                </button>
+                            </div>
                             @if($productCategoryId && optional($categories->firstWhere('id', $productCategoryId))->slug === 'outros')
                                 <input wire:model="productCustomCategory" type="text" class="mt-3 w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950" placeholder="Nome da nova categoria">
                                 <p class="mt-1 text-xs text-zinc-500">Escreve o nome da categoria que queres criar.</p>
@@ -386,10 +391,6 @@
                         <div>
                             <label class="mb-2 block text-sm font-semibold">Stock mínimo</label>
                             <input wire:model.live="productMinimumStock" type="number" min="0" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 @error('productMinimumStock') border-red-500 ring-2 ring-red-500/10 @enderror">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-semibold">SKU</label>
-                            <input wire:model="productSku" type="text" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950" placeholder="Ex.: PROD-001">
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-semibold">Descrição</label>
@@ -461,10 +462,6 @@
                             @enderror
 
                         </div>
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-semibold">SKU</label>
-                            <input wire:model="productSku" type="text" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950" placeholder="Ex.: PROD-001">
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-semibold">Descrição</label>
