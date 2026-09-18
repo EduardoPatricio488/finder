@@ -132,6 +132,7 @@ class ProductCatalog extends Component
 
         $this->selectedSiteId = $siteId;
         session()->put('current_site_id', $siteId);
+        $this->productsApplied = filled(data_get(Site::find($siteId)?->settings, 'products_applied_at'));
 
         $this->reset([
             'search',
@@ -405,6 +406,7 @@ class ProductCatalog extends Component
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         abort_if($product->orderItems()->exists(), 422, 'Este produto já tem vendas e não pode ser eliminado.');
         $product->delete();
+        $this->productsApplied = false;
         session()->flash('status', 'Produto eliminado com sucesso.');
     }
 
@@ -603,6 +605,7 @@ class ProductCatalog extends Component
             ]);
         }
 
+        $this->productsApplied = false;
         $this->closeManageProductModal();
         session()->flash('status', 'Produto atualizado com sucesso.');
         app(FinderNotificationService::class)->productChanged($site, 'Foi atualizado o produto "'.$product->name.'".');
@@ -676,6 +679,7 @@ class ProductCatalog extends Component
             ]);
         }
 
+        $this->productsApplied = false;
         $this->productModalOpen = false;
         $this->resetProductForm();
         session()->flash('status', 'Produto adicionado com sucesso.');
