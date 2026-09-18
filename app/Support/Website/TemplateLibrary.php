@@ -34,6 +34,12 @@ final class TemplateLibrary
             'audience' => trim((string) ($context['audience'] ?? '')),
             'goal_label' => (string) ($context['goal_label'] ?? 'Saber mais'),
             'style' => (string) ($context['style'] ?? 'Profissional'),
+            'headline' => trim((string) ($context['headline'] ?? '')),
+            'about' => trim((string) ($context['about'] ?? '')),
+            'featured_products' => trim((string) ($context['featured_products'] ?? '')),
+            'shipping' => trim((string) ($context['shipping'] ?? '')),
+            'returns' => trim((string) ($context['returns'] ?? '')),
+            'contact_email' => trim((string) ($context['contact_email'] ?? '')),
         ];
     }
 
