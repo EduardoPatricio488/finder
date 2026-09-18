@@ -55,11 +55,6 @@
     <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
 </flux:sidebar.group>
 
-<flux:sidebar.group heading="Conta" class="grid">
-    <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
-    <flux:sidebar.item icon="bell" :href="route('notifications')" :current="request()->routeIs('notifications')" wire:navigate>Notificações</flux:sidebar.item>
-</flux:sidebar.group>
-
                 @if($hasSite && ! $isDashboard)
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>Configuração do site</flux:sidebar.item>
@@ -94,7 +89,15 @@
                 @endif
             </flux:sidebar.nav>
 
-            <flux:spacer /><flux:sidebar.nav><flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            <flux:spacer />
+            <flux:sidebar.nav>
+                <flux:sidebar.group heading="Conta" class="grid">
+                    <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
+                    <flux:sidebar.item icon="bell" :href="route('notifications')" :current="request()->routeIs('notifications')" wire:navigate>Notificações</flux:sidebar.item>
+                </flux:sidebar.group>
+                <flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item>
+            </flux:sidebar.nav>
+            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" /> :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
         {{ $slot }}
