@@ -336,6 +336,7 @@ class ProductCatalog extends Component
 
     public function openImageGallery(int $productId, int $index = 0): void
     {
+        $this->stockProductId = $productId;
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         $photos = $product->images ?: ($product->image_url ? [$product->image_url] : []);
 
@@ -670,7 +671,7 @@ class ProductCatalog extends Component
 
         return view('livewire.product-catalog', [
             'products' => $products,
-            'stockValue' => $products->sum(fn (Product $product): float => (float) $product->price * (int) $product->stock),
+            'stockValue' => (float) $this->siteScoped(Product::query())->sum(DB::raw('price * stock')),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'categories' => $this->siteScoped(Category::query())->orderBy('name')->get(),
