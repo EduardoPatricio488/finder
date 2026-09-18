@@ -17,6 +17,7 @@ class ProductManager extends Component
     use WithFileUploads;
 
     public string $siteSlug = '';
+    public ?int $siteId = null;
     public ?int $editingProductId = null;
     public string $name = '';
     public ?int $categoryId = null;
@@ -32,6 +33,7 @@ class ProductManager extends Component
     public function mount(): void
     {
         $this->siteSlug = $this->currentSite()->slug;
+        $this->siteId = $this->currentSite()->id;
         $this->loadData();
     }
 
