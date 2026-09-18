@@ -80,8 +80,35 @@ class ProductCatalog extends Component
 
     public function openProductModal(): void
     {
+        $this->ensureGenericCategories();
         $this->resetProductForm();
         $this->productModalOpen = true;
+    }
+
+    private function ensureGenericCategories(): void
+    {
+        $site = $this->site();
+
+        $categories = [
+            'Alimentação',
+            'Bebidas',
+            'Casa',
+            'Desporto',
+            'Eletrónica',
+            'Moda',
+            'Saúde e Beleza',
+            'Serviços',
+            'Tecnologia',
+            'Transportes',
+            'Outros',
+        ];
+
+        foreach ($categories as $name) {
+            $site->categories()->firstOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name],
+            );
+        }
     }
 
     public function closeProductModal(): void
