@@ -40,7 +40,13 @@
                     @endforeach
                 @endif
             </nav>
-            <a href="{{ route('site.public', [$site, 'pageSlug' => 'products', 'preview' => $preview ? 1 : null]) }}" class="hidden rounded-full px-5 py-2.5 text-sm font-bold text-white sm:inline-flex" style="background:var(--finder-primary)">Ver produtos</a>
+            <div class="flex items-center gap-2">
+                <button type="button" wire:click="$set('cartOpen', true)" class="relative inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm font-bold">
+                    🛒 Carrinho
+                    @if(count($cart)) <span class="rounded-full px-2 py-0.5 text-xs text-white" style="background:var(--finder-primary)">{{ array_sum($cart) }}</span> @endif
+                </button>
+                <a href="{{ route('site.public', [$site, 'pageSlug' => 'products', 'preview' => $preview ? 1 : null]) }}" class="hidden rounded-full px-5 py-2.5 text-sm font-bold text-white sm:inline-flex" style="background:var(--finder-primary)">Ver produtos</a>
+            </div>
         </div>
         <div class="overflow-x-auto border-t border-black/5 md:hidden">
             <nav class="mx-auto flex min-w-max gap-1 px-5 py-2">
@@ -107,6 +113,76 @@
         <section class="border-t border-black/5 bg-white px-5 py-16 sm:px-8">
             <div class="mx-auto max-w-7xl"><p class="text-xs font-black uppercase tracking-[.18em]" style="color:var(--finder-primary)">Conteúdo visual</p><div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">@foreach($mediaByPlacement->flatten() as $item)<img src="{{ route('site.manage.media.file', ['media' => $item->id]) }}" alt="{{ $item->alt_text ?: $item->original_name }}" class="aspect-[4/3] w-full rounded-3xl object-cover">@endforeach</div></div>
         </section>
+    @endif
+
+
+
+    @if($completedOrderNumber)
+        <div class="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-5">
+            <div class="w-full max-w-lg rounded-[2rem] bg-white p-8 text-center shadow-2xl">
+                <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-100 text-2xl">✓</div>
+                <h2 class="mt-5 text-3xl font-black">Encomenda recebida</h2>
+                <p class="mt-3 text-zinc-600">A tua encomenda foi registada com sucesso.</p>
+                <p class="mt-5 rounded-2xl bg-zinc-50 px-4 py-3 font-black">{{ $completedOrderNumber }}</p>
+                <button type="button" wire:click="$set('completedOrderNumber', null)" class="mt-6 rounded-2xl px-6 py-3 font-bold text-white" style="background:var(--finder-primary)">Continuar</button>
+            </div>
+        </div>
+    @endif
+
+    @if($cartOpen)
+        <div class="fixed inset-0 z-[70] bg-black/40" wire:click="$set('cartOpen', false)">
+            <aside class="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl" wire:click.stop>
+                <div class="flex items-center justify-between">
+                    <div><p class="text-xs font-black uppercase tracking-wider text-zinc-400">A tua compra</p><h2 class="mt-1 text-2xl font-black">Carrinho</h2></div>
+                    <button type="button" wire:click="$set('cartOpen', false)" class="rounded-full bg-zinc-100 px-3 py-2 font-bold">✕</button>
+                </div>
+
+                @if($cartProducts->isEmpty())
+                    <div class="py-20 text-center text-zinc-500">O teu carrinho está vazio.</div>
+                @else
+                    <div class="mt-8 space-y-4">
+                        @foreach($cartProducts as $product)
+                            <div class="rounded-2xl border border-zinc-200 p-4">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div><p class="font-bold">{{ $product->name }}</p><p class="mt-1 text-sm text-zinc-500">{{ number_format((float)$product->price, 2, ',', '.') }} €</p></div>
+                                    <button type="button" wire:click="removeFromCart({{ $product->id }})" class="text-xs font-bold text-red-600">Remover</button>
+                                </div>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <div class="flex items-center gap-2"><button type="button" wire:click="decreaseQuantity({{ $product->id }})" class="size-9 rounded-xl bg-zinc-100 font-bold">−</button><span class="w-8 text-center font-bold">{{ $cart[$product->id] ?? 0 }}</span><button type="button" wire:click="increaseQuantity({{ $product->id }})" class="size-9 rounded-xl bg-zinc-100 font-bold">+</button></div>
+                                    <span class="font-black">{{ number_format((float)$product->price * ($cart[$product->id] ?? 0), 2, ',', '.') }} €</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-8 border-t border-zinc-200 pt-5">
+                        <div class="flex justify-between text-sm"><span>Subtotal</span><strong>{{ number_format($this->cartSubtotal, 2, ',', '.') }} €</strong></div>
+                        <div class="mt-2 flex justify-between text-sm"><span>IVA (23%)</span><strong>{{ number_format($this->cartTax, 2, ',', '.') }} €</strong></div>
+                        <div class="mt-2 flex justify-between text-sm"><span>Envio</span><strong>{{ $this->cartShipping > 0 ? number_format($this->cartShipping, 2, ',', '.') . ' €' : 'Grátis' }}</strong></div>
+                        <div class="mt-4 flex justify-between text-xl font-black"><span>Total</span><span>{{ number_format($this->cartTotal, 2, ',', '.') }} €</span></div>
+                        <button type="button" wire:click="openCheckout" class="mt-6 w-full rounded-2xl px-5 py-4 font-bold text-white" style="background:var(--finder-primary)">Continuar para checkout</button>
+                    </div>
+                @endif
+            </aside>
+        </div>
+    @endif
+
+    @if($checkoutOpen)
+        <div class="fixed inset-0 z-[75] overflow-y-auto bg-black/50 p-4 sm:p-8">
+            <div class="mx-auto max-w-2xl rounded-[2rem] bg-white p-6 shadow-2xl sm:p-9">
+                <div class="flex items-center justify-between"><div><p class="text-xs font-black uppercase tracking-wider text-zinc-400">Finalizar compra</p><h2 class="mt-1 text-3xl font-black">Checkout</h2></div><button type="button" wire:click="$set('checkoutOpen', false)" class="rounded-full bg-zinc-100 px-3 py-2 font-bold">✕</button></div>
+                <form wire:submit="checkout" class="mt-8 grid gap-5">
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <label class="grid gap-2 text-sm font-bold">Nome<input wire:model="customerName" required class="rounded-2xl border border-zinc-200 px-4 py-3"></label>
+                        <label class="grid gap-2 text-sm font-bold">Email<input wire:model="customerEmail" type="email" required class="rounded-2xl border border-zinc-200 px-4 py-3"></label>
+                    </div>
+                    <label class="grid gap-2 text-sm font-bold">Telefone<input wire:model="customerPhone" required class="rounded-2xl border border-zinc-200 px-4 py-3"></label>
+                    <label class="grid gap-2 text-sm font-bold">Morada de entrega<textarea wire:model="deliveryAddress" required rows="3" class="rounded-2xl border border-zinc-200 px-4 py-3"></textarea></label>
+                    <label class="grid gap-2 text-sm font-bold">Método de pagamento<select wire:model="paymentMethod" class="rounded-2xl border border-zinc-200 px-4 py-3"><option value="mbway">MB WAY</option><option value="transferencia">Transferência bancária</option><option value="cartao">Cartão</option><option value="entrega">Pagamento na entrega</option></select></label>
+                    <div class="rounded-2xl bg-zinc-50 p-5"><div class="flex justify-between text-sm"><span>Total</span><strong>{{ number_format($this->cartTotal, 2, ',', '.') }} €</strong></div><p class="mt-2 text-xs text-zinc-500">O pagamento fica registado como pendente até ser confirmado.</p></div>
+                    <button type="submit" wire:loading.attr="disabled" class="rounded-2xl px-5 py-4 font-bold text-white" style="background:var(--finder-primary)">Confirmar encomenda</button>
+                </form>
+            </div>
+        </div>
     @endif
 
     <footer class="border-t border-black/5 bg-zinc-950 px-5 py-10 text-white sm:px-8"><div class="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p class="font-bold">{{ $site->name }}</p><p class="text-xs text-white/40">© {{ now()->year }} · Loja online criada com Finder</p></div></footer>
