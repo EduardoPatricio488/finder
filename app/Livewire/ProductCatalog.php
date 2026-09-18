@@ -86,6 +86,32 @@ class ProductCatalog extends Component
         return null;
     }
 
+    public function updatedProductMinimumStock(): void
+    {
+        $this->validateMinimumStock();
+    }
+
+    public function updatedProductStock(): void
+    {
+        $this->validateMinimumStock();
+    }
+
+    private function validateMinimumStock(): void
+    {
+        $this->resetErrorBag('productMinimumStock');
+
+        if ($this->productMinimumStock < 0 || $this->productStock < 0) {
+            return;
+        }
+
+        if ($this->productMinimumStock >= $this->productStock) {
+            $this->addError(
+                'productMinimumStock',
+                'O stock mínimo tem de ser inferior ao stock atual.'
+            );
+        }
+    }
+
     public function openProductModal(): void
     {
         $this->ensureGenericCategories();
@@ -252,7 +278,7 @@ class ProductCatalog extends Component
             'productCategoryId' => ['required', 'integer'],
             'productCustomCategory' => ['nullable', 'string', 'max:255'],
             'productStock' => ['required', 'integer', 'min:0'],
-            'productMinimumStock' => ['required', 'integer', 'min:0'],
+            'productMinimumStock' => ['required', 'integer', 'min:0', 'lt:productStock'],
             'productIsActive' => ['boolean'],
             'productImages' => ['nullable', 'array', 'max:10'],
             'productImages.*' => ['image', 'max:10240'],
