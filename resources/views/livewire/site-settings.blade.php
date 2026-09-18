@@ -1,4 +1,6 @@
 <div class="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
+    <div class="mb-2"><x-site-workspace-selector :current-site="$site" route-name="settings" /></div>
+
     <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
             <div class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600 dark:text-indigo-400">
