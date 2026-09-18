@@ -50,8 +50,9 @@
                     <div class="hidden shrink-0 lg:block"><x-desktop-user-menu :name="auth()->user()->name" /></div>
                 </div>
             </header>
-        @else
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
+        @endif
+
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }} {{ $isDashboard ? 'hidden' : '' }}">
             <flux:sidebar.header><x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate /><flux:sidebar.collapse class="lg:hidden" /></flux:sidebar.header>
 
             @if($showSiteSidebar)
