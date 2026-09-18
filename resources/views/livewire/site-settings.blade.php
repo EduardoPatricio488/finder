@@ -1,10 +1,8 @@
 <div class="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
-    <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+    <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-            <div class="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600 dark:text-indigo-400">
+            <div class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600 dark:text-indigo-400">
                 <span>Dados do site</span>
-                <span class="rounded-full bg-indigo-100 px-2 py-1 text-[9px] dark:bg-indigo-950/60">Modelo escolhido · {{ $modelProfile['label'] ?? 'Pessoal' }}</span>
-                <span class="rounded-full bg-zinc-100 px-2 py-1 text-[9px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{{ $modelFilled }}/{{ $modelTotal }} preenchidos</span>
             </div>
             <h1 class="mt-2 text-3xl font-black tracking-tight text-stone-950 dark:text-white">
                 Configuração do site
@@ -14,7 +12,12 @@
             </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center justify-end gap-3 md:min-w-[420px]">
+            <div class="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-5 py-3 text-right shadow-sm dark:border-indigo-800 dark:bg-indigo-950/40">
+                <div class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">Modelo escolhido</div>
+                <div class="mt-1 text-base font-black text-indigo-950 dark:text-white">{{ $modelProfile['label'] ?? 'Pessoal' }}</div>
+            </div>
+            <div class="rounded-xl bg-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{{ $modelFilled }}/{{ $modelTotal }} preenchidos</div>
             @if(session('model-content-saved'))
                 <span class="rounded-xl bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
                     {{ session('model-content-saved') }}
