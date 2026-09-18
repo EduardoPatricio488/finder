@@ -210,6 +210,6 @@ class Site extends Model
 
     public function adminUrl(): string
     {
-        return route('admin.site.dashboard');
+        return route('site.manage.dashboard');
     }
 }
