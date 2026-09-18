@@ -19,14 +19,12 @@
                 return Route::has($routeName) ? route($routeName, $target) : '#';
             };
         @endphp
-
         @if($isPlatformAdmin)
             <div class="fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-4 border-b border-amber-300 bg-amber-100 px-4 py-2 text-xs font-semibold text-amber-900">
                 <span>Modo de administração da plataforma ativo — estás a gerir um website como administrador.</span>
                 <form method="POST" action="{{ route('admin.websites.exit-access') }}">@csrf<button class="rounded-lg bg-amber-900 px-3 py-1.5 text-white">Sair deste website</button></form>
             </div>
         @endif
-
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
             <flux:sidebar.header><x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate /><flux:sidebar.collapse class="lg:hidden" /></flux:sidebar.header>
             <div class="px-3 pb-3">
@@ -42,10 +40,9 @@
                         </span>
                         <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
                     </button>
-                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif @endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
+                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
                 </flux:dropdown>
             </div>
-
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus Websites</flux:sidebar.item>
                 <flux:sidebar.group heading="Loja" class="grid">
@@ -70,17 +67,22 @@
                     @endif
                 @endif
             </flux:sidebar.nav>
-
             <flux:spacer />
-
             <div class="px-3 pb-3">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white">
-                        <flux:icon.arrow-right-start-on-rectangle class="size-5" />
-                        <span>Logout</span>
-                    </button>
-                </form>
+                <flux:sidebar.nav class="!mt-0">
+                    <flux:sidebar.group heading="Conta" class="grid">
+                        <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
+                        <flux:sidebar.item icon="bell" :href="route('notifications')" :current="request()->routeIs('notifications')" wire:navigate>Notificações</flux:sidebar.item>
+                    </flux:sidebar.group>
+                    <flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item>
+                    <form method="POST" action="{{ route('logout') }}" class="mt-1">
+                        @csrf
+                        <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white">
+                            <flux:icon.arrow-right-start-on-rectangle class="size-5" />
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </flux:sidebar.nav>
             </div>
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
