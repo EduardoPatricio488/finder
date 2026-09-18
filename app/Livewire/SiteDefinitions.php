@@ -4,13 +4,14 @@ namespace App\Livewire;
 
 use App\Models\Site;
 use Illuminate\Support\Facades\Storage;
+use App\Support\SiteContext;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.admin')]
+#[Layout('layouts.app')]
 #[Title('Definições do website')]
 class SiteDefinitions extends Component
 {
@@ -30,12 +31,20 @@ class SiteDefinitions extends Component
     public $faviconUpload = null;
     public $ogImageUpload = null;
     public string $contactName = '';
+    public $availableSites = [];
+
+    public function switchSite(int $siteId): void
+    {
+        $target = SiteContext::manageableSitesQuery(auth()->user())->whereKey($siteId)->firstOrFail();
+        $this->redirectRoute('admin.site.definitions', $target, navigate: true);
+    }
 
     public function mount(Site $site): void
     {
         abort_unless($site->isManageableBy(auth()->user()), 403);
 
         $this->site = $site;
+        $this->availableSites = SiteContext::manageableSitesQuery(auth()->user())->orderBy('sort_order')->orderBy('name')->get(['id', 'name', 'slug', 'status']);
         $this->name = $site->name;
         $this->slug = $site->slug;
         $this->tagline = $site->tagline ?? '';
