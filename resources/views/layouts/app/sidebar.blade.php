@@ -59,6 +59,7 @@
 
 <flux:sidebar.group heading="Conta" class="grid">
     <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
+    <flux:sidebar.item icon="bell" :href="route('notifications')" :current="request()->routeIs('notifications')" wire:navigate>Notificações</flux:sidebar.item>
 </flux:sidebar.group>
 
                 @if($hasSite && ! $isDashboard)
