@@ -5,6 +5,19 @@
                 <div>
                     <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Loja</p>
                     <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Produtos</h1>
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                        @if($site)
+                            <span class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
+                                <flux:icon name="globe-alt" class="size-4" />
+                                Website: {{ $site->name }}
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+                                <flux:icon name="exclamation-triangle" class="size-4" />
+                                Não estão associados a nenhum website
+                            </span>
+                        @endif
+                    </div>
                     <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Gere os produtos da empresa, acompanha o stock e mantém o catálogo organizado.</p>
                 </div>
                 <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
