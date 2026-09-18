@@ -123,7 +123,6 @@
 
             <flux:spacer /><flux:sidebar.nav><flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item></flux:sidebar.nav><x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
-        @endif
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
         {{ $slot }}
         @if($hasSite && auth()->user()->can('access-ai', $currentSite))<livewire:admin-assistant />@endif
