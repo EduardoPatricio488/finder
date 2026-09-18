@@ -20,11 +20,6 @@
             <p class="mt-1 text-xs text-indigo-700 dark:text-indigo-300">Estas definições pertencem exclusivamente a este website.</p>
         </div>
 
-    <div>
-        <p class="text-sm font-medium text-indigo-600">{{ $site->name }}</p>
-        <h1 class="mt-1 text-2xl font-semibold tracking-tight">Definições do website</h1>
-        <p class="mt-1 text-sm text-zinc-500">Identidade, endereço e SEO do teu website.</p>
-    </div>
 
     @if(session('status'))
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</div>
