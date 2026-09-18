@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.catalog')]
+#[Layout('layouts.app')]
 class ProductCatalog extends Component
 {
     public string $search = '';
