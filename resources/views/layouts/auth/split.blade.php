@@ -15,7 +15,7 @@
                     <p class="text-sm font-semibold uppercase tracking-[0.2em] text-amber-300">Página principal</p>
                     <h1 class="mt-4 text-4xl font-semibold tracking-tight">Os seus sites, num só lugar.</h1>
                     <p class="mt-5 text-base leading-7 text-white/70">
-                        Entre para gerir a coleção Finder. A Casa &amp; Co. e os restantes projetos ficam todos aqui.
+                        Entre para gerir os seus websites e projetos no Finder.
                     </p>
                 </div>
             </aside>
