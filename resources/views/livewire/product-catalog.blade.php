@@ -71,6 +71,7 @@
                     <thead class="bg-zinc-50 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:bg-zinc-800/50">
                         <tr>
                             <th class="px-5 py-4">Produto</th>
+                            <th class="px-5 py-4">Descrição</th>
                             <th class="px-5 py-4">Categoria</th>
                             <th class="px-5 py-4">Stock</th>
                             <th class="px-5 py-4">Preço</th>
@@ -115,6 +116,13 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td class="px-5 py-4">
+                                    @if($product->description)
+                                        <p class="max-w-sm line-clamp-2 text-sm text-zinc-600 dark:text-zinc-300">{{ $product->description }}</p>
+                                    @else
+                                        <span class="text-sm text-zinc-400">Sem descrição</span>
+                                    @endif
+                                </td>
                                 <td class="px-5 py-4 text-zinc-600 dark:text-zinc-300">{{ $product->category?->name ?: 'Sem categoria' }}</td>
                                 <td class="px-5 py-4">
                                     @if($product->stock > 0)
@@ -141,7 +149,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-5 py-16 text-center">
+                                <td colspan="7" class="px-5 py-16 text-center">
                                     <flux:icon name="cube" class="mx-auto size-10 text-zinc-300 dark:text-zinc-600" />
                                     <p class="mt-3 font-semibold text-zinc-900 dark:text-white">Nenhum produto encontrado</p>
                                     <p class="mt-1 text-sm text-zinc-500">Experimenta alterar a pesquisa ou os filtros.</p>
