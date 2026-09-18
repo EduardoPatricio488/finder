@@ -278,10 +278,6 @@
                             <input wire:model="productImages" type="file" multiple accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
                             <p class="mt-1 text-xs text-zinc-500">As novas fotografias serão adicionadas às existentes. Até 10 MB por fotografia.</p>
                         </div>
-                        <label class="sm:col-span-2 flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-                            <input wire:model="productIsActive" type="checkbox" class="size-4 rounded border-zinc-300 text-indigo-600">
-                            <span class="text-sm font-semibold">Produto ativo</span>
-                        </label>
                     </div>
                     <div class="mt-6 flex justify-end gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-800">
                         <button type="button" wire:click="closeManageProductModal" class="rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-semibold dark:border-zinc-700">Cancelar</button>
