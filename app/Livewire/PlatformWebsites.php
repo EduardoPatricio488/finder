@@ -30,7 +30,7 @@ class PlatformWebsites extends Component
         ]);
 
         session()->put('current_site_id', $site->id);
-        $this->redirectRoute('admin.site.dashboard');
+        $this->redirectRoute('site.manage.dashboard');
     }
 
     public function render(): mixed
