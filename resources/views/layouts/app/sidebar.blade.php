@@ -72,6 +72,15 @@
 
                 @if($hasSite)
 
+                    <flux:sidebar.group heading="Dados do site" class="grid">
+                        <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('dashboard').'#model-content'" :current="request()->routeIs('admin.site.dashboard')" wire:navigate>
+                            <span class="flex min-w-0 flex-1 items-center gap-2">
+                                <span class="truncate">Configuração do modelo</span>
+                                <span class="ms-auto shrink-0 text-[10px] font-semibold text-zinc-400">{{ $modelFilled ?? 0 }}/{{ $modelTotal ?? count($modelFields) }} preenchidos</span>
+                            </span>
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="photo" :href="$siteRoute('media')" :current="request()->routeIs('admin.site.media')" wire:navigate>Media</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
