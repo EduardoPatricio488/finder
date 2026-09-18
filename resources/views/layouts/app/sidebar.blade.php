@@ -42,19 +42,17 @@
                         </span>
                         <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
                     </button>
-                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
+                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('admin.site.dashboard', $site)" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif @endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
                 </flux:dropdown>
             </div>
 
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Meus Websites</flux:sidebar.item>
-
                 <flux:sidebar.group heading="Loja" class="grid">
                     <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
                     <flux:sidebar.item icon="currency-euro" :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
                     <flux:sidebar.item icon="clipboard-document-list" :href="route('orders.tracking')" :current="request()->routeIs('orders.tracking')" wire:navigate>Encomendas</flux:sidebar.item>
                 </flux:sidebar.group>
-
                 @if($hasSite && ! $isDashboard)
                     <flux:sidebar.group heading="Website" class="grid">
                         <flux:sidebar.item icon="cog-6-tooth" :href="$siteRoute('settings')" :current="request()->routeIs('admin.site.settings')" wire:navigate>Configuração do site</flux:sidebar.item>
@@ -62,7 +60,6 @@
                         <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('admin.site.menus')" wire:navigate>Menus</flux:sidebar.item>
                         <flux:sidebar.item icon="adjustments-horizontal" :href="$siteRoute('definitions')" :current="request()->routeIs('admin.site.definitions')" wire:navigate>Definições</flux:sidebar.item>
                     </flux:sidebar.group>
-
                     @if($currentSite->type === 'online_store')
                         <flux:sidebar.group heading="Vendas" class="grid">
                             <flux:sidebar.item icon="presentation-chart-line" :href="$siteRoute('sales')" :current="request()->routeIs('admin.site.sales')" wire:navigate>Vendas</flux:sidebar.item>
@@ -77,20 +74,13 @@
             <flux:spacer />
 
             <div class="px-3 pb-3">
-                <flux:sidebar.nav class="!mt-0">
-                    <flux:sidebar.group heading="Conta" class="grid">
-                        <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
-                        <flux:sidebar.item icon="bell" :href="route('notifications')" :current="request()->routeIs('notifications')" wire:navigate>Notificações</flux:sidebar.item>
-                    </flux:sidebar.group>
-                    <flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item>
-                    <form method="POST" action="{{ route('logout') }}" class="mt-1">
-                        @csrf
-                        <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white">
-                            <flux:icon.arrow-right-start-on-rectangle class="size-5" />
-                            <span>Logout</span>
-                        </button>
-                    </form>
-                </flux:sidebar.nav>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white">
+                        <flux:icon.arrow-right-start-on-rectangle class="size-5" />
+                        <span>Logout</span>
+                    </button>
+                </form>
             </div>
         </flux:sidebar>
         <flux:header class="lg:hidden"><flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" /><flux:spacer /></flux:header>
