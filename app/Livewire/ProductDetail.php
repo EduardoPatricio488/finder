@@ -24,9 +24,13 @@ class ProductDetail extends Component
 
     public function mount(Product $product): void
     {
-        $site = SiteContext::storefront();
+        $routeSite = request()->route('site');
+        $site = $routeSite instanceof \App\Models\Site
+            ? $routeSite
+            : $product->site;
 
-        abort_unless((int) $product->site_id === $site->id || request()->route('site') === null, 404);
+        abort_unless($site instanceof \App\Models\Site && $site->status === 'online' && $site->is_published, 404);
+        abort_unless((int) $product->site_id === $site->id, 404);
 
         $this->product = $product;
         $this->canReview = auth()->check() && $this->purchaseQuery()->exists();
@@ -60,7 +64,7 @@ class ProductDetail extends Component
 
     private function purchaseQuery(): Builder
     {
-        $site = SiteContext::storefront();
+        $site = $this->product->site ?? SiteContext::storefront();
 
         return Order::query()
             ->when(Schema::hasColumn('orders', 'site_id'), fn ($query) => $query->where(function ($query) use ($site): void {
