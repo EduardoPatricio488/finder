@@ -157,6 +157,7 @@
                             <th class="px-5 py-4">Categoria</th>
                             <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Stock</th>
+                            <th class="px-5 py-4">Descontos</th>
                             <th class="px-5 py-4">Preço</th>
                             <th class="px-5 py-4">
                                 <span class="inline-flex items-center gap-1">
@@ -220,6 +221,18 @@
                                         <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">{{ $product->stock }} em stock</span>
                                     @endif
                                 </button></flux:modal.trigger></td>
+                                <td class="px-5 py-4">
+                                    @php($activePromotion = $product->promotions->first())
+                                    @if($activePromotion)
+                                        <span class="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+                                            <flux:icon name="tag" class="size-3.5" />
+                                            -{{ number_format((float) $activePromotion->discount_value, 2, ',', '.') }}{{ $activePromotion->discount_type === 'percentagem' ? '%' : ' €' }}
+                                        </span>
+                                        <p class="mt-1 max-w-36 truncate text-xs text-zinc-500 dark:text-zinc-400" title="{{ $activePromotion->name }}">{{ $activePromotion->name }}</p>
+                                    @else
+                                        <span class="text-sm text-zinc-400">—</span>
+                                    @endif
+                                </td>
                                 <td class="px-5 py-4 font-bold text-zinc-950 dark:text-white">€ {{ number_format($this->salePrice($product), 2, ',', '.') }}</a></td>
                                 <td class="px-5 py-4">
                                     @if($product->reviews_count > 0)
@@ -256,7 +269,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-5 py-16 text-center">
+                                <td colspan="10" class="px-5 py-16 text-center">
                                     <flux:icon name="cube" class="mx-auto size-10 text-zinc-300 dark:text-zinc-600" />
                                     <p class="mt-3 font-semibold text-zinc-900 dark:text-white">Nenhum produto encontrado</p>
                                     <p class="mt-1 text-sm text-zinc-500">Experimenta alterar a pesquisa ou os filtros.</p>
