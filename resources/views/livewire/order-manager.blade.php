@@ -71,7 +71,8 @@
                     <div x-cloak x-show="expanded" class="p-5 sm:p-6">
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40 sm:p-5">
                             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-                                <h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Progresso e estado da encomenda</h4>
+                                <div class="inline-flex items-center gap-2"><h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Progresso e estado da encomenda</h4>
+                            </div>
                                 <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-200">Estado atual: {{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</span>
                             </div>
                             <div class="mb-4 flex flex-wrap items-center gap-2">
