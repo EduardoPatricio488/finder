@@ -25,7 +25,6 @@ class ProductCatalog extends Component
 
     public string $search = '';
     public ?int $selectedSiteId = null;
-    public string $productSiteFilter = '';
     public string $category = '';
     public string $minPrice = '';
     public string $maxPrice = '';
@@ -247,7 +246,6 @@ class ProductCatalog extends Component
             'availability',
             'minRating',
             'catalogFilter',
-            'productSiteFilter',
         ]);
 
         $this->sortBy = 'name';
@@ -259,7 +257,7 @@ class ProductCatalog extends Component
 
         $this->selectedProducts = $value
             ? Product::query()->whereIn('site_id', $siteIds)
-                ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
+                ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
                 ->pluck('id')->map(fn ($id) => (string) $id)->all()
             : [];
     }
@@ -312,7 +310,7 @@ class ProductCatalog extends Component
         $this->openImageGallery($productId, $index);
     }
 
-    public function updatedProductSiteFilter(): void
+    public function updatedCatalogSiteId(): void
     {
         $this->selectedProducts = [];
         $this->selectAllProducts = false;
@@ -896,7 +894,7 @@ class ProductCatalog extends Component
         $minimumRating = (float) $this->minRating;
         $manageableSiteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
         $products = Product::query()->whereIn('site_id', $manageableSiteIds)
-            ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
+            ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
             ->with(['category', 'site'])->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])->withAvg('reviews', 'rating')->withCount('reviews')
             ->when($this->search !== '', fn ($query) => $query->where(fn ($query) => $query->where('name', 'like', '%'.$this->search.'%')->orWhere('description', 'like', '%'.$this->search.'%')->orWhere('sku', 'like', '%'.$this->search.'%')->orWhere('price', 'like', '%'.$this->search.'%')->orWhere('tags', 'like', '%'.$this->search.'%')->orWhereHas('category', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))))
             ->when($this->category !== '', fn ($query) => $query->whereHas('category', fn ($query) => $query->where('slug', $this->category)))
@@ -918,7 +916,7 @@ class ProductCatalog extends Component
         return view('livewire.product-catalog', [
             'products' => $products,
             'stockValue' => (float) Product::query()->whereIn('site_id', $manageableSiteIds)
-                ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
+                ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
                 ->sum(DB::raw('price * stock')),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
