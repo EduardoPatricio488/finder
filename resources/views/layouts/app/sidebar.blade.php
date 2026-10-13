@@ -26,9 +26,16 @@
         @endif
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
             <flux:sidebar.header>
-                <a href="{{ route('account') }}" wire:navigate aria-label="A minha conta" title="A minha conta" class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
-                    <flux:icon.user-circle class="size-5" />
-                </a>
+                <flux:dropdown position="bottom" align="start">
+                    <button type="button" aria-label="Abrir menu da conta" title="Conta" class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
+                        <flux:icon.user-circle class="size-5" />
+                    </button>
+                    <flux:menu>
+                        <flux:menu.item icon="user-circle" :href="route('account')" wire:navigate>Minha conta</flux:menu.item>
+                        <flux:menu.item icon="bell" :href="route('notifications')" wire:navigate>Notificações</flux:menu.item>
+                        <flux:menu.item icon="book-open-text" :href="route('help')" wire:navigate>Ajuda</flux:menu.item>
+                    </flux:menu>
+                </flux:dropdown>
                 <x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
@@ -64,15 +71,6 @@
                     <flux:sidebar.item icon="tag" :href="$siteRoute('promotions')" :current="request()->routeIs('site.manage.promotions')" wire:navigate>Promoções</flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
-            <div class="px-3 pb-3">
-                <flux:sidebar.nav class="!mt-0">
-                    <flux:sidebar.group heading="Conta" class="grid">
-                        <flux:sidebar.item icon="user-circle" :href="route('account')" :current="request()->routeIs('account')" wire:navigate>Minha conta</flux:sidebar.item>
-                        <flux:sidebar.item icon="bell" :href="route('notifications')" :current="request()->routeIs('notifications')" wire:navigate>Notificações</flux:sidebar.item>
-                    </flux:sidebar.group>
-                    <flux:sidebar.item icon="book-open-text" :href="route('help')" :current="request()->routeIs('help')" wire:navigate>Ajuda</flux:sidebar.item>
-                </flux:sidebar.nav>
-            </div>
             <flux:spacer />
             <div class="px-3 pb-3">
                 <form method="POST" action="{{ route('logout') }}">
