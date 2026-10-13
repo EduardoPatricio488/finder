@@ -20,6 +20,14 @@
                 <button type="button" wire:click="openCategoriesModal" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
                     <flux:icon name="tag" class="size-4" /> Gerir categorias
                 </button>
+                @auth
+                    <flux:modal.trigger name="product-stock-modal">
+                        <flux:button variant="outline" icon="archive-box">Stock</flux:button>
+                    </flux:modal.trigger>
+                    <flux:modal.trigger name="product-promotions-modal">
+                        <flux:button variant="outline" icon="ticket">Promoções</flux:button>
+                    </flux:modal.trigger>
+                @endauth
                 <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
                     <flux:icon name="plus" class="size-4" />
                     Adicionar produto
@@ -550,22 +558,26 @@
     @endif
 
         @auth
-            <div class="mt-8 flex justify-center border-t border-zinc-200 pt-8 dark:border-zinc-800">
-                <flux:modal.trigger name="product-stock-promotions">
-                    <flux:button variant="outline" icon="adjustments-horizontal">Gestão de stock e promoções</flux:button>
-                </flux:modal.trigger>
-            </div>
-
-            <flux:modal name="product-stock-promotions" class="w-full max-w-5xl">
-                <div class="space-y-6">
+            <flux:modal name="product-stock-modal" class="w-full max-w-5xl">
+                <div class="space-y-5">
                     <div>
-                        <flux:heading size="lg">Gestão de produtos</flux:heading>
-                        <flux:text class="mt-1">Gere movimentos de stock e promoções sem sair do catálogo.</flux:text>
+                        <flux:heading size="lg">Movimentos de stock</flux:heading>
+                        <flux:text class="mt-1">Regista entradas, saídas e ajustes e consulta o histórico do website selecionado.</flux:text>
                     </div>
+                    <div class="max-h-[75vh] overflow-y-auto pr-1">
+                        <livewire:stock-movement-manager :key="'stock-manager-modal-'.$selectedSiteId" />
+                    </div>
+                </div>
+            </flux:modal>
 
-                    <div class="max-h-[75vh] space-y-8 overflow-y-auto pr-1">
-                        <livewire:stock-movement-manager :key="'stock-manager-'.$selectedSiteId" />
-                        <livewire:promotion-manager :key="'promotion-manager-'.$selectedSiteId" />
+            <flux:modal name="product-promotions-modal" class="w-full max-w-5xl">
+                <div class="space-y-5">
+                    <div>
+                        <flux:heading size="lg">Promoções</flux:heading>
+                        <flux:text class="mt-1">Cria e consulta promoções e define os produtos abrangidos.</flux:text>
+                    </div>
+                    <div class="max-h-[75vh] overflow-y-auto pr-1">
+                        <livewire:promotion-manager :key="'promotion-manager-modal-'.$selectedSiteId" />
                     </div>
                 </div>
             </flux:modal>
