@@ -25,6 +25,7 @@ class ProductCatalog extends Component
 
     public string $search = '';
     public ?int $selectedSiteId = null;
+    public string $productSiteFilter = '';
     public string $category = '';
     public string $minPrice = '';
     public string $maxPrice = '';
@@ -253,9 +254,67 @@ class ProductCatalog extends Component
 
     public function updatedSelectAllProducts(bool $value): void
     {
+        $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
+
         $this->selectedProducts = $value
-            ? $this->siteScoped(Product::query())->pluck('id')->map(fn ($id) => (string) $id)->all()
+            ? Product::query()->whereIn('site_id', $siteIds)
+                ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
+                ->pluck('id')->map(fn ($id) => (string) $id)->all()
             : [];
+    }
+
+    private function selectProductSite(int $productId): Product
+    {
+        $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
+        $product = Product::query()->whereIn('site_id', $siteIds)->with('site')->findOrFail($productId);
+
+        abort_unless($product->site_id !== null, 404);
+        $this->selectedSiteId = (int) $product->site_id;
+        session()->put('current_site_id', $this->selectedSiteId);
+
+        return $product;
+    }
+
+    public function manageProductFromAnySite(int $productId): void
+    {
+        $this->selectProductSite($productId);
+        $this->openManageProductModal($productId);
+    }
+
+    public function quickStockFromAnySite(int $productId): void
+    {
+        $this->selectProductSite($productId);
+        $this->openQuickStockModal($productId);
+    }
+
+    public function stockHistoryFromAnySite(int $productId): void
+    {
+        $this->selectProductSite($productId);
+        $this->openStockHistory($productId);
+    }
+
+    public function duplicateProductFromAnySite(int $productId): void
+    {
+        $this->selectProductSite($productId);
+        $this->duplicateProduct($productId);
+    }
+
+    public function deleteProductFromAnySite(int $productId): void
+    {
+        $this->selectProductSite($productId);
+        $this->deleteProduct($productId);
+    }
+
+    public function openImageGalleryFromAnySite(int $productId, int $index = 0): void
+    {
+        $this->selectProductSite($productId);
+        $this->openImageGallery($productId, $index);
+    }
+
+    public function updatedProductSiteFilter(): void
+    {
+        $this->selectedProducts = [];
+        $this->selectAllProducts = false;
     }
 
     public function updatedImportFile(): void
@@ -414,7 +473,8 @@ class ProductCatalog extends Component
     {
         $ids = array_map('intval', $this->selectedProducts);
         if ($ids === []) return;
-        $products = $this->siteScoped(Product::query())->whereIn('id', $ids)->get();
+        $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
+        $products = Product::query()->whereIn('site_id', $siteIds)->whereIn('id', $ids)->get();
         foreach ($products as $product) {
             if (! $product->orderItems()->exists()) $product->delete();
         }
@@ -425,7 +485,8 @@ class ProductCatalog extends Component
 
     public function exportProducts(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $products = $this->siteScoped(Product::query())->with('category')->orderBy('name')->get();
+        $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
+        $products = Product::query()->whereIn('site_id', $siteIds)->with(['category', 'site'])->orderBy('name')->get();
         $userName = auth()->user()?->name ?: 'Utilizador';
         $filename = Str::slug($userName).'-produtos-'.now()->format('Y-m-d').'.csv';
         return response()->streamDownload(function () use ($products): void {
@@ -823,7 +884,10 @@ class ProductCatalog extends Component
             ->orderBy('name')
             ->get();
         $minimumRating = (float) $this->minRating;
-        $products = $this->siteScoped(Product::query())->where('is_active', true)->with('category')->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])->withAvg('reviews', 'rating')->withCount('reviews')
+        $manageableSiteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
+        $products = Product::query()->whereIn('site_id', $manageableSiteIds)
+            ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
+            ->where('is_active', true)->with(['category', 'site'])->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])->withAvg('reviews', 'rating')->withCount('reviews')
             ->when($this->search !== '', fn ($query) => $query->where(fn ($query) => $query->where('name', 'like', '%'.$this->search.'%')->orWhere('description', 'like', '%'.$this->search.'%')->orWhere('sku', 'like', '%'.$this->search.'%')->orWhere('price', 'like', '%'.$this->search.'%')->orWhere('tags', 'like', '%'.$this->search.'%')->orWhereHas('category', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))))
             ->when($this->category !== '', fn ($query) => $query->whereHas('category', fn ($query) => $query->where('slug', $this->category)))
             ->when($this->minPrice !== '', fn ($query) => $query->where('price', '>=', (float) $this->minPrice))
@@ -843,13 +907,15 @@ class ProductCatalog extends Component
 
         return view('livewire.product-catalog', [
             'products' => $products,
-            'stockValue' => (float) $this->siteScoped(Product::query())
+            'stockValue' => (float) Product::query()->whereIn('site_id', $manageableSiteIds)
+                ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
                 ->where('is_active', true)->sum(DB::raw('price * stock')),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'availableSites' => $availableSites,
             'productMedia' => $site->media()->where('placement', 'products')->latest()->get(),
             'categories' => $this->siteScoped(Category::query())->withCount('products')->orderBy('name')->get(),
+            'categoryFilters' => Category::query()->whereIn('site_id', $manageableSiteIds)->orderBy('name')->get()->unique('slug')->values(),
             'stockHistory' => $this->stockProductId ? $this->siteScoped(Product::query())->find($this->stockProductId)?->stockMovements()->with('user')->latest()->limit(30)->get() : collect(),
         ]);
     }
