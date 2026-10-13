@@ -431,9 +431,9 @@ class ProductCatalog extends Component
         return response()->streamDownload(function () use ($products): void {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($handle, ['Nome', 'Categoria', 'Preço', 'Stock', 'Stock mínimo', 'Descrição'], ';');
+            fputcsv($handle, ['Nome', 'Website', 'Categoria', 'Preço', 'Stock', 'Stock mínimo', 'Descrição'], ';');
             foreach ($products as $product) {
-                fputcsv($handle, [$product->name, $product->category?->name, $product->price, $product->stock, $product->minimum_stock, $product->description], ';');
+                fputcsv($handle, [$product->name, $product->site?->name ?: 'Não está em nenhum site', $product->category?->name, $product->price, $product->stock, $product->minimum_stock, $product->description], ';');
             }
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
