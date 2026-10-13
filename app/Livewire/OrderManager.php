@@ -66,12 +66,6 @@ class OrderManager extends Component
             return false;
         }
 
-        if ($step === 'pago' && $order->relationLoaded('payments') && $order->payments->contains(
-            fn ($payment): bool => $payment->status === 'recebido'
-        )) {
-            return true;
-        }
-
         return $currentIndex !== false && $currentIndex >= $stepIndex;
     }
 
