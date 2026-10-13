@@ -249,6 +249,7 @@ class ProductCatalog extends Component
             'availability',
             'minRating',
             'catalogFilter',
+            'productSiteFilter',
         ]);
 
         $this->sortBy = 'name';
