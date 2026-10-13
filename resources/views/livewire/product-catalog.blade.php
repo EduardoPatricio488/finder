@@ -8,6 +8,7 @@
         <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
             <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
+                    <p class="max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere todos os produtos dos teus websites num único catálogo, acompanha o stock e mantém tudo organizado.</p>
                 </div>
                 <div class="flex flex-wrap items-center justify-end gap-2">
                     <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
@@ -74,7 +75,7 @@
                         <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
                     @endforeach
                 </select>
-                <select wire:model.live="catalogSiteId" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 lg:w-60">
+                <select wire:model.live="productSiteFilter" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 lg:w-60">
                     <option value="">Todos os websites</option>
                     @foreach($availableSites as $availableSite)
                         <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
@@ -152,9 +153,9 @@
                         <tr>
                             <th class="w-12 px-5 py-4"><input type="checkbox" wire:model.live="selectAllProducts" class="rounded border-zinc-300"></th>
                             <th class="px-5 py-4">Produto</th>
-                            <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Descrição</th>
                             <th class="px-5 py-4">Categoria</th>
+                            <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Stock</th>
                             <th class="px-5 py-4">Preço</th>
