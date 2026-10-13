@@ -316,8 +316,18 @@ class ProductCatalog extends Component
         $this->openImageGallery($productId, $index);
     }
 
-    public function updatedCatalogSiteId(): void
+    public function updatedCatalogSiteId($siteId): void
     {
+        $siteId = (string) $siteId;
+
+        if ($siteId !== '') {
+            abort_unless(
+                SiteContext::manageableSitesQuery(auth()->user())->whereKey((int) $siteId)->exists(),
+                404
+            );
+        }
+
+        $this->catalogSiteId = $siteId;
         $this->selectedProducts = [];
         $this->selectAllProducts = false;
     }
