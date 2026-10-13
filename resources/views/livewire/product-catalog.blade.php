@@ -2,7 +2,7 @@
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="mb-5">
             <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Loja</p>
-            <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Produtos</h1>
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Todos os produtos</h1>
         </div>
 
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
