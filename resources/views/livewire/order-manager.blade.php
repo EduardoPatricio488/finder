@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl space-y-7">
-        <header class="rounded-2xl border border-zinc-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:px-8">
+        <header class="px-1 py-2">
             <h1 class="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-3xl">Encomendas</h1>
         </header>
 
