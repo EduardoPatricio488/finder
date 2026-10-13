@@ -82,14 +82,26 @@
                                     @endforelse
                                 </div>
                             </div>
-                            <div>
-                                <h4 class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">Atualizar estado</h4>
-                                <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
-                                    <p class="mb-3 text-xs leading-5 text-zinc-500 dark:text-zinc-400">Seleciona o próximo estado ou corrige o estado atual da encomenda.</p>
-                                    <div class="flex flex-wrap gap-2">
+                            <div class="min-w-0">
+                                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                    <h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Atualizar estado</h4>
+                                    <span class="text-xs text-zinc-500 dark:text-zinc-400">Estado atual: <strong class="font-semibold text-zinc-700 dark:text-zinc-200">{{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</strong></span>
+                                </div>
+                                <div class="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/60">
+                                    <p class="mb-4 text-sm leading-5 text-zinc-600 dark:text-zinc-400">Escolhe o estado para o qual pretendes atualizar esta encomenda.</p>
+                                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
                                         @foreach(['pendente' => 'Pendente', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue'] as $statusValue => $statusLabel)
-                                            @if($order->status !== $statusValue)
-                                                <button type="button" wire:click="setStatus({{ $order->id }}, '{{ $statusValue }}')" wire:loading.attr="disabled" wire:target="setStatus({{ $order->id }}, '{{ $statusValue }}')" class="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-wait disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-800 dark:hover:bg-indigo-500/10">{{ $statusLabel }}</button>
+                                            @if($order->status === $statusValue)
+                                                <div aria-current="step" class="flex min-h-12 items-center gap-3 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2.5 text-sm font-semibold text-indigo-800 dark:border-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-200">
+                                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs text-white dark:bg-indigo-400 dark:text-zinc-950">✓</span>
+                                                    <span class="min-w-0 flex-1">{{ $statusLabel }}</span>
+                                                    <span class="text-[10px] font-bold uppercase tracking-wider">Atual</span>
+                                                </div>
+                                            @else
+                                                <button type="button" wire:click="setStatus({{ $order->id }}, '{{ $statusValue }}')" wire:loading.attr="disabled" wire:target="setStatus({{ $order->id }}, '{{ $statusValue }}')" class="group flex min-h-12 items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm font-medium text-zinc-700 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-wait disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-200">
+                                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-zinc-300 text-[10px] text-zinc-400 transition group-hover:border-indigo-400 group-hover:text-indigo-600 dark:border-zinc-600 dark:group-hover:border-indigo-500 dark:group-hover:text-indigo-300">→</span>
+                                                    <span class="min-w-0 flex-1">{{ $statusLabel }}</span>
+                                                </button>
                                             @endif
                                         @endforeach
                                     </div>
