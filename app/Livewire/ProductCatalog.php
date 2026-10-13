@@ -21,7 +21,6 @@ use Livewire\WithFileUploads;
 #[Layout('layouts.app')]
 class ProductCatalog extends Component
 {
-    public string $productSiteFilter = '';
     use WithFileUploads;
 
     public string $search = '';
