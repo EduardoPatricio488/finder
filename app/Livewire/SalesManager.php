@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\InteractsWithSiteContext;
+use App\Support\SiteContext;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -15,15 +16,50 @@ class SalesManager extends Component
 
     public string $status = '';
 
+    public string $catalogSiteId = '';
+
+    public function updatedCatalogSiteId($siteId): void
+    {
+        $siteId = (string) $siteId;
+
+        if ($siteId !== '') {
+            abort_unless(
+                SiteContext::manageableSitesQuery(auth()->user())->whereKey((int) $siteId)->exists(),
+                404
+            );
+        }
+
+        $this->catalogSiteId = $siteId;
+    }
+
     public function render(): mixed
     {
-        $sales = $this->currentSite()->orders()
-            ->with(['customer', 'items'])
-            ->when($this->search !== '', fn ($query) => $query->where('order_number', 'like', '%'.$this->search.'%')->orWhereHas('customer', fn ($customer) => $customer->where('name', 'like', '%'.$this->search.'%')))
+        $availableSites = SiteContext::manageableSitesQuery(auth()->user())
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        $siteIds = $availableSites->modelKeys();
+
+        $sales = Order::query()
+            ->whereIn('site_id', $siteIds)
+            ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
+            ->when($this->search !== '', function ($query) {
+                $search = trim($this->search);
+
+                $query->where(function ($query) use ($search) {
+                    $query->where('order_number', 'like', '%'.$search.'%')
+                        ->orWhereHas('customer', fn ($customer) => $customer->where('name', 'like', '%'.$search.'%'));
+                });
+            })
             ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
+            ->with(['customer', 'items', 'site'])
             ->latest('sold_at')
             ->get();
 
-        return view('livewire.sales-manager', ['sales' => $sales, 'site' => $this->currentSite()]);
+        return view('livewire.sales-manager', [
+            'sales' => $sales,
+            'availableSites' => $availableSites,
+        ]);
     }
 }
