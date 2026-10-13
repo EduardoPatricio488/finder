@@ -80,6 +80,10 @@
                                 <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-200">Estado atual: {{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</span>
                             </div>
                             <p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">Seleciona uma etapa para atualizar o estado da encomenda. As etapas concluídas aparecem a verde.</p>
+                            <div wire:loading.flex wire:target="setStatus" role="status" aria-live="polite" class="mb-4 items-center gap-2 rounded-lg border border-indigo-200 px-3 py-2.5 text-sm font-medium text-indigo-700 dark:border-indigo-800 dark:text-indigo-300">
+                                <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path></svg>
+                                <span>A alterar o estado da encomenda...</span>
+                            </div>
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
                                 @foreach(['criada' => 'Criada', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue'] as $step => $label)
                                     @php
