@@ -38,9 +38,18 @@ class OrderManager extends Component
         abort_unless(in_array($status, ['pendente', 'pago', 'em_preparacao', 'enviado', 'entregue'], true), 422);
 
         $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
-        $order = Order::query()->whereIn('site_id', $siteIds)->with(['customer', 'site'])->findOrFail($orderId);
+        $order = Order::query()->whereIn('site_id', $siteIds)->with(['customer', 'site', 'payments'])->findOrFail($orderId);
         $site = $order->site;
         abort_unless($site !== null && $site->isManageableBy(auth()->user()), 404);
+
+        $hasReceivedPayment = $order->payments->contains(fn ($payment): bool => $payment->status === 'recebido');
+
+        // Um pagamento confirmado não pode voltar a deixar a encomenda como pendente.
+        if ($status === 'pendente' && $hasReceivedPayment) {
+            $status = 'pago';
+            $this->dispatch('order-status-sync-notice', message: 'Esta encomenda já tem um pagamento recebido. O estado foi mantido em Pago.');
+        }
+
         $order->update(['status' => $status]);
 
         app(FinderNotificationService::class)->saleChanged(
@@ -77,6 +86,13 @@ class OrderManager extends Component
             ->get();
 
         $siteIds = $availableSites->modelKeys();
+
+        // Corrige registos antigos/inconsistentes: pagamento recebido implica, no mínimo, estado Pago.
+        Order::query()
+            ->whereIn('site_id', $siteIds)
+            ->where('status', 'pendente')
+            ->whereHas('payments', fn ($query) => $query->where('status', 'recebido'))
+            ->update(['status' => 'pago']);
 
         $orders = Order::query()
             ->whereIn('site_id', $siteIds)
