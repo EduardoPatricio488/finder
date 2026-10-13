@@ -526,10 +526,18 @@
                                     Ainda não tens fotografias para produtos na biblioteca de media. Vai a <a href="{{ route('site.manage.media') }}" class="font-bold text-indigo-600 hover:underline">Media</a>, escolhe <strong>Produtos</strong> e carrega as fotografias.
                                 </div>
                             @endif
-                            <details class="mt-3">
-                                <summary class="cursor-pointer text-xs font-semibold text-indigo-600">Ou carregar fotografias diretamente</summary>
-                                <input wire:model="productImages" type="file" multiple accept="image/jpeg,image/png,image/webp" class="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
-                            <p class="mt-1 text-xs text-zinc-500">Podes adicionar até 10 fotografias, com até 10 MB por fotografia.</p>
+                            <div class="mt-4 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/60 p-4 dark:border-indigo-900 dark:bg-indigo-500/5">
+                                <p class="text-sm font-semibold text-zinc-900 dark:text-white">Ou carregar uma fotografia do computador</p>
+                                <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">A fotografia fica automaticamente em Media &gt; Produtos, com a descrição que indicares.</p>
+                                <label class="mt-3 block text-xs font-medium text-zinc-600 dark:text-zinc-300">Fotografia</label>
+                                <input wire:model="productPhotoUpload" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                                @error('productPhotoUpload') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                                <label class="mt-3 block text-xs font-medium text-zinc-600 dark:text-zinc-300">Descrição da fotografia</label>
+                                <input wire:model="productPhotoDescription" type="text" maxlength="255" placeholder="Ex.: Teclado mecânico preto visto de frente" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                                @error('productPhotoDescription') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                                <button type="button" wire:click="uploadProductPhoto" wire:loading.attr="disabled" wire:target="uploadProductPhoto,productPhotoUpload" class="mt-3 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60">Adicionar à Media e selecionar</button>
+                                <p wire:loading wire:target="uploadProductPhoto,productPhotoUpload" class="mt-2 text-xs text-indigo-600">A carregar fotografia...</p>
+                            </div>
                             @error('productImages') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             @error('productImages.*') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
@@ -598,9 +606,14 @@
                             <textarea wire:model="productDescription" rows="3" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950"></textarea>
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="mb-2 block text-sm font-semibold">Adicionar fotografias</label>
-                            <input wire:model="productImages" type="file" multiple accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
-                            <p class="mt-1 text-xs text-zinc-500">As novas fotografias serão adicionadas às existentes. Até 10 MB por fotografia.</p>
+                            <label class="mb-2 block text-sm font-semibold">Adicionar fotografia à Media</label>
+                            <input wire:model="productPhotoUpload" type="file" accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                            @error('productPhotoUpload') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <label class="mb-2 mt-3 block text-sm font-semibold">Descrição da fotografia</label>
+                            <input wire:model="productPhotoDescription" type="text" maxlength="255" placeholder="Descreve a fotografia" class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950">
+                            @error('productPhotoDescription') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <button type="button" wire:click="uploadProductPhoto" wire:loading.attr="disabled" wire:target="uploadProductPhoto,productPhotoUpload" class="mt-3 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60">Adicionar à Media e selecionar</button>
+                            <p class="mt-1 text-xs text-zinc-500">A fotografia fica em Media &gt; Produtos e será associada ao produto quando guardares.</p>
                         </div>
                     </div>
                     <div class="mt-6 flex justify-end gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-800">
