@@ -59,11 +59,6 @@
                     <flux:sidebar.item icon="document-text" :href="$siteRoute('menus')" :current="request()->routeIs('site.manage.menus')" wire:navigate>Menus</flux:sidebar.item>
                     <flux:sidebar.item icon="adjustments-horizontal" :href="$siteRoute('definitions')" :current="request()->routeIs('site.manage.definitions')" wire:navigate>Definições</flux:sidebar.item>
                 </flux:sidebar.group>
-                <flux:sidebar.group heading="Vendas" class="grid">
-                    <flux:sidebar.item icon="currency-euro" :href="$siteRoute('payments')" :current="request()->routeIs('site.manage.payments')" wire:navigate>Pagamentos</flux:sidebar.item>
-                    <flux:sidebar.item icon="archive-box" :href="$siteRoute('stock')" :current="request()->routeIs('site.manage.stock')" wire:navigate>Stock</flux:sidebar.item>
-                    <flux:sidebar.item icon="tag" :href="$siteRoute('promotions')" :current="request()->routeIs('site.manage.promotions')" wire:navigate>Promoções</flux:sidebar.item>
-                </flux:sidebar.group>
             </flux:sidebar.nav>
             <flux:spacer />
             <div class="px-3 pb-3">
