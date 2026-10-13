@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\InteractsWithSiteContext;
 use App\Models\Order;
+use App\Support\SiteContext;
 use App\Services\FinderNotificationService;
 use App\Services\StoreMailService;
 use Livewire\Attributes\Layout;
@@ -16,15 +17,34 @@ class OrderManager extends Component
 
     public string $status = '';
 
+    public string $catalogSiteId = '';
+
+    public function updatedCatalogSiteId($siteId): void
+    {
+        $siteId = (string) $siteId;
+
+        if ($siteId !== '') {
+            abort_unless(
+                SiteContext::manageableSitesQuery(auth()->user())->whereKey((int) $siteId)->exists(),
+                404
+            );
+        }
+
+        $this->catalogSiteId = $siteId;
+    }
+
     public function setStatus(int $orderId, string $status): void
     {
         abort_unless(in_array($status, ['pendente', 'pago', 'em_preparacao', 'enviado', 'entregue'], true), 422);
 
-        $order = $this->currentSite()->orders()->with('customer')->findOrFail($orderId);
+        $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
+        $order = Order::query()->whereIn('site_id', $siteIds)->with(['customer', 'site'])->findOrFail($orderId);
+        $site = $order->site;
+        abort_unless($site !== null && $site->isManageableBy(auth()->user()), 404);
         $order->update(['status' => $status]);
 
         app(FinderNotificationService::class)->saleChanged(
-            $this->currentSite(),
+            $site,
             'A encomenda #'.$order->order_number.' mudou para "'.$status.'".'
         );
 
@@ -57,18 +77,24 @@ class OrderManager extends Component
 
     public function render(): mixed
     {
-        $site = $this->currentSite();
+        $availableSites = SiteContext::manageableSitesQuery(auth()->user())
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
 
-        return view('livewire.order-tracking', [
-            'site' => $site,
-            'orders' => $site->orders()
-                ->with(['customer', 'items', 'payments'])
-                ->when(
-                    $this->status !== '',
-                    fn ($query) => $query->where('status', $this->status)
-                )
-                ->latest('sold_at')
-                ->get(),
+        $siteIds = $availableSites->modelKeys();
+
+        $orders = Order::query()
+            ->whereIn('site_id', $siteIds)
+            ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
+            ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
+            ->with(['customer', 'items', 'payments', 'site'])
+            ->latest('sold_at')
+            ->get();
+
+        return view('livewire.order-manager', [
+            'orders' => $orders,
+            'availableSites' => $availableSites,
         ]);
     }
 }
