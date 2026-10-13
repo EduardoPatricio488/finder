@@ -120,6 +120,7 @@
                         </div>
 
                     </div>
+<template x-teleport="body">
                     <div x-cloak x-show="detailsOpen" x-transition.opacity class="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="order-details-title" x-on:keydown.escape.window="detailsOpen = false">
                         <div x-on:click.outside="detailsOpen = false" class="max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xl dark:border-zinc-700 dark:bg-zinc-950 sm:p-6">
                             <div class="mb-5 flex items-start justify-between gap-4 border-b border-zinc-100 pb-4 dark:border-zinc-800">
@@ -214,6 +215,7 @@
                         </div>
                         </div>
                     </div>
+                    </template>
                     <div x-cloak x-show="confirmStatus !== null" x-transition.opacity class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="order-status-confirm-title" x-on:keydown.escape.window="confirmStatus = null; confirmStatusLabel = ''">
                         <div x-on:click.outside="confirmStatus = null; confirmStatusLabel = ''" x-transition class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
                             <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
