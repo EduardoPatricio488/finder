@@ -137,11 +137,51 @@
                     <span class="rounded-xl bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Alterações por aplicar</span>
                 @endif
                 <flux:button type="button" wire:click="applyProducts" wire:loading.attr="disabled" icon="arrow-up-tray" class="!rounded-xl">Aplicar no site</flux:button>
-                @if($site)
-                    <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800">
-                        <flux:icon name="arrow-top-right-on-square" class="size-4" />
-                        Ver site
-                    </a>
+                @if($availableSites->isNotEmpty())
+                    <div x-data="{ sitePreviewSelectorOpen: false }">
+                        <button type="button" @click="sitePreviewSelectorOpen = true" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm transition hover:border-indigo-300 hover:bg-zinc-50 hover:text-indigo-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-indigo-500 dark:hover:bg-zinc-800">
+                            <flux:icon name="arrow-top-right-on-square" class="size-4" />
+                            Ver site
+                        </button>
+
+                        <div x-cloak x-show="sitePreviewSelectorOpen" x-transition.opacity @keydown.escape.window="sitePreviewSelectorOpen = false" @click.self="sitePreviewSelectorOpen = false" class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-zinc-950/60 p-4 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="site-preview-selector-title">
+                            <div x-show="sitePreviewSelectorOpen" x-transition class="my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
+                                <div class="flex items-start justify-between gap-4 border-b border-zinc-100 px-6 py-5 dark:border-zinc-800 sm:px-7">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                                            <flux:icon name="globe-alt" class="size-5" />
+                                        </div>
+                                        <div>
+                                            <h2 id="site-preview-selector-title" class="text-lg font-bold text-zinc-950 dark:text-white">Que website queres abrir?</h2>
+                                            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Escolhe o website que pretendes pré-visualizar.</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="sitePreviewSelectorOpen = false" aria-label="Fechar" class="flex size-9 shrink-0 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white">
+                                        <flux:icon name="x-mark" class="size-5" />
+                                    </button>
+                                </div>
+
+                                <div class="max-h-[60vh] space-y-2 overflow-y-auto p-4 sm:p-5">
+                                    @foreach($availableSites as $previewSite)
+                                        <a href="{{ route('site.public', [$previewSite, 'pageSlug' => null, 'preview' => 1]) }}" target="_blank" rel="noopener" class="group flex items-center gap-3 rounded-2xl border border-zinc-200 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/70 dark:border-zinc-700 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-500/10">
+                                            <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition group-hover:bg-indigo-100 group-hover:text-indigo-700 dark:bg-zinc-800 dark:text-zinc-300 dark:group-hover:bg-indigo-500/20 dark:group-hover:text-indigo-300">
+                                                <flux:icon name="window" class="size-5" />
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="truncate text-sm font-semibold text-zinc-950 dark:text-white">{{ $previewSite->name }}</p>
+                                                <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Abrir pré-visualização do website</p>
+                                            </div>
+                                            <flux:icon name="arrow-top-right-on-square" class="size-4 shrink-0 text-zinc-400 transition group-hover:text-indigo-600 dark:group-hover:text-indigo-300" />
+                                        </a>
+                                    @endforeach
+                                </div>
+
+                                <div class="flex justify-end border-t border-zinc-100 bg-zinc-50/70 px-6 py-4 dark:border-zinc-800 dark:bg-zinc-950/30">
+                                    <button type="button" @click="sitePreviewSelectorOpen = false" class="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>
