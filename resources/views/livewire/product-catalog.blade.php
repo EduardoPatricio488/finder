@@ -162,7 +162,7 @@
                     <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                         @forelse($products as $product)
                             <tr wire:key="product-{{ $product->id }}" class="transition hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
-                                <td class="px-5 py-4"><a href="{{ route('site.manage.stock') }}" wire:navigate class="inline-flex rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Abrir gestão de stock"><input type="checkbox" value="{{ $product->id }}" wire:model.live="selectedProducts" class="rounded border-zinc-300"></a></td>
+                                <td class="px-5 py-4"><input type="checkbox" value="{{ $product->id }}" wire:model.live="selectedProducts" class="rounded border-zinc-300"></td>
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex shrink-0 items-center -space-x-2">
@@ -210,7 +210,7 @@
                                         <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">{{ $product->stock }} em stock</span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 font-bold text-zinc-950 dark:text-white">€ {{ number_format($this->salePrice($product), 2, ',', '.') }}</td>
+                                <td class="px-5 py-4 font-bold text-zinc-950 dark:text-white">€ {{ number_format($this->salePrice($product), 2, ',', '.') }}</a></td>
                                 <td class="px-5 py-4">
                                     @if($product->reviews_count > 0)
                                         <span class="font-semibold">{{ number_format((float) $product->reviews_avg_rating, 1, ',', '.') }}</span>
