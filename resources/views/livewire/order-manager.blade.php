@@ -62,7 +62,7 @@
                     ];
                     $statusLabels = ['pendente' => 'Pendente', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue', 'cancelado' => 'Cancelado'];
                 @endphp
-                <article wire:key="order-{{ $order->id }}" x-data="{ expanded: false }" class="group/order overflow-hidden rounded-2xl border border-zinc-200 bg-transparent transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 dark:border-zinc-800 dark:hover:border-indigo-800">
+                <article wire:key="order-{{ $order->id }}" x-data="{ expanded: false, confirmStatus: null, confirmStatusLabel: '' }" class="group/order overflow-hidden rounded-2xl border border-zinc-200 bg-transparent transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 dark:border-zinc-800 dark:hover:border-indigo-800">
                     <button type="button" x-on:click="expanded = !expanded" x-bind:aria-expanded="expanded.toString()" class="flex w-full flex-col gap-4 border-b border-zinc-100 bg-zinc-50/70 p-5 text-left transition hover:bg-zinc-100/70 dark:border-zinc-800 dark:bg-zinc-900/70 dark:hover:bg-zinc-800/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <div class="flex items-start gap-3">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16v13H4zM8 7V5a4 4 0 0 1 8 0v2"/></svg></div>
@@ -103,7 +103,7 @@
                                             <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">Atual</span>
                                         </div>
                                     @else
-                                        <button type="button" wire:click="setStatus({{ $order->id }}, '{{ $stepStatus }}')" wire:loading.attr="disabled" wire:target="setStatus({{ $order->id }}, '{{ $stepStatus }}')" class="group flex min-h-12 items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition disabled:cursor-wait disabled:opacity-50 {{ $isComplete ? 'border-emerald-200 bg-emerald-50 hover:border-indigo-300 hover:bg-indigo-50 dark:border-emerald-900 dark:bg-emerald-500/10 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10' : 'border-zinc-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10' }}">
+                                        <button type="button" x-on:click="confirmStatus = '{{ $stepStatus }}'; confirmStatusLabel = '{{ $label }}'" class="group flex min-h-12 items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition disabled:cursor-wait disabled:opacity-50 {{ $isComplete ? 'border-emerald-200 bg-emerald-50 hover:border-indigo-300 hover:bg-indigo-50 dark:border-emerald-900 dark:bg-emerald-500/10 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10' : 'border-zinc-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10' }}">
                                             <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs {{ $isComplete ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-zinc-300 text-zinc-400 group-hover:border-indigo-400 group-hover:text-indigo-600 dark:border-zinc-600' }}">{{ $isComplete ? '✓' : '→' }}</span>
                                             <span class="min-w-0 flex-1 text-sm font-medium {{ $isComplete ? 'text-emerald-800 dark:text-emerald-300' : 'text-zinc-700 dark:text-zinc-200' }}">{{ $label }}</span>
                                         </button>
@@ -112,7 +112,7 @@
                             </div>
                             @if($order->status !== 'pendente')
                                 <div class="mt-3 flex justify-end">
-                                    <button type="button" wire:click="setStatus({{ $order->id }}, 'pendente')" wire:loading.attr="disabled" wire:target="setStatus({{ $order->id }}, 'pendente')" class="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition hover:bg-white hover:text-indigo-700 disabled:opacity-50 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-indigo-300">Repor estado para Pendente</button>
+                                    <button type="button" x-on:click="confirmStatus = 'pendente'; confirmStatusLabel = 'Pendente'" class="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition hover:bg-white hover:text-indigo-700 disabled:opacity-50 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-indigo-300">Repor estado para Pendente</button>
                                 </div>
                             @endif
                         </div>
@@ -128,6 +128,22 @@
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+                    <div x-cloak x-show="confirmStatus !== null" x-transition.opacity class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="order-status-confirm-title" x-on:keydown.escape.window="confirmStatus = null; confirmStatusLabel = ''">
+                        <div x-on:click.outside="confirmStatus = null; confirmStatusLabel = ''" x-transition class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
+                            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+                            </div>
+                            <h3 id="order-status-confirm-title" class="text-lg font-bold text-zinc-950 dark:text-white">Confirmar alteração do estado</h3>
+                            <p class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">Estás prestes a alterar o estado da encomenda <strong>#{{ $order->order_number }}</strong> para <strong x-text="confirmStatusLabel"></strong>. Queres continuar?</p>
+                            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                                <button type="button" x-on:click="confirmStatus = null; confirmStatusLabel = ''" class="rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800">Cancelar</button>
+                                <button type="button" x-on:click="$wire.setStatus({{ $order->id }}, confirmStatus).then(() => { confirmStatus = null; confirmStatusLabel = '' })" wire:loading.attr="disabled" wire:target="setStatus" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-wait disabled:opacity-60">
+                                    <span wire:loading.remove wire:target="setStatus">Confirmar alteração</span>
+                                    <span wire:loading.flex wire:target="setStatus" class="items-center gap-2"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path></svg>A alterar...</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </article>
