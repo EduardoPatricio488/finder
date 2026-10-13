@@ -541,13 +541,14 @@ class ProductCatalog extends Component
     {
         $this->validate([
             'productPhotoUpload' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
-            'productPhotoDescription' => ['nullable', 'string', 'max:255'],
+            'productPhotoDescription' => ['required', 'string', 'max:255'],
             'productMediaIds' => ['array', 'max:10'],
         ], [
             'productPhotoUpload.required' => 'Seleciona uma fotografia do teu computador.',
             'productPhotoUpload.image' => 'O ficheiro tem de ser uma imagem válida.',
             'productPhotoUpload.mimes' => 'Usa uma imagem JPG, JPEG, PNG ou WEBP.',
             'productPhotoUpload.max' => 'A fotografia não pode ultrapassar 10 MB.',
+            'productPhotoDescription.required' => 'Escreve uma descrição para a fotografia.',
             'productPhotoDescription.max' => 'A descrição não pode ultrapassar 255 caracteres.',
         ]);
 
