@@ -5,9 +5,18 @@
                 <h1 class="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Todas as vendas</h1>
                 <p class="mt-3 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere as vendas de todos os teus websites num único catálogo, acompanha as encomendas e mantém tudo organizado.</p>
             </div>
-            <div class="rounded-2xl bg-zinc-50 px-5 py-3 dark:bg-zinc-800/70">
-                <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Total apresentado</p>
-                <p class="mt-1 text-xl font-bold text-zinc-950 dark:text-white">€ {{ number_format($sales->sum(fn($sale) => (float) $sale->total), 2, ',', '.') }}</p>
+            <div class="flex flex-col items-stretch gap-3 sm:items-end">
+                @auth
+                    <flux:modal.trigger name="sales-payments-modal">
+                        <flux:button variant="primary" icon="credit-card" class="!rounded-xl !bg-indigo-600 hover:!bg-indigo-700">
+                            Pagamentos
+                        </flux:button>
+                    </flux:modal.trigger>
+                @endauth
+                <div class="rounded-2xl border border-zinc-200 bg-white px-5 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Total apresentado</p>
+                    <p class="mt-1 text-xl font-bold text-zinc-950 dark:text-white">€ {{ number_format($sales->sum(fn($sale) => (float) $sale->total), 2, ',', '.') }}</p>
+                </div>
             </div>
         </div>
 
@@ -72,19 +81,23 @@
             </div>
         </div>
         @auth
-            <div class="mt-8 flex justify-center border-t border-zinc-200 pt-8 dark:border-zinc-800">
-                <flux:modal.trigger name="sales-payments-modal">
-                    <flux:button variant="outline" icon="credit-card">Pagamentos</flux:button>
-                </flux:modal.trigger>
-            </div>
-
-            <flux:modal name="sales-payments-modal" class="w-full max-w-5xl">
-                <div class="space-y-5">
-                    <div>
-                        <flux:heading size="lg">Gestão de vendas — Pagamentos</flux:heading>
-                        <flux:text class="mt-1">Consulta os pagamentos e confirma os valores recebidos.</flux:text>
+            <flux:modal name="sales-payments-modal" class="w-full max-w-6xl">
+                <div class="flex max-h-[90vh] flex-col overflow-hidden rounded-2xl">
+                    <div class="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-600 px-6 py-6 text-white sm:px-8">
+                        <div class="absolute -right-8 -top-12 size-40 rounded-full bg-white/10"></div>
+                        <div class="absolute -bottom-16 right-24 size-44 rounded-full bg-white/5"></div>
+                        <div class="relative flex items-start gap-4">
+                            <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-inner">
+                                <flux:icon name="credit-card" class="size-6" />
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-indigo-100">Gestão financeira</p>
+                                <flux:heading size="xl" class="mt-1 !text-white">Pagamentos</flux:heading>
+                                <p class="mt-2 max-w-2xl text-sm leading-6 text-indigo-100">Consulta os pagamentos das encomendas, acompanha os estados e confirma os valores recebidos num único local.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="max-h-[75vh] overflow-y-auto pr-1">
+                    <div class="min-h-0 flex-1 overflow-y-auto bg-zinc-50 p-4 dark:bg-zinc-950 sm:p-6">
                         <livewire:payment-manager />
                     </div>
                 </div>
