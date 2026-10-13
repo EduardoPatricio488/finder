@@ -88,5 +88,42 @@
                 <flux:icon name="arrow-right" class="size-5 transition group-hover:translate-x-1" />
             </a>
         </div>
+
+        <section class="mt-10">
+            <div class="mb-5">
+                <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Acesso rápido</p>
+                <h2 class="mt-1 text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">Todas as opções do Finder</h2>
+                <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Acede diretamente às ferramentas de gestão da tua loja e dos teus websites.</p>
+            </div>
+            @php
+                $quickLinks = [
+                    ['title' => 'Produtos', 'description' => 'Catálogo, stock e promoções.', 'icon' => 'shopping-bag', 'url' => route('products')],
+                    ['title' => 'Vendas e pagamentos', 'description' => 'Vendas e pagamentos recebidos.', 'icon' => 'currency-euro', 'url' => route('sales')],
+                    ['title' => 'Encomendas', 'description' => 'Consulta e gere as encomendas.', 'icon' => 'clipboard-document-list', 'url' => route('orders')],
+                    ['title' => 'Utilizadores', 'description' => 'Gere utilizadores dos websites.', 'icon' => 'users', 'url' => route('users')],
+                    ['title' => 'Dashboard do website', 'description' => 'Resumo do website selecionado.', 'icon' => 'squares-2x2', 'url' => route('site.manage.dashboard')],
+                    ['title' => 'Configuração do site', 'description' => 'Dados e opções do website.', 'icon' => 'cog-6-tooth', 'url' => route('site.manage.settings')],
+                    ['title' => 'Biblioteca de media', 'description' => 'Imagens e ficheiros do website.', 'icon' => 'photo', 'url' => route('site.manage.media')],
+                    ['title' => 'Menus', 'description' => 'Organiza a navegação do website.', 'icon' => 'bars-3', 'url' => route('site.manage.menus')],
+                    ['title' => 'Definições', 'description' => 'Opções e configuração do modelo.', 'icon' => 'adjustments-horizontal', 'url' => route('site.manage.definitions')],
+                    ['title' => 'Categorias', 'description' => 'Organiza as categorias de produtos.', 'icon' => 'tag', 'url' => route('site.manage.categories')],
+                    ['title' => 'Submissões', 'description' => 'Formulários recebidos pelo website.', 'icon' => 'inbox', 'url' => route('site.manage.submissions')],
+                    ['title' => 'Plano e funcionalidades', 'description' => 'Consulta planos e funcionalidades.', 'icon' => 'sparkles', 'url' => route('site.manage.upgrade')],
+                    ['title' => 'A minha conta', 'description' => 'Perfil e dados da tua conta.', 'icon' => 'user-circle', 'url' => route('account')],
+                    ['title' => 'Notificações', 'description' => 'Avisos e atualizações da conta.', 'icon' => 'bell', 'url' => route('notifications')],
+                    ['title' => 'Ajuda', 'description' => 'Orientações para utilizar o Finder.', 'icon' => 'book-open-text', 'url' => route('help')],
+                ];
+            @endphp
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                @foreach ($quickLinks as $link)
+                    <a href="{{ $link['url'] }}" wire:navigate class="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-700">
+                        <span class="flex size-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"><flux:icon :name="$link['icon']" class="size-5" /></span>
+                        <h3 class="mt-4 font-bold text-zinc-950 dark:text-white">{{ $link['title'] }}</h3>
+                        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ $link['description'] }}</p>
+                        <span class="mt-4 inline-flex text-sm font-semibold text-indigo-600 dark:text-indigo-400">Abrir →</span>
+                    </a>
+                @endforeach
+            </div>
+        </section>
     </div>
 </div>
