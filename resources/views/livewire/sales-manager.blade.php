@@ -83,4 +83,3 @@
             </section>
         @endauth
     </div>
-</div>
