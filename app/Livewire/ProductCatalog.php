@@ -25,6 +25,7 @@ class ProductCatalog extends Component
 
     public string $search = '';
     public ?int $selectedSiteId = null;
+    public string $catalogSiteId = '';
     public string $category = '';
     public string $minPrice = '';
     public string $maxPrice = '';
@@ -136,6 +137,7 @@ class ProductCatalog extends Component
 
         $this->reset([
             'search',
+            'catalogSiteId',
             'category',
             'minPrice',
             'maxPrice',
