@@ -7,31 +7,7 @@
 
         <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
             <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <div class="max-w-md">
-                        <label for="product-site-selector" class="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Website / Workspace</label>
-                        <select id="product-site-selector" wire:model.live="selectedSiteId" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold text-zinc-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white">
-                            @foreach($availableSites as $availableSite)
-                                <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
-                            @endforeach
-                        </select>
-                        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Os produtos apresentados e criados nesta página pertencem exclusivamente ao website selecionado.</p>
-                    </div>
-                    <div class="mt-3 flex flex-wrap items-center gap-2">
-                        @if($site)
-                            <span class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
-                                <flux:icon name="globe-alt" class="size-4" />
-                                Website: {{ $site->name }}
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
-                                <flux:icon name="exclamation-triangle" class="size-4" />
-                                Não estão associados a nenhum website
-                            </span>
-                        @endif
-                    </div>
-                    <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Gere os produtos da empresa, acompanha o stock e mantém o catálogo organizado.</p>
-                </div>
+                <div></div>
                 <div class="flex flex-wrap items-center justify-end gap-2">
                     <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
                         <flux:icon name="plus" class="size-4" />
@@ -91,9 +67,15 @@
                     <flux:icon name="magnifying-glass" class="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-zinc-400" />
                     <input wire:model.live.debounce.300ms="search" type="search" placeholder="Pesquisar por nome, descrição ou SKU..." class="w-full rounded-xl border-zinc-200 bg-zinc-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-950">
                 </div>
+                <select wire:model.live="productSiteFilter" class="rounded-xl border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-100 lg:w-56">
+                    <option value="">Todos os websites</option>
+                    @foreach($availableSites as $availableSite)
+                        <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
+                    @endforeach
+                </select>
                 <select wire:model.live="category" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 lg:w-52">
                     <option value="">Todas as categorias</option>
-                    @foreach($categories as $item)
+                    @foreach($categoryFilters as $item)
                         <option value="{{ $item->slug }}">{{ $item->name }}</option>
                     @endforeach
                 </select>
@@ -163,6 +145,7 @@
                         <tr>
                             <th class="w-12 px-5 py-4"><input type="checkbox" wire:model.live="selectAllProducts" class="rounded border-zinc-300"></th>
                             <th class="px-5 py-4">Produto</th>
+                            <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Descrição</th>
                             <th class="px-5 py-4">Categoria</th>
                             <th class="px-5 py-4">Stock</th>
@@ -189,7 +172,7 @@
                                                 $productPhotos = $product->images ?: ($product->image_url ? [$product->image_url] : []);
                                             @endphp
                                             @forelse(array_slice($productPhotos, 0, 2) as $photoIndex => $photo)
-                                                <button type="button" wire:click="openImageGallery({{ $product->id }}, {{ $photoIndex }})" class="relative shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Ver fotografias em grande">
+                                                <button type="button" wire:click="openImageGalleryFromAnySite({{ $product->id }}, {{ $photoIndex }})" class="relative shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Ver fotografias em grande">
                                                     <img src="{{ asset('storage/'.$photo) }}" alt="{{ $product->name }}" class="size-11 rounded-xl border-2 border-white object-cover transition hover:scale-110 dark:border-zinc-900">
                                                 </button>
                                             @empty
@@ -198,7 +181,7 @@
                                                 </div>
                                             @endforelse
                                             @if(count($productPhotos) > 2)
-                                                <button type="button" wire:click="openImageGallery({{ $product->id }}, 0)" class="flex size-11 shrink-0 items-center justify-center rounded-xl border-2 border-white bg-zinc-100 text-xs font-bold text-zinc-700 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700" title="Ver todas as fotografias">
+                                                <button type="button" wire:click="openImageGalleryFromAnySite({{ $product->id }}, 0)" class="flex size-11 shrink-0 items-center justify-center rounded-xl border-2 border-white bg-zinc-100 text-xs font-bold text-zinc-700 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700" title="Ver todas as fotografias">
                                                     +{{ count($productPhotos) - 2 }}
                                                 </button>
                                             @endif
@@ -207,6 +190,16 @@
                                             <p class="font-semibold text-zinc-950 dark:text-white">{{ $product->name }}</p>
                                         </div>
                                     </div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    @if($product->site)
+                                        <span class="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
+                                            <flux:icon name="globe-alt" class="size-3.5" />
+                                            {{ $product->site->name }}
+                                        </span>
+                                    @else
+                                        <span class="text-xs text-zinc-400">Não está em nenhum site</span>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-4">
                                     @if($product->description)
@@ -242,20 +235,20 @@
                                         <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" aria-label="Ações do produto" />
 
                                         <flux:menu>
-                                            <flux:menu.item as="button" wire:click="openManageProductModal({{ $product->id }})" icon="pencil-square">
+                                            <flux:menu.item as="button" wire:click="manageProductFromAnySite({{ $product->id }})" icon="pencil-square">
                                                 Gerir produto
                                             </flux:menu.item>
-                                            <flux:menu.item as="button" wire:click="openQuickStockModal({{ $product->id }})" icon="arrows-up-down">
+                                            <flux:menu.item as="button" wire:click="quickStockFromAnySite({{ $product->id }})" icon="arrows-up-down">
                                                 Alterar stock
                                             </flux:menu.item>
-                                            <flux:menu.item as="button" wire:click="openStockHistory({{ $product->id }})" icon="clock">
+                                            <flux:menu.item as="button" wire:click="stockHistoryFromAnySite({{ $product->id }})" icon="clock">
                                                 Histórico de stock
                                             </flux:menu.item>
-                                            <flux:menu.item as="button" wire:click="duplicateProduct({{ $product->id }})" icon="square-2-stack">
+                                            <flux:menu.item as="button" wire:click="duplicateProductFromAnySite({{ $product->id }})" icon="square-2-stack">
                                                 Duplicar
                                             </flux:menu.item>
                                             <flux:menu.separator />
-                                            <flux:menu.item as="button" wire:click="deleteProduct({{ $product->id }})" wire:confirm="Eliminar este produto? Esta ação não pode ser anulada." icon="trash" variant="danger">
+                                            <flux:menu.item as="button" wire:click="deleteProductFromAnySite({{ $product->id }})" wire:confirm="Eliminar este produto? Esta ação não pode ser anulada." icon="trash" variant="danger">
                                                 Eliminar
                                             </flux:menu.item>
                                         </flux:menu>
@@ -264,7 +257,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-5 py-16 text-center">
+                                <td colspan="9" class="px-5 py-16 text-center">
                                     <flux:icon name="cube" class="mx-auto size-10 text-zinc-300 dark:text-zinc-600" />
                                     <p class="mt-3 font-semibold text-zinc-900 dark:text-white">Nenhum produto encontrado</p>
                                     <p class="mt-1 text-sm text-zinc-500">Experimenta alterar a pesquisa ou os filtros.</p>
