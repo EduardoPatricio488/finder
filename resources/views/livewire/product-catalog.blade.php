@@ -162,7 +162,7 @@
                     <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                         @forelse($products as $product)
                             <tr wire:key="product-{{ $product->id }}" class="transition hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
-                                <td class="px-5 py-4"><input type="checkbox" value="{{ $product->id }}" wire:model.live="selectedProducts" class="rounded border-zinc-300"></td>
+                                <td class="px-5 py-4"><a href="{{ route('site.manage.stock') }}" wire:navigate class="inline-flex rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Abrir gestão de stock"><input type="checkbox" value="{{ $product->id }}" wire:model.live="selectedProducts" class="rounded border-zinc-300"></a></td>
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex shrink-0 items-center -space-x-2">
@@ -197,7 +197,7 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4"><button type="button" wire:click="openCategoriesModal" class="group inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-sm text-zinc-600 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-zinc-300 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300" title="Abrir gestão de categorias"><span>{{ $product->category?->name ?: 'Sem categoria' }}</span><flux:icon name="pencil-square" class="size-3.5 opacity-0 transition group-hover:opacity-100" /></button></td>
-                                <td class="px-5 py-4"><a href="{{ route('site.manage.stock') }}" wire:navigate class="inline-flex rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Abrir gestão de stock"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300"><flux:icon name="globe-alt" class="size-3.5" />{{ $product->site?->name ?? 'Não está posto em nenhum site' }}</span></a></td>
+                                <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300"><flux:icon name="globe-alt" class="size-3.5" />{{ $product->site?->name ?? 'Não está posto em nenhum site' }}</span></td>
                                 <td class="px-5 py-4">
                                     @if($product->stock <= 0)
                                         <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">Esgotado</span>
