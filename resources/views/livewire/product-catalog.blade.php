@@ -5,27 +5,25 @@
             <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Produtos</h1>
         </div>
 
-        <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
-            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <p class="max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere todos os produtos dos teus websites num único catálogo, acompanha o stock e mantém tudo organizado.</p>
-                </div>
-                <div class="flex flex-wrap items-center justify-start gap-2 lg:justify-end">
-                    <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
-                        <flux:icon name="arrow-up-tray" class="size-4" /> Importar CSV
-                        <input type="file" wire:model="importFile" accept=".csv,.txt" class="hidden">
-                    </label>
-                    <button type="button" wire:click="exportProducts" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
-                        <flux:icon name="arrow-down-tray" class="size-4" /> Exportar CSV
-                    </button>
-                    <button type="button" wire:click="openCategoriesModal" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
-                        <flux:icon name="tag" class="size-4" /> Gerir categorias
-                    </button>
-                    <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
-                        <flux:icon name="plus" class="size-4" />
-                        Adicionar produto
-                    </button>
-                </div>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+                <p class="max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere todos os produtos dos teus websites num único catálogo, acompanha o stock e mantém tudo organizado.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+                <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                    <flux:icon name="arrow-up-tray" class="size-4" /> Importar CSV
+                    <input type="file" wire:model="importFile" accept=".csv,.txt" class="hidden">
+                </label>
+                <button type="button" wire:click="exportProducts" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                    <flux:icon name="arrow-down-tray" class="size-4" /> Exportar CSV
+                </button>
+                <button type="button" wire:click="openCategoriesModal" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                    <flux:icon name="tag" class="size-4" /> Gerir categorias
+                </button>
+                <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
+                    <flux:icon name="plus" class="size-4" />
+                    Adicionar produto
+                </button>
             </div>
         </div>
 
