@@ -43,13 +43,7 @@
             <div class="px-3 pb-3">
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate class="!rounded-xl !border !border-indigo-200 !bg-indigo-50 !px-3 !py-3 !font-bold !text-indigo-700 shadow-sm transition hover:!border-indigo-300 hover:!bg-indigo-100 dark:!border-indigo-900 dark:!bg-indigo-950/50 dark:!text-indigo-300 dark:hover:!bg-indigo-950">Meus Websites</flux:sidebar.item>
                 <div class="h-3"></div>
-                <flux:dropdown position="bottom" align="start">
-                    <button type="button" class="flex w-full items-center justify-between gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-left text-sm text-white">
-                        <span class="min-w-0">@if($hasSite)<span class="block truncate font-semibold">{{ $currentSite->name }}</span><span class="mt-0.5 block text-xs text-zinc-400">{{ $currentSite->statusLabel() }} · {{ $modelProfile['label'] ?? ($currentSite->category_label ?? 'Website') }}</span>@else<span class="block truncate font-semibold text-zinc-400 italic">Selecionar Projeto</span>@endif</span>
-                        <flux:icon.chevrons-up-down class="size-4 shrink-0 text-zinc-400" />
-                    </button>
-                    <flux:menu>@foreach ($availableSites as $site)<flux:menu.item :href="route('site.manage.switch', ['site' => $site->slug])" wire:navigate>{{ $site->name }} @if ($hasSite && $site->is($currentSite)) ✓ @endif</flux:menu.item>@endforeach<flux:menu.separator /><flux:menu.item :href="route('site.create')" icon="plus" wire:navigate>Criar novo website</flux:menu.item></flux:menu>
-                </flux:dropdown>
+
             </div>
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="squares-2x2" :href="$siteRoute('dashboard')" :current="request()->routeIs('site.manage.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>
