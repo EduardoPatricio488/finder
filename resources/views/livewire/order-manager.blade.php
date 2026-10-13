@@ -120,15 +120,85 @@
                         <div class="mt-6 grid gap-5 border-t border-zinc-100 pt-5 dark:border-zinc-800 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
                             <div>
                                 <div class="mb-3 flex items-center justify-between gap-3"><h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Artigos encomendados</h4><span class="text-xs text-zinc-500">{{ $order->items->count() }} artigo(s)</span></div>
-                                <div class="divide-y divide-zinc-100 rounded-xl border border-zinc-100 px-3 dark:divide-zinc-800 dark:border-zinc-800">
+                                <div class="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white px-4 dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
                                     @forelse($order->items as $item)
-                                        <div class="flex items-center justify-between gap-4 py-3 text-sm"><div class="min-w-0"><p class="truncate font-medium text-zinc-800 dark:text-zinc-200">{{ $item->product_name ?? $item->name ?? 'Produto' }}</p><p class="mt-0.5 text-xs text-zinc-500">Quantidade: {{ $item->quantity }}</p></div><span class="shrink-0 font-semibold tabular-nums text-zinc-900 dark:text-white">€ {{ number_format((float) ($item->total ?? $item->subtotal ?? 0), 2, ',', '.') }}</span></div>
+                                        @php
+                                            $itemUnitPrice = (float) ($item->unit_price ?? $item->price ?? 0);
+                                            $itemQuantity = (int) ($item->quantity ?? 0);
+                                            $itemTotal = (float) ($item->total ?? $item->subtotal ?? ($itemUnitPrice * $itemQuantity));
+                                            $itemProduct = $item->product;
+                                            $itemCategory = $itemProduct?->category?->name;
+                                        @endphp
+                                        <div class="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="font-semibold text-zinc-900 dark:text-white">{{ $item->product_name ?? $item->name ?? $itemProduct?->name ?? 'Produto' }}</p>
+                                                @if($itemProduct?->sku || $item->sku)
+                                                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Referência: {{ $item->sku ?? $itemProduct?->sku }}</p>
+                                                @endif
+                                                @if($itemCategory)
+                                                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Categoria: {{ $itemCategory }}</p>
+                                                @endif
+                                                @if($itemProduct?->description)
+                                                    <p class="mt-2 text-sm leading-5 text-zinc-600 dark:text-zinc-300">{{ $itemProduct->description }}</p>
+                                                @endif
+                                                <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                                    <div class="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/70"><p class="text-xs text-zinc-500 dark:text-zinc-400">Quantidade</p><p class="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">{{ $itemQuantity }}</p></div>
+                                                    <div class="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/70"><p class="text-xs text-zinc-500 dark:text-zinc-400">Preço unitário</p><p class="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">€ {{ number_format($itemUnitPrice, 2, ',', '.') }}</p></div>
+                                                    <div class="rounded-lg bg-indigo-50 px-3 py-2 dark:bg-indigo-500/10"><p class="text-xs text-indigo-700 dark:text-indigo-300">Total do artigo</p><p class="mt-1 text-sm font-bold text-indigo-800 dark:text-indigo-200">€ {{ number_format($itemTotal, 2, ',', '.') }}</p></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @empty
                                         <p class="py-4 text-sm text-zinc-500">Não existem artigos associados a esta encomenda.</p>
                                     @endforelse
                                 </div>
                             </div>
-
+                            <aside class="space-y-4">
+                                <section class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                                    <h4 class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">Resumo da encomenda</h4>
+                                    <dl class="space-y-2 text-sm">
+                                        <div class="flex justify-between gap-3"><dt class="text-zinc-500 dark:text-zinc-400">Subtotal</dt><dd class="font-medium text-zinc-900 dark:text-white">€ {{ number_format((float) ($order->subtotal ?? $order->total), 2, ',', '.') }}</dd></div>
+                                        @if((float) ($order->discount ?? 0) > 0)<div class="flex justify-between gap-3"><dt class="text-zinc-500 dark:text-zinc-400">Desconto</dt><dd class="font-medium text-emerald-700 dark:text-emerald-300">− € {{ number_format((float) $order->discount, 2, ',', '.') }}</dd></div>@endif
+                                        @if((float) ($order->tax ?? 0) > 0)<div class="flex justify-between gap-3"><dt class="text-zinc-500 dark:text-zinc-400">Impostos</dt><dd class="font-medium text-zinc-900 dark:text-white">€ {{ number_format((float) $order->tax, 2, ',', '.') }}</dd></div>@endif
+                                        @if((float) ($order->shipping ?? 0) > 0)<div class="flex justify-between gap-3"><dt class="text-zinc-500 dark:text-zinc-400">Envio</dt><dd class="font-medium text-zinc-900 dark:text-white">€ {{ number_format((float) $order->shipping, 2, ',', '.') }}</dd></div>@endif
+                                        <div class="flex justify-between gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800"><dt class="font-semibold text-zinc-700 dark:text-zinc-300">Total</dt><dd class="text-base font-bold text-zinc-950 dark:text-white">€ {{ number_format((float) $order->total, 2, ',', '.') }}</dd></div>
+                                    </dl>
+                                </section>
+                                <section class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                                    <h4 class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">Dados do cliente</h4>
+                                    @if($order->customer)
+                                        <dl class="space-y-2 text-sm">
+                                            @if($order->customer->name ?? $order->customer->full_name ?? false)<div><dt class="text-xs text-zinc-500 dark:text-zinc-400">Nome</dt><dd class="mt-0.5 font-medium text-zinc-900 dark:text-white">{{ $order->customer->name ?? $order->customer->full_name }}</dd></div>@endif
+                                            @if($order->customer->email ?? false)<div><dt class="text-xs text-zinc-500 dark:text-zinc-400">Email</dt><dd class="mt-0.5 break-words font-medium text-zinc-900 dark:text-white">{{ $order->customer->email }}</dd></div>@endif
+                                            @if($order->customer->phone ?? $order->customer->telephone ?? false)<div><dt class="text-xs text-zinc-500 dark:text-zinc-400">Telefone</dt><dd class="mt-0.5 font-medium text-zinc-900 dark:text-white">{{ $order->customer->phone ?? $order->customer->telephone }}</dd></div>@endif
+                                            @if($order->customer->address ?? false)<div><dt class="text-xs text-zinc-500 dark:text-zinc-400">Morada</dt><dd class="mt-0.5 text-zinc-900 dark:text-white">{{ $order->customer->address }}</dd></div>@endif
+                                        </dl>
+                                    @else
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400">Sem dados de cliente associados.</p>
+                                    @endif
+                                </section>
+                                @if($order->payments->isNotEmpty())
+                                    <section class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                                        <h4 class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">Pagamentos</h4>
+                                        <div class="space-y-3">
+                                            @foreach($order->payments as $payment)
+                                                <div class="border-b border-zinc-100 pb-3 last:border-0 last:pb-0 dark:border-zinc-800">
+                                                    <div class="flex justify-between gap-3 text-sm"><span class="text-zinc-500 dark:text-zinc-400">Estado</span><span class="font-semibold text-zinc-900 dark:text-white">{{ ucfirst(str_replace('_', ' ', $payment->status ?? 'desconhecido')) }}</span></div>
+                                                    @if($payment->method ?? $payment->payment_method ?? false)<div class="mt-1 flex justify-between gap-3 text-sm"><span class="text-zinc-500 dark:text-zinc-400">Método</span><span class="font-medium text-zinc-900 dark:text-white">{{ $payment->method ?? $payment->payment_method }}</span></div>@endif
+                                                    <div class="mt-1 flex justify-between gap-3 text-sm"><span class="text-zinc-500 dark:text-zinc-400">Valor</span><span class="font-medium text-zinc-900 dark:text-white">€ {{ number_format((float) ($payment->amount ?? 0), 2, ',', '.') }}</span></div>
+                                                    @if($payment->paid_at)<div class="mt-1 flex justify-between gap-3 text-sm"><span class="text-zinc-500 dark:text-zinc-400">Pago em</span><span class="font-medium text-zinc-900 dark:text-white">{{ $payment->paid_at->format('d/m/Y H:i') }}</span></div>@endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </section>
+                                @endif
+                                @if($order->seller)
+                                    <section class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                                        <h4 class="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">Responsável pela venda</h4>
+                                        <p class="text-sm font-medium text-zinc-900 dark:text-white">{{ $order->seller->name ?? $order->seller->email ?? 'Responsável não identificado' }}</p>
+                                    </section>
+                                @endif
+                            </aside>
                         </div>
                     </div>
                     <div x-cloak x-show="confirmStatus !== null" x-transition.opacity class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="order-status-confirm-title" x-on:keydown.escape.window="confirmStatus = null; confirmStatusLabel = ''">
