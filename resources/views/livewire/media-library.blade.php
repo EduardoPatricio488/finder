@@ -1,11 +1,10 @@
 <div class="mx-auto max-w-7xl space-y-6 p-6">
     <div class="mb-2"><x-site-workspace-selector :current-site="$site" route-name="media" /></div>
 
-    <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div>
-            <p class="text-sm font-semibold text-indigo-600">{{ $site->name }}</p>
-            <h1 class="text-3xl font-bold tracking-tight">Biblioteca de media</h1>
-            <p class="mt-1 text-sm text-zinc-500">Imagens e ficheiros deste website, isolados por tenant.</p>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+            <h1 class="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Biblioteca de media</h1>
+            <p class="mt-3 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Organiza as imagens e os ficheiros do website selecionado num só local.</p>
         </div>
         <div class="flex flex-wrap items-center justify-end gap-2">
     @if(session('media-applied'))
