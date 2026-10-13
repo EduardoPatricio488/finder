@@ -71,15 +71,23 @@
                 </table>
             </div>
         </div>
-    </div>
         @auth
-            <section class="mt-10 space-y-4 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-                <div>
-                    <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Gestão de vendas</p>
-                    <h2 class="mt-1 text-2xl font-bold text-zinc-950 dark:text-white">Pagamentos</h2>
-                    <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Consulta os pagamentos e confirma os valores recebidos sem sair da página de vendas.</p>
+            <div class="mt-8 flex justify-center border-t border-zinc-200 pt-8 dark:border-zinc-800">
+                <flux:modal.trigger name="sales-payments-modal">
+                    <flux:button variant="outline" icon="credit-card">Pagamentos</flux:button>
+                </flux:modal.trigger>
+            </div>
+
+            <flux:modal name="sales-payments-modal" class="w-full max-w-5xl">
+                <div class="space-y-5">
+                    <div>
+                        <flux:heading size="lg">Gestão de vendas — Pagamentos</flux:heading>
+                        <flux:text class="mt-1">Consulta os pagamentos e confirma os valores recebidos.</flux:text>
+                    </div>
+                    <div class="max-h-[75vh] overflow-y-auto pr-1">
+                        <livewire:payment-manager />
+                    </div>
                 </div>
-                <livewire:payment-manager />
-            </section>
+            </flux:modal>
         @endauth
     </div>
