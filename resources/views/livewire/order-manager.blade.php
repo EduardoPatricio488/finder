@@ -63,13 +63,43 @@
                         </div>
                     </button>
                     <div x-cloak x-show="expanded" class="p-5 sm:p-6">
-                        <div class="mb-3 flex items-center justify-between gap-3"><h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Progresso da encomenda</h4><span class="text-xs text-zinc-500 dark:text-zinc-400">Estado atual: {{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</span></div>
-                        <div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                            @foreach(['criada' => 'Criada', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue'] as $step => $label)
-                                <div class="flex min-h-12 items-center gap-2 rounded-xl border px-3 py-2 {{ $this->isStepComplete($order, $step) ? 'border-emerald-200 bg-emerald-50/80 dark:border-emerald-900 dark:bg-emerald-500/10' : 'border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950' }}">
-                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold {{ $this->isStepComplete($order, $step) ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800' }}">{{ $this->isStepComplete($order, $step) ? '✓' : '·' }}</span><span class="text-xs font-semibold {{ $this->isStepComplete($order, $step) ? 'text-emerald-800 dark:text-emerald-300' : 'text-zinc-500 dark:text-zinc-400' }}">{{ $label }}</span>
+                        <div class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40 sm:p-5">
+                            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                                <h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Progresso e estado da encomenda</h4>
+                                <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-200">Estado atual: {{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</span>
+                            </div>
+                            <p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">Seleciona uma etapa para atualizar o estado da encomenda. As etapas concluídas aparecem a verde.</p>
+                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                                @foreach(['criada' => 'Criada', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue'] as $step => $label)
+                                    @php
+                                        $stepStatus = $step === 'criada' ? null : $step;
+                                        $isCurrentStatus = $stepStatus !== null && $order->status === $stepStatus;
+                                        $isComplete = $this->isStepComplete($order, $step);
+                                    @endphp
+                                    @if($step === 'criada')
+                                        <div class="flex min-h-12 items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 dark:border-emerald-900 dark:bg-emerald-500/10">
+                                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">✓</span>
+                                            <span class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">{{ $label }}</span>
+                                        </div>
+                                    @elseif($isCurrentStatus)
+                                        <div aria-current="step" class="flex min-h-12 items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2.5 dark:border-indigo-700 dark:bg-indigo-500/10">
+                                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white dark:bg-indigo-400 dark:text-zinc-950">✓</span>
+                                            <span class="min-w-0 flex-1 text-sm font-semibold text-indigo-800 dark:text-indigo-200">{{ $label }}</span>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">Atual</span>
+                                        </div>
+                                    @else
+                                        <button type="button" wire:click="setStatus({{ $order->id }}, '{{ $stepStatus }}')" wire:loading.attr="disabled" wire:target="setStatus({{ $order->id }}, '{{ $stepStatus }}')" class="group flex min-h-12 items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition disabled:cursor-wait disabled:opacity-50 {{ $isComplete ? 'border-emerald-200 bg-emerald-50 hover:border-indigo-300 hover:bg-indigo-50 dark:border-emerald-900 dark:bg-emerald-500/10 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10' : 'border-zinc-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10' }}">
+                                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs {{ $isComplete ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-zinc-300 text-zinc-400 group-hover:border-indigo-400 group-hover:text-indigo-600 dark:border-zinc-600' }}">{{ $isComplete ? '✓' : '→' }}</span>
+                                            <span class="min-w-0 flex-1 text-sm font-medium {{ $isComplete ? 'text-emerald-800 dark:text-emerald-300' : 'text-zinc-700 dark:text-zinc-200' }}">{{ $label }}</span>
+                                        </button>
+                                    @endif
+                                @endforeach
+                            </div>
+                            @if($order->status !== 'pendente')
+                                <div class="mt-3 flex justify-end">
+                                    <button type="button" wire:click="setStatus({{ $order->id }}, 'pendente')" wire:loading.attr="disabled" wire:target="setStatus({{ $order->id }}, 'pendente')" class="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition hover:bg-white hover:text-indigo-700 disabled:opacity-50 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-indigo-300">Repor estado para Pendente</button>
                                 </div>
-                            @endforeach
+                            @endif
                         </div>
                         <div class="mt-6 grid gap-5 border-t border-zinc-100 pt-5 dark:border-zinc-800 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
                             <div>
@@ -82,31 +112,7 @@
                                     @endforelse
                                 </div>
                             </div>
-                            <div class="min-w-0">
-                                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                                    <h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Atualizar estado</h4>
-                                    <span class="text-xs text-zinc-500 dark:text-zinc-400">Estado atual: <strong class="font-semibold text-zinc-700 dark:text-zinc-200">{{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</strong></span>
-                                </div>
-                                <div class="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/60">
-                                    <p class="mb-4 text-sm leading-5 text-zinc-600 dark:text-zinc-400">Escolhe o estado para o qual pretendes atualizar esta encomenda.</p>
-                                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                                        @foreach(['pendente' => 'Pendente', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue'] as $statusValue => $statusLabel)
-                                            @if($order->status === $statusValue)
-                                                <div aria-current="step" class="flex min-h-12 items-center gap-3 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2.5 text-sm font-semibold text-indigo-800 dark:border-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-200">
-                                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs text-white dark:bg-indigo-400 dark:text-zinc-950">✓</span>
-                                                    <span class="min-w-0 flex-1">{{ $statusLabel }}</span>
-                                                    <span class="text-[10px] font-bold uppercase tracking-wider">Atual</span>
-                                                </div>
-                                            @else
-                                                <button type="button" wire:click="setStatus({{ $order->id }}, '{{ $statusValue }}')" wire:loading.attr="disabled" wire:target="setStatus({{ $order->id }}, '{{ $statusValue }}')" class="group flex min-h-12 items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm font-medium text-zinc-700 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-wait disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-700 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-200">
-                                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-zinc-300 text-[10px] text-zinc-400 transition group-hover:border-indigo-400 group-hover:text-indigo-600 dark:border-zinc-600 dark:group-hover:border-indigo-500 dark:group-hover:text-indigo-300">→</span>
-                                                    <span class="min-w-0 flex-1">{{ $statusLabel }}</span>
-                                                </button>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </article>
