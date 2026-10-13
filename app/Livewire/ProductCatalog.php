@@ -257,7 +257,7 @@ class ProductCatalog extends Component
 
         $this->selectedProducts = $value
             ? Product::query()->whereIn('site_id', $siteIds)
-                ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
+                ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
                 ->pluck('id')->map(fn ($id) => (string) $id)->all()
             : [];
     }
