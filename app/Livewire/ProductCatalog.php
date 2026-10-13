@@ -256,9 +256,12 @@ class ProductCatalog extends Component
     {
         $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
 
-        $this->selectedProducts = $value
+        $query = $siteIds->isNotEmpty()
             ? Product::query()->whereIn('site_id', $siteIds)
-                ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
+            : $this->siteScoped(Product::query());
+
+        $this->selectedProducts = $value
+            ? $query->when($this->catalogSiteId !== '' && $siteIds->isNotEmpty(), fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
                 ->pluck('id')->map(fn ($id) => (string) $id)->all()
             : [];
     }
@@ -492,7 +495,10 @@ class ProductCatalog extends Component
     public function exportProducts(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
-        $products = Product::query()->whereIn('site_id', $siteIds)->with(['category', 'site'])->orderBy('name')->get();
+        $productsQuery = $siteIds->isNotEmpty()
+            ? Product::query()->whereIn('site_id', $siteIds)
+            : $this->siteScoped(Product::query());
+        $products = $productsQuery->with(['category', 'site'])->orderBy('name')->get();
         $userName = auth()->user()?->name ?: 'Utilizador';
         $filename = Str::slug($userName).'-produtos-'.now()->format('Y-m-d').'.csv';
         return response()->streamDownload(function () use ($products): void {
@@ -894,8 +900,11 @@ class ProductCatalog extends Component
             ->get();
         $minimumRating = (float) $this->minRating;
         $manageableSiteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
-        $products = Product::query()->whereIn('site_id', $manageableSiteIds)
-            ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
+        $productsQuery = $manageableSiteIds->isNotEmpty()
+            ? Product::query()->whereIn('site_id', $manageableSiteIds)
+            : $this->siteScoped(Product::query());
+        $products = $productsQuery
+            ->when($this->catalogSiteId !== '' && $manageableSiteIds->isNotEmpty(), fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
             ->with(['category', 'site'])->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])->withAvg('reviews', 'rating')->withCount('reviews')
             ->when($this->search !== '', fn ($query) => $query->where(fn ($query) => $query->where('name', 'like', '%'.$this->search.'%')->orWhere('description', 'like', '%'.$this->search.'%')->orWhere('sku', 'like', '%'.$this->search.'%')->orWhere('price', 'like', '%'.$this->search.'%')->orWhere('tags', 'like', '%'.$this->search.'%')->orWhereHas('category', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))))
             ->when($this->category !== '', fn ($query) => $query->whereHas('category', fn ($query) => $query->where('slug', $this->category)))
@@ -916,15 +925,19 @@ class ProductCatalog extends Component
 
         return view('livewire.product-catalog', [
             'products' => $products,
-            'stockValue' => (float) Product::query()->whereIn('site_id', $manageableSiteIds)
-                ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
-                ->sum(DB::raw('price * stock')),
+            'stockValue' => (float) ($manageableSiteIds->isNotEmpty()
+                ? Product::query()->whereIn('site_id', $manageableSiteIds)
+                    ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
+                    ->sum(DB::raw('price * stock'))
+                : $this->siteScoped(Product::query())->sum(DB::raw('price * stock'))),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'availableSites' => $availableSites,
             'productMedia' => $site->media()->where('placement', 'products')->latest()->get(),
             'categories' => $this->siteScoped(Category::query())->withCount('products')->orderBy('name')->get(),
-            'categoryFilters' => Category::query()->whereIn('site_id', $manageableSiteIds)->orderBy('name')->get()->unique('slug')->values(),
+            'categoryFilters' => ($manageableSiteIds->isNotEmpty()
+                ? Category::query()->whereIn('site_id', $manageableSiteIds)
+                : $this->siteScoped(Category::query()))->orderBy('name')->get()->unique('slug')->values(),
             'stockHistory' => $this->stockProductId ? $this->siteScoped(Product::query())->find($this->stockProductId)?->stockMovements()->with('user')->latest()->limit(30)->get() : collect(),
         ]);
     }
