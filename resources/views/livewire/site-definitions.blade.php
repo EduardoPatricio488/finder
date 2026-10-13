@@ -4,15 +4,9 @@
             <x-site-workspace-selector :current-site="$site" route-name="definitions" />
         </div>
 
-        <div class="mb-6">
-            <p class="text-sm font-medium text-indigo-600">{{ $site->name }}</p>
-            <h1 class="mt-1 text-2xl font-semibold tracking-tight">Definições do website</h1>
-            <p class="mt-1 text-sm text-zinc-500">Identidade, endereço e SEO deste website.</p>
-        </div>
-
-        <div class="mb-6 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-900/50 dark:bg-indigo-950/30">
-            <p class="text-sm font-semibold text-indigo-900 dark:text-indigo-200">{{ $site->name }}</p>
-            <p class="mt-1 text-xs text-indigo-700 dark:text-indigo-300">Estas definições pertencem exclusivamente a este website.</p>
+        <div class="mb-6 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+            <h1 class="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Definições do website</h1>
+            <p class="mt-3 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Configura a identidade, o endereço público e o SEO do website selecionado.</p>
         </div>
 
         @if(session('status'))
