@@ -37,7 +37,7 @@
 
     <div class="grid gap-6 xl:grid-cols-3">
         <section class="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 xl:col-span-2">
-            <div class="flex items-start justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div><flux:icon name="chart-no-axes-column" class="size-5 text-zinc-400" /></div>
+            <div class="flex items-start justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div><flux:icon name="chart-bar" class="size-5 text-zinc-400" /></div>
             <div class="mt-7 grid grid-cols-6 items-end gap-3">
                 @foreach($monthlySales as $month)
                     <div class="flex min-w-0 flex-col items-center gap-2">
