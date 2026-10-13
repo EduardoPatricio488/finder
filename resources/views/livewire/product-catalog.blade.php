@@ -10,7 +10,17 @@
                 <div>
                     <p class="max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere todos os produtos dos teus websites num único catálogo, acompanha o stock e mantém tudo organizado.</p>
                 </div>
-                <div class="flex flex-wrap items-center justify-end gap-2">
+                <div class="flex flex-wrap items-center justify-start gap-2 lg:justify-end">
+                    <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                        <flux:icon name="arrow-up-tray" class="size-4" /> Importar CSV
+                        <input type="file" wire:model="importFile" accept=".csv,.txt" class="hidden">
+                    </label>
+                    <button type="button" wire:click="exportProducts" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                        <flux:icon name="arrow-down-tray" class="size-4" /> Exportar CSV
+                    </button>
+                    <button type="button" wire:click="openCategoriesModal" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold transition hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
+                        <flux:icon name="tag" class="size-4" /> Gerir categorias
+                    </button>
                     <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
                         <flux:icon name="plus" class="size-4" />
                         Adicionar produto
@@ -42,26 +52,14 @@
             </div>
         </div>
 
-        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap gap-2">
-                <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
-                    <flux:icon name="arrow-up-tray" class="size-4" /> Importar CSV
-                    <input type="file" wire:model="importFile" accept=".csv,.txt" class="hidden">
-                </label>
-                <button type="button" wire:click="exportProducts" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
-                    <flux:icon name="arrow-down-tray" class="size-4" /> Exportar CSV
-                </button>
-                <button type="button" wire:click="openCategoriesModal" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-indigo-300 dark:border-zinc-700 dark:bg-zinc-900">
-                    <flux:icon name="tag" class="size-4" /> Gerir categorias
-                </button>
-            </div>
-            @if(count($selectedProducts))
+        @if(count($selectedProducts))
+            <div class="mt-6 flex justify-end">
                 <div class="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm dark:border-indigo-500/20 dark:bg-indigo-500/10">
                     <span class="font-semibold">{{ count($selectedProducts) }} seleccionados</span>
                     <button type="button" wire:click="bulkDelete" wire:confirm="Eliminar os produtos seleccionados que não tenham vendas?" class="rounded-lg px-3 py-1.5 font-semibold text-red-600 hover:bg-red-100 dark:hover:bg-red-500/10">Eliminar</button>
                 </div>
-            @endif
-        </div>
+            </div>
+        @endif
 
         <div class="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div class="flex flex-col gap-3 lg:flex-row">
