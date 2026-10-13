@@ -37,7 +37,7 @@
 
     <div class="grid gap-6 xl:grid-cols-3">
         <section class="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 xl:col-span-2">
-            <div class="flex items-start justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div><flux:icon name="chart-bar" class="size-5 text-zinc-400" /></div>
+            <div class="flex items-check-circlet justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div><flux:icon name="chart-bar" class="size-5 text-zinc-400" /></div>
             <div class="mt-7 grid grid-cols-6 items-end gap-3">
                 @foreach($monthlySales as $month)
                     <div class="flex min-w-0 flex-col items-center gap-2">
@@ -69,7 +69,7 @@
 
     <div class="grid gap-6 xl:grid-cols-2">
         <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Encomendas recentes</h2><p class="mt-1 text-sm text-zinc-500">Últimas seis encomendas registadas.</p></div><flux:icon name="receipt" class="size-5 text-zinc-400" /></div>
+            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Encomendas recentes</h2><p class="mt-1 text-sm text-zinc-500">Últimas seis encomendas registadas.</p></div><flux:icon name="clipboard-document-list" class="size-5 text-zinc-400" /></div>
             @if($recentOrders->isEmpty())
                 <p class="p-6 text-sm text-zinc-500">Ainda não existem encomendas para apresentar.</p>
             @else
@@ -85,7 +85,7 @@
         </section>
 
         <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Produtos em destaque</h2><p class="mt-1 text-sm text-zinc-500">Produtos com mais unidades associadas a encomendas.</p></div><flux:icon name="star" class="size-5 text-zinc-400" /></div>
+            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Produtos em destaque</h2><p class="mt-1 text-sm text-zinc-500">Produtos com mais unidades associadas a encomendas.</p></div><flux:icon name="check-circle" class="size-5 text-zinc-400" /></div>
             @if($topProducts->isEmpty())
                 <p class="p-6 text-sm text-zinc-500">Ainda não existem produtos para apresentar.</p>
             @else
