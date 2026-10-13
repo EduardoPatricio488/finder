@@ -25,7 +25,6 @@ class ProductCatalog extends Component
 
     public string $search = '';
     public ?int $selectedSiteId = null;
-    public string $catalogSiteId = '';
     public string $productSiteFilter = '';
     public string $category = '';
     public string $minPrice = '';
@@ -242,7 +241,6 @@ class ProductCatalog extends Component
     {
         $this->reset([
             'search',
-            'catalogSiteId',
             'category',
             'minPrice',
             'maxPrice',
@@ -899,7 +897,7 @@ class ProductCatalog extends Component
         $manageableSiteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
         $products = Product::query()->whereIn('site_id', $manageableSiteIds)
             ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
-            ->where('is_active', true)->with(['category', 'site'])->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])->withAvg('reviews', 'rating')->withCount('reviews')
+            ->with(['category', 'site'])->with(['promotions' => fn ($query) => $query->where('starts_at', '<=', now())->where('ends_at', '>=', now())])->withAvg('reviews', 'rating')->withCount('reviews')
             ->when($this->search !== '', fn ($query) => $query->where(fn ($query) => $query->where('name', 'like', '%'.$this->search.'%')->orWhere('description', 'like', '%'.$this->search.'%')->orWhere('sku', 'like', '%'.$this->search.'%')->orWhere('price', 'like', '%'.$this->search.'%')->orWhere('tags', 'like', '%'.$this->search.'%')->orWhereHas('category', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))))
             ->when($this->category !== '', fn ($query) => $query->whereHas('category', fn ($query) => $query->where('slug', $this->category)))
             ->when($this->minPrice !== '', fn ($query) => $query->where('price', '>=', (float) $this->minPrice))
@@ -921,7 +919,7 @@ class ProductCatalog extends Component
             'products' => $products,
             'stockValue' => (float) Product::query()->whereIn('site_id', $manageableSiteIds)
                 ->when($this->productSiteFilter !== '', fn ($query) => $query->where('site_id', (int) $this->productSiteFilter))
-                ->where('is_active', true)->sum(DB::raw('price * stock')),
+                ->sum(DB::raw('price * stock')),
             'lowStockProducts' => $products->filter(fn (Product $product): bool => $product->stock > 0 && $product->stock <= $product->minimum_stock),
             'site' => $site,
             'availableSites' => $availableSites,
