@@ -1,11 +1,9 @@
-<div class="mx-auto max-w-7xl space-y-8 px-6 py-10 lg:px-12">
-    <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div>
-            <p class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600">Gestão do website</p>
-            <h1 class="mt-2 text-4xl font-black tracking-tight text-zinc-950 dark:text-white">Utilizadores</h1>
-            <p class="mt-2 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere os utilizadores associados ao website selecionado.</p>
+<div class="mx-auto max-w-7xl space-y-6 px-6 py-8 lg:px-12">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+            <h1 class="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Todos os utilizadores</h1>
+            <p class="mt-3 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere os utilizadores dos teus websites num único catálogo e mantém os acessos organizados.</p>
         </div>
-        <x-site-workspace-selector :current-site="$site" route-name="users" />
     </div>
 
     @if(session('status'))
@@ -18,9 +16,10 @@
     <section class="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div class="flex flex-col gap-4 border-b border-zinc-200 p-6 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h2 class="text-lg font-bold text-zinc-950 dark:text-white">Utilizadores associados</h2>
-                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ $users->count() }} utilizador(es) neste website.</p>
+                <h2 class="text-lg font-bold text-zinc-950 dark:text-white">Utilizadores</h2>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ $users->count() }} utilizador(es) encontrados.</p>
             </div>
+            <select wire:model.live="catalogSiteId" class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-950 sm:w-56"><option value="">Todos os websites</option>@foreach($availableSites as $availableSite)<option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>@endforeach</select>
             <input wire:model.live.debounce.300ms="search" type="search" placeholder="Pesquisar por nome ou email..." class="w-full rounded-xl border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white sm:w-80">
         </div>
 
@@ -30,6 +29,7 @@
                     <tr>
                         <th class="px-6 py-4">Utilizador</th>
                         <th class="px-6 py-4">Email</th>
+                        <th class="px-6 py-4">Websites</th>
                         <th class="px-6 py-4">Função</th>
                         <th class="px-6 py-4 text-right">Ações</th>
                     </tr>
@@ -39,6 +39,7 @@
                         <tr wire:key="site-user-{{ $user->id }}" class="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/40">
                             <td class="px-6 py-4 font-semibold text-zinc-900 dark:text-white">{{ $user->name }}</td>
                             <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $user->email }}</td>
+                            <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $user->sites->whereIn('id', $availableSites->modelKeys())->pluck('name')->join(', ') ?: '—' }}</td>
                             <td class="px-6 py-4"><span class="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{{ ucfirst($user->role ?? 'utilizador') }}</span></td>
                             <td class="px-6 py-4 text-right">
                                 <button type="button" wire:click="edit({{ $user->id }})" class="mr-3 text-sm font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">Editar</button>
@@ -48,7 +49,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-6 py-14 text-center text-sm text-zinc-500 dark:text-zinc-400">Não existem utilizadores associados a este website.</td></tr>
+                        <tr><td colspan="5" class="px-6 py-14 text-center text-sm text-zinc-500 dark:text-zinc-400">Não existem utilizadores nos websites selecionados.</td></tr>
                     @endforelse
                 </tbody>
             </table>
