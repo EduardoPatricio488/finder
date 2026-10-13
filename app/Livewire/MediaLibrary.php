@@ -94,7 +94,7 @@ class MediaLibrary extends Component
         return [
             'logo' => 'Logótipo', 'hero' => 'Capa / Hero', 'about' => 'Sobre mim / Sobre nós',
             'experience' => 'Experiência', 'education' => 'Formação', 'skills' => 'Competências',
-            'projects' => 'Projetos', 'services' => 'Serviços', 'testimonials' => 'Testemunhos',
+            'projects' => 'Projetos', 'products' => 'Produtos', 'services' => 'Serviços', 'testimonials' => 'Testemunhos',
             'gallery' => 'Galeria', 'contact' => 'Contacto', 'background' => 'Fundo de secção', 'footer' => 'Rodapé',
         ][$placement ?: 'gallery'] ?? 'Galeria';
     }
