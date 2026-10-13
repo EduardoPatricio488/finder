@@ -358,6 +358,7 @@ class ProductCatalog extends Component
 
     public function deleteProductImage(int $productId, int $index): void
     {
+        $this->selectProductSite($productId);
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         $images = array_values($product->images ?: ($product->image_url ? [$product->image_url] : []));
         if (!isset($images[$index])) return;
@@ -370,6 +371,7 @@ class ProductCatalog extends Component
 
     public function setPrimaryImage(int $productId, int $index): void
     {
+        $this->selectProductSite($productId);
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         $images = array_values($product->images ?: ($product->image_url ? [$product->image_url] : []));
         if (!isset($images[$index])) return;
@@ -388,6 +390,7 @@ class ProductCatalog extends Component
 
     public function openQuickStockModal(int $productId): void
     {
+        $this->selectProductSite($productId);
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         $this->stockProductId = $product->id;
         $this->stockProductName = (string) $product->name;
@@ -437,6 +440,7 @@ class ProductCatalog extends Component
 
     public function openStockHistory(int $productId): void
     {
+        $this->selectProductSite($productId);
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         $this->stockProductId = $product->id;
         $this->stockProductName = (string) $product->name;
@@ -452,6 +456,7 @@ class ProductCatalog extends Component
 
     public function duplicateProduct(int $productId): void
     {
+        $this->selectProductSite($productId);
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         $copy = $product->replicate();
         $copy->name = $product->name.' (cópia)';
@@ -465,6 +470,7 @@ class ProductCatalog extends Component
 
     public function deleteProduct(int $productId): void
     {
+        $this->selectProductSite($productId);
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         abort_if($product->orderItems()->exists(), 422, 'Este produto já tem vendas e não pode ser eliminado.');
         $product->delete();
@@ -548,6 +554,7 @@ class ProductCatalog extends Component
 
     public function openImageGallery(int $productId, int $index = 0): void
     {
+        $this->selectProductSite($productId);
         $this->stockProductId = $productId;
         $product = $this->siteScoped(Product::query())->findOrFail($productId);
         $photos = $product->images ?: ($product->image_url ? [$product->image_url] : []);
@@ -588,6 +595,7 @@ class ProductCatalog extends Component
 
     public function openManageProductModal(int $productId): void
     {
+        $this->selectProductSite($productId);
         $this->ensureGenericCategories();
         $product = $this->siteScoped(Product::query())->with('category')->findOrFail($productId);
 
@@ -783,6 +791,7 @@ class ProductCatalog extends Component
 
     public function toggleFavorite(int $productId): void
     {
+        $this->selectProductSite($productId);
         abort_unless(auth()->check(), 403);
         abort_unless($this->siteScoped(Product::query())->whereKey($productId)->exists(), 404);
         $favorite = DB::table('favorite_products')->where('site_id', $this->site()->id)->where('user_id', auth()->id())->where('product_id', $productId);
