@@ -549,4 +549,18 @@
         </div>
     @endif
 
+        @auth
+            <section class="mt-10 space-y-6 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+                <div>
+                    <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Gestão de produtos</p>
+                    <h2 class="mt-1 text-2xl font-bold text-zinc-950 dark:text-white">Stock e promoções</h2>
+                    <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Gere os movimentos de stock e as promoções sem sair do catálogo de produtos.</p>
+                </div>
+                <div class="space-y-8">
+                    <livewire:stock-movement-manager />
+                    <livewire:promotion-manager />
+                </div>
+            </section>
+        @endauth
+    </div>
 </div>
