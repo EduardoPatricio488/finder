@@ -199,7 +199,7 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 text-zinc-600 dark:text-zinc-300">{{ $product->category?->name ?: 'Sem categoria' }}</td>
-                                <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300"><flux:icon name="globe-alt" class="size-3.5" />{{ $product->site?->name ?? 'Website desconhecido' }}</span></td>
+                                <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300"><flux:icon name="globe-alt" class="size-3.5" />{{ $product->site?->name ?? 'Não está posto em nenhum site' }}</span></td>
                                 <td class="px-5 py-4">
                                     @if($product->stock <= 0)
                                         <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">Esgotado</span>
