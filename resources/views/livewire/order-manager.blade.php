@@ -1,35 +1,46 @@
-<div class="min-h-screen bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-b from-indigo-50/70 via-zinc-50 to-zinc-50 px-4 py-6 dark:from-indigo-950/20 dark:via-zinc-950 dark:to-zinc-950 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl space-y-7">
-        <header class="px-1 py-2">
-            <h1 class="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-3xl">Encomendas</h1>
+        <header class="relative isolate overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-r from-white via-indigo-50/70 to-violet-50/80 px-5 py-6 shadow-sm dark:border-zinc-800 dark:from-zinc-900 dark:via-indigo-950/30 dark:to-violet-950/20 sm:px-7 sm:py-7">
+            <div class="pointer-events-none absolute -right-8 -top-12 -z-10 h-44 w-44 rounded-full bg-indigo-200/40 blur-3xl dark:bg-indigo-500/10"></div>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/80 px-3 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-zinc-900/80 dark:text-indigo-300"><span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span> Gestão de vendas</div>
+                    <h1 class="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-3xl">Encomendas</h1>
+                    <p class="mt-2 max-w-xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">Acompanha os pedidos, consulta os artigos e mantém cada encomenda atualizada num só lugar.</p>
+                </div>
+                <div class="flex items-center gap-3 rounded-xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16v13H4zM8 7V5a4 4 0 0 1 8 0v2"/></svg></span>
+                    <div><p class="text-xs text-zinc-500 dark:text-zinc-400">Resultados visíveis</p><p class="text-xl font-bold tabular-nums text-zinc-900 dark:text-white">{{ $orders->count() }}</p></div>
+                </div>
+            </div>
         </header>
 
         <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="group rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Total de encomendas</p>
                 <p class="mt-2 text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">{{ $orders->count() }}</p>
                 <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Pedidos no resultado atual</p>
             </div>
-            <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="group rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Pendentes</p>
                 <p class="mt-2 text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">{{ $orders->where('status', 'pendente')->count() }}</p>
                 <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">A aguardar tratamento</p>
             </div>
-            <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="group rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Em preparação</p>
                 <p class="mt-2 text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">{{ $orders->where('status', 'em_preparacao')->count() }}</p>
                 <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">A ser preparado ou expedido</p>
             </div>
-            <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="group rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Entregues</p>
                 <p class="mt-2 text-2xl font-semibold tabular-nums text-zinc-900 dark:text-white">{{ $orders->where('status', 'entregue')->count() }}</p>
                 <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Pedidos concluídos</p>
             </div>
         </section>
 
-        <section class="space-y-4 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex flex-wrap items-end justify-between gap-2"><div><h2 class="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">Lista de encomendas</h2><p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Consulta os artigos, acompanha o progresso e atualiza o estado de cada pedido.</p></div><p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ $orders->count() }} resultado(s)</p></div>
-            <div class="rounded-lg border border-zinc-100 bg-zinc-50/70 p-3 dark:border-zinc-800 dark:bg-zinc-950/50">
+        <section class="space-y-4 rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-5">
+            <div class="flex flex-wrap items-end justify-between gap-3"><div><div class="mb-1 flex items-center gap-2"><span class="h-5 w-1 rounded-full bg-indigo-500"></span><h2 class="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">Lista de encomendas</h2></div><p class="text-sm text-zinc-500 dark:text-zinc-400">Consulta os artigos, acompanha o progresso e atualiza o estado de cada pedido.</p></div><span class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"><span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>{{ $orders->count() }} resultado(s)</span></div>
+            <div class="rounded-xl border border-zinc-100 bg-gradient-to-r from-zinc-50 to-indigo-50/40 p-4 dark:border-zinc-800 dark:from-zinc-950/70 dark:to-indigo-950/20">
                 <div class="mb-2 flex items-center justify-between gap-3">
                     <h3 class="text-sm font-semibold text-zinc-900 dark:text-white">Filtrar encomendas</h3>
                     <span class="text-xs text-zinc-400 dark:text-zinc-500">Refinar resultados</span>
@@ -51,7 +62,7 @@
                     ];
                     $statusLabels = ['pendente' => 'Pendente', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue', 'cancelado' => 'Cancelado'];
                 @endphp
-                <article wire:key="order-{{ $order->id }}" x-data="{ expanded: false }" class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:border-indigo-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-900">
+                <article wire:key="order-{{ $order->id }}" x-data="{ expanded: false }" class="group/order overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-800">
                     <button type="button" x-on:click="expanded = !expanded" x-bind:aria-expanded="expanded.toString()" class="flex w-full flex-col gap-4 border-b border-zinc-100 bg-zinc-50/70 p-5 text-left transition hover:bg-zinc-100/70 dark:border-zinc-800 dark:bg-zinc-900/70 dark:hover:bg-zinc-800/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <div class="flex items-start gap-3">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16v13H4zM8 7V5a4 4 0 0 1 8 0v2"/></svg></div>
