@@ -1,25 +1,7 @@
 <div class="min-h-screen bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl space-y-7">
-        <header class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-violet-700 to-purple-800 p-6 text-white shadow-lg shadow-indigo-950/10 sm:p-8">
-            <div class="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute -bottom-24 right-1/3 h-48 w-48 rounded-full bg-fuchsia-400/20 blur-3xl"></div>
-            <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-inner">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m3.3 7.7 8.7 4.5 8.7-4.5M12 21v-8.8M7.5 5.2l9 4.6"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-100">Gestão da loja</p>
-                        <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Encomendas</h1>
-                        <p class="mt-2 max-w-2xl text-sm leading-6 text-indigo-100 sm:text-base">Acompanha os pedidos, atualiza os estados e gere as encomendas de todos os teus websites num só lugar.</p>
-                    </div>
-                </div>
-                <div class="rounded-2xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm sm:min-w-44">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-indigo-100">Encomendas apresentadas</p>
-                    <p class="mt-1 text-3xl font-bold tabular-nums">{{ $orders->count() }}</p>
-                    <p class="mt-1 text-xs text-indigo-100">De acordo com os filtros</p>
-                </div>
-            </div>
+        <header class="rounded-2xl border border-zinc-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:px-8">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-3xl">Encomendas</h1>
         </header>
 
         <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
