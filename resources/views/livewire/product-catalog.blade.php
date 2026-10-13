@@ -7,7 +7,9 @@
 
         <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
             <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div></div>
+                <div>
+                    <p class="max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">Gere todos os produtos dos teus websites num único catálogo, acompanha o stock e mantém tudo organizado.</p>
+                </div>
                 <div class="flex flex-wrap items-center justify-end gap-2">
                     <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
                         <flux:icon name="plus" class="size-4" />
@@ -68,6 +70,12 @@
                     <input wire:model.live.debounce.300ms="search" type="search" placeholder="Pesquisar por nome, descrição ou SKU..." class="w-full rounded-xl border-zinc-200 bg-zinc-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-950">
                 </div>
                 <select wire:model.live="productSiteFilter" class="rounded-xl border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-100 lg:w-56">
+                    <option value="">Todos os websites</option>
+                    @foreach($availableSites as $availableSite)
+                        <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
+                    @endforeach
+                </select>
+                <select wire:model.live="catalogSiteId" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 lg:w-60">
                     <option value="">Todos os websites</option>
                     @foreach($availableSites as $availableSite)
                         <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
@@ -148,6 +156,7 @@
                             <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Descrição</th>
                             <th class="px-5 py-4">Categoria</th>
+                            <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Stock</th>
                             <th class="px-5 py-4">Preço</th>
                             <th class="px-5 py-4">
@@ -209,6 +218,7 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 text-zinc-600 dark:text-zinc-300">{{ $product->category?->name ?: 'Sem categoria' }}</td>
+                                <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300"><flux:icon name="globe-alt" class="size-3.5" />{{ $product->site?->name ?? 'Website desconhecido' }}</span></td>
                                 <td class="px-5 py-4">
                                     @if($product->stock <= 0)
                                         <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">Esgotado</span>
