@@ -98,7 +98,7 @@ class OrderManager extends Component
             ->whereIn('site_id', $siteIds)
             ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
             ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
-            ->with(['customer', 'items', 'payments', 'site'])
+            ->with(['customer', 'items.product.category', 'payments', 'site', 'seller'])
             ->latest('sold_at')
             ->get();
 
