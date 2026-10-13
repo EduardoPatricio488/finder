@@ -150,7 +150,6 @@
                             <th class="px-5 py-4">Descrição</th>
                             <th class="px-5 py-4">Categoria</th>
                             <th class="px-5 py-4">Website</th>
-                            <th class="px-5 py-4">Website</th>
                             <th class="px-5 py-4">Stock</th>
                             <th class="px-5 py-4">Preço</th>
                             <th class="px-5 py-4">
@@ -193,16 +192,6 @@
                                             <p class="font-semibold text-zinc-950 dark:text-white">{{ $product->name }}</p>
                                         </div>
                                     </div>
-                                </td>
-                                <td class="px-5 py-4">
-                                    @if($product->site)
-                                        <span class="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
-                                            <flux:icon name="globe-alt" class="size-3.5" />
-                                            {{ $product->site->name }}
-                                        </span>
-                                    @else
-                                        <span class="text-xs text-zinc-400">Não está em nenhum site</span>
-                                    @endif
                                 </td>
                                 <td class="px-5 py-4">
                                     @if($product->description)
