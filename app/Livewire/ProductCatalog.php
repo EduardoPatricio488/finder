@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SiteMedia;
 use App\Services\FinderNotificationService;
 use App\Models\Site;
 use App\Services\StoreMailService;
@@ -53,6 +54,8 @@ class ProductCatalog extends Component
     public bool $productIsActive = true;
     public array $productImages = [];
     public array $productMediaIds = [];
+    public $productPhotoUpload = null;
+    public string $productPhotoDescription = '';
     public bool $productsApplied = false;
     public array $cart = [];
     public string $couponCode = '';
@@ -534,6 +537,46 @@ class ProductCatalog extends Component
         session()->flash('products-applied', 'Os produtos e respetivas imagens foram aplicados no site.');
     }
 
+    public function uploadProductPhoto(): void
+    {
+        $this->validate([
+            'productPhotoUpload' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'productPhotoDescription' => ['nullable', 'string', 'max:255'],
+            'productMediaIds' => ['array', 'max:10'],
+        ], [
+            'productPhotoUpload.required' => 'Seleciona uma fotografia do teu computador.',
+            'productPhotoUpload.image' => 'O ficheiro tem de ser uma imagem válida.',
+            'productPhotoUpload.mimes' => 'Usa uma imagem JPG, JPEG, PNG ou WEBP.',
+            'productPhotoUpload.max' => 'A fotografia não pode ultrapassar 10 MB.',
+            'productPhotoDescription.max' => 'A descrição não pode ultrapassar 255 caracteres.',
+        ]);
+
+        $site = $this->site();
+        $upload = $this->productPhotoUpload;
+        $path = $upload->store('sites/'.$site->id.'/media', 'public');
+        $dimensions = @getimagesize($upload->getRealPath());
+
+        $media = SiteMedia::create([
+            'site_id' => $site->id,
+            'uploaded_by' => auth()->id(),
+            'disk' => 'public',
+            'path' => $path,
+            'original_name' => $upload->getClientOriginalName(),
+            'mime_type' => $upload->getMimeType(),
+            'size' => $upload->getSize(),
+            'alt_text' => trim($this->productPhotoDescription),
+            'placement' => 'products',
+            'width' => $dimensions[0] ?? null,
+            'height' => $dimensions[1] ?? null,
+        ]);
+
+        $this->productMediaIds[] = $media->id;
+        $this->productMediaIds = array_values(array_unique(array_map('intval', $this->productMediaIds)));
+        $this->reset(['productPhotoUpload', 'productPhotoDescription']);
+        $this->resetValidation(['productPhotoUpload', 'productPhotoDescription']);
+        session()->flash('status', 'Fotografia adicionada à Media > Produtos com a descrição guardada. Será associada ao produto quando guardares.');
+    }
+
     public function openProductModal(): void
     {
         $this->ensureGenericCategories();
@@ -625,6 +668,8 @@ class ProductCatalog extends Component
         $this->productIsActive = (bool) $product->is_active;
         $this->productImages = [];
         $this->productMediaIds = [];
+        $this->productPhotoUpload = null;
+        $this->productPhotoDescription = '';
         $this->resetValidation();
         $this->manageProductModalOpen = true;
     }
@@ -681,11 +726,17 @@ class ProductCatalog extends Component
             'minimum_stock' => $data['productMinimumStock'],
         ]);
 
+        $paths = $product->images ?? ($product->image_url ? [$product->image_url] : []);
+        if ($this->productMediaIds !== []) {
+            $mediaPaths = $site->media()->whereIn('id', $this->productMediaIds)->where('placement', 'products')->pluck('path')->all();
+            $paths = array_values(array_unique(array_merge($paths, $mediaPaths)));
+        }
         if ($this->productImages !== []) {
-            $paths = $product->images ?? [];
             foreach ($this->productImages as $image) {
                 $paths[] = $image->store('products', 'public');
             }
+        }
+        if ($paths !== ($product->images ?? [])) {
             $product->update([
                 'image_url' => $paths[0] ?? null,
                 'images' => $paths,
@@ -786,6 +837,8 @@ class ProductCatalog extends Component
             'productCustomCategory',
             'productImages',
             'productMediaIds',
+            'productPhotoUpload',
+            'productPhotoDescription',
             'productStock',
             'productMinimumStock',
         ]);
