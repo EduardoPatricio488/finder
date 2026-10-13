@@ -4,11 +4,10 @@
         <x-site-workspace-selector :current-site="$site" route-name="menus" />
     </div>
 
-    <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <p class="text-sm font-semibold text-indigo-600">{{ $site->name }}</p>
-            <h1 class="mt-1 text-4xl font-semibold tracking-tight text-zinc-950">Menus</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Define a navegação do website de forma simples. Neste website estão disponíveis apenas <strong class="font-semibold text-zinc-700">Início, Sobre mim e Contactos</strong>.</p>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+            <h1 class="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Menus do website</h1>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">Define a navegação do website selecionado. As páginas essenciais são Início, Sobre mim e Contactos.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold {{ $menuApplied ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700' }}">
