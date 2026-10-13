@@ -47,6 +47,7 @@
             </div>
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="squares-2x2" :href="$siteRoute('dashboard')" :current="request()->routeIs('site.manage.dashboard')" wire:navigate>Dashboard</flux:sidebar.item>
+                <flux:sidebar.item icon="chart-pie" :href="$siteRoute('overview')" :current="request()->routeIs('site.manage.overview')" wire:navigate>Visão geral</flux:sidebar.item>
                 <flux:sidebar.group heading="Loja" class="grid">
                     <flux:sidebar.item icon="shopping-bag" :href="route('products')" :current="request()->routeIs('products')" wire:navigate>Produtos</flux:sidebar.item>
                     <flux:sidebar.item icon="currency-euro"  :href="route('sales')" :current="request()->routeIs('sales')" wire:navigate>Vendas</flux:sidebar.item>
