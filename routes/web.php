@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\AdminDashboard;
+use App\Livewire\BusinessOverview;
 use App\Livewire\CategoryManager;
 use App\Livewire\CreateSite;
 use App\Livewire\CustomerAccount;
@@ -109,6 +110,7 @@ Route::middleware(['auth', 'verified', 'site.access'])
     ->name('site.manage.')
     ->group(function (): void {
         Route::get('gestao', AdminDashboard::class)->name('dashboard');
+        Route::get('visao-geral', BusinessOverview::class)->name('overview');
         Route::get('config', StoreSettings::class)->name('config');
         Route::get('configuracao', SiteSettings::class)->name('settings');
         Route::get('definicoes', SiteDefinitions::class)->name('definitions');
