@@ -1,17 +1,12 @@
 <div class="min-h-screen bg-transparent px-4 py-6 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl space-y-7">
-        <header class="relative isolate overflow-hidden rounded-2xl border border-zinc-200 bg-transparent px-5 py-6 dark:border-zinc-800 sm:px-7 sm:py-7">
+        <header class="px-0 py-2">
             
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-transparent px-3 py-1 text-xs font-semibold text-indigo-700 dark:border-zinc-700 dark:text-indigo-300"><span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span> Gestão de vendas</div>
                     <h1 class="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-3xl">Encomendas</h1>
-                    <p class="mt-2 max-w-xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">Acompanha os pedidos, consulta os artigos e mantém cada encomenda atualizada num só lugar.</p>
                 </div>
-                <div class="flex items-center gap-3 rounded-xl border border-zinc-200 bg-transparent px-4 py-3 dark:border-zinc-700">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16v13H4zM8 7V5a4 4 0 0 1 8 0v2"/></svg></span>
-                    <div><p class="text-xs text-zinc-500 dark:text-zinc-400">Resultados visíveis</p><p class="text-xl font-bold tabular-nums text-zinc-900 dark:text-white">{{ $orders->count() }}</p></div>
-                </div>
+
             </div>
         </header>
 
