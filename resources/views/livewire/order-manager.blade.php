@@ -57,17 +57,18 @@
                     ];
                     $statusLabels = ['pendente' => 'Pendente', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue', 'cancelado' => 'Cancelado'];
                 @endphp
-                <article wire:key="order-{{ $order->id }}" x-data="{ expanded: false, confirmStatus: null, confirmStatusLabel: '' }" class="group/order overflow-hidden rounded-2xl border border-zinc-200 bg-transparent transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 dark:border-zinc-800 dark:hover:border-indigo-800">
-                    <button type="button" x-on:click="expanded = !expanded" x-bind:aria-expanded="expanded.toString()" class="flex w-full flex-col gap-4 border-b border-zinc-100 bg-zinc-50/70 p-5 text-left transition hover:bg-zinc-100/70 dark:border-zinc-800 dark:bg-zinc-900/70 dark:hover:bg-zinc-800/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <article wire:key="order-{{ $order->id }}" x-data="{ expanded: false, detailsOpen: false, confirmStatus: null, confirmStatusLabel: '' }" class="group/order overflow-hidden rounded-2xl border border-zinc-200 bg-transparent transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 dark:border-zinc-800 dark:hover:border-indigo-800">
+                    <div x-on:click="expanded = !expanded" x-bind:aria-expanded="expanded.toString()" class="flex w-full cursor-pointer flex-col gap-4 border-b border-zinc-100 bg-zinc-50/70 p-5 text-left transition hover:bg-zinc-100/70 dark:border-zinc-800 dark:bg-zinc-900/70 dark:hover:bg-zinc-800/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <div class="flex items-start gap-3">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16v13H4zM8 7V5a4 4 0 0 1 8 0v2"/></svg></div>
                             <div><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-zinc-950 dark:text-white">Encomenda #{{ $order->order_number }}</h3><span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset {{ $statusStyles[$order->status] ?? 'bg-zinc-100 text-zinc-700 ring-zinc-500/20 dark:bg-zinc-800 dark:text-zinc-300' }}">{{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</span></div><p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ $order->site?->name ?? 'Website desconhecido' }}</p><p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{{ optional($order->sold_at)->format('d/m/Y · H:i') ?? 'Data não disponível' }}</p></div>
                         </div>
                         <div class="flex items-center justify-between gap-4 sm:justify-end sm:gap-5">
+                            <button type="button" x-on:click.stop="detailsOpen = true" class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition hover:border-indigo-400 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-indigo-800 dark:bg-zinc-900 dark:text-indigo-300 dark:hover:bg-indigo-500/10"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Detalhes</span></button>
                             <div class="sm:text-right"><p class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Total da encomenda</p><p class="mt-1 text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">€ {{ number_format((float) $order->total, 2, ',', '.') }}</p></div>
                             <svg x-bind:class="expanded ? 'rotate-180' : ''" class="h-5 w-5 shrink-0 text-zinc-500 transition-transform duration-200 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                         </div>
-                    </button>
+                    </div>
                     <div x-cloak x-show="expanded" class="p-5 sm:p-6">
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40 sm:p-5">
                             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -117,7 +118,18 @@
                                     </div>
                             @endif
                         </div>
-                        <div class="mt-6 grid gap-5 border-t border-zinc-100 pt-5 dark:border-zinc-800 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
+
+                    </div>
+                    <div x-cloak x-show="detailsOpen" x-transition.opacity class="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="order-details-title" x-on:keydown.escape.window="detailsOpen = false">
+                        <div x-on:click.outside="detailsOpen = false" class="max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xl dark:border-zinc-700 dark:bg-zinc-950 sm:p-6">
+                            <div class="mb-5 flex items-start justify-between gap-4 border-b border-zinc-100 pb-4 dark:border-zinc-800">
+                                <div>
+                                    <h3 id="order-details-title" class="text-lg font-bold text-zinc-950 dark:text-white">Detalhes da encomenda #{{ $order->order_number }}</h3>
+                                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Artigos, valores, cliente e pagamentos associados.</p>
+                                </div>
+                                <button type="button" x-on:click="detailsOpen = false" aria-label="Fechar detalhes" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M18 6 6 18"/></svg></button>
+                            </div>
+                            <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
                             <div>
                                 <div class="mb-3 flex items-center justify-between gap-3"><h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Artigos encomendados</h4><span class="text-xs text-zinc-500">{{ $order->items->count() }} artigo(s)</span></div>
                                 <div class="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white px-4 dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
@@ -199,6 +211,7 @@
                                     </section>
                                 @endif
                             </aside>
+                        </div>
                         </div>
                     </div>
                     <div x-cloak x-show="confirmStatus !== null" x-transition.opacity class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="order-status-confirm-title" x-on:keydown.escape.window="confirmStatus = null; confirmStatusLabel = ''">
