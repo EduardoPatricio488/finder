@@ -69,13 +69,7 @@
                     <flux:icon name="magnifying-glass" class="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-zinc-400" />
                     <input wire:model.live.debounce.300ms="search" type="search" placeholder="Pesquisar por nome, descrição ou SKU..." class="w-full rounded-xl border-zinc-200 bg-zinc-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-950">
                 </div>
-                <select wire:model.live="productSiteFilter" class="rounded-xl border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-100 lg:w-56">
-                    <option value="">Todos os websites</option>
-                    @foreach($availableSites as $availableSite)
-                        <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
-                    @endforeach
-                </select>
-                <select wire:model.live="productSiteFilter" class="rounded-xl border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-950 lg:w-60">
+                <select wire:model.live="catalogSiteId" class="rounded-xl border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-100 lg:w-56">
                     <option value="">Todos os websites</option>
                     @foreach($availableSites as $availableSite)
                         <option value="{{ $availableSite->id }}">{{ $availableSite->name }}</option>
