@@ -126,7 +126,7 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('pagamentos', fn () => redirect()->route('sales'))->name('payments');
         Route::get('promocoes', fn () => redirect()->route('products'))->name('promotions');
-        Route::get('stock', fn () => redirect()->route('products'))->name('stock');
+        Route::get('stock', StockMovementManager::class)->name('stock');
         Route::get('submissoes', SiteSubmissions::class)->name('submissions');
         Route::get('mudar-website/{site:slug}', function (Site $site) {
             abort_unless($site->isManageableBy(auth()->user()), 403);
