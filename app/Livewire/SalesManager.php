@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Order;
 use App\Livewire\Concerns\InteractsWithSiteContext;
 use App\Support\SiteContext;
 use Livewire\Attributes\Layout;
