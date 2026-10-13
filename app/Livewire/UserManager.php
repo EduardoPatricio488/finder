@@ -14,10 +14,20 @@ class UserManager extends Component
 {
     public ?Site $site = null;
 
+    public string $catalogSiteId = '';
+
+    public function updatedCatalogSiteId($siteId): void
+    {
+        $siteId = (string) $siteId;
+        if ($siteId !== '') {
+            abort_unless(SiteContext::manageableSitesQuery(auth()->user())->whereKey((int) $siteId)->exists(), 404);
+        }
+        $this->catalogSiteId = $siteId;
+    }
+
     public function mount(): void
     {
-        $this->site = SiteContext::current();
-        abort_unless($this->site instanceof Site, 404);
+        $this->site = null;
     }
 
     public ?int $editingUserId = null;
@@ -32,7 +42,7 @@ class UserManager extends Component
 
     public function edit(int $userId): void
     {
-        $user = $this->usersQuery()->findOrFail($userId);
+        $user = $this->manageableUsersQuery()->findOrFail($userId);
 
         $this->editingUserId = $user->id;
         $this->name = $user->name;
@@ -48,7 +58,7 @@ class UserManager extends Component
             'role' => ['required', 'in:administrador,gestor,vendedor'],
         ]);
 
-        $user = $this->usersQuery()->findOrFail($this->editingUserId);
+        $user = $this->manageableUsersQuery()->findOrFail($this->editingUserId);
         $user->update($validated);
 
         $this->resetForm();
@@ -63,7 +73,7 @@ class UserManager extends Component
             return;
         }
 
-        $this->usersQuery()->findOrFail($userId)->delete();
+        $this->manageableUsersQuery()->findOrFail($userId)->delete();
         session()->flash('status', 'Utilizador excluído com sucesso.');
     }
 
@@ -76,7 +86,13 @@ class UserManager extends Component
 
     public function render(): mixed
     {
-        $users = $this->usersQuery()
+        $availableSites = SiteContext::manageableSitesQuery(auth()->user())
+            ->orderBy('sort_order')->orderBy('name')->get();
+        $siteIds = $availableSites->modelKeys();
+        $users = User::query()
+            ->whereHas('sites', fn ($query) => $query->whereIn('sites.id', $siteIds))
+            ->when($this->catalogSiteId !== '', fn ($query) => $query->whereHas('sites', fn ($siteQuery) => $siteQuery->whereKey((int) $this->catalogSiteId)))
+            ->with('sites')
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($query): void {
                     $query->where('name', 'like', '%'.$this->search.'%')
@@ -86,19 +102,12 @@ class UserManager extends Component
             ->latest()
             ->get();
 
-        return view('livewire.user-manager', ['users' => $users]);
+        return view('livewire.user-manager', ['users' => $users, 'availableSites' => $availableSites]);
     }
 
-    private function usersQuery()
+    private function manageableUsersQuery()
     {
-        if (! $this->site) {
-            abort_unless(auth()->user()?->isAdministrator(), 403);
-
-            return User::query();
-        }
-
-        abort_unless($this->site->isManageableBy(auth()->user()), 403);
-
-        return User::query()->whereHas('sites', fn ($query) => $query->whereKey($this->site->id));
+        $siteIds = SiteContext::manageableSitesQuery(auth()->user())->pluck('id');
+        return User::query()->whereHas('sites', fn ($query) => $query->whereIn('sites.id', $siteIds));
     }
 }
