@@ -21,12 +21,14 @@
                     <flux:icon name="tag" class="size-4" /> Gerir categorias
                 </button>
                 @auth
-                    <flux:modal.trigger name="product-stock-modal">
-                        <flux:button variant="outline" icon="archive-box">Stock</flux:button>
-                    </flux:modal.trigger>
-                    <flux:modal.trigger name="product-promotions-modal">
-                        <flux:button variant="outline" icon="ticket">Promoções</flux:button>
-                    </flux:modal.trigger>
+                    <div class="flex items-center gap-2">
+                        <flux:modal.trigger name="product-stock-modal">
+                            <flux:button variant="outline" icon="archive-box">Stock</flux:button>
+                        </flux:modal.trigger>
+                        <flux:modal.trigger name="product-promotions-modal">
+                            <flux:button variant="outline" icon="ticket">Promoções</flux:button>
+                        </flux:modal.trigger>
+                    </div>
                 @endauth
                 <button type="button" wire:click="openProductModal" class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-indigo-500 dark:hover:text-white">
                     <flux:icon name="plus" class="size-4" />
