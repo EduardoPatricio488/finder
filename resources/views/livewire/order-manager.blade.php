@@ -74,7 +74,13 @@
                                 <h4 class="text-sm font-semibold text-zinc-900 dark:text-white">Progresso e estado da encomenda</h4>
                                 <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-200">Estado atual: {{ $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status)) }}</span>
                             </div>
-                            <p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">Seleciona uma etapa para atualizar o estado da encomenda. As etapas concluídas aparecem a verde.</p>
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400">Seleciona uma etapa para atualizar o estado da encomenda. As etapas concluídas aparecem a verde.</p>
+                                <span class="group relative inline-flex">
+                                    <button type="button" aria-label="Como funciona o progresso da encomenda" class="inline-flex size-5 items-center justify-center rounded-full border border-zinc-300 text-xs font-bold text-zinc-500 transition hover:border-indigo-400 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-zinc-600 dark:text-zinc-400 dark:hover:text-indigo-300">i</button>
+                                    <span role="tooltip" class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-xl bg-zinc-900 px-3 py-2.5 text-left text-xs font-medium leading-5 text-white opacity-0 shadow-xl transition group-hover:opacity-100 group-focus-within:opacity-100">O progresso é atualizado automaticamente pelo website à medida que a encomenda avança. Também podes alterar manualmente o estado através das etapas.</span>
+                                </span>
+                            </div>
                             <div wire:loading.flex wire:target="setStatus" role="status" aria-live="polite" class="mb-4 items-center gap-2 rounded-lg border border-indigo-200 px-3 py-2.5 text-sm font-medium text-indigo-700 dark:border-indigo-800 dark:text-indigo-300">
                                 <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path></svg>
                                 <span>A alterar o estado da encomenda...</span>
