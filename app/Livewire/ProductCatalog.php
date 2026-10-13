@@ -242,6 +242,7 @@ class ProductCatalog extends Component
     {
         $this->reset([
             'search',
+            'catalogSiteId',
             'category',
             'minPrice',
             'maxPrice',
