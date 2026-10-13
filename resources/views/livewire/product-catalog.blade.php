@@ -557,10 +557,9 @@
                     <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Gere os movimentos de stock e as promoções sem sair do catálogo de produtos.</p>
                 </div>
                 <div class="space-y-8">
-                    <livewire:stock-movement-manager />
-                    <livewire:promotion-manager />
+                    <livewire:stock-movement-manager :key="'stock-manager-'.$selectedSiteId" />
+                    <livewire:promotion-manager :key="'promotion-manager-'.$selectedSiteId" />
                 </div>
             </section>
         @endauth
     </div>
-</div>
