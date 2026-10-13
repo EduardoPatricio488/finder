@@ -14,22 +14,22 @@
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Receita deste mês</span><span class="rounded-xl bg-emerald-50 p-2 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"><flux:icon name="banknotes" class="size-5" /></span></div>
+            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Receita deste mês</span><span class="rounded-xl bg-emerald-50 p-2 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"></span></div>
             <div class="mt-4 text-3xl font-black tracking-tight text-zinc-950 dark:text-white">{{ number_format($monthRevenue, 2, ',', '.') }} €</div>
             <div class="mt-2 text-xs text-zinc-500">{{ $monthSales }} encomenda(s) este mês</div>
         </div>
         <div class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Receita total</span><span class="rounded-xl bg-sky-50 p-2 text-sky-700 dark:bg-sky-950 dark:text-sky-300"><flux:icon name="chart-bar" class="size-5" /></span></div>
+            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Receita total</span><span class="rounded-xl bg-sky-50 p-2 text-sky-700 dark:bg-sky-950 dark:text-sky-300"></span></div>
             <div class="mt-4 text-3xl font-black tracking-tight text-zinc-950 dark:text-white">{{ number_format($allRevenue, 2, ',', '.') }} €</div>
             <div class="mt-2 text-xs text-zinc-500">Encomendas com pagamento confirmado</div>
         </div>
         <div class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Encomendas</span><span class="rounded-xl bg-violet-50 p-2 text-violet-700 dark:bg-violet-950 dark:text-violet-300"><flux:icon name="shopping-bag" class="size-5" /></span></div>
+            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Encomendas</span><span class="rounded-xl bg-violet-50 p-2 text-violet-700 dark:bg-violet-950 dark:text-violet-300"></span></div>
             <div class="mt-4 text-3xl font-black tracking-tight text-zinc-950 dark:text-white">{{ number_format($totalOrders, 0, ',', '.') }}</div>
             <div class="mt-2 text-xs text-zinc-500">{{ $pendingOrders }} pendente(s) ou em preparação</div>
         </div>
         <div class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Produtos ativos</span><span class="rounded-xl bg-amber-50 p-2 text-amber-700 dark:bg-amber-950 dark:text-amber-300"><flux:icon name="archive-box" class="size-5" /></span></div>
+            <div class="flex items-center justify-between text-sm font-medium text-zinc-500"><span>Produtos ativos</span><span class="rounded-xl bg-amber-50 p-2 text-amber-700 dark:bg-amber-950 dark:text-amber-300"></span></div>
             <div class="mt-4 text-3xl font-black tracking-tight text-zinc-950 dark:text-white">{{ number_format($activeProducts, 0, ',', '.') }} <span class="text-sm font-semibold text-zinc-400">/ {{ $totalProducts }}</span></div>
             <div class="mt-2 text-xs {{ $lowStockProducts > 0 ? 'font-semibold text-amber-600' : 'text-zinc-500' }}">{{ $lowStockProducts }} produto(s) com stock baixo</div>
         </div>
@@ -37,7 +37,7 @@
 
     <div class="grid gap-6 xl:grid-cols-3">
         <section class="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 xl:col-span-2">
-            <div class="flex items-check-circlet justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div><flux:icon name="chart-bar" class="size-5 text-zinc-400" /></div>
+            <div class="flex items-check-circlet justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div></div>
             <div class="mt-7 grid grid-cols-6 items-end gap-3">
                 @foreach($monthlySales as $month)
                     <div class="flex min-w-0 flex-col items-center gap-2">
@@ -69,7 +69,7 @@
 
     <div class="grid gap-6 xl:grid-cols-2">
         <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Encomendas recentes</h2><p class="mt-1 text-sm text-zinc-500">Últimas seis encomendas registadas.</p></div><flux:icon name="clipboard-document-list" class="size-5 text-zinc-400" /></div>
+            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Encomendas recentes</h2><p class="mt-1 text-sm text-zinc-500">Últimas seis encomendas registadas.</p></div></div>
             @if($recentOrders->isEmpty())
                 <p class="p-6 text-sm text-zinc-500">Ainda não existem encomendas para apresentar.</p>
             @else
@@ -85,7 +85,7 @@
         </section>
 
         <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Produtos em destaque</h2><p class="mt-1 text-sm text-zinc-500">Produtos com mais unidades associadas a encomendas.</p></div><flux:icon name="check-circle" class="size-5 text-zinc-400" /></div>
+            <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5 dark:border-zinc-800"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Produtos em destaque</h2><p class="mt-1 text-sm text-zinc-500">Produtos com mais unidades associadas a encomendas.</p></div></div>
             @if($topProducts->isEmpty())
                 <p class="p-6 text-sm text-zinc-500">Ainda não existem produtos para apresentar.</p>
             @else
