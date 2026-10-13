@@ -513,14 +513,20 @@
                                     @foreach($productMedia as $mediaItem)
                                         <label class="group cursor-pointer">
                                             <input type="checkbox" wire:model.live="productMediaIds" value="{{ $mediaItem->id }}" class="sr-only">
-                                            <div class="overflow-hidden rounded-xl border-2 {{ in_array($mediaItem->id, $productMediaIds) ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-zinc-200 dark:border-zinc-700' }} bg-zinc-100">
+                                            <div class="relative overflow-hidden rounded-xl border-2 {{ in_array($mediaItem->id, $productMediaIds) ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-zinc-200 dark:border-zinc-700' }} bg-zinc-100">
                                                 <img src="{{ route('site.manage.media.file', ['media' => $mediaItem->id]) }}" alt="{{ $mediaItem->alt_text ?: $mediaItem->original_name }}" class="aspect-square w-full object-cover transition group-hover:scale-105">
+                                                @if(in_array($mediaItem->id, $productMediaIds))
+                                                    <span class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-indigo-600 px-2 py-1 text-[10px] font-bold text-white shadow">
+                                                        <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.2 7.26a1 1 0 0 1-1.42.004L3.3 9.22a1 1 0 1 1 1.4-1.428l4.08 4.002 6.5-6.51a1 1 0 0 1 1.424.006Z" clip-rule="evenodd"/></svg>
+                                                        Selecionada
+                                                    </span>
+                                                @endif
                                             </div>
                                             <p class="mt-1 truncate text-[11px] text-zinc-500">{{ $mediaItem->original_name }}</p>
                                         </label>
                                     @endforeach
                                 </div>
-                                <p class="mt-2 text-xs text-zinc-500">Seleciona as fotografias que queres aplicar a este produto.</p>
+                                <p class="mt-2 text-xs text-zinc-500">As fotografias com a marca <strong>Selecionada</strong> serão associadas ao produto. Uma fotografia carregada do computador fica selecionada automaticamente; depois, basta clicares em <strong>Adicionar produto</strong>.</p>
                             @else
                                 <div class="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-4 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950">
                                     Ainda não tens fotografias para produtos na biblioteca de media. Vai a <a href="{{ route('site.manage.media') }}" class="font-bold text-indigo-600 hover:underline">Media</a>, escolhe <strong>Produtos</strong> e carrega as fotografias.
