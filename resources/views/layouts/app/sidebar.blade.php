@@ -25,7 +25,13 @@
             </div>
         @endif
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 {{ $isPlatformAdmin ? 'pt-10' : '' }}">
-            <flux:sidebar.header><x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate /><flux:sidebar.collapse class="lg:hidden" /></flux:sidebar.header>
+            <flux:sidebar.header>
+                <a href="{{ route('account') }}" wire:navigate aria-label="A minha conta" title="A minha conta" class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
+                    <flux:icon.user-circle class="size-5" />
+                </a>
+                <x-app-logo :sidebar="true" href="{{ route('home') }}" wire:navigate />
+                <flux:sidebar.collapse class="lg:hidden" />
+            </flux:sidebar.header>
             <div class="px-3 pb-3">
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate class="!rounded-xl !border !border-indigo-200 !bg-indigo-50 !px-3 !py-3 !font-bold !text-indigo-700 shadow-sm transition hover:!border-indigo-300 hover:!bg-indigo-100 dark:!border-indigo-900 dark:!bg-indigo-950/50 dark:!text-indigo-300 dark:hover:!bg-indigo-950">Meus Websites</flux:sidebar.item>
                 <div class="h-3"></div>
