@@ -1,7 +1,7 @@
 <div class="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
     <div class="mb-2"><x-site-workspace-selector :current-site="$site" route-name="settings" /></div>
 
-    <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+    <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
         <div>
             <div class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600 dark:text-indigo-400">
                 <span>Dados do site</span>
@@ -13,8 +13,7 @@
                 {{ $modelProfile['description'] ?? 'Preenche os conteúdos específicos deste website.' }}
             </p>
         </div>
-
-        <div class="flex flex-wrap items-center justify-end gap-3 md:min-w-[420px]">
+        <div class="mt-5 flex flex-wrap items-center justify-start gap-3">
             <div class="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-5 py-3 text-right shadow-sm dark:border-indigo-800 dark:bg-indigo-950/40">
                 <div class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">Modelo escolhido</div>
                 <div class="mt-1 text-base font-black text-indigo-950 dark:text-white">{{ $modelProfile['label'] ?? 'Pessoal' }}</div>
