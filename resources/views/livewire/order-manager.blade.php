@@ -85,7 +85,7 @@
                                 <span>A alterar o estado da encomenda...</span>
                             </div>
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
-                                @foreach(['criada' => 'Criada', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue'] as $step => $label)
+                                @foreach(['criada' => 'Criada', 'pendente' => 'Pendente', 'pago' => 'Pago', 'em_preparacao' => 'Em preparação', 'enviado' => 'Enviado', 'entregue' => 'Entregue'] as $step => $label)
                                     @php
                                         $stepStatus = $step === 'criada' ? null : $step;
                                         $isCurrentStatus = $stepStatus !== null && $order->status === $stepStatus;
