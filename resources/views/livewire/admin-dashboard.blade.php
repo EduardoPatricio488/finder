@@ -58,7 +58,7 @@
             <div class="mt-3 flex flex-wrap items-center gap-3"><h1 class="text-5xl font-black italic tracking-tighter text-stone-950 dark:text-white">{{ $site->name }}</h1><span class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-black text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300"><flux:icon :name="$modelProfile['icon'] ?? 'globe-alt'" class="size-3.5" />{{ $modelProfile['label'] ?? ($site->category_label ?? 'Website') }}</span></div>
             <p class="mt-3 max-w-2xl text-sm font-medium leading-relaxed text-stone-500">{{ $modelProfile['description'] ?? 'Configura o teu website e preenche os conteúdos específicos do modelo escolhido.' }}</p>
         </div>
-        <div class="flex flex-wrap items-center gap-3"><flux:button href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank" variant="ghost" icon="eye" class="!rounded-xl">Pré-visualizar</flux:button><flux:button href="{{ route('builder.edit', $site) }}" variant="primary" icon="pencil-square" class="!rounded-xl !bg-stone-950">Abrir editor</flux:button></div>
+        <div class="flex flex-wrap items-center gap-3"><flux:button href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank" variant="ghost" icon="eye" class="!rounded-xl">Pré-visualizar</flux:button><flux:button href="{{ route('menus') }}" variant="primary" icon="pencil-square" class="!rounded-xl !bg-stone-950">Abrir editor</flux:button></div>
     </header>
 
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
