@@ -20,7 +20,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(LoginResponseContract::class, SiteLoginResponse::class);
+        //
     }
 
     /**
@@ -28,6 +28,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->app->singleton(LoginResponseContract::class, SiteLoginResponse::class);
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
