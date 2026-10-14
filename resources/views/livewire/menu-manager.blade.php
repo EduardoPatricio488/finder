@@ -178,33 +178,28 @@
             <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
         </div>
         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach($allPages as $pageRecord)
-                @php
-                    $pageMenuItem = $items->firstWhere('site_page_id', $pageRecord->id);
-                    $pageInSidebar = in_array((string) $pageRecord->id, $sidebarPageIds, true);
-                    $pageInAppliedHeader = $menuApplied && $pageMenuItem && $pageMenuItem->is_visible;
-                @endphp
-                <a href="{{ route('site.manage.pages.edit', $pageRecord->id) }}" class="group rounded-2xl border border-zinc-200 p-4 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md">
+            @foreach($allPages as $page)
+                <a href="{{ route('site.manage.pages.edit', $page->id) }}" class="group rounded-2xl border border-zinc-200 p-4 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md">
                     <div class="flex items-start justify-between gap-3">
-                        <div><p class="font-semibold text-zinc-900">{{ $pageRecord->name }}</p><p class="mt-1 text-xs text-zinc-500">/ {{ $pageRecord->slug }}</p></div>
-                        <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $pageRecord->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $pageRecord->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
+                        <div><p class="font-semibold text-zinc-900">{{ $page->name }}</p><p class="mt-1 text-xs text-zinc-500">/ {{ $page->slug }}</p></div>
+                        <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $page->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $page->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
                     </div>
                     <div class="mt-3 flex flex-wrap gap-1.5">
-                        @if($pageInAppliedHeader)
+                        @if($menuApplied && ($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false))
                             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700"><span class="size-1.5 rounded-full bg-emerald-500"></span>No menu do site</span>
-                        @elseif($pageMenuItem && $pageMenuItem->is_visible)
+                        @elseif($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false)
                             <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700"><span class="size-1.5 rounded-full bg-amber-500"></span>Menu por aplicar</span>
                         @endif
-                        @if($pageInSidebar)
+                        @if(in_array((string) $page->id, $sidebarPageIds, true))
                             <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-700"><span class="size-1.5 rounded-full bg-indigo-500"></span>Selecionada na sidebar</span>
                         @endif
-                        @if(!$pageInAppliedHeader && !$pageInSidebar && !($pageMenuItem && $pageMenuItem->is_visible))
+                        @if(!($menuApplied && ($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false)) && !in_array((string) $page->id, $sidebarPageIds, true) && !($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false))
                             <span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-[10px] font-semibold text-zinc-500"><span class="size-1.5 rounded-full bg-zinc-400"></span>Fora da navegação</span>
                         @endif
                     </div>
                     <p class="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-800">Editar página →</p>
                 </a>
-            @php endforeach; @endphp
+            @endforeachach; @endphp
         </div>
     </section>
 
