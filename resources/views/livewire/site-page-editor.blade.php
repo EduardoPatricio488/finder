@@ -15,6 +15,25 @@
             <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('status') }}</div>
         @endif
 
+        <section class="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-5 py-4">
+                <div>
+                    <h2 class="font-bold text-zinc-900">Pré-visualização real do website</h2>
+                    <p class="mt-1 text-xs text-zinc-500">Usa o mesmo tema, tipografia, cores, navegação e separadores da página pública.</p>
+                </div>
+                <a href="{{ route('site.public', [$site, 'pageSlug' => $page->slug, 'preview' => 1]) }}" target="_blank" class="rounded-xl border border-zinc-200 px-3 py-2 text-sm font-semibold hover:bg-zinc-50">Abrir em novo separador ↗</a>
+            </div>
+            <div class="bg-zinc-100 p-2 sm:p-4">
+                <div class="mx-auto overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg">
+                    <div class="flex h-8 items-center gap-1.5 border-b border-zinc-200 bg-zinc-50 px-3">
+                        <span class="size-2.5 rounded-full bg-red-400"></span><span class="size-2.5 rounded-full bg-amber-400"></span><span class="size-2.5 rounded-full bg-emerald-400"></span>
+                        <span class="ml-2 truncate rounded-md bg-white px-3 py-1 text-[10px] text-zinc-500">{{ $site->domain ?: $site->slug.'.finder.test' }}</span>
+                    </div>
+                    <iframe title="Pré-visualização da página do website" src="{{ route('site.public', [$site, 'pageSlug' => $page->slug, 'preview' => 1, 'editor_refresh' => $previewVersion]) }}" class="block h-[680px] w-full bg-white sm:h-[780px]" loading="eager"></iframe>
+                </div>
+            </div>
+        </section>
+
         <form wire:submit="save" class="space-y-6">
             <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <h2 class="text-lg font-bold">Definições da página</h2>
@@ -86,6 +105,24 @@
                                 <label class="grid gap-2 text-sm font-semibold">Link do botão
                                     <input wire:model="sections.{{ $index }}.button_url" class="rounded-xl border border-zinc-200 bg-white px-3 py-2.5 font-normal" placeholder="/contact ou https://...">
                                 </label>
+                                <div class="md:col-span-2 rounded-2xl border border-zinc-200 bg-white p-4">
+                                    <p class="mb-3 text-sm font-bold">Cores desta secção</p>
+                                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                        <label class="grid gap-2 text-xs font-semibold text-zinc-600">Fundo
+                                            <span class="flex items-center gap-2"><input type="color" wire:model.live="sections.{{ $index }}.background_color" class="h-10 w-12 cursor-pointer rounded-lg border border-zinc-200 p-1"><input wire:model.live="sections.{{ $index }}.background_color" class="min-w-0 w-full rounded-lg border border-zinc-200 px-2 py-2 font-mono text-xs"></span>
+                                        </label>
+                                        <label class="grid gap-2 text-xs font-semibold text-zinc-600">Texto
+                                            <span class="flex items-center gap-2"><input type="color" wire:model.live="sections.{{ $index }}.text_color" class="h-10 w-12 cursor-pointer rounded-lg border border-zinc-200 p-1"><input wire:model.live="sections.{{ $index }}.text_color" class="min-w-0 w-full rounded-lg border border-zinc-200 px-2 py-2 font-mono text-xs"></span>
+                                        </label>
+                                        <label class="grid gap-2 text-xs font-semibold text-zinc-600">Destaques / botões
+                                            <span class="flex items-center gap-2"><input type="color" wire:model.live="sections.{{ $index }}.accent_color" class="h-10 w-12 cursor-pointer rounded-lg border border-zinc-200 p-1"><input wire:model.live="sections.{{ $index }}.accent_color" class="min-w-0 w-full rounded-lg border border-zinc-200 px-2 py-2 font-mono text-xs"></span>
+                                        </label>
+                                        <label class="grid gap-2 text-xs font-semibold text-zinc-600">Separadores / contorno
+                                            <span class="flex items-center gap-2"><input type="color" wire:model.live="sections.{{ $index }}.border_color" class="h-10 w-12 cursor-pointer rounded-lg border border-zinc-200 p-1"><input wire:model.live="sections.{{ $index }}.border_color" class="min-w-0 w-full rounded-lg border border-zinc-200 px-2 py-2 font-mono text-xs"></span>
+                                        </label>
+                                    </div>
+                                    <p class="mt-2 text-xs text-zinc-500">As cores são aplicadas à secção no website depois de guardares.</p>
+                                </div>
                             </div>
                         </article>
                     @empty
