@@ -82,7 +82,7 @@
     </section>
 
     <div class="flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-200">
-        <flux:icon name="info" class="mt-0.5 size-5 shrink-0" />
+        <flux:icon name="information-circle" class="mt-0.5 size-5 shrink-0" />
         <p><strong>Nota:</strong> estas definições são diferentes dos campos de conteúdo do modelo. Para alterar textos, imagens, widgets ou secções, abre o editor da página correspondente.</p>
     </div>
 </div>
