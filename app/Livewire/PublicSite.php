@@ -207,7 +207,11 @@ class PublicSite extends Component
         ]);
         $cart = [];
         foreach ($validated['cart'] as $productId => $quantity) {
-            abort_unless(ctype_digit((string) $productId) && (int) $productId > 0, 422, 'O carrinho contém um produto inválido.');
+            if (! ctype_digit((string) $productId) || (int) $productId < 1) {
+                throw ValidationException::withMessages([
+                    'cart' => 'O carrinho contém um produto inválido. Remove-o e tenta novamente.',
+                ]);
+            }
             $cart[(int) $productId] = (int) $quantity;
         }
 
