@@ -215,6 +215,32 @@
                     </div>
                 </article>
             @endforeach
+
+            <article class="rounded-2xl border border-dashed border-indigo-300 bg-indigo-50/50 p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-semibold text-zinc-900">Entrar</p>
+                        <p class="mt-1 text-xs text-zinc-500">Página de autenticação do Finder</p>
+                    </div>
+                    <span class="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-bold text-indigo-800">Página do sistema</span>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ route('login') }}" target="_blank" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Abrir página de login →</a>
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-dashed border-indigo-300 bg-indigo-50/50 p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-semibold text-zinc-900">Carrinho</p>
+                        <p class="mt-1 text-xs text-zinc-500">Painel de compras do website. Abre através do botão «Carrinho» na loja.</p>
+                    </div>
+                    <span class="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-bold text-indigo-800">Funcionalidade do sistema</span>
+                </div>
+                <div class="mt-4">
+                    <span class="text-sm text-zinc-500">Disponível no website publicado</span>
+                </div>
+            </article>
         </div>
     </section>
 
