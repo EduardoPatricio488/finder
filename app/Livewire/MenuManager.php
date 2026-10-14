@@ -33,6 +33,12 @@ class MenuManager extends Component
 
     public bool $menuApplied = false;
 
+    public string $newPageName = '';
+
+    public string $newPageSlug = '';
+
+    public string $newPageStatus = 'draft';
+
     /** @var array<string, int|null> */
     public array $requiredItemIds = [];
 
@@ -96,6 +102,33 @@ class MenuManager extends Component
         $this->ensureRequiredMenuItems();
         $this->menuApplied = false;
         session()->flash('status', 'Menu guardado. Agora podes aplicar as alterações no site.');
+    }
+
+    public function createPage(): void
+    {
+        $this->newPageName = trim($this->newPageName);
+        $this->newPageSlug = \Illuminate\Support\Str::slug($this->newPageSlug ?: $this->newPageName);
+
+        $this->validate([
+            'newPageName' => ['required', 'string', 'max:255'],
+            'newPageSlug' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:site_pages,slug,NULL,id,site_id,'.$this->site->id],
+            'newPageStatus' => ['required', 'in:draft,published'],
+        ]);
+
+        $page = $this->site->pages()->create([
+            'name' => $this->newPageName,
+            'slug' => $this->newPageSlug,
+            'status' => $this->newPageStatus,
+            'is_homepage' => false,
+            'seo' => [],
+            'theme' => [],
+            'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
+        ]);
+
+        $this->reset('newPageName', 'newPageSlug');
+        $this->newPageStatus = 'draft';
+        session()->flash('status', 'Página criada. Já podes editar o conteúdo e adicioná-la ao menu.');
+        $this->redirectRoute('site.manage.pages.edit', ['page' => $page->id]);
     }
 
     public function addItem(): void
