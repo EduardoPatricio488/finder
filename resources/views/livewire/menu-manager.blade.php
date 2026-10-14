@@ -75,84 +75,42 @@
                 </div>
             </section>
 
-    <section class="flex min-h-0 flex-col rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-                <div class="flex items-center gap-2">
-                    <h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2>
-                    <span class="group relative inline-flex" title="Este website pode ter páginas obrigatórias, como Início, Sobre mim e Contactos.">
-                        <flux:icon name="information-circle" class="size-4 cursor-help text-amber-600" />
-                        <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-medium leading-5 text-white opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-within:opacity-100">
-                            Este website pode ter páginas obrigatórias, como Início, Sobre mim e Contactos.
-                        </span>
-                    </span>
-                </div>
-                <p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p>
-                <div class="mt-3 rounded-xl border border-sky-200 bg-sky-50 p-3.5 text-sm text-sky-950">
-                    <p class="font-semibold">Como distinguir os tipos de página</p>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-800">Página base</span>
-                        <span class="text-xs leading-5">Página padrão do website (por exemplo, Início, Sobre mim e Contactos). Não pode ser eliminada.</span>
-                    </div>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <span class="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-800">Adicionada por ti</span>
-                        <span class="text-xs leading-5">Página criada através de «Adicionar página». Pode ser editada e eliminada.</span>
-                    </div>
-                    <p class="mt-2 text-xs leading-5 text-sky-800">A etiqueta «Publicada/Rascunho» indica o estado da página. A presença no menu ou na sidebar é independente: uma página pode existir sem aparecer na navegação do website.</p>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
-                <button type="button" wire:click="$set('showCreatePageModal', true)" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                    <flux:icon name="plus" class="size-4" />
-                    Adicionar página
-                </button>
-            </div>
-        </div>
-        <div class="mt-5 max-h-[32rem] overflow-y-auto pr-1">
-            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
-            @foreach($allPages as $page)
-                <article class="rounded-2xl border border-zinc-200 p-4 transition hover:border-indigo-300 hover:shadow-md">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0 flex-1">
-                            <p class="truncate font-semibold text-zinc-900">{{ $page->name }}</p>
-                            <p class="mt-1 truncate text-xs text-zinc-500">/ {{ $page->slug }}</p>
+            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-700">
+                            <flux:icon name="document-text" class="size-5" />
                         </div>
-                        <div class="flex shrink-0 flex-col items-end gap-1.5">
-                            <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $page->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $page->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
-                            @if($page->is_homepage || in_array($page->slug, ['home', 'about', 'contact'], true))
-                                <span title="Página base do website; não pode ser eliminada." class="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-bold text-indigo-800">Página base</span>
-                            @else
-                                <span title="Página criada pelo utilizador; pode ser eliminada." class="rounded-full bg-violet-100 px-2 py-1 text-[10px] font-bold text-violet-800">Adicionada por ti</span>
-                            @endif
+                        <div>
+                            <h2 class="font-semibold text-zinc-950">Páginas na sidebar</h2>
+                            <p class="mt-1 text-xs leading-5 text-zinc-500">Marca as páginas que queres apresentar na navegação lateral.</p>
                         </div>
                     </div>
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        @if($menuApplied && ($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false))
-                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700"><span class="size-1.5 rounded-full bg-emerald-500"></span>No menu do site</span>
-                        @elseif($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false)
-                            <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700"><span class="size-1.5 rounded-full bg-amber-500"></span>Menu por aplicar</span>
-                        @endif
-                        @if(in_array((string) $page->id, $sidebarPageIds, true))
-                            <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-700"><span class="size-1.5 rounded-full bg-indigo-500"></span>Selecionada na sidebar</span>
-                        @endif
-                        @if(!($menuApplied && ($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false)) && !in_array((string) $page->id, $sidebarPageIds, true) && !($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false))
-                            <span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-[10px] font-semibold text-zinc-500"><span class="size-1.5 rounded-full bg-zinc-400"></span>Fora da navegação</span>
-                        @endif
-                    </div>
-                    <div class="mt-4 flex items-center justify-between gap-3">
-                        <a href="{{ route('site.manage.pages.edit', $page->id) }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Editar página →</a>
-                        @unless(in_array($page->slug, ['home', 'about', 'contact'], true))
-                            <button type="button" wire:click="deletePage({{ $page->id }})" wire:confirm="Tens a certeza de que queres eliminar esta página? Esta ação não pode ser anulada." title="Eliminar página" aria-label="Eliminar {{ $page->name }}" class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50">
-                                <flux:icon name="trash" class="size-3.5" /> Eliminar
-                            </button>
-                        @endunless
-                    </div>
-                </article>
-            @endforeach
-            </div>
-        </div>
-    </section>
+                    <span class="shrink-0 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600">{{ count($sidebarPageIds) }} selecionadas</span>
+                </div>
+
+                <div class="mt-6 max-h-80 space-y-2 overflow-y-auto rounded-2xl border border-zinc-200 p-3">
+                    @forelse($allPages as $sidebarPage)
+                        <div class="flex items-center gap-2 rounded-xl px-3 py-2.5 transition hover:bg-zinc-50">
+                            <input id="sidebar-page-{{ $sidebarPage->id }}" type="checkbox" wire:model="sidebarPageIds" value="{{ $sidebarPage->id }}" class="size-4 shrink-0 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500">
+                            <label for="sidebar-page-{{ $sidebarPage->id }}" class="min-w-0 flex-1 cursor-pointer">
+                                <span class="block truncate text-sm font-medium text-zinc-800">{{ $sidebarPage->name }}</span>
+                                <span class="block truncate text-xs text-zinc-400">/{{ $sidebarPage->slug }}</span>
+                            </label>
+                            <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $sidebarPage->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $sidebarPage->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
+                            @unless(in_array($sidebarPage->slug, ['home', 'about', 'contact'], true))
+                                <button type="button" wire:click="deletePage({{ $sidebarPage->id }})" wire:confirm="Tens a certeza de que queres eliminar esta página? Esta ação não pode ser anulada." title="Eliminar página" aria-label="Eliminar {{ $sidebarPage->name }}" class="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 hover:text-red-700">
+                                    <flux:icon name="trash" class="size-4" />
+                                </button>
+                            @endunless
+                        </div>
+                    @empty
+                        <p class="p-3 text-sm text-zinc-500">Ainda não existem páginas neste website.</p>
+                    @endforelse
+                </div>
+                @error('sidebarPageIds') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror
+                @error('sidebarPageIds.*') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </section>
         </div>
     </form>
 
@@ -201,7 +159,82 @@
         </section>
     </div>
 
-
+    <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2>
+                    <span class="group relative inline-flex" title="Este website pode ter páginas obrigatórias, como Início, Sobre mim e Contactos.">
+                        <flux:icon name="information-circle" class="size-4 cursor-help text-amber-600" />
+                        <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-medium leading-5 text-white opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-within:opacity-100">
+                            Este website pode ter páginas obrigatórias, como Início, Sobre mim e Contactos.
+                        </span>
+                    </span>
+                </div>
+                <p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p>
+                <div class="mt-3 rounded-xl border border-sky-200 bg-sky-50 p-3.5 text-sm text-sky-950">
+                    <p class="font-semibold">Como distinguir os tipos de página</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-800">Página base</span>
+                        <span class="text-xs leading-5">Página padrão do website (por exemplo, Início, Sobre mim e Contactos). Não pode ser eliminada.</span>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <span class="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-800">Adicionada por ti</span>
+                        <span class="text-xs leading-5">Página criada através de «Adicionar página». Pode ser editada e eliminada.</span>
+                    </div>
+                    <p class="mt-2 text-xs leading-5 text-sky-800">A etiqueta «Publicada/Rascunho» indica o estado da página. A presença no menu ou na sidebar é independente: uma página pode existir sem aparecer na navegação do website.</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
+                <button type="button" wire:click="$set('showCreatePageModal', true)" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <flux:icon name="plus" class="size-4" />
+                    Adicionar página
+                </button>
+            </div>
+        </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach($allPages as $page)
+                <article class="rounded-2xl border border-zinc-200 p-4 transition hover:border-indigo-300 hover:shadow-md">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate font-semibold text-zinc-900">{{ $page->name }}</p>
+                            <p class="mt-1 truncate text-xs text-zinc-500">/ {{ $page->slug }}</p>
+                        </div>
+                        <div class="flex shrink-0 flex-col items-end gap-1.5">
+                            <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $page->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $page->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
+                            @if($page->is_homepage || in_array($page->slug, ['home', 'about', 'contact'], true))
+                                <span title="Página base do website; não pode ser eliminada." class="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-bold text-indigo-800">Página base</span>
+                            @else
+                                <span title="Página criada pelo utilizador; pode ser eliminada." class="rounded-full bg-violet-100 px-2 py-1 text-[10px] font-bold text-violet-800">Adicionada por ti</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        @if($menuApplied && ($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false))
+                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700"><span class="size-1.5 rounded-full bg-emerald-500"></span>No menu do site</span>
+                        @elseif($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false)
+                            <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700"><span class="size-1.5 rounded-full bg-amber-500"></span>Menu por aplicar</span>
+                        @endif
+                        @if(in_array((string) $page->id, $sidebarPageIds, true))
+                            <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-700"><span class="size-1.5 rounded-full bg-indigo-500"></span>Selecionada na sidebar</span>
+                        @endif
+                        @if(!($menuApplied && ($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false)) && !in_array((string) $page->id, $sidebarPageIds, true) && !($items->firstWhere('site_page_id', $page->id)?->is_visible ?? false))
+                            <span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-[10px] font-semibold text-zinc-500"><span class="size-1.5 rounded-full bg-zinc-400"></span>Fora da navegação</span>
+                        @endif
+                    </div>
+                    <div class="mt-4 flex items-center justify-between gap-3">
+                        <a href="{{ route('site.manage.pages.edit', $page->id) }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Editar página →</a>
+                        @unless(in_array($page->slug, ['home', 'about', 'contact'], true))
+                            <button type="button" wire:click="deletePage({{ $page->id }})" wire:confirm="Tens a certeza de que queres eliminar esta página? Esta ação não pode ser anulada." title="Eliminar página" aria-label="Eliminar {{ $page->name }}" class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50">
+                                <flux:icon name="trash" class="size-3.5" /> Eliminar
+                            </button>
+                        @endunless
+                    </div>
+                </article>
+            @endforeach
+        </div>
+    </section>
 
 </div>
 </div>
