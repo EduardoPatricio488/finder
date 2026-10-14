@@ -1,14 +1,27 @@
 <div class="mx-auto max-w-7xl space-y-7 px-6 py-8 lg:px-10">
+    <div class="max-w-sm">
+        <label for="overview-site-filter" class="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-500">Filtrar por website</label>
+        <select id="overview-site-filter" wire:model.live="selectedSiteId" class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
+            <option value="">Todos os websites</option>
+            @foreach($sites as $siteOption)
+                <option value="{{ $siteOption->id }}">{{ $siteOption->name }}</option>
+            @endforeach
+        </select>
+        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Por defeito, os indicadores incluem todos os websites a que tens acesso.</p>
+    </div>
+
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
             <div class="text-xs font-bold uppercase tracking-[0.22em] text-indigo-600 dark:text-indigo-400">Resumo do negócio</div>
             <h1 class="mt-2 text-3xl font-black tracking-tight text-zinc-950 dark:text-white">Visão geral</h1>
             <p class="mt-2 text-sm text-zinc-500">Vendas, pagamentos, produtos e atividade num único painel. Apenas consulta, sem ações de edição.</p>
-            <p class="mt-1 text-xs font-semibold text-zinc-400">{{ $site->name }}</p>
+            <p class="mt-1 text-xs font-semibold text-zinc-400">{{ $allSitesMode ? 'Todos os websites' : $site->name }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
             <flux:button href="{{ route('site.manage.dashboard') }}" variant="ghost" icon="squares-2x2">Painel de gestão</flux:button>
-            <flux:button href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank" variant="outline" icon="eye">Ver website</flux:button>
+            @if($site)
+                <flux:button href="{{ route('site.public', ['site' => $site, 'preview' => 1]) }}" target="_blank" variant="outline" icon="eye">Ver website</flux:button>
+            @endif
         </div>
     </div>
 
@@ -37,7 +50,7 @@
 
     <div class="grid gap-6 xl:grid-cols-3">
         <section class="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 xl:col-span-2">
-            <div class="flex items-check-circlet justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div></div>
+            <div class="flex items-center justify-between gap-3"><div><h2 class="text-lg font-bold text-zinc-950 dark:text-white">Vendas ao longo do tempo</h2><p class="mt-1 text-sm text-zinc-500">Receita por mês, nos últimos seis meses.</p></div></div>
             <div class="mt-7 grid grid-cols-6 items-end gap-3">
                 @foreach($monthlySales as $month)
                     <div class="flex min-w-0 flex-col items-center gap-2">
