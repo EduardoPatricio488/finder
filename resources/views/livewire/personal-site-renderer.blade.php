@@ -26,6 +26,9 @@
     };
 
     $sidebarType = (string) data_get($site->settings, 'sidebar.type', 'fixed');
+    $sidebarAppearance = (string) data_get($site->settings, 'sidebar.appearance', 'light');
+    $sidebarWidth = (string) data_get($site->settings, 'sidebar.width', 'normal');
+    $sidebarIcons = (string) data_get($site->settings, 'sidebar.icons', 'shown');
     $sidebarPosition = (string) data_get($site->settings, 'sidebar.position', 'left');
     $sidebarPageIds = collect(data_get($site->settings, 'sidebar.page_ids', []))->map(fn ($id) => (string) $id);
     $sidebarPages = $site->pages->whereIn('id', $sidebarPageIds)->sortBy('sort_order')->values();
@@ -78,7 +81,7 @@
             </div>
         </aside>
     @else
-        <aside x-data="{ sidebarOpen: true }" class="fixed inset-y-0 z-50 hidden border-zinc-200 bg-white shadow-sm lg:block {{ $sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r' }} {{ $sidebarType === 'compact' ? 'w-20' : 'w-64' }}">
+        <aside x-data="{ sidebarOpen: true }" class="fixed inset-y-0 z-50 hidden {{ $sidebarAppearance === 'dark' ? 'border-zinc-800 bg-zinc-950 text-white' : 'border-zinc-200 bg-white text-zinc-950' }} shadow-sm lg:block {{ $sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r' }} {{ $sidebarType === 'compact' ? 'w-20' : match ($sidebarWidth) { 'narrow' => 'w-48', 'wide' => 'w-80', default => 'w-64' } }}">
             @if($sidebarType === 'collapsible')
                 <button type="button" @click="sidebarOpen = !sidebarOpen" class="m-4 flex items-center gap-2 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-200">
                     <span class="text-lg">☰</span><span x-show="sidebarOpen">Recolher</span>
@@ -92,7 +95,7 @@
             <nav class="space-y-1 p-3" aria-label="Navegação lateral">
                 @foreach($sidebarPages as $sidebarPage)
                     <a href="{{ route('site.public', [$site, 'pageSlug' => $sidebarPage->slug, 'preview' => $preview ? 1 : null]) }}" title="{{ $sidebarPage->name }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition {{ $currentPage === $sidebarPage->slug ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950' }}">
-                        <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $currentPage === $sidebarPage->slug ? 'bg-white/15' : 'bg-zinc-100' }}">{{ mb_strtoupper(mb_substr($sidebarPage->name, 0, 1)) }}</span>
+                        <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $currentPage === $sidebarPage->slug ? 'bg-white/15' : 'bg-zinc-100' }}">@if($sidebarIcons === 'shown'){{ mb_strtoupper(mb_substr($sidebarPage->name, 0, 1)) }}@endif</span>
                         @if($sidebarType !== 'compact')
                             <span x-show="sidebarOpen" class="truncate">{{ $sidebarPage->name }}</span>
                         @endif
