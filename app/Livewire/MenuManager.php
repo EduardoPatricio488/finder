@@ -63,6 +63,17 @@ class MenuManager extends Component
         $site = \App\Support\SiteContext::current();
         abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
         $this->site = $site;
+        if (! $site->pages()->where('slug', 'cart')->exists()) {
+            $site->pages()->create([
+                'name' => 'Carrinho',
+                'slug' => 'cart',
+                'status' => 'published',
+                'is_homepage' => false,
+                'seo' => ['title' => 'Carrinho — '.$site->name, 'description' => 'Consulta e gere os produtos no teu carrinho.'],
+                'theme' => [],
+                'sort_order' => ((int) $site->pages()->max('sort_order')) + 1,
+            ]);
+        }
         session()->put('current_site_id', $site->id);
         $this->menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
         $this->sidebarType = 'fixed';
