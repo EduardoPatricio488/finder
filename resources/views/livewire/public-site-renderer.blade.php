@@ -48,7 +48,7 @@
                             {{ $sidebarPage->name }}
                         </a>
                     @endforeach
-                    <a href="{{ route('login') }}" class="inline-flex shrink-0 items-center rounded-full border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100">Entrar</a>
+                    <a href="{{ route('site.public', ['site' => $site, 'pageSlug' => 'login', 'preview' => $preview ? 1 : null]) }}" class="inline-flex shrink-0 items-center rounded-full border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100">Entrar</a>
                     <button type="button" wire:click="$set('cartOpen', true)" class="relative inline-flex shrink-0 items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-800">
                         🛒 Carrinho
                         @if(count($cart)) <span class="rounded-full px-2 py-0.5 text-xs text-white" style="background:var(--finder-primary)">{{ array_sum($cart) }}</span> @endif
@@ -101,7 +101,7 @@
                 @endif
             </nav>
             <div class="flex items-center gap-2">
-                <a href="{{ route('login') }}" class="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100">Entrar</a>
+                <a href="{{ route('site.public', ['site' => $site, 'pageSlug' => 'login', 'preview' => $preview ? 1 : null]) }}" class="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100">Entrar</a>
                 <button type="button" wire:click="$set('cartOpen', true)" class="relative inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm font-bold">
                     🛒 Carrinho
                     @if(count($cart)) <span class="rounded-full px-2 py-0.5 text-xs text-white" style="background:var(--finder-primary)">{{ array_sum($cart) }}</span> @endif
