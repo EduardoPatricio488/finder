@@ -82,7 +82,15 @@ class MenuManager extends Component
         $this->sidebarAppearance = (string) data_get($site->settings, 'sidebar.appearance', 'light');
         $this->sidebarWidth = (string) data_get($site->settings, 'sidebar.width', 'normal');
         $this->sidebarIcons = (string) data_get($site->settings, 'sidebar.icons', 'shown');
-        $this->sidebarPageIds = $site->pages()->orderBy('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $availablePageIds = $site->pages()->orderBy('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $savedSidebarPageIds = data_get($site->settings, 'sidebar.page_ids');
+
+        $this->sidebarPageIds = is_array($savedSidebarPageIds)
+            ? array_values(array_filter(
+                array_map('strval', $savedSidebarPageIds),
+                fn (string $id) => in_array($id, $availablePageIds, true)
+            ))
+            : $availablePageIds;
         $menu = $site->menus()->first();
 
         if ($menu) {
