@@ -28,9 +28,9 @@
     $productCount = $site->products->count();
 @endphp
 
-<div class="{{ $sidebarEnabled && in_array($sidebarPosition, ['left', 'right'], true) ? ($sidebarPosition === 'left' ? ($sidebarType === 'compact' ? 'lg:pl-20' : 'lg:pl-64') : ($sidebarType === 'compact' ? 'lg:pr-20' : 'lg:pr-64')) : '' }} min-h-screen bg-[#fafaf8] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
+<div class="{{ $sidebarEnabled ? (in_array($sidebarPosition, ['left', 'right'], true) ? ($sidebarPosition === 'left' ? ($sidebarType === 'compact' ? 'lg:pl-20' : 'lg:pl-64') : ($sidebarType === 'compact' ? 'lg:pr-20' : 'lg:pr-64')) : ($sidebarPosition === 'top' ? 'pt-20' : 'pb-20')) : '' }} min-h-screen bg-[#fafaf8] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
 @if($sidebarEnabled)
-    <aside x-data="{ sidebarOpen: true }" class="{{ in_array($sidebarPosition, ['left', 'right'], true) ? 'fixed inset-y-0 z-50 hidden lg:block '.($sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r').' '.($sidebarType === 'compact' ? 'w-20' : 'w-64') : 'relative z-30 w-full border-y' }} border-zinc-200 bg-white shadow-sm">
+    <aside x-data="{ sidebarOpen: true }" class="{{ in_array($sidebarPosition, ['left', 'right'], true) ? 'fixed inset-y-0 z-50 hidden lg:block '.($sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r').' '.($sidebarType === 'compact' ? 'w-20' : 'w-64') : ('fixed left-0 z-50 w-full '.($sidebarPosition === 'top' ? 'top-0 border-b' : 'bottom-0 border-t')) }} border-zinc-200 bg-white shadow-sm">
 
         @if($sidebarType === 'collapsible')
             <button type="button" @click="sidebarOpen = !sidebarOpen" class="m-4 flex items-center gap-2 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-200">
