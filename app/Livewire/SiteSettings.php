@@ -16,6 +16,16 @@ class SiteSettings extends Component
 
     public array $modelContent = [];
 
+    public bool $allowSearchIndexing = true;
+
+    public string $siteLanguage = 'pt-PT';
+
+    public string $siteDescription = '';
+
+    public string $analyticsId = '';
+
+    public bool $showFinderBranding = true;
+
     public bool $modelContentApplied = false;
 
     public bool $modelContentSaved = false;
@@ -26,6 +36,11 @@ class SiteSettings extends Component
         abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
 
         $this->site = $site;
+        $this->allowSearchIndexing = (bool) data_get($site->settings, 'preferences.allow_search_indexing', true);
+        $this->siteLanguage = (string) data_get($site->settings, 'preferences.language', 'pt-PT');
+        $this->siteDescription = (string) data_get($site->settings, 'preferences.site_description', '');
+        $this->analyticsId = (string) data_get($site->settings, 'preferences.analytics_id', '');
+        $this->showFinderBranding = (bool) data_get($site->settings, 'preferences.show_finder_branding', true);
         session()->put('current_site_id', $site->id);
         $this->modelContent = data_get($site->settings, 'model_content', []);
         $this->modelContentApplied = filled(data_get($site->settings, 'model_content_applied_at'));
@@ -93,6 +108,30 @@ class SiteSettings extends Component
         $this->modelContentSaved = true;
         $this->modelContentApplied = false;
         session()->flash('model-content-saved', 'Configuração do site guardada. Agora podes aplicar os dados no site.');
+    }
+
+    public function savePreferences(): void
+    {
+        $this->validate([
+            'siteLanguage' => ['required', 'in:pt-PT,en-GB,es-ES,fr-FR'],
+            'siteDescription' => ['nullable', 'string', 'max:320'],
+            'analyticsId' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9._:-]*$/'],
+        ]);
+
+        $settings = $this->site->settings ?? [];
+        $settings['preferences'] = array_merge($settings['preferences'] ?? [], [
+            'allow_search_indexing' => $this->allowSearchIndexing,
+            'language' => $this->siteLanguage,
+            'site_description' => trim($this->siteDescription),
+            'analytics_id' => trim($this->analyticsId),
+            'show_finder_branding' => $this->showFinderBranding,
+        ]);
+
+        $this->site->update(['settings' => $settings]);
+        app(FinderNotificationService::class)->siteChanged($this->site, 'As preferências gerais do website foram alteradas.');
+        $this->site->refresh();
+
+        session()->flash('preferences-saved', 'Preferências gerais guardadas com sucesso.');
     }
 
     public function updatedModelContent(): void
