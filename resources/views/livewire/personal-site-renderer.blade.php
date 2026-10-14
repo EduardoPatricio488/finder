@@ -101,7 +101,8 @@
             </nav>
         </aside>
     @endif
-@endif    <header class="sticky top-0 z-40 border-b border-black/5 bg-[#f8f8f6]/90 backdrop-blur-xl">
+@endif    @unless($sidebarEnabled && $sidebarPosition === 'top')
+    <header class="sticky top-0 z-40 border-b border-black/5 bg-[#f8f8f6]/90 backdrop-blur-xl">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
             <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => $preview ? 1 : null]) }}" class="flex items-center gap-3 font-semibold tracking-tight">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm" style="background: var(--finder-primary)">{{ $initial }}</span>
@@ -171,6 +172,7 @@
             </nav>
         </div>
     </header>
+    @endunless
 
     @if($preview)
         <div data-visual-ignore class="border-b border-amber-200 bg-amber-50 px-5 py-2.5 text-center text-xs font-medium text-amber-800">Pré-visualização privada — este conteúdo ainda não está público.</div>
