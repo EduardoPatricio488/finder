@@ -30,8 +30,7 @@
     $sidebarWidth = (string) data_get($site->settings, 'sidebar.width', 'normal');
     $sidebarIcons = (string) data_get($site->settings, 'sidebar.icons', 'shown');
     $sidebarPosition = (string) data_get($site->settings, 'sidebar.position', 'left');
-    $sidebarPageIds = collect(data_get($site->settings, 'sidebar.page_ids', []))->map(fn ($id) => (string) $id);
-    $sidebarPages = $site->pages->whereIn('id', $sidebarPageIds)->sortBy('sort_order')->values();
+    $sidebarPages = $site->pages->sortBy('sort_order')->values();
     if (! $preview) {
         $sidebarPages = $sidebarPages->where('status', 'published')->values();
     }
