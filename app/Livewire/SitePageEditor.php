@@ -133,7 +133,7 @@ class SitePageEditor extends Component
                 'slug' => $this->slug,
                 'status' => $this->status,
             ]);
-    
+
             foreach ($this->sections as $index => $sectionData) {
                 $items = collect(preg_split('/\r?\n/', (string) ($sectionData['items_text'] ?? '')))
                     ->map(fn ($item) => trim($item))
@@ -141,7 +141,7 @@ class SitePageEditor extends Component
                     ->map(fn ($item) => ['title' => $item])
                     ->values()
                     ->all();
-    
+
                 $content = [
                     'title' => trim((string) ($sectionData['title'] ?? '')),
                     'body' => trim((string) ($sectionData['body'] ?? '')),
@@ -151,7 +151,7 @@ class SitePageEditor extends Component
                     'image_url' => trim((string) ($sectionData['image_url'] ?? '')),
                     'items' => $items,
                 ];
-    
+
                 $attributes = [
                     'type' => $sectionData['type'],
                     'label' => trim((string) ($sectionData['label'] ?? '')) ?: null,
@@ -165,15 +165,14 @@ class SitePageEditor extends Component
                     'sort_order' => $index,
                     'is_visible' => (bool) ($sectionData['is_visible'] ?? true),
                 ];
-    
+
                 if (! empty($sectionData['id'])) {
                     $this->page->sections()->whereKey($sectionData['id'])->update($attributes);
                 } else {
                     $this->page->sections()->create($attributes);
                 }
             }
-    
-    
+
         });
 
         $this->page->refresh();
