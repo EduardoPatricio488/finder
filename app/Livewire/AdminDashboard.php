@@ -140,6 +140,22 @@ class AdminDashboard extends Component
                 ];
             });
 
+            $recentUsers = $sites
+                ->flatMap(fn (Site $site) => $site->members()->latest()->limit(5)->get())
+                ->sortByDesc('created_at')
+                ->take(5)
+                ->values();
+
+            $lowStockProducts = $sites
+                ->flatMap(fn (Site $site) => $site->products()
+                    ->whereColumn('stock', '<=', 'minimum_stock')
+                    ->orderBy('stock')
+                    ->limit(5)
+                    ->get())
+                ->sortBy('stock')
+                ->take(5)
+                ->values();
+
             return view('livewire.admin-dashboard', [
                 'allSitesMode' => true,
                 'sites' => $sites,
@@ -148,10 +164,11 @@ class AdminDashboard extends Component
                 'totalProducts' => $siteSummaries->sum('products'),
                 'activeProducts' => $siteSummaries->sum('activeProducts'),
                 'totalOrders' => $siteSummaries->sum('orders'),
-                'todayRevenue' => $siteSummaries->sum('todayRevenue'),
-                'todaySales' => $siteSummaries->sum('todaySales'),
-                'lowStockTotal' => $siteSummaries->sum('lowStock'),
-                'totalMembers' => $siteSummaries->sum('members'),
+                'totalUsers' => $siteSummaries->sum('members'),
+                'revenue' => $siteSummaries->sum('todayRevenue'),
+                'sales' => $siteSummaries->sum('todaySales'),
+                'lowStockProducts' => $lowStockProducts,
+                'recentUsers' => $recentUsers,
             ]);
         }
 
