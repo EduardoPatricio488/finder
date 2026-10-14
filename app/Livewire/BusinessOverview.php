@@ -62,7 +62,7 @@ class BusinessOverview extends Component
         abort_unless($siteIds->isNotEmpty(), 404);
 
         $orders = Order::query()->whereIn('site_id', $siteIds);
-        $payments = Payment::query()->whereIn('site_id', $siteIds);
+        $payments = Payment::query()->whereHas('order', fn ($query) => $query->whereIn('site_id', $siteIds));
         $products = Product::query()->whereIn('site_id', $siteIds);
 
         $paidStatuses = ['pago', 'em_preparacao', 'enviado', 'entregue'];
