@@ -52,9 +52,9 @@
                         <label for="sidebarPosition" class="text-sm font-semibold text-zinc-800">Posição da sidebar</label>
                         <select id="sidebarPosition" wire:model="sidebarPosition" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
                             <option value="top">Em cima — horizontal</option>
-                            <option value="left">À esquerda — vertical</option>
-                            <option value="right">À direita — vertical</option>
-                            <option value="bottom">Em baixo — horizontal</option>
+                            <option value="left" disabled>À esquerda — vertical (Em breve)</option>
+                            <option value="right" disabled>À direita — vertical (Em breve)</option>
+                            <option value="bottom" disabled>Em baixo — horizontal (Em breve)</option>
                         </select>
                         @error('sidebarPosition') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
@@ -63,8 +63,8 @@
                         <label for="sidebarType" class="text-sm font-semibold text-zinc-800">Tipo de sidebar</label>
                         <select id="sidebarType" wire:model="sidebarType" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
                             <option value="fixed">Fixa — sempre visível</option>
-                            <option value="collapsible">Recolhível — pode ser aberta e fechada</option>
-                            <option value="compact">Recolhida — só ícones</option>
+                            <option value="collapsible" disabled>Recolhível — pode ser aberta e fechada (Em breve)</option>
+                            <option value="compact" disabled>Recolhida — só ícones (Em breve)</option>
                         </select>
                         @error('sidebarType') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
