@@ -216,8 +216,10 @@ class PublicSite extends Component
         }
 
         $orderNumber = 'PED-'.now()->format('Ymd').'-'.strtoupper(Str::random(6));
+        $createdOrderId = null;
+        $lowStockProductIds = [];
 
-        DB::transaction(function () use ($validated, $orderNumber, $cart): void {
+        DB::transaction(function () use ($validated, $orderNumber, $cart, &$createdOrderId, &$lowStockProductIds): void {
             $site = $this->site;
             $customer = $site->customers()->updateOrCreate(['email' => $validated['customerEmail']], ['name' => $validated['customerName'], 'phone' => $validated['customerPhone']]);
             $products = $site->products()->whereIn('id', array_keys($cart))->with('promotions')->lockForUpdate()->get()->keyBy('id');
@@ -239,17 +241,31 @@ class PublicSite extends Component
             $shipping = $subtotal >= 50 ? 0 : $deliveryFee;
             $total = $subtotal + $tax + $shipping;
             $order = $site->orders()->create(['order_number' => $orderNumber, 'customer_id' => $customer->id, 'delivery_address' => $validated['deliveryAddress'], 'sold_at' => now(), 'subtotal' => $subtotal, 'discount' => 0, 'tax' => $tax, 'shipping' => $shipping, 'total' => $total, 'payment_method' => $validated['paymentMethod'], 'status' => 'pendente']);
+            $createdOrderId = $order->id;
+
             foreach ($cart as $productId => $quantity) {
                 $product = $products->get($productId);
                 $promotion = $product->promotions->first(fn ($p) => $p->starts_at <= now() && $p->ends_at >= now());
                 $price = $promotion ? ($promotion->discount_type === 'percentagem' ? max(0, (float) $product->price * (1 - ((float) $promotion->discount_value / 100))) : max(0, (float) $product->price - (float) $promotion->discount_value)) : (float) $product->price;
                 $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => $quantity, 'unit_price' => $price, 'total' => $price * $quantity]);
                 $product->decrement('stock', $quantity);
-                if ($product->stock <= $product->minimum_stock) app(StoreMailService::class)->lowStock($product->refresh());
+                if ($product->stock <= $product->minimum_stock) $lowStockProductIds[] = $product->id;
             }
             $order->payments()->create(['site_id' => $site->id, 'amount' => $total, 'method' => $validated['paymentMethod'], 'status' => 'pendente']);
-            app(StoreMailService::class)->orderReceived($order->load('customer'));
         });
+
+        // Emails are external side effects: send them only after the database transaction commits.
+        $order = $this->site->orders()->with('customer')->findOrFail($createdOrderId);
+        $mailService = app(StoreMailService::class);
+        $mailService->orderReceived($order);
+
+        foreach (array_unique($lowStockProductIds) as $productId) {
+            $product = $this->site->products()->find($productId);
+            if ($product !== null) {
+                $mailService->lowStock($product);
+            }
+        }
+
         $this->completedOrderNumber = $orderNumber;
         $this->cart = [];
         session()->forget($this->cartKey());
