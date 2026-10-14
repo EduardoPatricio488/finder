@@ -220,12 +220,12 @@
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0 flex-1">
                         <p class="font-semibold text-zinc-900">Entrar</p>
-                        <p class="mt-1 text-xs text-zinc-500">Página de autenticação do Finder</p>
+                        <p class="mt-1 text-xs text-zinc-500">Página de autenticação personalizada deste website</p>
                     </div>
                     <span class="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-bold text-indigo-800">Página do sistema</span>
                 </div>
                 <div class="mt-4">
-                    <a href="{{ route('login') }}" target="_blank" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Abrir página de login →</a>
+                    <a href="{{ route('site.public', ['site' => $site, 'pageSlug' => 'login', 'preview' => 1]) }}" target="_blank" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Abrir página de login →</a>
                 </div>
             </article>
 
