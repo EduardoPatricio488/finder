@@ -150,6 +150,8 @@ class PublicSite extends Component
 
     public function addToCart(int $productId): void
     {
+        abort_if($this->preview, 404);
+
         $product = $this->site->products()->where('is_active', true)->findOrFail($productId);
         abort_if($product->stock < 1, 422, 'Este produto está esgotado.');
         $this->cart[$productId] = min(($this->cart[$productId] ?? 0) + 1, $product->stock);
@@ -161,6 +163,8 @@ class PublicSite extends Component
 
     public function decreaseQuantity(int $productId): void
     {
+        abort_if($this->preview, 404);
+
         if (! isset($this->cart[$productId])) return;
         if ($this->cart[$productId] > 1) {
             $this->cart[$productId]--;
@@ -172,12 +176,16 @@ class PublicSite extends Component
 
     public function removeFromCart(int $productId): void
     {
+        abort_if($this->preview, 404);
+
         unset($this->cart[$productId]);
         session()->put($this->cartKey(), $this->cart);
     }
 
     public function openCheckout(): void
     {
+        abort_if($this->preview, 404);
+
         abort_if($this->cart === [], 422, 'O carrinho está vazio.');
         $this->cartOpen = false;
         $this->checkoutOpen = true;
@@ -185,6 +193,8 @@ class PublicSite extends Component
 
     public function checkout(): void
     {
+        abort_if($this->preview, 404);
+
         abort_if($this->cart === [], 422, 'O carrinho está vazio.');
         $validated = $this->validate([
             'customerName' => ['required', 'string', 'max:255'],
