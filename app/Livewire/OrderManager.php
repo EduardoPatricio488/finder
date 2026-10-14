@@ -87,13 +87,6 @@ class OrderManager extends Component
 
         $siteIds = $availableSites->modelKeys();
 
-        // Corrige registos antigos/inconsistentes: pagamento recebido implica, no mínimo, estado Pago.
-        Order::query()
-            ->whereIn('site_id', $siteIds)
-            ->where('status', 'pendente')
-            ->whereHas('payments', fn ($query) => $query->where('status', 'recebido'))
-            ->update(['status' => 'pago']);
-
         $orders = Order::query()
             ->whereIn('site_id', $siteIds)
             ->when($this->catalogSiteId !== '', fn ($query) => $query->where('site_id', (int) $this->catalogSiteId))
