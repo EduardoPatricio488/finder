@@ -218,7 +218,9 @@ class PublicSite extends Component
                 $subtotal += $price * $quantity;
             }
             $tax = $subtotal * 0.23;
-            $shipping = $subtotal >= 50 ? 0 : 4.99;
+            $configuredDeliveryFee = $site->storeConfig()->value('delivery_fee');
+            $deliveryFee = $configuredDeliveryFee === null ? 4.99 : max(0, (float) $configuredDeliveryFee);
+            $shipping = $subtotal >= 50 ? 0 : $deliveryFee;
             $total = $subtotal + $tax + $shipping;
             $order = $site->orders()->create(['order_number' => $orderNumber, 'customer_id' => $customer->id, 'delivery_address' => $validated['deliveryAddress'], 'sold_at' => now(), 'subtotal' => $subtotal, 'discount' => 0, 'tax' => $tax, 'shipping' => $shipping, 'total' => $total, 'payment_method' => $validated['paymentMethod'], 'status' => 'pendente']);
             foreach ($this->cart as $productId => $quantity) {
@@ -253,7 +255,16 @@ class PublicSite extends Component
         });
     }
 
-    public function getCartShippingProperty(): float { return $this->cartSubtotal >= 50 ? 0 : ($this->cartSubtotal > 0 ? 4.99 : 0); }
+    public function getCartShippingProperty(): float
+    {
+        if ($this->cartSubtotal <= 0 || $this->cartSubtotal >= 50) {
+            return 0;
+        }
+
+        $configuredDeliveryFee = $this->site->storeConfig()->value('delivery_fee');
+
+        return $configuredDeliveryFee === null ? 4.99 : max(0, (float) $configuredDeliveryFee);
+    }
     public function getCartTaxProperty(): float { return $this->cartSubtotal * 0.23; }
     public function getCartTotalProperty(): float { return $this->cartSubtotal + $this->cartTax + $this->cartShipping; }
 
