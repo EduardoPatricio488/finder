@@ -27,7 +27,7 @@ class SiteLoginResponse implements LoginResponse
             }
         }
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended((string) config('fortify.home', '/entrada'));
     }
 
     private function safeSiteRedirect(Request $request, mixed $candidate): ?string
