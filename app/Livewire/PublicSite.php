@@ -25,6 +25,8 @@ class PublicSite extends Component
 
     public bool $showLoginPage = false;
 
+    public bool $showCartPage = false;
+
     public string $contactName = '';
 
     public string $contactEmail = '';
@@ -58,14 +60,28 @@ class PublicSite extends Component
         $this->customerName = (string) (auth()->user()?->name ?? '');
         $this->customerEmail = (string) (auth()->user()?->email ?? '');
         $this->showLoginPage = $pageSlug === 'login';
+        $this->showCartPage = $pageSlug === 'cart';
         if ($this->showLoginPage && ! auth()->check()) {
             session()->put('url.intended', route('site.public', ['site' => $site, 'pageSlug' => null]));
         }
-        $this->page = $this->showLoginPage
+        $systemPageSlug = $this->showLoginPage ? null : ($this->showCartPage ? 'cart' : $pageSlug);
+        if ($this->showCartPage && ! $this->site->pages()->where('slug', 'cart')->exists()) {
+            $this->site->pages()->create([
+                'name' => 'Carrinho',
+                'slug' => 'cart',
+                'status' => 'published',
+                'is_homepage' => false,
+                'seo' => ['title' => 'Carrinho — '.$this->site->name, 'description' => 'Consulta e gere os produtos no teu carrinho.'],
+                'theme' => [],
+                'sort_order' => ((int) $this->site->pages()->max('sort_order')) + 1,
+            ]);
+            $this->site->load('pages.sections');
+        }
+        $this->page = ($this->showLoginPage)
             ? ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
                 ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail())
-            : ($pageSlug
-                ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
+            : ($systemPageSlug
+                ? $this->site->pages()->where('slug', $systemPageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
                 : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
                     ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail()));
 
@@ -260,9 +276,11 @@ class PublicSite extends Component
     {
         $view = $this->showLoginPage
             ? 'livewire.site-login-page'
-            : ($this->site->type === 'personal'
-                ? 'livewire.personal-site-renderer'
-                : 'livewire.public-site-renderer');
+            : ($this->showCartPage
+                ? 'livewire.site-cart-page'
+                : ($this->site->type === 'personal'
+                    ? 'livewire.personal-site-renderer'
+                    : 'livewire.public-site-renderer'));
 
         $media = $this->site->media
             ->filter(fn ($item) => filled($item->placement))
@@ -271,6 +289,7 @@ class PublicSite extends Component
         return view($view, [
             'mediaByPlacement' => $media,
             'showLoginPage' => $this->showLoginPage,
+            'showCartPage' => $this->showCartPage,
         ])
             ->layout('layouts.public-site', [
                 'site' => $this->site,
