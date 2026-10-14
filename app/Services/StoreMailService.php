@@ -63,7 +63,7 @@ class StoreMailService
     {
         $email = config('mail.admin_address');
 
-        if (!is_string($email) || trim($email) === '') {
+        if (! is_string($email) || trim($email) === '') {
             return;
         }
 
