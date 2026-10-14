@@ -89,7 +89,7 @@
     </header>
 
     @if($preview)
-        <div class="border-b border-amber-200 bg-amber-50 px-5 py-2.5 text-center text-xs font-semibold text-amber-800">Pré-visualização privada — a loja ainda não está publicada.</div>
+        <div data-visual-ignore class="border-b border-amber-200 bg-amber-50 px-5 py-2.5 text-center text-xs font-semibold text-amber-800">Pré-visualização privada — a loja ainda não está publicada.</div>
     @endif
 
     @if(session('site_form_success'))
@@ -248,14 +248,14 @@
 
     <footer class="border-t border-black/5 bg-zinc-950 px-5 py-10 text-white sm:px-8"><div class="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p class="font-bold">{{ $site->name }}</p><p class="text-xs text-white/40">© {{ now()->year }} · Loja online criada com Finder</p></div></footer>
 
-@if($preview && request()->boolean('visual_edit'))
+@if(true)
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const edits = new Map();
-    const nodes = Array.from(document.querySelectorAll('h1,h2,h3,h4,p,a,button,span,img,section,header,footer,nav,main,article,li,small,strong,em,label,div'));
+    const saved = @json(data_get($page->theme, 'visual_edits', []));
+    const nodes = Array.from(document.querySelectorAll('h1,h2,h3,h4,p,a,button,span,img,section,header,footer,nav,main,article,li,small,strong,em,label,div')).filter(el => !el.closest('[data-visual-ignore]'));
     nodes.forEach(function (el, index) {
         el.dataset.visualKey = 'v' + index;
-        const saved = @json(data_get($page->theme, 'visual_edits', []));
         const value = saved[el.dataset.visualKey];
         if (value) {
             if (value.text && el.children.length === 0) el.textContent = value.text;
@@ -265,6 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (value.background) el.style.backgroundColor = value.background;
         }
     });
+    if (!@json($preview && request()->boolean('visual_edit'))) return;
     const bar = document.createElement('div');
     bar.style.cssText = 'position:fixed;top:12px;left:12px;z-index:999999;background:#18181b;color:white;padding:12px;display:flex;gap:8px;align-items:center;border-radius:12px;font:600 13px system-ui';
     bar.innerHTML = '<b>Editar website</b><button id="visual-color" style="background:#3f3f46;padding:8px;border-radius:8px">Cores</button><button id="visual-save" style="background:#4f46e5;padding:8px;border-radius:8px">Guardar</button><span id="visual-status"></span>';
