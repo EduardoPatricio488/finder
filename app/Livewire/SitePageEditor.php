@@ -1,15 +1,15 @@
 <?php
 
-namespace App\\Livewire;
+namespace App\Livewire;
 
-use App\\Models\\Site;
-use App\\Models\\SitePage;
-use App\\Models\\SiteSection;
-use App\\Support\\SiteContext;
-use Illuminate\\Support\\Str;
-use Livewire\\Attributes\\Layout;
-use Livewire\\Attributes\\Title;
-use Livewire\\Component;
+use App\Models\Site;
+use App\Models\SitePage;
+use App\Models\SiteSection;
+use App\Support\SiteContext;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
 #[Layout('layouts.admin')]
 #[Title('Editor da página')]
@@ -120,7 +120,7 @@ class SitePageEditor extends Component
         ]);
 
         foreach ($this->sections as $index => $sectionData) {
-            $items = collect(preg_split('/\\r?\\n/', (string) ($sectionData['items_text'] ?? '')))
+            $items = collect(preg_split('/\r?\n/', (string) ($sectionData['items_text'] ?? '')))
                 ->map(fn ($item) => trim($item))
                 ->filter()
                 ->map(fn ($item) => ['title' => $item])
