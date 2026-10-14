@@ -19,6 +19,11 @@ class MenuManager extends Component
 
     public string $menuLocation = 'header';
 
+    public string $sidebarType = 'fixed';
+
+    /** @var array<int, string> */
+    public array $sidebarPageIds = [];
+
     public string $label = '';
 
     public string $url = '';
@@ -52,6 +57,8 @@ class MenuManager extends Component
         $this->site = $site;
         session()->put('current_site_id', $site->id);
         $this->menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
+        $this->sidebarType = (string) data_get($site->settings, 'sidebar.type', 'fixed');
+        $this->sidebarPageIds = array_map('strval', data_get($site->settings, 'sidebar.page_ids', []));
         $menu = $site->menus()->first();
 
         if ($menu) {
@@ -102,6 +109,27 @@ class MenuManager extends Component
         $this->ensureRequiredMenuItems();
         $this->menuApplied = false;
         session()->flash('status', 'Menu guardado. Agora podes aplicar as alterações no site.');
+    }
+
+    public function saveSidebar(): void
+    {
+        $this->validate([
+            'sidebarType' => ['required', 'in:fixed,collapsible,compact'],
+            'sidebarPageIds' => ['array', 'max:100'],
+            'sidebarPageIds.*' => ['required', 'integer', 'distinct', 'exists:site_pages,id'],
+        ]);
+
+        $validPageIds = $this->site->pages()->whereIn('id', $this->sidebarPageIds)->pluck('id')->map(fn ($id) => (string) $id)->all();
+        abort_if(count($validPageIds) !== count(array_unique($this->sidebarPageIds)), 422, 'Uma das páginas selecionadas não pertence a este website.');
+
+        $settings = $this->site->settings ?? [];
+        data_set($settings, 'sidebar.type', $this->sidebarType);
+        data_set($settings, 'sidebar.page_ids', array_values($validPageIds));
+        data_set($settings, 'sidebar.updated_at', now()->toIso8601String());
+        $this->site->update(['settings' => $settings]);
+        $this->site->refresh();
+        session()->flash('status', 'Sidebar guardada. Aplica as alterações e pré-visualiza o website.');
+        $this->menuApplied = false;
     }
 
     public function createPage(): void
