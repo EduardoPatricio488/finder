@@ -84,6 +84,7 @@ class PublicSite extends Component
                 ? $this->site->pages()->where('slug', $systemPageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
                 : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
                     ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail()));
+        $this->page->loadMissing('sections');
 
         if (! $this->preview) {
             SiteAnalyticsEvent::create([
