@@ -23,6 +23,8 @@ class SiteSettings extends Component
 
     public string $siteDescription = '';
 
+    public string $siteTaxRate = '23';
+
     public string $analyticsId = '';
 
     public bool $showFinderBranding = true;
@@ -40,6 +42,7 @@ class SiteSettings extends Component
         $this->allowSearchIndexing = (bool) data_get($site->settings, 'preferences.allow_search_indexing', true);
         $this->siteLanguage = (string) data_get($site->settings, 'preferences.language', 'pt-PT');
         $this->siteDescription = (string) data_get($site->settings, 'preferences.site_description', '');
+        $this->siteTaxRate = (string) data_get($site->settings, 'preferences.tax_rate', '23');
         $this->analyticsId = (string) data_get($site->settings, 'preferences.analytics_id', '');
         $this->showFinderBranding = (bool) data_get($site->settings, 'preferences.show_finder_branding', true);
         session()->put('current_site_id', $site->id);
@@ -116,6 +119,7 @@ class SiteSettings extends Component
         $this->validate([
             'siteLanguage' => ['required', 'in:pt-PT,en-GB,es-ES,fr-FR'],
             'siteDescription' => ['nullable', 'string', 'max:320'],
+            'siteTaxRate' => ['required', 'numeric', 'min:0', 'max:100'],
             'analyticsId' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9._:-]*$/'],
         ]);
 
@@ -124,6 +128,7 @@ class SiteSettings extends Component
             'allow_search_indexing' => $this->allowSearchIndexing,
             'language' => $this->siteLanguage,
             'site_description' => trim($this->siteDescription),
+            'tax_rate' => (float) $this->siteTaxRate,
             'analytics_id' => trim($this->analyticsId),
             'show_finder_branding' => $this->showFinderBranding,
         ]);
