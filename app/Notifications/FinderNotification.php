@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
 class FinderNotification extends Notification
@@ -15,7 +14,9 @@ class FinderNotification extends Notification
         public string $title,
         public string $message,
         public string $icon = 'bell',
-    ) {}
+    )
+    {
+    }
 
     public function via(object $notifiable): array
     {
