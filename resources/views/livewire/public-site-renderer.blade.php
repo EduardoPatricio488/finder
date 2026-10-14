@@ -11,6 +11,10 @@
         }
     }
     $accent = $site->theme['primary'] ?? $site->primary_color ?? '#059669';
+    $sidebarType = (string) data_get($site->settings, 'sidebar.type', 'fixed');
+    $sidebarPageIds = collect(data_get($site->settings, 'sidebar.page_ids', []))->map(fn ($id) => (string) $id);
+    $sidebarPages = $site->pages->whereIn('id', $sidebarPageIds)->sortBy('sort_order')->values();
+    $sidebarEnabled = $sidebarPages->isNotEmpty();
     $currentPage = $page->slug;
     $menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
     $activeMenu = $menuApplied ? $site->menus->firstWhere('location', 'header') : null;
@@ -20,7 +24,32 @@
     $productCount = $site->products->count();
 @endphp
 
-<div class="min-h-screen bg-[#fafaf8] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
+@if($sidebarEnabled)
+    <aside x-data="{ sidebarOpen: true }" class="fixed inset-y-0 left-0 z-50 hidden border-r border-zinc-200 bg-white shadow-sm lg:block {{ $sidebarType === 'compact' ? 'w-20' : 'w-64' }}">
+        @if($sidebarType === 'collapsible')
+            <button type="button" @click="sidebarOpen = !sidebarOpen" class="m-4 flex items-center gap-2 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-200">
+                <span class="text-lg">☰</span><span x-show="sidebarOpen">Recolher</span>
+            </button>
+        @else
+            <div class="border-b border-zinc-100 px-5 py-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-zinc-400">Navegação</p>
+                <p class="mt-1 truncate font-bold text-zinc-900">{{ $site->name }}</p>
+            </div>
+        @endif
+        <nav class="space-y-1 p-3" aria-label="Navegação lateral">
+            @foreach($sidebarPages as $sidebarPage)
+                <a href="{{ route('site.public', [$site, 'pageSlug' => $sidebarPage->slug, 'preview' => $preview ? 1 : null]) }}" title="{{ $sidebarPage->name }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition {{ $currentPage === $sidebarPage->slug ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950' }}">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $currentPage === $sidebarPage->slug ? 'bg-white/15' : 'bg-zinc-100' }}">{{ mb_strtoupper(mb_substr($sidebarPage->name, 0, 1)) }}</span>
+                    @if($sidebarType !== 'compact')
+                        <span x-show="sidebarOpen" class="truncate">{{ $sidebarPage->name }}</span>
+                    @endif
+                </a>
+            @endforeach
+        </nav>
+    </aside>
+@endif
+
+<div class="{{ $sidebarEnabled ? ($sidebarType === 'compact' ? 'lg:pl-20' : 'lg:pl-64') : '' }} min-h-screen bg-[#fafaf8] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
     <header class="sticky top-0 z-40 border-b border-black/5 bg-[#fafaf8]/90 backdrop-blur-xl">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-4 sm:px-8">
             <a href="{{ route('site.public', [$site, 'pageSlug' => 'home', 'preview' => $preview ? 1 : null]) }}" class="flex items-center gap-3">
