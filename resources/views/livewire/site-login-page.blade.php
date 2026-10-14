@@ -46,7 +46,6 @@
 
                     <form method="POST" action="{{ route('login') }}" class="space-y-5">
                         @csrf
-                        <input type="hidden" name="redirect_to_site" value="{{ $site->slug }}">
                         <div>
                             <label for="email" class="mb-2 block text-sm font-semibold text-zinc-800">Email</label>
                             <input id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="username" required autofocus class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:ring-4" style="--tw-ring-color: color-mix(in srgb, {{ $accent }} 18%, transparent)" placeholder="nome@exemplo.pt">
