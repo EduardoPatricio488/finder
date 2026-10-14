@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Component;
 
 class Notifications extends Component
