@@ -34,7 +34,7 @@
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('menu-applied') }}</div>
     @endif
 
-    <div class="grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
+    <div class="grid gap-6">
         <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="flex items-start gap-3">
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
@@ -87,44 +87,6 @@
             </form>
         </div>
 
-        <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                    <flux:icon name="plus" class="size-5" />
-                </div>
-                <div class="min-w-0 flex-1">
-                    <h2 class="font-semibold text-zinc-950">Páginas obrigatórias</h2>
-                    <p class="mt-1 text-xs leading-5 text-zinc-500">Início, Sobre mim e Contactos já fazem parte do menu. Podes mudar o nome de cada uma, mas não as podes eliminar.</p>
-                </div>
-                <button type="button" @click="showCreatePageModal = true" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
-                    <flux:icon name="plus" class="size-4" />
-                    Adicionar página
-                </button>
-            </div>
-
-            <div class="mt-6 space-y-3">
-                @foreach ($pages as $page)
-                    @php($requiredItemId = $requiredItemIds[$page->slug] ?? null)
-                    @php($requiredItem = $requiredItemId ? $items->firstWhere('id', $requiredItemId) : null)
-                    <div role="link" tabindex="0" onclick="if (!event.target.closest('input,button,a,select')) window.location.href='{{ route('site.manage.pages.edit', $page->id) }}'" class="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/40 sm:flex-row sm:items-center">
-                        <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-zinc-500 shadow-sm">
-                            <flux:icon name="{{ match($page->slug) { 'home' => 'home', 'about' => 'user', 'contact' => 'envelope', default => 'document-text' } }}" class="size-5" />
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">{{ $this->pageLabel($page->slug) }}</p>
-                            <input wire:model="requiredLabels.{{ $page->slug }}" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900" />
-                        </div>
-                        <a href="{{ route('site.manage.pages.edit', $page->id) }}" class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">Editar página →</a>
-                        <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                            <span class="size-1.5 rounded-full bg-emerald-500"></span>
-                            Obrigatório
-                        </span>
-                    </div>
-                @endforeach
-            </div>
-
-            <p class="mt-4 text-xs leading-5 text-zinc-400">Estas três páginas são criadas automaticamente e permanecem sempre no menu. Aqui só podes alterar o nome apresentado.</p>
-        </div>
     </div>
 
     <div x-cloak x-show="showCreatePageModal" x-transition.opacity @keydown.escape.window="showCreatePageModal = false" class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4 sm:p-6" style="display: none;">
