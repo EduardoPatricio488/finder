@@ -42,17 +42,28 @@
                 </div>
                 <div>
                     <h2 class="font-semibold text-zinc-950">Sidebar</h2>
-                    <p class="mt-1 text-xs leading-5 text-zinc-500">Escolhe o estilo da barra lateral e as páginas que devem aparecer nela.</p>
+                    <p class="mt-1 text-xs leading-5 text-zinc-500">Escolhe a posição, o comportamento e as páginas apresentadas na sidebar.</p>
                 </div>
             </div>
 
             <form wire:submit="saveSidebar" class="mt-6 space-y-5">
                 <div>
+                    <label for="sidebarPosition" class="text-sm font-semibold text-zinc-800">Posição da sidebar</label>
+                    <select id="sidebarPosition" wire:model="sidebarPosition" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                        <option value="top">Em cima — horizontal</option>
+                        <option value="left">À esquerda — vertical</option>
+                        <option value="right">À direita — vertical</option>
+                        <option value="bottom">Em baixo — horizontal</option>
+                    </select>
+                    @error('sidebarPosition') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
                     <label for="sidebarType" class="text-sm font-semibold text-zinc-800">Tipo de sidebar</label>
                     <select id="sidebarType" wire:model="sidebarType" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
                         <option value="fixed">Fixa — sempre visível</option>
                         <option value="collapsible">Recolhível — pode ser aberta e fechada</option>
-                        <option value="compact">Compacta — mais estreita</option>
+                        <option value="compact">Recolhida — só ícones</option>
                     </select>
                     @error('sidebarType') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
