@@ -1,25 +1,68 @@
 <?php
 
-namespace App\Livewire;
+namespace App\\Livewire;
 
-use App\Livewire\Concerns\InteractsWithSiteContext;
-use Illuminate\Support\Str;
-use Livewire\Attributes\Layout;
-use Livewire\Component;
+use App\\Livewire\\Concerns\\InteractsWithSiteContext;
+use App\\Models\\Site;
+use App\\Support\\SiteContext;
+use Illuminate\\Support\\Str;
+use Livewire\\Attributes\\Layout;
+use Livewire\\Component;
 
 #[Layout('layouts.admin')]
 class AdminDashboard extends Component
 {
     use InteractsWithSiteContext;
 
+    public ?string $selectedSiteId = null;
+
     public array $modelContent = [];
 
     public function mount(): void
     {
-        $site = $this->currentSite();
+        // A gestão abre sempre com todos os websites. O filtro é opcional.
+        $this->selectedSiteId = request()->query('site') ? (string) request()->query('site') : null;
+
+        if ($this->selectedSiteId !== null) {
+            $this->loadModelContent();
+        }
+    }
+
+    public function updatedSelectedSiteId(): void
+    {
+        if (blank($this->selectedSiteId)) {
+            $this->selectedSiteId = null;
+            $this->modelContent = [];
+
+            return;
+        }
+
+        $site = $this->selectedSite();
+        session()->put('current_site_id', $site->id);
+        $this->loadModelContent();
+    }
+
+    private function manageableSites()
+    {
+        return SiteContext::manageableSitesQuery(auth()->user())
+            ->with('plan')
+            ->orderBy('sort_order')
+            ->orderBy('name');
+    }
+
+    private function selectedSite(): Site
+    {
+        abort_if(blank($this->selectedSiteId), 404);
+
+        return $this->manageableSites()->whereKey((int) $this->selectedSiteId)->firstOrFail();
+    }
+
+    private function loadModelContent(): void
+    {
+        $site = $this->selectedSite();
         $this->modelContent = data_get($site->settings, 'model_content', []);
 
-        foreach ($this->modelProfile()['fields'] as $field) {
+        foreach ($this->modelProfile($site)['fields'] as $field) {
             $key = (string) ($field['key'] ?? '');
             if ($key !== '' && ! array_key_exists($key, $this->modelContent)) {
                 $this->modelContent[$key] = '';
@@ -29,7 +72,8 @@ class AdminDashboard extends Component
 
     public function saveModelContent(): void
     {
-        $profile = $this->modelProfile();
+        $site = $this->selectedSite();
+        $profile = $this->modelProfile($site);
         $rules = [];
 
         foreach ($profile['fields'] as $field) {
@@ -53,19 +97,20 @@ class AdminDashboard extends Component
 
         $this->validate($rules);
 
-        $settings = $this->currentSite()->settings ?? [];
+        $settings = $site->settings ?? [];
         $settings['model_content'] = collect($this->modelContent)
             ->map(fn ($value) => is_string($value) ? trim($value) : $value)
             ->all();
 
-        $this->currentSite()->update(['settings' => $settings]);
+        $site->update(['settings' => $settings]);
 
         session()->flash('model-content-saved', 'Conteúdo do modelo guardado com sucesso.');
     }
 
-    private function modelProfile(): array
+    private function modelProfile(?Site $site = null): array
     {
-        $type = (string) $this->currentSite()->type;
+        $site ??= $this->selectedSite();
+        $type = (string) $site->type;
 
         return config("website.model_profiles.{$type}", [
             'label' => config("website.types.{$type}.label", 'Website'),
@@ -78,8 +123,41 @@ class AdminDashboard extends Component
 
     public function render(): mixed
     {
-        $site = $this->currentSite();
-        $profile = $this->modelProfile();
+        $sites = $this->manageableSites()->get();
+
+        if (blank($this->selectedSiteId)) {
+            $siteSummaries = $sites->map(function (Site $site): array {
+                $validOrders = $site->orders()->where('status', '!=', 'cancelada');
+
+                return [
+                    'site' => $site,
+                    'products' => $site->products()->count(),
+                    'activeProducts' => $site->products()->where('is_active', true)->count(),
+                    'orders' => (clone $validOrders)->count(),
+                    'todaySales' => (clone $validOrders)->whereDate('sold_at', today())->count(),
+                    'todayRevenue' => (float) (clone $validOrders)->whereDate('sold_at', today())->sum('total'),
+                    'lowStock' => $site->products()->whereColumn('stock', '<=', 'minimum_stock')->count(),
+                    'members' => $site->members()->count(),
+                ];
+            });
+
+            return view('livewire.admin-dashboard', [
+                'allSitesMode' => true,
+                'sites' => $sites,
+                'siteSummaries' => $siteSummaries,
+                'totalSites' => $sites->count(),
+                'totalProducts' => $siteSummaries->sum('products'),
+                'activeProducts' => $siteSummaries->sum('activeProducts'),
+                'totalOrders' => $siteSummaries->sum('orders'),
+                'todayRevenue' => $siteSummaries->sum('todayRevenue'),
+                'todaySales' => $siteSummaries->sum('todaySales'),
+                'lowStockTotal' => $siteSummaries->sum('lowStock'),
+                'totalMembers' => $siteSummaries->sum('members'),
+            ]);
+        }
+
+        $site = $this->selectedSite();
+        $profile = $this->modelProfile($site);
         $fields = $profile['fields'] ?? [];
         $filled = collect($fields)->filter(function (array $field): bool {
             $value = $this->modelContent[$field['key']] ?? '';
@@ -92,6 +170,8 @@ class AdminDashboard extends Component
             && $site->members()->whereKey($site->owner_id)->exists();
 
         return view('livewire.admin-dashboard', [
+            'allSitesMode' => false,
+            'sites' => $sites,
             'site' => $site,
             'activeProducts' => $site->products()->where('is_active', true)->count(),
             'totalProducts' => $site->products()->count(),
