@@ -205,7 +205,7 @@ class PublicSite extends Component
             'paymentMethod' => ['required', 'in:mbway,transferencia,cartao,entrega'],
         ]);
         $cart = [];
-        foreach ($cart as $productId => $quantity) {
+        foreach ($validated['cart'] as $productId => $quantity) {
             abort_unless(ctype_digit((string) $productId) && (int) $productId > 0, 422, 'O carrinho contém um produto inválido.');
             $cart[(int) $productId] = (int) $quantity;
         }
@@ -217,7 +217,7 @@ class PublicSite extends Component
             $customer = $site->customers()->updateOrCreate(['email' => $validated['customerEmail']], ['name' => $validated['customerName'], 'phone' => $validated['customerPhone']]);
             $products = $site->products()->whereIn('id', array_keys($cart))->with('promotions')->lockForUpdate()->get()->keyBy('id');
             $subtotal = 0.0;
-            foreach ($this->cart as $productId => $quantity) {
+            foreach ($cart as $productId => $quantity) {
                 $product = $products->get($productId);
                 abort_if($product === null || ! $product->is_active || $product->stock < $quantity, 422, 'Um produto ficou sem stock.');
                 $promotion = $product->promotions->first(fn ($p) => $p->starts_at <= now() && $p->ends_at >= now());
@@ -230,7 +230,7 @@ class PublicSite extends Component
             $shipping = $subtotal >= 50 ? 0 : $deliveryFee;
             $total = $subtotal + $tax + $shipping;
             $order = $site->orders()->create(['order_number' => $orderNumber, 'customer_id' => $customer->id, 'delivery_address' => $validated['deliveryAddress'], 'sold_at' => now(), 'subtotal' => $subtotal, 'discount' => 0, 'tax' => $tax, 'shipping' => $shipping, 'total' => $total, 'payment_method' => $validated['paymentMethod'], 'status' => 'pendente']);
-            foreach ($this->cart as $productId => $quantity) {
+            foreach ($cart as $productId => $quantity) {
                 $product = $products->get($productId);
                 $promotion = $product->promotions->first(fn ($p) => $p->starts_at <= now() && $p->ends_at >= now());
                 $price = $promotion ? ($promotion->discount_type === 'percentagem' ? max(0, (float) $product->price * (1 - ((float) $promotion->discount_value / 100))) : max(0, (float) $product->price - (float) $promotion->discount_value)) : (float) $product->price;
