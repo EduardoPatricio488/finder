@@ -109,6 +109,8 @@
         <main class="px-5 py-20 sm:px-8"><div class="mx-auto max-w-7xl"><p class="text-xs font-black uppercase tracking-[.18em]" style="color:var(--finder-primary)">{{ $labels[$currentPage] ?? $page->name }}</p><h1 class="mt-3 text-5xl font-black">{{ $page->name }}</h1><div class="mt-10 space-y-8">@foreach($page->sections as $section)<section class="rounded-3xl bg-white p-8"><h2 class="text-2xl font-black">{{ data_get($section->content,'title','') }}</h2><p class="mt-3 whitespace-pre-line leading-8 text-zinc-600">{{ data_get($section->content,'body',data_get($section->content,'description','')) }}</p></section>@endforeach</div></div></main>
     @endif
 
+    @include('livewire.partials.page-custom-sections')
+
     @if($mediaByPlacement->isNotEmpty())
         <section class="border-t border-black/5 bg-white px-5 py-16 sm:px-8">
             <div class="mx-auto max-w-7xl"><p class="text-xs font-black uppercase tracking-[.18em]" style="color:var(--finder-primary)">Conteúdo visual</p><div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">@foreach($mediaByPlacement->flatten() as $item)<img src="{{ route('site.manage.media.file', ['media' => $item->id]) }}" alt="{{ $item->alt_text ?: $item->original_name }}" class="aspect-[4/3] w-full rounded-3xl object-cover">@endforeach</div></div>
