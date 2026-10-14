@@ -44,6 +44,12 @@
                         <div class="mt-1 flex justify-between gap-3 text-xs text-zinc-400"><span>Recomendado: uma descrição clara e curta.</span><span>{{ mb_strlen($siteDescription) }}/320</span></div>
                         @error('siteDescription') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
+                    <div>
+                        <label for="site-tax-rate" class="mb-2 block text-sm font-semibold text-zinc-800 dark:text-zinc-200">Taxa de IVA da loja (%)</label>
+                        <input id="site-tax-rate" type="number" min="0" max="100" step="0.01" wire:model="siteTaxRate" class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
+                        <p class="mt-1 text-xs text-zinc-400">Valor geral da loja; confirma a taxa aplicável aos teus produtos e clientes.</p>
+                        @error('siteTaxRate') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
                 </div>
                 <label class="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 p-4 transition hover:border-indigo-300 dark:border-zinc-700">
                     <input type="checkbox" wire:model="allowSearchIndexing" class="mt-1 size-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500">
