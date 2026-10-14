@@ -216,4 +216,34 @@
     @endif
 
     <footer class="border-t border-black/5 bg-zinc-950 px-5 py-10 text-white sm:px-8"><div class="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p class="font-bold">{{ $site->name }}</p><p class="text-xs text-white/40">© {{ now()->year }} · Loja online criada com Finder</p></div></footer>
+
+@if($preview && request()->boolean('visual_edit'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const bar = document.createElement('div');
+    bar.textContent = 'Modo de edição: clica num texto para o editar. As alterações são temporárias nesta pré-visualização.';
+    bar.style.cssText = 'position:fixed;top:12px;left:12px;z-index:999999;background:#18181b;color:white;padding:12px 16px;border-radius:12px;font:600 13px system-ui';
+    document.body.appendChild(bar);
+    document.querySelectorAll('h1,h2,h3,p,a,button,span,img').forEach(function (el) {
+        if (el.closest('header') && el.tagName === 'A') return;
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function (event) {
+            if (event.target === bar || bar.contains(event.target)) return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (el.tagName === 'IMG') {
+                const url = prompt('URL da imagem', el.src);
+                if (url) el.src = url;
+            } else {
+                el.contentEditable = 'true';
+                el.focus();
+                el.style.outline = '2px dashed #6366f1';
+            }
+        }, true);
+        el.addEventListener('blur', function () { el.contentEditable = 'false'; el.style.outline = ''; });
+    });
+});
+</script>
+@endif
+
 </div>
