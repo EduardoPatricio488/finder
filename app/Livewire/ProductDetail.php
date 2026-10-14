@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
+use App\Models\Site;
 use App\Support\SiteContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
@@ -73,7 +74,7 @@ class ProductDetail extends Component
 
         return Order::query()
             ->when(Schema::hasColumn('orders', 'site_id'), fn ($query) => $query->where(function ($query) use ($site): void {
-                $query->where('site_id', $site->id); 
+                $query->where('site_id', $site->id);
             }))
             ->whereHas('customer', fn ($query) => $query->where('email', auth()->user()?->email))
             ->whereHas('items', fn ($query) => $query->where('product_id', $this->product->id))
