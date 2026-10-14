@@ -38,7 +38,7 @@
         <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="flex items-start gap-3">
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
-                    <flux:icon name="panel-left" class="size-5" />
+                    <flux:icon name="bars-3" class="size-5" />
                 </div>
                 <div>
                     <h2 class="font-semibold text-zinc-950">Sidebar</h2>
