@@ -154,7 +154,6 @@ Route::middleware(['auth', 'verified', 'site.access'])
 
             return response()->json(['saved' => true, 'message' => 'Alterações guardadas no website.']);
         })->name('pages.visual.save');
-        Route::get('paginas/{page}', SitePageEditor::class)->name('pages.edit');
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('pagamentos', fn () => redirect()->route('sales'))->name('payments');
         Route::get('promocoes', fn () => redirect()->route('products'))->name('promotions');
