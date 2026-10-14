@@ -21,7 +21,7 @@ class MenuManager extends Component
 
     public string $sidebarType = 'fixed';
 
-    public string $sidebarPosition = 'left';
+    public string $sidebarPosition = 'top';
 
     /** @var array<int, string> */
     public array $sidebarPageIds = [];
@@ -59,8 +59,8 @@ class MenuManager extends Component
         $this->site = $site;
         session()->put('current_site_id', $site->id);
         $this->menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
-        $this->sidebarType = (string) data_get($site->settings, 'sidebar.type', 'fixed');
-        $this->sidebarPosition = (string) data_get($site->settings, 'sidebar.position', 'left');
+        $this->sidebarType = 'fixed';
+        $this->sidebarPosition = 'top';
         $this->sidebarPageIds = array_map('strval', data_get($site->settings, 'sidebar.page_ids', []));
         $menu = $site->menus()->first();
 
@@ -116,9 +116,12 @@ class MenuManager extends Component
 
     public function saveSidebar(): void
     {
+        $this->sidebarType = 'fixed';
+        $this->sidebarPosition = 'top';
+
         $this->validate([
-            'sidebarType' => ['required', 'in:fixed,collapsible,compact'],
-            'sidebarPosition' => ['required', 'in:top,left,right,bottom'],
+            'sidebarType' => ['required', 'in:fixed'],
+            'sidebarPosition' => ['required', 'in:top'],
             'sidebarPageIds' => ['array', 'max:100'],
             'sidebarPageIds.*' => ['required', 'integer', 'distinct', 'exists:site_pages,id'],
         ]);
