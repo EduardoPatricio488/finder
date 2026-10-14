@@ -259,6 +259,7 @@ class MenuManager extends Component
 
         return view('livewire.menu-manager', [
             'pages' => $this->availablePages(),
+            'allPages' => $this->site->pages()->orderBy('sort_order')->get(['id', 'name', 'slug', 'status']),
             'items' => $menu?->items ?? collect(),
             'menus' => collect(),
         ]);
