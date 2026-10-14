@@ -23,6 +23,7 @@ use App\Livewire\PromotionManager;
 use App\Livewire\PublicSite;
 use App\Livewire\SalesManager;
 use App\Livewire\SiteDefinitions;
+use App\Livewire\SitePageEditor;
 use App\Livewire\SiteSettings;
 use App\Livewire\SiteSubmissions;
 use App\Livewire\StockMovementManager;
@@ -125,6 +126,7 @@ Route::middleware(['auth', 'verified', 'site.access'])
         })->name('media.file');
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
+        Route::get('paginas/{page}', SitePageEditor::class)->name('pages.edit');
         Route::get('paginas/{page}', SitePageEditor::class)->name('pages.edit');
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('pagamentos', fn () => redirect()->route('sales'))->name('payments');
