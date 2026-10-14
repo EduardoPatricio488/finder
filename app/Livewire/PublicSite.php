@@ -235,7 +235,8 @@ class PublicSite extends Component
                 $price = $promotion ? ($promotion->discount_type === 'percentagem' ? max(0, (float) $product->price * (1 - ((float) $promotion->discount_value / 100))) : max(0, (float) $product->price - (float) $promotion->discount_value)) : (float) $product->price;
                 $subtotal += $price * $quantity;
             }
-            $tax = $subtotal * 0.23;
+            $taxRate = max(0, min(100, (float) data_get($site->settings, 'preferences.tax_rate', 23)));
+            $tax = $subtotal * ($taxRate / 100);
             $configuredDeliveryFee = $site->storeConfig()->value('delivery_fee');
             $deliveryFee = $configuredDeliveryFee === null ? 4.99 : max(0, (float) $configuredDeliveryFee);
             $shipping = $subtotal >= 50 ? 0 : $deliveryFee;
@@ -297,7 +298,12 @@ class PublicSite extends Component
 
         return $configuredDeliveryFee === null ? 4.99 : max(0, (float) $configuredDeliveryFee);
     }
-    public function getCartTaxProperty(): float { return $this->cartSubtotal * 0.23; }
+    public function getCartTaxProperty(): float
+    {
+        $taxRate = max(0, min(100, (float) data_get($this->site->settings, 'preferences.tax_rate', 23)));
+
+        return $this->cartSubtotal * ($taxRate / 100);
+    }
     public function getCartTotalProperty(): float { return $this->cartSubtotal + $this->cartTax + $this->cartShipping; }
 
     private function ensurePublicSubmissionAllowed(string $type): void
