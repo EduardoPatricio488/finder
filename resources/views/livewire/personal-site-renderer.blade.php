@@ -58,31 +58,50 @@
 
 <div class="{{ $sidebarEnabled ? (in_array($sidebarPosition, ['left', 'right'], true) ? ($sidebarPosition === 'left' ? ($sidebarType === 'compact' ? 'lg:pl-20' : 'lg:pl-64') : ($sidebarType === 'compact' ? 'lg:pr-20' : 'lg:pr-64')) : ($sidebarPosition === 'top' ? 'pt-20' : 'pb-20')) : '' }} min-h-screen bg-[#f8f8f6] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
 @if($sidebarEnabled)
-    <aside x-data="{ sidebarOpen: true }" class="{{ in_array($sidebarPosition, ['left', 'right'], true) ? 'fixed inset-y-0 z-50 hidden lg:block '.($sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r').' '.($sidebarType === 'compact' ? 'w-20' : 'w-64') : ('fixed left-0 z-50 w-full '.($sidebarPosition === 'top' ? 'top-0 border-b' : 'bottom-0 border-t')) }} border-zinc-200 bg-white shadow-sm">
-
-        @if($sidebarType === 'collapsible')
-            <button type="button" @click="sidebarOpen = !sidebarOpen" class="m-4 flex items-center gap-2 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-200">
-                <span class="text-lg">☰</span><span x-show="sidebarOpen">Recolher</span>
-            </button>
-        @else
-            <div class="border-b border-zinc-100 px-5 py-5">
-                <p class="text-xs font-bold uppercase tracking-wider text-zinc-400">Navegação</p>
-                <p class="mt-1 truncate font-bold text-zinc-900">{{ $site->name }}</p>
-            </div>
-        @endif
-        <nav class="{{ in_array($sidebarPosition, ['top', 'bottom'], true) ? 'flex flex-wrap items-center justify-center gap-2 px-4 py-3' : 'space-y-1 p-3' }}" aria-label="Navegação lateral">
-            @foreach($sidebarPages as $sidebarPage)
-                <a href="{{ route('site.public', [$site, 'pageSlug' => $sidebarPage->slug, 'preview' => $preview ? 1 : null]) }}" title="{{ $sidebarPage->name }}" class="{{ in_array($sidebarPosition, ['top', 'bottom'], true) ? 'inline-flex items-center gap-2 rounded-xl px-3 py-2' : 'flex items-center gap-3 rounded-xl px-3 py-3' }} text-sm font-semibold transition {{ $currentPage === $sidebarPage->slug ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950' }}">
-                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $currentPage === $sidebarPage->slug ? 'bg-white/15' : 'bg-zinc-100' }}">{{ mb_strtoupper(mb_substr($sidebarPage->name, 0, 1)) }}</span>
-                    @if($sidebarType !== 'compact')
-                        <span x-show="sidebarOpen" class="truncate">{{ $sidebarPage->name }}</span>
-                    @endif
+    @if(in_array($sidebarPosition, ['top', 'bottom'], true))
+        <aside class="fixed {{ $sidebarPosition === 'top' ? 'top-0 border-b' : 'bottom-0 border-t' }} left-0 z-50 w-full border-zinc-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
+            <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
+                <a href="{{ route('site.public', [$site, 'pageSlug' => 'home', 'preview' => $preview ? 1 : null]) }}" class="flex min-w-0 items-center gap-3">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-xl text-sm font-black text-white shadow-sm" style="background:var(--finder-primary)">{{ mb_strtoupper(mb_substr($site->name, 0, 1)) }}</span>
+                    <span class="min-w-0">
+                        <span class="block truncate text-sm font-bold tracking-tight text-zinc-950">{{ $site->name }}</span>
+                        <span class="block text-[10px] font-semibold uppercase tracking-[.16em] text-zinc-400">Menu do site</span>
+                    </span>
                 </a>
-            @endforeach
-        </nav>
-    </aside>
-@endif
-    <header class="sticky top-0 z-40 border-b border-black/5 bg-[#f8f8f6]/90 backdrop-blur-xl">
+                <nav class="-mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-0.5 lg:mx-0 lg:justify-end lg:pb-0" aria-label="Navegação do website">
+                    @foreach($sidebarPages as $sidebarPage)
+                        <a href="{{ route('site.public', [$site, 'pageSlug' => $sidebarPage->slug, 'preview' => $preview ? 1 : null]) }}" title="{{ $sidebarPage->name }}" class="inline-flex shrink-0 items-center rounded-full px-4 py-2 text-sm font-semibold transition {{ $currentPage === $sidebarPage->slug ? 'text-white shadow-sm' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950' }}" @if($currentPage === $sidebarPage->slug) style="background:var(--finder-primary)" @endif>
+                            {{ $sidebarPage->name }}
+                        </a>
+                    @endforeach
+                </nav>
+            </div>
+        </aside>
+    @else
+        <aside x-data="{ sidebarOpen: true }" class="fixed inset-y-0 z-50 hidden border-zinc-200 bg-white shadow-sm lg:block {{ $sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r' }} {{ $sidebarType === 'compact' ? 'w-20' : 'w-64' }}">
+            @if($sidebarType === 'collapsible')
+                <button type="button" @click="sidebarOpen = !sidebarOpen" class="m-4 flex items-center gap-2 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-200">
+                    <span class="text-lg">☰</span><span x-show="sidebarOpen">Recolher</span>
+                </button>
+            @else
+                <div class="border-b border-zinc-100 px-5 py-5">
+                    <p class="text-xs font-bold uppercase tracking-wider text-zinc-400">Navegação</p>
+                    <p class="mt-1 truncate font-bold text-zinc-900">{{ $site->name }}</p>
+                </div>
+            @endif
+            <nav class="space-y-1 p-3" aria-label="Navegação lateral">
+                @foreach($sidebarPages as $sidebarPage)
+                    <a href="{{ route('site.public', [$site, 'pageSlug' => $sidebarPage->slug, 'preview' => $preview ? 1 : null]) }}" title="{{ $sidebarPage->name }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition {{ $currentPage === $sidebarPage->slug ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950' }}">
+                        <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $currentPage === $sidebarPage->slug ? 'bg-white/15' : 'bg-zinc-100' }}">{{ mb_strtoupper(mb_substr($sidebarPage->name, 0, 1)) }}</span>
+                        @if($sidebarType !== 'compact')
+                            <span x-show="sidebarOpen" class="truncate">{{ $sidebarPage->name }}</span>
+                        @endif
+                    </a>
+                @endforeach
+            </nav>
+        </aside>
+    @endif
+@endif    <header class="sticky top-0 z-40 border-b border-black/5 bg-[#f8f8f6]/90 backdrop-blur-xl">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
             <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => $preview ? 1 : null]) }}" class="flex items-center gap-3 font-semibold tracking-tight">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm" style="background: var(--finder-primary)">{{ $initial }}</span>
