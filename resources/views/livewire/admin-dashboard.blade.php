@@ -39,7 +39,8 @@
 
             <section class="rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><div class="flex items-center justify-between"><div><h2 class="text-lg font-black text-stone-950 dark:text-white">Stock a verificar</h2><p class="mt-1 text-sm text-stone-500">Produtos com stock mínimo em qualquer website.</p></div><flux:button href="{{ route('products') }}" variant="ghost" size="sm">Ver produtos</flux:button></div><div class="mt-6 space-y-3">@forelse($lowStockProducts as $product)<div class="flex items-center justify-between rounded-2xl bg-stone-50 px-4 py-3 dark:bg-zinc-800/60"><div><p class="text-sm font-semibold text-stone-900 dark:text-white">{{ $product->name }}</p><p class="text-xs text-stone-500">Mínimo: {{ $product->minimum_stock }}</p></div><span class="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700 dark:bg-red-950/40 dark:text-red-300">{{ $product->stock }}</span></div>@empty<p class="rounded-2xl bg-stone-50 p-5 text-sm text-stone-500 dark:bg-zinc-800/60">O stock está controlado.</p>@endforelse</div></section>
         </div>
-    @elseif(($site->plan->name ?? null) === 'Free')
+    @else
+        @if(($site->plan->name ?? null) === 'Free')
         <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-amber-500 to-orange-600 p-0.5 shadow-lg shadow-amber-500/20 animate-in fade-in slide-in-from-top-4">
             <div class="relative flex flex-col items-center justify-between gap-4 rounded-[1.9rem] bg-white px-8 py-5 dark:bg-zinc-900 sm:flex-row">
                 <div class="flex items-center gap-5">
@@ -49,7 +50,7 @@
                 <flux:button href="{{ route('site.manage.upgrade') }}" variant="primary" class="!rounded-xl !bg-stone-950 !px-6 shadow-lg shadow-stone-950/20">Fazer Upgrade Agora</flux:button>
             </div>
         </div>
-    @endif
+        @endif
 
     <header class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
