@@ -9,6 +9,7 @@ use App\Models\SiteSubmission;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use App\Services\StoreMailService;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Title;
@@ -219,7 +220,11 @@ class PublicSite extends Component
             $subtotal = 0.0;
             foreach ($cart as $productId => $quantity) {
                 $product = $products->get($productId);
-                abort_if($product === null || ! $product->is_active || $product->stock < $quantity, 422, 'Um produto ficou sem stock.');
+                if ($product === null || ! $product->is_active || $product->stock < $quantity) {
+                    throw ValidationException::withMessages([
+                        'cart' => 'Um dos produtos deixou de estar disponível ou já não tem stock suficiente. Atualiza o carrinho e tenta novamente.',
+                    ]);
+                }
                 $promotion = $product->promotions->first(fn ($p) => $p->starts_at <= now() && $p->ends_at >= now());
                 $price = $promotion ? ($promotion->discount_type === 'percentagem' ? max(0, (float) $product->price * (1 - ((float) $promotion->discount_value / 100))) : max(0, (float) $product->price - (float) $promotion->discount_value)) : (float) $product->price;
                 $subtotal += $price * $quantity;
