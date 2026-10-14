@@ -137,6 +137,48 @@ class MenuManager extends Component
         $this->menuApplied = false;
     }
 
+    public function deletePage(int $pageId): void
+    {
+        $page = $this->site->pages()->findOrFail($pageId);
+
+        if ($page->is_homepage) {
+            session()->flash('status', 'A página inicial não pode ser eliminada. Define outra página como inicial primeiro.');
+            return;
+        }
+
+        $menuIds = $this->site->menus()->pluck('id');
+        $menuItems = \\App\\Models\\SiteMenuItem::query()
+            ->whereIn('site_menu_id', $menuIds)
+            ->where('site_page_id', $page->id)
+            ->get();
+
+        $itemIds = $menuItems->pluck('id')->all();
+        if ($itemIds !== []) {
+            \\App\\Models\\SiteMenuItem::query()
+                ->whereIn('site_menu_id', $menuIds)
+                ->whereIn('parent_id', $itemIds)
+                ->delete();
+            $menuItems->each->delete();
+        }
+
+        $settings = $this->site->settings ?? [];
+        $pageIds = array_values(array_filter(
+            data_get($settings, 'sidebar.page_ids', []),
+            fn ($id) => (string) $id !== (string) $page->id
+        ));
+        data_set($settings, 'sidebar.page_ids', $pageIds);
+        $this->site->update(['settings' => $settings]);
+
+        $page->delete();
+        $this->sidebarPageIds = array_values(array_filter(
+            $this->sidebarPageIds,
+            fn ($id) => (string) $id !== (string) $page->id
+        ));
+        $this->menuApplied = false;
+
+        session()->flash('status', 'Página eliminada com sucesso.');
+    }
+
     public function createPage(): void
     {
         $this->newPageName = trim($this->newPageName);
