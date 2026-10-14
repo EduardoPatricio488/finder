@@ -73,7 +73,8 @@
             </nav>
         </aside>
     @endif
-@endif    <header class="sticky top-0 z-40 border-b border-black/5 bg-[#fafaf8]/90 backdrop-blur-xl">
+@endif    @unless($sidebarEnabled && $sidebarPosition === 'top')
+    <header class="sticky top-0 z-40 border-b border-black/5 bg-[#fafaf8]/90 backdrop-blur-xl">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-4 sm:px-8">
             <a href="{{ route('site.public', [$site, 'pageSlug' => 'home', 'preview' => $preview ? 1 : null]) }}" class="flex items-center gap-3">
                 <span class="flex size-10 items-center justify-center rounded-2xl text-sm font-black text-white" style="background:var(--finder-primary)">{{ mb_strtoupper(mb_substr($site->name, 0, 1)) }}</span>
@@ -108,6 +109,7 @@
             </nav>
         </div>
     </header>
+    @endunless
 
     @if($preview)
         <div data-visual-ignore class="border-b border-amber-200 bg-amber-50 px-5 py-2.5 text-center text-xs font-semibold text-amber-800">Pré-visualização privada — a loja ainda não está publicada.</div>
