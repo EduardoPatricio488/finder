@@ -96,6 +96,38 @@
         </div>
     </div>
 
+    <section class="rounded-3xl border border-indigo-200 bg-indigo-50/50 p-6 shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex items-start gap-3">
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white"><flux:icon name="plus" class="size-5" /></div>
+                <div><h2 class="text-lg font-bold text-zinc-950">Adicionar nova página</h2><p class="mt-1 max-w-2xl text-sm leading-6 text-zinc-600">Cria uma página para este website. Depois podes abrir o editor visual, personalizar o conteúdo e adicioná-la ao menu.</p></div>
+            </div>
+        </div>
+        <form wire:submit="createPage" class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_.8fr_auto] lg:items-end">
+            <div>
+                <label for="newPageName" class="text-sm font-semibold text-zinc-800">Nome da página</label>
+                <input id="newPageName" wire:model="newPageName" placeholder="Ex.: Serviços" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                @error('newPageName') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label for="newPageSlug" class="text-sm font-semibold text-zinc-800">Endereço (slug)</label>
+                <input id="newPageSlug" wire:model="newPageSlug" placeholder="servicos (opcional)" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                @error('newPageSlug') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label for="newPageStatus" class="text-sm font-semibold text-zinc-800">Estado inicial</label>
+                <select id="newPageStatus" wire:model="newPageStatus" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                    <option value="draft">Rascunho</option>
+                    <option value="published">Publicada</option>
+                </select>
+                @error('newPageStatus') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+            <button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-700">
+                <flux:icon name="plus" class="size-4" /> Criar página
+            </button>
+        </form>
+    </section>
+
     <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div><h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2><p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p></div>
