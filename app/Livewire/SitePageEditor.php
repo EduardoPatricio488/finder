@@ -6,6 +6,7 @@ use App\Models\Site;
 use App\Models\SitePage;
 use App\Models\SiteSection;
 use App\Support\SiteContext;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -126,50 +127,54 @@ class SitePageEditor extends Component
             'sections.*.border_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ]);
 
-        $this->page->update([
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'status' => $this->status,
-        ]);
-
-        foreach ($this->sections as $index => $sectionData) {
-            $items = collect(preg_split('/\r?\n/', (string) ($sectionData['items_text'] ?? '')))
-                ->map(fn ($item) => trim($item))
-                ->filter()
-                ->map(fn ($item) => ['title' => $item])
-                ->values()
-                ->all();
-
-            $content = [
-                'title' => trim((string) ($sectionData['title'] ?? '')),
-                'body' => trim((string) ($sectionData['body'] ?? '')),
-                'description' => trim((string) ($sectionData['body'] ?? '')),
-                'button_label' => trim((string) ($sectionData['button_label'] ?? '')),
-                'button_url' => trim((string) ($sectionData['button_url'] ?? '')),
-                'image_url' => trim((string) ($sectionData['image_url'] ?? '')),
-                'items' => $items,
-            ];
-
-            $attributes = [
-                'type' => $sectionData['type'],
-                'label' => trim((string) ($sectionData['label'] ?? '')) ?: null,
-                'content' => $content,
-                'settings' => [
-                    'background_color' => $sectionData['background_color'] ?? '#ffffff',
-                    'text_color' => $sectionData['text_color'] ?? '#27272a',
-                    'accent_color' => $sectionData['accent_color'] ?? '#635bff',
-                    'border_color' => $sectionData['border_color'] ?? '#e4e4e7',
-                ],
-                'sort_order' => $index,
-                'is_visible' => (bool) ($sectionData['is_visible'] ?? true),
-            ];
-
-            if (! empty($sectionData['id'])) {
-                $this->page->sections()->whereKey($sectionData['id'])->update($attributes);
-            } else {
-                $this->page->sections()->create($attributes);
+        DB::transaction(function (): void {
+            $this->page->update([
+                'name' => $this->name,
+                'slug' => $this->slug,
+                'status' => $this->status,
+            ]);
+    
+            foreach ($this->sections as $index => $sectionData) {
+                $items = collect(preg_split('/\r?\n/', (string) ($sectionData['items_text'] ?? '')))
+                    ->map(fn ($item) => trim($item))
+                    ->filter()
+                    ->map(fn ($item) => ['title' => $item])
+                    ->values()
+                    ->all();
+    
+                $content = [
+                    'title' => trim((string) ($sectionData['title'] ?? '')),
+                    'body' => trim((string) ($sectionData['body'] ?? '')),
+                    'description' => trim((string) ($sectionData['body'] ?? '')),
+                    'button_label' => trim((string) ($sectionData['button_label'] ?? '')),
+                    'button_url' => trim((string) ($sectionData['button_url'] ?? '')),
+                    'image_url' => trim((string) ($sectionData['image_url'] ?? '')),
+                    'items' => $items,
+                ];
+    
+                $attributes = [
+                    'type' => $sectionData['type'],
+                    'label' => trim((string) ($sectionData['label'] ?? '')) ?: null,
+                    'content' => $content,
+                    'settings' => [
+                        'background_color' => $sectionData['background_color'] ?? '#ffffff',
+                        'text_color' => $sectionData['text_color'] ?? '#27272a',
+                        'accent_color' => $sectionData['accent_color'] ?? '#635bff',
+                        'border_color' => $sectionData['border_color'] ?? '#e4e4e7',
+                    ],
+                    'sort_order' => $index,
+                    'is_visible' => (bool) ($sectionData['is_visible'] ?? true),
+                ];
+    
+                if (! empty($sectionData['id'])) {
+                    $this->page->sections()->whereKey($sectionData['id'])->update($attributes);
+                } else {
+                    $this->page->sections()->create($attributes);
+                }
             }
-        }
+    
+    
+        });
 
         $this->page->refresh();
         $this->loadSections();
