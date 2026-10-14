@@ -28,6 +28,9 @@
     $sidebarType = (string) data_get($site->settings, 'sidebar.type', 'fixed');
     $sidebarPageIds = collect(data_get($site->settings, 'sidebar.page_ids', []))->map(fn ($id) => (string) $id);
     $sidebarPages = $site->pages->whereIn('id', $sidebarPageIds)->sortBy('sort_order')->values();
+    if (! $preview) {
+        $sidebarPages = $sidebarPages->where('status', 'published')->values();
+    }
     $sidebarEnabled = $sidebarPages->isNotEmpty();
     $currentPage = $page->slug;
     $accent = $site->theme['primary'] ?? $site->primary_color ?? '#635bff';
