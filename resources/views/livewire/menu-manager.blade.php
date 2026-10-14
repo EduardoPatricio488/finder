@@ -199,7 +199,7 @@
                     </div>
                     <p class="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-800">Editar página →</p>
                 </a>
-            @endforeachach; @endphp
+            @endforeach
         </div>
     </section>
 
