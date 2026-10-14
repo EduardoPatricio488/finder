@@ -1,11 +1,7 @@
 <div x-data="{ showCreatePageModal: false }">
 <div class="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-    <div class="mb-2">
-        <x-site-workspace-selector :current-site="$site" route-name="menus" />
-    </div>
-
     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+        <div class="min-w-0 flex-1 py-1">
             <h1 class="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">Menus do website</h1>
             <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">Define a navegação do website selecionado. As páginas essenciais são Início, Sobre mim e Contactos.</p>
         </div>
@@ -23,6 +19,12 @@
                 Ver site
             </a>
         </div>
+    </div>
+
+
+
+    <div class="mb-2">
+        <x-site-workspace-selector :current-site="$site" route-name="menus" />
     </div>
 
     @if (session('status'))
