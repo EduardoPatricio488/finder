@@ -78,8 +78,15 @@
     <section class="flex min-h-0 flex-col rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2>
-                <p class="mt-1 text-sm text-zinc-500">Este website pode ter páginas obrigatórias, como Início, Sobre mim e Contactos.</p>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2>
+                    <span class="group relative inline-flex" title="Este website pode ter páginas obrigatórias, como Início, Sobre mim e Contactos.">
+                        <flux:icon name="information-circle" class="size-4 cursor-help text-amber-600" />
+                        <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-medium leading-5 text-white opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-within:opacity-100">
+                            Este website pode ter páginas obrigatórias, como Início, Sobre mim e Contactos.
+                        </span>
+                    </span>
+                </div>
                 <p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p>
                 <div class="flex flex-wrap items-center gap-2">
                 <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
