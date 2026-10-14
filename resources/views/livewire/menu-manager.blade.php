@@ -93,7 +93,7 @@
                     <flux:icon name="plus" class="size-5" />
                 </div>
                 <div class="min-w-0 flex-1">
-                    <h2 class="font-semibold text-zinc-950">Páginas disponíveis</h2>
+                    <h2 class="font-semibold text-zinc-950">Páginas obrigatórias</h2>
                     <p class="mt-1 text-xs leading-5 text-zinc-500">Início, Sobre mim e Contactos já fazem parte do menu. Podes mudar o nome de cada uma, mas não as podes eliminar.</p>
                 </div>
                 <button type="button" @click="showCreatePageModal = true" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
