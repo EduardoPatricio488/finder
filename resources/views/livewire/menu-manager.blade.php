@@ -98,7 +98,7 @@
                                 <span class="block truncate text-xs text-zinc-400">/{{ $sidebarPage->slug }}</span>
                             </label>
                             <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $sidebarPage->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $sidebarPage->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
-                            @unless($sidebarPage->is_homepage)
+                            @unless(in_array($sidebarPage->slug, ['home', 'about', 'contact'], true))
                                 <button type="button" wire:click="deletePage({{ $sidebarPage->id }})" wire:confirm="Tens a certeza de que queres eliminar esta página? Esta ação não pode ser anulada." title="Eliminar página" aria-label="Eliminar {{ $sidebarPage->name }}" class="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 hover:text-red-700">
                                     <flux:icon name="trash" class="size-4" />
                                 </button>
@@ -206,7 +206,7 @@
                     </div>
                     <div class="mt-4 flex items-center justify-between gap-3">
                         <a href="{{ route('site.manage.pages.edit', $page->id) }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Editar página →</a>
-                        @unless($page->is_homepage)
+                        @unless(in_array($page->slug, ['home', 'about', 'contact'], true))
                             <button type="button" wire:click="deletePage({{ $page->id }})" wire:confirm="Tens a certeza de que queres eliminar esta página? Esta ação não pode ser anulada." title="Eliminar página" aria-label="Eliminar {{ $page->name }}" class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50">
                                 <flux:icon name="trash" class="size-3.5" /> Eliminar
                             </button>
