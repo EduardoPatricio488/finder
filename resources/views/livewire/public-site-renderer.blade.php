@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     if (!@json($preview && request()->boolean('visual_edit'))) return;
     const bar = document.createElement('div');
-    bar.style.cssText = 'position:fixed;top:12px;left:12px;z-index:999999;background:#18181b;color:white;padding:12px;display:flex;gap:8px;align-items:center;border-radius:12px;font:600 13px system-ui';
+    bar.style.cssText = 'position:fixed;top:auto;right:auto;bottom:18px;left:50%;transform:translateX(-50%);z-index:999999;background:#18181b;color:white;padding:12px 14px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:calc(100vw - 24px);box-sizing:border-box;border:1px solid rgba(255,255,255,.12);box-shadow:0 12px 36px rgba(0,0,0,.3);border-radius:14px;font:600 13px system-ui';
     bar.innerHTML = '<b>Editar website</b><button id="visual-color" style="background:#3f3f46;padding:8px;border-radius:8px">Cores</button><button id="visual-save" style="background:#4f46e5;padding:8px;border-radius:8px">Guardar</button><span id="visual-status"></span>';
     document.body.appendChild(bar);
     let selected = null;
