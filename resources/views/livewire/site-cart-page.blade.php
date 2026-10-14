@@ -81,7 +81,7 @@
                             <div class="flex items-center gap-2">
                                 <button type="button" wire:click="decreaseQuantity({{ $product->id }})" aria-label="Diminuir quantidade" class="flex size-9 items-center justify-center rounded-lg border border-zinc-200 font-bold hover:bg-zinc-50">−</button>
                                 <span class="min-w-8 text-center text-sm font-bold">{{ $cart[$product->id] ?? 0 }}</span>
-                                <button type="button" wire:click="increaseQuantity({{ $product->id }})" aria-label="Aumentar quantidade" class="flex size-9 items-center justify-center rounded-lg border border-zinc-200 font-bold hover:bg-zinc-50">+</button>
+                                <button type="button" wire:click="increaseQuantity({{ $product->id }})" aria-label="Aumentar quantidade" @disabled(($cart[$product->id] ?? 0) >= $product->stock) class="flex size-9 items-center justify-center rounded-lg border border-zinc-200 font-bold hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40">+</button>
                                 <button type="button" wire:click="removeFromCart({{ $product->id }})" class="ml-2 text-sm font-semibold text-red-600 hover:text-red-800">Remover</button>
                             </div>
                         </article>
