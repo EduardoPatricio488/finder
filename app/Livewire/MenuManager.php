@@ -70,7 +70,7 @@ class MenuManager extends Component
         $this->sidebarAppearance = (string) data_get($site->settings, 'sidebar.appearance', 'light');
         $this->sidebarWidth = (string) data_get($site->settings, 'sidebar.width', 'normal');
         $this->sidebarIcons = (string) data_get($site->settings, 'sidebar.icons', 'shown');
-        $this->sidebarPageIds = array_map('strval', data_get($site->settings, 'sidebar.page_ids', []));
+        $this->sidebarPageIds = $site->pages()->orderBy('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
         $menu = $site->menus()->first();
 
         if ($menu) {
@@ -135,8 +135,7 @@ class MenuManager extends Component
             'sidebarPageIds.*' => ['required', 'integer', 'distinct', 'exists:site_pages,id'],
         ]);
 
-        $validPageIds = $this->site->pages()->whereIn('id', $this->sidebarPageIds)->pluck('id')->map(fn ($id) => (string) $id)->all();
-        abort_if(count($validPageIds) !== count(array_unique($this->sidebarPageIds)), 422, 'Uma das páginas selecionadas não pertence a este website.');
+        $validPageIds = $this->site->pages()->orderBy('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
 
         $settings = $this->site->settings ?? [];
         data_set($settings, 'sidebar.type', $this->sidebarType);
