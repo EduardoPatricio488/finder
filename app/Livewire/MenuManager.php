@@ -146,7 +146,16 @@ class MenuManager extends Component
             'sidebarPageIds.*' => ['required', 'integer', 'distinct', 'exists:site_pages,id'],
         ]);
 
-        $validPageIds = $this->site->pages()->orderBy('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $sitePageIds = $this->site->pages()->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $validPageIds = array_values(array_filter(
+            array_map('strval', $this->sidebarPageIds),
+            fn (string $id) => in_array($id, $sitePageIds, true)
+        ));
+        $validPageIds = collect($this->site->pages()->orderBy('sort_order')->pluck('id'))
+            ->map(fn ($id) => (string) $id)
+            ->filter(fn (string $id) => in_array($id, $validPageIds, true))
+            ->values()
+            ->all();
 
         $settings = $this->site->settings ?? [];
         data_set($settings, 'sidebar.type', $this->sidebarType);
@@ -154,7 +163,7 @@ class MenuManager extends Component
         data_set($settings, 'sidebar.appearance', $this->sidebarAppearance);
         data_set($settings, 'sidebar.width', $this->sidebarWidth);
         data_set($settings, 'sidebar.icons', $this->sidebarIcons);
-        data_set($settings, 'sidebar.page_ids', array_values($validPageIds));
+        data_set($settings, 'sidebar.page_ids', $validPageIds);
         data_set($settings, 'sidebar.updated_at', now()->toIso8601String());
         $this->site->update(['settings' => $settings]);
         $this->site->refresh();
