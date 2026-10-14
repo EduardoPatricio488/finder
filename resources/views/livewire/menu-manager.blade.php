@@ -136,19 +136,7 @@
                     </span>
                 </div>
                 <p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p>
-                <div class="mt-3 rounded-xl border border-sky-200 bg-sky-50 p-3.5 text-sm text-sky-950">
-                    <p class="font-semibold">Como distinguir os tipos de página</p>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-800">Página base</span>
-                        <span class="text-xs leading-5">Página padrão do website (por exemplo, Início, Sobre mim e Contactos). Não pode ser eliminada.</span>
-                    </div>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <span class="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-800">Adicionada por ti</span>
-                        <span class="text-xs leading-5">Página criada através de «Adicionar página». Pode ser editada e eliminada.</span>
-                    </div>
-                    <p class="mt-2 text-xs leading-5 text-sky-800">A etiqueta «Publicada/Rascunho» indica o estado da página. A presença no menu ou na sidebar é independente: uma página pode existir sem aparecer na navegação do website.</p>
-                </div>
-            </div>
+                            </div>
             <div class="flex flex-wrap items-center gap-2">
                 <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
                 <button type="button" wire:click="$set('showCreatePageModal', true)" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
