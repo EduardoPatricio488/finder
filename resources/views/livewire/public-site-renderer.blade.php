@@ -28,6 +28,8 @@
     $labels = ['home' => 'Início', 'products' => 'Produtos', 'about' => 'Sobre a marca', 'contact' => 'Contactos', 'faq' => 'FAQ', 'gallery' => 'Galeria', 'blog' => 'Blog'];
     $visiblePages = $site->pages->sortBy('sort_order')->whereIn('slug', array_keys($labels));
     $productCount = $site->products->count();
+    $taxRate = max(0, min(100, (float) data_get($site->settings, 'preferences.tax_rate', 23)));
+    $showFinderBranding = (bool) data_get($site->settings, 'preferences.show_finder_branding', true);
 @endphp
 
 <div class="{{ $sidebarEnabled ? (in_array($sidebarPosition, ['left', 'right'], true) ? ($sidebarPosition === 'left' ? ($sidebarType === 'compact' ? 'lg:pl-20' : 'lg:pl-64') : ($sidebarType === 'compact' ? 'lg:pr-20' : 'lg:pr-64')) : ($sidebarPosition === 'top' ? 'pt-20' : 'pb-20')) : '' }} min-h-screen bg-[#fafaf8] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
@@ -248,7 +250,7 @@
                     </div>
                     <div class="mt-8 border-t border-zinc-200 pt-5">
                         <div class="flex justify-between text-sm"><span>Subtotal</span><strong>{{ number_format($this->cartSubtotal, 2, ',', '.') }} €</strong></div>
-                        <div class="mt-2 flex justify-between text-sm"><span>IVA (23%)</span><strong>{{ number_format($this->cartTax, 2, ',', '.') }} €</strong></div>
+                        <div class="mt-2 flex justify-between text-sm"><span>IVA ({{ rtrim(rtrim(number_format($taxRate, 2, ',', ''), '0'), ',') }}%)</span><strong>{{ number_format($this->cartTax, 2, ',', '.') }} €</strong></div>
                         <div class="mt-2 flex justify-between text-sm"><span>Envio</span><strong>{{ $this->cartShipping > 0 ? number_format($this->cartShipping, 2, ',', '.') . ' €' : 'Grátis' }}</strong></div>
                         <div class="mt-4 flex justify-between text-xl font-black"><span>Total</span><span>{{ number_format($this->cartTotal, 2, ',', '.') }} €</span></div>
                         <button type="button" wire:click="openCheckout" class="mt-6 w-full rounded-2xl px-5 py-4 font-bold text-white" style="background:var(--finder-primary)">Continuar para checkout</button>
@@ -277,7 +279,7 @@
         </div>
     @endif
 
-    <footer class="border-t border-black/5 bg-zinc-950 px-5 py-10 text-white sm:px-8"><div class="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p class="font-bold">{{ $site->name }}</p><p class="text-xs text-white/40">© {{ now()->year }} · Loja online criada com Finder</p></div></footer>
+    <footer class="border-t border-black/5 bg-zinc-950 px-5 py-10 text-white sm:px-8"><div class="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p class="font-bold">{{ $site->name }}</p><p class="text-xs text-white/40">© {{ now()->year }} @if($showFinderBranding) · Loja online criada com Finder @endif</p></div></footer>
 
 @if(true)
 <script>
