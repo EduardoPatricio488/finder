@@ -27,7 +27,7 @@ class ProductDetail extends Component
     {
         $product = $site->products()->where('slug', $product)->firstOrFail();
 
-        abort_unless($site instanceof \App\Models\Site, 404);
+        abort_unless($site instanceof Site, 404);
 
         $preview = request()->boolean('preview');
         if ($preview) {
