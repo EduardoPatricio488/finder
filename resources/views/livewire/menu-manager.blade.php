@@ -34,71 +34,80 @@
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('menu-applied') }}</div>
     @endif
 
-    <div class="grid gap-6">
-        <div class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
-                    <flux:icon name="bars-3" class="size-5" />
-                </div>
-                <div>
-                    <h2 class="font-semibold text-zinc-950">Sidebar</h2>
-                    <p class="mt-1 text-xs leading-5 text-zinc-500">Escolhe a posição, o comportamento e as páginas apresentadas na sidebar.</p>
-                </div>
-            </div>
-
-            <form wire:submit="saveSidebar" class="mt-6 space-y-5">
-                <div>
-                    <label for="sidebarPosition" class="text-sm font-semibold text-zinc-800">Posição da sidebar</label>
-                    <select id="sidebarPosition" wire:model="sidebarPosition" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
-                        <option value="top">Em cima — horizontal</option>
-                        <option value="left">À esquerda — vertical</option>
-                        <option value="right">À direita — vertical</option>
-                        <option value="bottom">Em baixo — horizontal</option>
-                    </select>
-                    @error('sidebarPosition') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <label for="sidebarType" class="text-sm font-semibold text-zinc-800">Tipo de sidebar</label>
-                    <select id="sidebarType" wire:model="sidebarType" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
-                        <option value="fixed">Fixa — sempre visível</option>
-                        <option value="collapsible">Recolhível — pode ser aberta e fechada</option>
-                        <option value="compact">Recolhida — só ícones</option>
-                    </select>
-                    @error('sidebarType') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between gap-3">
-                        <p class="text-sm font-semibold text-zinc-800">Páginas na sidebar</p>
-                        <span class="text-xs text-zinc-400">{{ count($sidebarPageIds) }} selecionadas</span>
+    <form wire:submit="saveSidebar">
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
+                        <flux:icon name="bars-3" class="size-5" />
                     </div>
-                    <p class="mt-1 text-xs leading-5 text-zinc-500">Marca as páginas que queres apresentar na navegação lateral.</p>
-                    <div class="mt-3 max-h-64 space-y-2 overflow-y-auto rounded-2xl border border-zinc-200 p-3">
-                        @forelse($allPages as $sidebarPage)
-                            <label for="sidebar-page-{{ $sidebarPage->id }}" class="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-zinc-50">
-                                <input id="sidebar-page-{{ $sidebarPage->id }}" type="checkbox" wire:model="sidebarPageIds" value="{{ $sidebarPage->id }}" class="size-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500">
-                                <span class="min-w-0 flex-1">
-                                    <span class="block truncate text-sm font-medium text-zinc-800">{{ $sidebarPage->name }}</span>
-                                    <span class="block truncate text-xs text-zinc-400">/{{ $sidebarPage->slug }}</span>
-                                </span>
-                                <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $sidebarPage->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $sidebarPage->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
-                            </label>
-                        @empty
-                            <p class="p-3 text-sm text-zinc-500">Ainda não existem páginas neste website.</p>
-                        @endforelse
+                    <div>
+                        <h2 class="font-semibold text-zinc-950">Sidebar</h2>
+                        <p class="mt-1 text-xs leading-5 text-zinc-500">Escolhe a posição e o comportamento da navegação lateral.</p>
                     </div>
-                    @error('sidebarPageIds') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    @error('sidebarPageIds.*') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
-                <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
-                    <flux:icon name="check" class="size-4" /> Guardar sidebar
-                </button>
-            </form>
+                <div class="mt-6 space-y-5">
+                    <div>
+                        <label for="sidebarPosition" class="text-sm font-semibold text-zinc-800">Posição da sidebar</label>
+                        <select id="sidebarPosition" wire:model="sidebarPosition" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                            <option value="top">Em cima — horizontal</option>
+                            <option value="left">À esquerda — vertical</option>
+                            <option value="right">À direita — vertical</option>
+                            <option value="bottom">Em baixo — horizontal</option>
+                        </select>
+                        @error('sidebarPosition') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label for="sidebarType" class="text-sm font-semibold text-zinc-800">Tipo de sidebar</label>
+                        <select id="sidebarType" wire:model="sidebarType" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                            <option value="fixed">Fixa — sempre visível</option>
+                            <option value="collapsible">Recolhível — pode ser aberta e fechada</option>
+                            <option value="compact">Recolhida — só ícones</option>
+                        </select>
+                        @error('sidebarType') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                        <flux:icon name="check" class="size-4" /> Guardar sidebar
+                    </button>
+                </div>
+            </section>
+
+            <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-700">
+                            <flux:icon name="document-text" class="size-5" />
+                        </div>
+                        <div>
+                            <h2 class="font-semibold text-zinc-950">Páginas na sidebar</h2>
+                            <p class="mt-1 text-xs leading-5 text-zinc-500">Marca as páginas que queres apresentar na navegação lateral.</p>
+                        </div>
+                    </div>
+                    <span class="shrink-0 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600">{{ count($sidebarPageIds) }} selecionadas</span>
+                </div>
+
+                <div class="mt-6 max-h-80 space-y-2 overflow-y-auto rounded-2xl border border-zinc-200 p-3">
+                    @forelse($allPages as $sidebarPage)
+                        <label for="sidebar-page-{{ $sidebarPage->id }}" class="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-zinc-50">
+                            <input id="sidebar-page-{{ $sidebarPage->id }}" type="checkbox" wire:model="sidebarPageIds" value="{{ $sidebarPage->id }}" class="size-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-sm font-medium text-zinc-800">{{ $sidebarPage->name }}</span>
+                                <span class="block truncate text-xs text-zinc-400">/{{ $sidebarPage->slug }}</span>
+                            </span>
+                            <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $sidebarPage->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $sidebarPage->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
+                        </label>
+                    @empty
+                        <p class="p-3 text-sm text-zinc-500">Ainda não existem páginas neste website.</p>
+                    @endforelse
+                </div>
+                @error('sidebarPageIds') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror
+                @error('sidebarPageIds.*') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </section>
         </div>
-
-    </div>
+    </form>
 
     <div x-cloak x-show="showCreatePageModal" x-transition.opacity @keydown.escape.window="showCreatePageModal = false" class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4 sm:p-6" style="display: none;">
         <div class="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm" @click="showCreatePageModal = false"></div>
