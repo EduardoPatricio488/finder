@@ -113,18 +113,23 @@
                 <div class="mt-10 space-y-8">
                     @foreach($page->sections->where('is_visible', true)->sortBy('sort_order') as $section)
                         @php($sectionContent = $section->content ?? [])
-                        <section class="rounded-3xl bg-white p-6 sm:p-8">
+                        @php($sectionSettings = $section->settings ?? [])
+                        @php($sectionBackground = data_get($sectionSettings, 'background_color', '#ffffff'))
+                        @php($sectionText = data_get($sectionSettings, 'text_color', '#27272a'))
+                        @php($sectionAccent = data_get($sectionSettings, 'accent_color', '#635bff'))
+                        @php($sectionBorder = data_get($sectionSettings, 'border_color', '#e4e4e7'))
+                        <section class="rounded-3xl border p-6 sm:p-8" style="background-color: {{ $sectionBackground }}; color: {{ $sectionText }}; border-color: {{ $sectionBorder }}">
                             @if(filled(data_get($sectionContent, 'title')))<h2 class="text-2xl font-black">{{ data_get($sectionContent, 'title') }}</h2>@endif
-                            @if(filled(data_get($sectionContent, 'body', data_get($sectionContent, 'description', ''))))<p class="mt-3 whitespace-pre-line leading-8 text-zinc-600">{{ data_get($sectionContent, 'body', data_get($sectionContent, 'description', '')) }}</p>@endif
+                            @if(filled(data_get($sectionContent, 'body', data_get($sectionContent, 'description', ''))))<p class="mt-3 whitespace-pre-line leading-8" style="color: {{ $sectionText }}">{{ data_get($sectionContent, 'body', data_get($sectionContent, 'description', '')) }}</p>@endif
                             @if(filled(data_get($sectionContent, 'image_url')))<img src="{{ data_get($sectionContent, 'image_url') }}" alt="{{ data_get($sectionContent, 'title', $section->label) }}" loading="lazy" class="mt-5 max-h-[34rem] w-full rounded-2xl object-cover">@endif
                             @if(count(data_get($sectionContent, 'items', [])))
                                 <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                     @foreach(data_get($sectionContent, 'items', []) as $sectionItem)
-                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5"><h3 class="font-bold">{{ is_array($sectionItem) ? ($sectionItem['title'] ?? '') : $sectionItem }}</h3></div>
+                                        <div class="rounded-2xl border p-5" style="background-color: {{ $sectionBackground }}; color: {{ $sectionText }}; border-color: {{ $sectionBorder }}"><h3 class="font-bold">{{ is_array($sectionItem) ? ($sectionItem['title'] ?? '') : $sectionItem }}</h3></div>
                                     @endforeach
                                 </div>
                             @endif
-                            @if(filled(data_get($sectionContent, 'button_label')) && filled(data_get($sectionContent, 'button_url')))<a href="{{ data_get($sectionContent, 'button_url') }}" class="mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold text-white" style="background:var(--finder-primary)">{{ data_get($sectionContent, 'button_label') }}</a>@endif
+                            @if(filled(data_get($sectionContent, 'button_label')) && filled(data_get($sectionContent, 'button_url')))<a href="{{ data_get($sectionContent, 'button_url') }}" class="mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold text-white" style="background-color: {{ $sectionAccent }}">{{ data_get($sectionContent, 'button_label') }}</a>@endif
                         </section>
                     @endforeach
                 </div>
