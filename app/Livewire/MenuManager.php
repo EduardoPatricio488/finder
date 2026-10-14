@@ -147,14 +147,14 @@ class MenuManager extends Component
         }
 
         $menuIds = $this->site->menus()->pluck('id');
-        $menuItems = \\App\\Models\\SiteMenuItem::query()
+        $menuItems = \App\Models\SiteMenuItem::query()
             ->whereIn('site_menu_id', $menuIds)
             ->where('site_page_id', $page->id)
             ->get();
 
         $itemIds = $menuItems->pluck('id')->all();
         if ($itemIds !== []) {
-            \\App\\Models\\SiteMenuItem::query()
+            \App\Models\SiteMenuItem::query()
                 ->whereIn('site_menu_id', $menuIds)
                 ->whereIn('parent_id', $itemIds)
                 ->delete();
