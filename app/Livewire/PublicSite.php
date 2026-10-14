@@ -195,8 +195,9 @@ class PublicSite extends Component
     {
         abort_if($this->preview, 404);
 
-        abort_if($this->cart === [], 422, 'O carrinho está vazio.');
         $validated = $this->validate([
+            'cart' => ['required', 'array', 'min:1'],
+            'cart.*' => ['required', 'integer', 'min:1', 'max:1000'],
             'customerName' => ['required', 'string', 'max:255'],
             'customerEmail' => ['required', 'email', 'max:255'],
             'customerPhone' => ['required', 'string', 'max:30'],
