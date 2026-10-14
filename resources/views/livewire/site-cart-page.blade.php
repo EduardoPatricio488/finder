@@ -46,6 +46,7 @@
                 <button type="button" wire:click="$set('checkoutOpen', false)" class="mb-5 text-sm font-semibold text-zinc-500 hover:text-zinc-900">← Voltar ao carrinho</button>
                 <h2 class="text-2xl font-extrabold">Dados da encomenda</h2>
                 <p class="mt-2 text-sm text-zinc-500">Preenche os dados para registar a tua encomenda.</p>
+                @error('cart')<div role="alert" class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $message }}</div>@enderror
                 <form wire:submit="checkout" class="mt-7 space-y-5">
                     <div><label for="customerName" class="mb-1.5 block text-sm font-semibold">Nome completo</label><input id="customerName" wire:model="customerName" required autocomplete="name" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm">@error('customerName')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror</div>
                     <div><label for="customerEmail" class="mb-1.5 block text-sm font-semibold">Email</label><input id="customerEmail" type="email" wire:model="customerEmail" required autocomplete="email" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm">@error('customerEmail')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror</div>
