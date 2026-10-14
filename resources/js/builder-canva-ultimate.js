@@ -16,7 +16,7 @@
         ready: false,
     };
 
-    const isBuilder = () => Boolean(document.querySelector(ROOT)) && /\\/websites\\/[^/]+\\/builder$/.test(location.pathname);
+    const isBuilder = () => Boolean(document.querySelector(ROOT)) && /\/websites\/[^/]+\/builder$/.test(location.pathname);
     const root = () => document.querySelector(ROOT);
     const wire = () => {
         const el = root();
