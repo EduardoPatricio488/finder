@@ -1,5 +1,13 @@
 <!doctype html>
-<html lang="pt-PT">
+@php
+    $sitePreferences = data_get($site->settings, 'preferences', []);
+    $siteLanguage = (string) ($sitePreferences['language'] ?? 'pt-PT');
+    $siteDescription = trim((string) ($sitePreferences['site_description'] ?? ''));
+    $siteDescription = $siteDescription !== '' ? $siteDescription : (string) ($site->seo['description'] ?? '');
+    $allowSearchIndexing = (bool) ($sitePreferences['allow_search_indexing'] ?? true);
+    $analyticsId = trim((string) ($sitePreferences['analytics_id'] ?? ''));
+@endphp
+<html lang="{{ $siteLanguage }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +24,15 @@
     <meta property="og:site_name" content="{{ $site->name }}">
     <title>{{ $page->seo['title'] ?? $site->seo['title'] ?? $page->name.' — '.$site->name }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if(preg_match('/^G-[A-Z0-9]+$/i', $analyticsId))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $analyticsId }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', @json($analyticsId));
+        </script>
+    @endif
     @php
         $fontFamily = match($site->theme['font_family'] ?? 'modern-sans') {
             'classic-serif' => 'Georgia, Times New Roman, serif',
