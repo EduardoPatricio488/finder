@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Site;
 use App\Models\User;
 use Laravel\Fortify\Features;
 
@@ -30,6 +31,38 @@ test('users can authenticate using the login screen', function () {
         ->assertRedirect(route('entry', absolute: false));
 
     $this->assertAuthenticated();
+});
+
+test('users can return to the website where they started login', function () {
+    $user = User::factory()->create();
+    $site = Site::factory()->create([
+        'owner_id' => $user->id,
+        'is_published' => true,
+        'status' => 'published',
+    ]);
+    $siteUrl = route('site.public', $site);
+
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+        'redirect' => $siteUrl,
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect($siteUrl);
+    $this->assertAuthenticatedAs($user);
+});
+
+test('login ignores external redirect destinations', function () {
+    $user = User::factory()->create();
+
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+        'redirect' => 'https://example.com/site/other',
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('entry', absolute: false));
+    $this->assertAuthenticatedAs($user);
 });
 
 test('regular users are sent to the public sales page after login', function () {
