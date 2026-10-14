@@ -1,6 +1,6 @@
 @php
     $accent = $site->theme['primary'] ?? $site->primary_color ?? '#4f46e5';
-    $homeUrl = route('site.public', ['site' => $site, 'pageSlug' => null]);
+    $homeUrl = route('site.public', ['site' => $site, 'pageSlug' => null, 'preview' => $preview ? 1 : null]);
 @endphp
 
 <div class="min-h-screen bg-zinc-50 px-4 py-10 sm:px-6 lg:py-16" style="--finder-primary: {{ $accent }}">
