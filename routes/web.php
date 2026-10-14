@@ -127,6 +127,33 @@ Route::middleware(['auth', 'verified', 'site.access'])
         Route::get('upgrade', PlanSelection::class)->name('upgrade');
         Route::get('menus', MenuManager::class)->name('menus');
         Route::get('paginas/{page}', SitePageEditor::class)->name('pages.edit');
+        Route::post('paginas/{page}/visual', function (\Illuminate\Http\Request $request, \App\Models\SitePage $page) {
+            $site = \App\Support\SiteContext::current();
+            abort_unless($site instanceof \App\Models\Site && $site->isManageableBy($request->user()), 403);
+            abort_unless((int) $page->site_id === (int) $site->id, 404);
+
+            $validated = $request->validate([
+                'edits' => ['required', 'array', 'max:500'],
+                'edits.*.key' => ['required', 'string', 'max:500', 'regex:/^[a-zA-Z0-9._-]+$/'],
+                'edits.*.text' => ['nullable', 'string', 'max:10000'],
+                'edits.*.href' => ['nullable', 'string', 'max:2048'],
+                'edits.*.src' => ['nullable', 'url', 'max:2048'],
+                'edits.*.color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+                'edits.*.background' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            ]);
+
+            $theme = $page->theme ?? [];
+            $existing = data_get($theme, 'visual_edits', []);
+            foreach ($validated['edits'] as $edit) {
+                $key = $edit['key'];
+                $values = array_intersect_key($edit, array_flip(['text', 'href', 'src', 'color', 'background']));
+                $existing[$key] = array_merge($existing[$key] ?? [], $values);
+            }
+            data_set($theme, 'visual_edits', $existing);
+            $page->update(['theme' => $theme]);
+
+            return response()->json(['saved' => true, 'message' => 'Alterações guardadas no website.']);
+        })->name('pages.visual.save');
         Route::get('paginas/{page}', SitePageEditor::class)->name('pages.edit');
         Route::get('categorias', CategoryManager::class)->name('categories');
         Route::get('pagamentos', fn () => redirect()->route('sales'))->name('payments');
