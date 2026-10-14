@@ -21,6 +21,7 @@ class SitePageEditor extends Component
     public string $slug = '';
     public string $status = 'draft';
     public array $sections = [];
+    public int $previewVersion = 0;
 
     public function mount(SitePage $page): void
     {
@@ -49,6 +50,10 @@ class SitePageEditor extends Component
             'image_url' => (string) data_get($section->content, 'image_url', ''),
             'items_text' => collect(data_get($section->content, 'items', []))->map(fn ($item) => is_array($item) ? (string) ($item['title'] ?? $item['question'] ?? '') : (string) $item)->filter()->implode("\n"),
             'is_visible' => (bool) $section->is_visible,
+            'background_color' => (string) data_get($section->settings, 'background_color', '#ffffff'),
+            'text_color' => (string) data_get($section->settings, 'text_color', '#27272a'),
+            'accent_color' => (string) data_get($section->settings, 'accent_color', '#635bff'),
+            'border_color' => (string) data_get($section->settings, 'border_color', '#e4e4e7'),
         ])->all();
     }
 
@@ -78,6 +83,10 @@ class SitePageEditor extends Component
             'image_url' => '',
             'items_text' => '',
             'is_visible' => true,
+            'background_color' => '#ffffff',
+            'text_color' => '#27272a',
+            'accent_color' => '#635bff',
+            'border_color' => '#e4e4e7',
         ];
     }
 
@@ -111,6 +120,10 @@ class SitePageEditor extends Component
             'sections.*.image_url' => ['nullable', 'url', 'max:2048'],
             'sections.*.items_text' => ['nullable', 'string', 'max:10000'],
             'sections.*.is_visible' => ['boolean'],
+            'sections.*.background_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'sections.*.text_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'sections.*.accent_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'sections.*.border_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ]);
 
         $this->page->update([
@@ -141,7 +154,12 @@ class SitePageEditor extends Component
                 'type' => $sectionData['type'],
                 'label' => trim((string) ($sectionData['label'] ?? '')) ?: null,
                 'content' => $content,
-                'settings' => [],
+                'settings' => [
+                    'background_color' => $sectionData['background_color'] ?? '#ffffff',
+                    'text_color' => $sectionData['text_color'] ?? '#27272a',
+                    'accent_color' => $sectionData['accent_color'] ?? '#635bff',
+                    'border_color' => $sectionData['border_color'] ?? '#e4e4e7',
+                ],
                 'sort_order' => $index,
                 'is_visible' => (bool) ($sectionData['is_visible'] ?? true),
             ];
@@ -155,6 +173,7 @@ class SitePageEditor extends Component
 
         $this->page->refresh();
         $this->loadSections();
+        $this->previewVersion++;
         session()->flash('status', 'Página e conteúdo guardados com sucesso.');
     }
 
