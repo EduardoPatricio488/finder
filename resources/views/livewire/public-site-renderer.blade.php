@@ -106,7 +106,30 @@
     @elseif($currentPage === 'faq')
         <main><section class="px-5 py-20 sm:px-8 sm:py-28"><div class="mx-auto max-w-4xl"><p class="text-xs font-black uppercase tracking-[.18em]" style="color:var(--finder-primary)">Ajuda</p><h1 class="mt-4 text-5xl font-black">Perguntas frequentes</h1><div class="mt-12 space-y-4">@foreach($page->sections->where('type','faq') as $section) @foreach(($section->content['items'] ?? []) as $item)<details class="rounded-2xl border border-black/5 bg-white p-5"><summary class="cursor-pointer font-bold">{{ $item['question'] ?? '' }}</summary><p class="mt-3 text-sm leading-7 text-zinc-600">{{ $item['answer'] ?? '' }}</p></details>@endforeach @endforeach</div></div></section></main>
     @else
-        <main class="px-5 py-20 sm:px-8"><div class="mx-auto max-w-7xl"><p class="text-xs font-black uppercase tracking-[.18em]" style="color:var(--finder-primary)">{{ $labels[$currentPage] ?? $page->name }}</p><h1 class="mt-3 text-5xl font-black">{{ $page->name }}</h1><div class="mt-10 space-y-8">@foreach($page->sections as $section)<section class="rounded-3xl bg-white p-8"><h2 class="text-2xl font-black">{{ data_get($section->content,'title','') }}</h2><p class="mt-3 whitespace-pre-line leading-8 text-zinc-600">{{ data_get($section->content,'body',data_get($section->content,'description','')) }}</p></section>@endforeach</div></div></main>
+        <main class="px-5 py-20 sm:px-8">
+            <div class="mx-auto max-w-7xl">
+                <p class="text-xs font-black uppercase tracking-[.18em]" style="color:var(--finder-primary)">{{ $labels[$currentPage] ?? $page->name }}</p>
+                <h1 class="mt-3 text-5xl font-black">{{ $page->name }}</h1>
+                <div class="mt-10 space-y-8">
+                    @foreach($page->sections->where('is_visible', true)->sortBy('sort_order') as $section)
+                        @php($sectionContent = $section->content ?? [])
+                        <section class="rounded-3xl bg-white p-6 sm:p-8">
+                            @if(filled(data_get($sectionContent, 'title')))<h2 class="text-2xl font-black">{{ data_get($sectionContent, 'title') }}</h2>@endif
+                            @if(filled(data_get($sectionContent, 'body', data_get($sectionContent, 'description', ''))))<p class="mt-3 whitespace-pre-line leading-8 text-zinc-600">{{ data_get($sectionContent, 'body', data_get($sectionContent, 'description', '')) }}</p>@endif
+                            @if(filled(data_get($sectionContent, 'image_url')))<img src="{{ data_get($sectionContent, 'image_url') }}" alt="{{ data_get($sectionContent, 'title', $section->label) }}" loading="lazy" class="mt-5 max-h-[34rem] w-full rounded-2xl object-cover">@endif
+                            @if(count(data_get($sectionContent, 'items', [])))
+                                <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    @foreach(data_get($sectionContent, 'items', []) as $sectionItem)
+                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5"><h3 class="font-bold">{{ is_array($sectionItem) ? ($sectionItem['title'] ?? '') : $sectionItem }}</h3></div>
+                                    @endforeach
+                                </div>
+                            @endif
+                            @if(filled(data_get($sectionContent, 'button_label')) && filled(data_get($sectionContent, 'button_url')))<a href="{{ data_get($sectionContent, 'button_url') }}" class="mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold text-white" style="background:var(--finder-primary)">{{ data_get($sectionContent, 'button_label') }}</a>@endif
+                        </section>
+                    @endforeach
+                </div>
+            </div>
+        </main>
     @endif
 
     @include('livewire.partials.page-custom-sections')
