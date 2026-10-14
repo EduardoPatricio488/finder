@@ -23,6 +23,12 @@ class MenuManager extends Component
 
     public string $sidebarPosition = 'top';
 
+    public string $sidebarAppearance = 'light';
+
+    public string $sidebarWidth = 'normal';
+
+    public string $sidebarIcons = 'shown';
+
     /** @var array<int, string> */
     public array $sidebarPageIds = [];
 
@@ -60,7 +66,10 @@ class MenuManager extends Component
         session()->put('current_site_id', $site->id);
         $this->menuApplied = filled(data_get($site->settings, 'menu_applied_at'));
         $this->sidebarType = 'fixed';
-        $this->sidebarPosition = 'top';
+        $this->sidebarPosition = (string) data_get($site->settings, 'sidebar.position', 'top');
+        $this->sidebarAppearance = (string) data_get($site->settings, 'sidebar.appearance', 'light');
+        $this->sidebarWidth = (string) data_get($site->settings, 'sidebar.width', 'normal');
+        $this->sidebarIcons = (string) data_get($site->settings, 'sidebar.icons', 'shown');
         $this->sidebarPageIds = array_map('strval', data_get($site->settings, 'sidebar.page_ids', []));
         $menu = $site->menus()->first();
 
@@ -116,12 +125,12 @@ class MenuManager extends Component
 
     public function saveSidebar(): void
     {
-        $this->sidebarType = 'fixed';
-        $this->sidebarPosition = 'top';
-
         $this->validate([
             'sidebarType' => ['required', 'in:fixed'],
-            'sidebarPosition' => ['required', 'in:top'],
+            'sidebarPosition' => ['required', 'in:top,left,right'],
+            'sidebarAppearance' => ['required', 'in:light,dark'],
+            'sidebarWidth' => ['required', 'in:narrow,normal,wide'],
+            'sidebarIcons' => ['required', 'in:shown,hidden'],
             'sidebarPageIds' => ['array', 'max:100'],
             'sidebarPageIds.*' => ['required', 'integer', 'distinct', 'exists:site_pages,id'],
         ]);
@@ -132,6 +141,9 @@ class MenuManager extends Component
         $settings = $this->site->settings ?? [];
         data_set($settings, 'sidebar.type', $this->sidebarType);
         data_set($settings, 'sidebar.position', $this->sidebarPosition);
+        data_set($settings, 'sidebar.appearance', $this->sidebarAppearance);
+        data_set($settings, 'sidebar.width', $this->sidebarWidth);
+        data_set($settings, 'sidebar.icons', $this->sidebarIcons);
         data_set($settings, 'sidebar.page_ids', array_values($validPageIds));
         data_set($settings, 'sidebar.updated_at', now()->toIso8601String());
         $this->site->update(['settings' => $settings]);
