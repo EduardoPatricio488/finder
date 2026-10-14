@@ -55,6 +55,7 @@
 
 @endphp
 
+<div class="{{ $sidebarEnabled ? ($sidebarType === 'compact' ? 'lg:pl-20' : 'lg:pl-64') : '' }} min-h-screen bg-[#f8f8f6] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
 @if($sidebarEnabled)
     <aside x-data="{ sidebarOpen: true }" class="fixed inset-y-0 left-0 z-50 hidden border-r border-zinc-200 bg-white shadow-sm lg:block {{ $sidebarType === 'compact' ? 'w-20' : 'w-64' }}">
         @if($sidebarType === 'collapsible')
@@ -79,8 +80,6 @@
         </nav>
     </aside>
 @endif
-
-<div class="{{ $sidebarEnabled ? ($sidebarType === 'compact' ? 'lg:pl-20' : 'lg:pl-64') : '' }} min-h-screen bg-[#f8f8f6] text-zinc-950 antialiased" style="--finder-primary: {{ $accent }}">
     <header class="sticky top-0 z-40 border-b border-black/5 bg-[#f8f8f6]/90 backdrop-blur-xl">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
             <a href="{{ route('site.public', [$site, 'pageSlug' => null, 'preview' => $preview ? 1 : null]) }}" class="flex items-center gap-3 font-semibold tracking-tight">
