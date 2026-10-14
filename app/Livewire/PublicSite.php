@@ -58,6 +58,9 @@ class PublicSite extends Component
         $this->customerName = (string) (auth()->user()?->name ?? '');
         $this->customerEmail = (string) (auth()->user()?->email ?? '');
         $this->showLoginPage = $pageSlug === 'login';
+        if ($this->showLoginPage && ! auth()->check()) {
+            session()->put('url.intended', route('site.public', ['site' => $site, 'pageSlug' => null]));
+        }
         $this->page = $this->showLoginPage
             ? ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
                 ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail())
