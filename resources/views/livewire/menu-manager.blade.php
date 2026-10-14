@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ showCreatePageModal: false }">
 <div class="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
     <div class="mb-2">
         <x-site-workspace-selector :current-site="$site" route-name="menus" />
@@ -65,10 +65,14 @@
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
                     <flux:icon name="plus" class="size-5" />
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <h2 class="font-semibold text-zinc-950">Páginas disponíveis</h2>
                     <p class="mt-1 text-xs leading-5 text-zinc-500">Início, Sobre mim e Contactos já fazem parte do menu. Podes mudar o nome de cada uma, mas não as podes eliminar.</p>
                 </div>
+                <button type="button" @click="showCreatePageModal = true" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
+                    <flux:icon name="plus" class="size-4" />
+                    Adicionar página
+                </button>
             </div>
 
             <div class="mt-6 space-y-3">
@@ -96,37 +100,50 @@
         </div>
     </div>
 
-    <section class="rounded-3xl border border-indigo-200 bg-indigo-50/50 p-6 shadow-sm">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div class="flex items-start gap-3">
-                <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white"><flux:icon name="plus" class="size-5" /></div>
-                <div><h2 class="text-lg font-bold text-zinc-950">Adicionar nova página</h2><p class="mt-1 max-w-2xl text-sm leading-6 text-zinc-600">Cria uma página para este website. Depois podes abrir o editor visual, personalizar o conteúdo e adicioná-la ao menu.</p></div>
+    <div x-cloak x-show="showCreatePageModal" x-transition.opacity @keydown.escape.window="showCreatePageModal = false" class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4 sm:p-6" style="display: none;">
+        <div class="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm" @click="showCreatePageModal = false"></div>
+        <section x-transition.scale.origin.center class="relative z-10 w-full max-w-xl rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl sm:p-8" role="dialog" aria-modal="true" aria-labelledby="create-page-title">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white"><flux:icon name="plus" class="size-5" /></div>
+                    <div>
+                        <h2 id="create-page-title" class="text-lg font-bold text-zinc-950">Adicionar nova página</h2>
+                        <p class="mt-1 text-sm leading-6 text-zinc-500">Define os dados da nova página. Podes editar o conteúdo depois de a criares.</p>
+                    </div>
+                </div>
+                <button type="button" @click="showCreatePageModal = false" aria-label="Fechar janela" class="rounded-xl p-2 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-800"><flux:icon name="x-mark" class="size-5" /></button>
             </div>
-        </div>
-        <form wire:submit="createPage" class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_.8fr_auto] lg:items-end">
-            <div>
-                <label for="newPageName" class="text-sm font-semibold text-zinc-800">Nome da página</label>
-                <input id="newPageName" wire:model="newPageName" placeholder="Ex.: Serviços" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
-                @error('newPageName') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label for="newPageSlug" class="text-sm font-semibold text-zinc-800">Endereço (slug)</label>
-                <input id="newPageSlug" wire:model="newPageSlug" placeholder="servicos (opcional)" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
-                @error('newPageSlug') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label for="newPageStatus" class="text-sm font-semibold text-zinc-800">Estado inicial</label>
-                <select id="newPageStatus" wire:model="newPageStatus" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
-                    <option value="draft">Rascunho</option>
-                    <option value="published">Publicada</option>
-                </select>
-                @error('newPageStatus') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-700">
-                <flux:icon name="plus" class="size-4" /> Criar página
-            </button>
-        </form>
-    </section>
+            <form wire:submit="createPage" class="mt-6 space-y-5">
+                <div>
+                    <label for="newPageName" class="text-sm font-semibold text-zinc-800">Nome da página</label>
+                    <input id="newPageName" wire:model="newPageName" placeholder="Ex.: Serviços" required class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                    @error('newPageName') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="newPageSlug" class="text-sm font-semibold text-zinc-800">Endereço (slug)</label>
+                    <input id="newPageSlug" wire:model="newPageSlug" placeholder="Ex.: servicos (opcional)" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                    <p class="mt-1.5 text-xs text-zinc-400">Se ficar vazio, é criado automaticamente a partir do nome.</p>
+                    @error('newPageSlug') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="newPageStatus" class="text-sm font-semibold text-zinc-800">Estado inicial</label>
+                    <select id="newPageStatus" wire:model="newPageStatus" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                        <option value="draft">Rascunho</option>
+                        <option value="published">Publicada</option>
+                    </select>
+                    @error('newPageStatus') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div class="flex flex-col-reverse gap-3 border-t border-zinc-100 pt-5 sm:flex-row sm:justify-end">
+                    <button type="button" @click="showCreatePageModal = false" class="inline-flex items-center justify-center rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50">Cancelar</button>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="createPage" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60">
+                        <span wire:loading.remove wire:target="createPage"><flux:icon name="plus" class="size-4" /></span>
+                        <span wire:loading wire:target="createPage"><flux:icon name="arrow-path" class="size-4 animate-spin" /></span>
+                        Criar página
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
 
     <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
