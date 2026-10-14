@@ -273,4 +273,79 @@
             <p>Website criado com <span class="font-semibold text-zinc-700">Finder</span></p>
         </div>
     </footer>
+
+@if($preview && request()->boolean('visual_edit'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const edits = new Map();
+    const nodes = Array.from(document.querySelectorAll('h1,h2,h3,p,a,button,span,img'));
+    const saved = @json(data_get($page->theme, 'visual_edits', []));
+    nodes.forEach(function (el, index) {
+        el.dataset.visualKey = 'v' + index;
+        const value = saved[el.dataset.visualKey];
+        if (value) {
+            if (value.text && el.children.length === 0) el.textContent = value.text;
+            if (value.src && el.tagName === 'IMG') el.src = value.src;
+            if (value.href && el.tagName === 'A') el.href = value.href;
+            if (value.color) el.style.color = value.color;
+            if (value.background) el.style.backgroundColor = value.background;
+        }
+    });
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:fixed;top:12px;left:12px;z-index:999999;background:#18181b;color:white;padding:12px;display:flex;gap:8px;align-items:center;border-radius:12px;font:600 13px system-ui';
+    bar.innerHTML = '<b>Editar website</b><button id="visual-color" style="background:#3f3f46;padding:8px;border-radius:8px">Cores</button><button id="visual-save" style="background:#4f46e5;padding:8px;border-radius:8px">Guardar</button><span id="visual-status"></span>';
+    document.body.appendChild(bar);
+    let selected = null;
+    nodes.forEach(function (el) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function (event) {
+            if (event.target.closest('#visual-save, #visual-color')) return;
+            event.preventDefault(); event.stopPropagation(); selected = el;
+            if (el.tagName === 'IMG') {
+                const value = prompt('URL da imagem', el.src);
+                if (value) { el.src = value; edits.set(el.dataset.visualKey, {key:el.dataset.visualKey,src:value}); }
+            } else if (el.tagName === 'A') {
+                if (el.children.length === 0) {
+                    const value = prompt('Texto', el.innerText);
+                    if (value !== null) { el.textContent = value; edits.set(el.dataset.visualKey, {...(edits.get(el.dataset.visualKey)||{}),key:el.dataset.visualKey,text:value}); }
+                }
+                const href = prompt('Destino do link', el.getAttribute('href') || '');
+                if (href !== null) { el.setAttribute('href',href); edits.set(el.dataset.visualKey, {...(edits.get(el.dataset.visualKey)||{}),key:el.dataset.visualKey,href:href}); }
+            } else if (el.children.length === 0) {
+                el.contentEditable = 'true'; el.focus();
+                el.onblur = function () { el.contentEditable = 'false'; edits.set(el.dataset.visualKey, {...(edits.get(el.dataset.visualKey)||{}),key:el.dataset.visualKey,text:el.innerText}); };
+            }
+        }, true);
+    });
+    document.getElementById('visual-color').onclick = function () {
+        if (!selected) return;
+        const color = prompt('Cor do texto (#hex)', '#27272a');
+        if (color && /^#[0-9a-fA-F]{6}$/.test(color)) {
+            selected.style.color = color;
+            edits.set(selected.dataset.visualKey, {...(edits.get(selected.dataset.visualKey)||{}),key:selected.dataset.visualKey,color:color});
+        }
+        const background = prompt('Cor de fundo (#hex)', '');
+        if (background && /^#[0-9a-fA-F]{6}$/.test(background)) {
+            selected.style.backgroundColor = background;
+            edits.set(selected.dataset.visualKey, {...(edits.get(selected.dataset.visualKey)||{}),key:selected.dataset.visualKey,background:background});
+        }
+    };
+    document.getElementById('visual-save').onclick = async function () {
+        const status = document.getElementById('visual-status');
+        if (!edits.size) { status.textContent = 'Sem alterações'; return; }
+        status.textContent = 'A guardar…';
+        try {
+            const response = await fetch(@json(route('site.manage.pages.visual.save', $page)), {
+                method: 'POST', credentials: 'same-origin',
+                headers: {'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':@json(csrf_token())},
+                body: JSON.stringify({edits:Array.from(edits.values())})
+            });
+            if (!response.ok) throw new Error('Erro ' + response.status);
+            edits.clear(); status.textContent = 'Guardado ✓';
+        } catch (error) { status.textContent = 'Não foi possível guardar'; }
+    };
+});
+</script>
+@endif
+
 </div>
