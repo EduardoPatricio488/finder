@@ -35,7 +35,7 @@
     @endif
 
     <form wire:submit="saveSidebar">
-        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+        <div class="grid grid-cols-1 items-start gap-6">
             <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <div class="flex items-start gap-3">
                     <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
@@ -47,7 +47,7 @@
                     </div>
                 </div>
 
-                <div class="mt-6 space-y-5">
+                <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                     <div>
                         <label for="sidebarPosition" class="text-sm font-semibold text-zinc-800">Posição da sidebar</label>
                         <select id="sidebarPosition" wire:model="sidebarPosition" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
@@ -69,9 +69,39 @@
                         @error('sidebarType') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
 
-                    <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
-                        <flux:icon name="check" class="size-4" /> Guardar sidebar
-                    </button>
+                    <div>
+                        <label for="sidebarAppearance" class="text-sm font-semibold text-zinc-800">Aparência</label>
+                        <select id="sidebarAppearance" wire:model="sidebarAppearance" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                            <option value="light">Clara</option>
+                            <option value="dark">Escura</option>
+                        </select>
+                        @error('sidebarAppearance') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label for="sidebarWidth" class="text-sm font-semibold text-zinc-800">Largura</label>
+                        <select id="sidebarWidth" wire:model="sidebarWidth" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                            <option value="narrow">Estreita</option>
+                            <option value="normal">Normal</option>
+                            <option value="wide">Larga</option>
+                        </select>
+                        @error('sidebarWidth') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label for="sidebarIcons" class="text-sm font-semibold text-zinc-800">Ícones</label>
+                        <select id="sidebarIcons" wire:model="sidebarIcons" class="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm">
+                            <option value="shown">Mostrar</option>
+                            <option value="hidden">Ocultar</option>
+                        </select>
+                        @error('sidebarIcons') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="md:col-span-2 xl:col-span-3">
+                        <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                            <flux:icon name="check" class="size-4" /> Guardar sidebar
+                        </button>
+                    </div>
                 </div>
             </section>
 
