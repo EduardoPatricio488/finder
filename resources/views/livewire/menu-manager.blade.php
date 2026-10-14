@@ -75,7 +75,7 @@
                 @foreach ($pages as $page)
                     @php($requiredItemId = $requiredItemIds[$page->slug] ?? null)
                     @php($requiredItem = $requiredItemId ? $items->firstWhere('id', $requiredItemId) : null)
-                    <div class="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 sm:flex-row sm:items-center">
+                    <div role="link" tabindex="0" onclick="if (!event.target.closest('input,button,a,select')) window.location.href='{{ route('site.manage.pages.edit', $page->id) }}'" class="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/40 sm:flex-row sm:items-center">
                         <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-zinc-500 shadow-sm">
                             <flux:icon name="{{ match($page->slug) { 'home' => 'home', 'about' => 'user', 'contact' => 'envelope', default => 'document-text' } }}" class="size-5" />
                         </div>
@@ -83,6 +83,7 @@
                             <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">{{ $this->pageLabel($page->slug) }}</p>
                             <input wire:model="requiredLabels.{{ $page->slug }}" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900" />
                         </div>
+                        <a href="{{ route('site.manage.pages.edit', $page->id) }}" class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">Editar página →</a>
                         <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
                             <span class="size-1.5 rounded-full bg-emerald-500"></span>
                             Obrigatório
@@ -94,5 +95,24 @@
             <p class="mt-4 text-xs leading-5 text-zinc-400">Estas três páginas são criadas automaticamente e permanecem sempre no menu. Aqui só podes alterar o nome apresentado.</p>
         </div>
     </div>
+
+    <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div><h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2><p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p></div>
+            <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
+        </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach($allPages as $sitePageOption)
+                <a href="{{ route('site.manage.pages.edit', $sitePageOption->id) }}" class="group rounded-2xl border border-zinc-200 p-4 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md">
+                    <div class="flex items-start justify-between gap-3">
+                        <div><p class="font-semibold text-zinc-900">{{ $sitePageOption->name }}</p><p class="mt-1 text-xs text-zinc-500">/ {{ $sitePageOption->slug }}</p></div>
+                        <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $sitePageOption->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $sitePageOption->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
+                    </div>
+                    <p class="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-800">Editar página →</p>
+                </a>
+            @endforeach
+        </div>
+    </section>
+
 </div>
 </div>
