@@ -147,7 +147,14 @@
 
     <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
-            <div><h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2><p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p></div>
+            <div>
+                <h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2>
+                <p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p>
+                <div class="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm text-amber-900">
+                    <flux:icon name="information-circle" class="mt-0.5 size-5 shrink-0 text-amber-600" />
+                    <p><strong>Páginas obrigatórias:</strong> Início, Sobre mim e Contactos são páginas essenciais do website. Mantém estas páginas no site e configura o respetivo conteúdo para os visitantes.</p>
+                </div>
+            </div>
             <div class="flex flex-wrap items-center gap-2">
                 <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
                 <button type="button" wire:click="$set('showCreatePageModal', true)" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
