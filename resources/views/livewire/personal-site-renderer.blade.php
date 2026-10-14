@@ -152,7 +152,7 @@
     </header>
 
     @if($preview)
-        <div class="border-b border-amber-200 bg-amber-50 px-5 py-2.5 text-center text-xs font-medium text-amber-800">Pré-visualização privada — este conteúdo ainda não está público.</div>
+        <div data-visual-ignore class="border-b border-amber-200 bg-amber-50 px-5 py-2.5 text-center text-xs font-medium text-amber-800">Pré-visualização privada — este conteúdo ainda não está público.</div>
     @endif
 
     @if(session('site_form_success'))
@@ -305,12 +305,12 @@
         </div>
     </footer>
 
-@if($preview && request()->boolean('visual_edit'))
+@if(true)
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const edits = new Map();
-    const nodes = Array.from(document.querySelectorAll('h1,h2,h3,h4,p,a,button,span,img,section,header,footer,nav,main,article,li,small,strong,em,label,div'));
     const saved = @json(data_get($page->theme, 'visual_edits', []));
+    const nodes = Array.from(document.querySelectorAll('h1,h2,h3,h4,p,a,button,span,img,section,header,footer,nav,main,article,li,small,strong,em,label,div')).filter(el => !el.closest('[data-visual-ignore]'));
     nodes.forEach(function (el, index) {
         el.dataset.visualKey = 'v' + index;
         const value = saved[el.dataset.visualKey];
@@ -322,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (value.background) el.style.backgroundColor = value.background;
         }
     });
+    if (!@json($preview && request()->boolean('visual_edit'))) return;
     const bar = document.createElement('div');
     bar.style.cssText = 'position:fixed;top:12px;left:12px;z-index:999999;background:#18181b;color:white;padding:12px;display:flex;gap:8px;align-items:center;border-radius:12px;font:600 13px system-ui';
     bar.innerHTML = '<b>Editar website</b><button id="visual-color" style="background:#3f3f46;padding:8px;border-radius:8px">Cores</button><button id="visual-save" style="background:#4f46e5;padding:8px;border-radius:8px">Guardar</button><span id="visual-status"></span>';
