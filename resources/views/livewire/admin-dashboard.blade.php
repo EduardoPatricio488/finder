@@ -1,4 +1,46 @@
 <div class="mx-auto max-w-7xl space-y-8 px-6 py-10 lg:px-12">
+    <div class="max-w-sm">
+        <label for="management-site-filter" class="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-500">Filtrar por website</label>
+        <select id="management-site-filter" wire:model.live="selectedSiteId" class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
+            <option value="">Todos os websites</option>
+            @foreach($sites as $siteOption)
+                <option value="{{ $siteOption->id }}">{{ $siteOption->name }}</option>
+            @endforeach
+        </select>
+        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Por defeito, os dados incluem todos os websites a que tens acesso. Escolhe um para ver apenas esse.</p>
+    </div>
+
+    @if($allSitesMode)
+        <header>
+            <div class="text-[10px] font-black uppercase tracking-[0.3em] text-amber-700">Painel de Gestão</div>
+            <h1 class="mt-3 text-4xl font-black tracking-tight text-stone-950 dark:text-white">Todos os websites</h1>
+            <p class="mt-2 text-sm text-stone-500">Resumo conjunto dos teus websites, sem misturar os dados individuais de cada um.</p>
+        </header>
+
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p class="text-xs font-bold uppercase tracking-wider text-stone-500">Websites</p><p class="mt-3 text-3xl font-black text-stone-950 dark:text-white">{{ $totalSites }}</p></div>
+            <div class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p class="text-xs font-bold uppercase tracking-wider text-stone-500">Produtos ativos</p><p class="mt-3 text-3xl font-black text-stone-950 dark:text-white">{{ $activeProducts }} <span class="text-sm font-semibold text-stone-400">/ {{ $totalProducts }}</span></p></div>
+            <div class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p class="text-xs font-bold uppercase tracking-wider text-stone-500">Receita hoje</p><p class="mt-3 text-3xl font-black text-stone-950 dark:text-white">{{ number_format($todayRevenue, 2, ',', '.') }} €</p><p class="mt-1 text-xs text-stone-500">{{ $todaySales }} venda(s)</p></div>
+            <div class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p class="text-xs font-bold uppercase tracking-wider text-stone-500">Encomendas</p><p class="mt-3 text-3xl font-black text-stone-950 dark:text-white">{{ $totalOrders }}</p></div>
+            <div class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p class="text-xs font-bold uppercase tracking-wider text-stone-500">Utilizadores associados</p><p class="mt-3 text-3xl font-black text-stone-950 dark:text-white">{{ $totalMembers }}</p></div>
+            <div class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p class="text-xs font-bold uppercase tracking-wider text-stone-500">Produtos com stock baixo</p><p class="mt-3 text-3xl font-black text-stone-950 dark:text-white">{{ $lowStockTotal }}</p></div>
+        </div>
+
+        <section class="overflow-hidden rounded-2xl border border-stone-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="border-b border-stone-100 px-6 py-5 dark:border-zinc-800"><h2 class="text-lg font-black text-stone-950 dark:text-white">Resumo por website</h2><p class="mt-1 text-sm text-stone-500">Cada linha mantém os indicadores separados por website.</p></div>
+            @forelse($siteSummaries as $summary)
+                <div class="grid gap-4 border-b border-stone-100 px-6 py-5 last:border-b-0 dark:border-zinc-800 md:grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,1fr))] md:items-center">
+                    <div class="min-w-0"><p class="truncate font-bold text-stone-950 dark:text-white">{{ $summary['site']->name }}</p><p class="mt-1 text-xs text-stone-500">{{ $summary['site']->plan->name ?? 'Sem plano' }} · {{ $summary['site']->statusLabel() }}</p><button type="button" wire:click="$set('selectedSiteId', '{{ $summary['site']->id }}')" class="mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">Ver este website →</button></div>
+                    <div><p class="text-xs text-stone-500">Produtos ativos</p><p class="mt-1 font-bold text-stone-900 dark:text-white">{{ $summary['activeProducts'] }} / {{ $summary['products'] }}</p></div>
+                    <div><p class="text-xs text-stone-500">Encomendas</p><p class="mt-1 font-bold text-stone-900 dark:text-white">{{ $summary['orders'] }}</p></div>
+                    <div><p class="text-xs text-stone-500">Receita hoje</p><p class="mt-1 font-bold text-stone-900 dark:text-white">{{ number_format($summary['todayRevenue'], 2, ',', '.') }} €</p></div>
+                    <div><p class="text-xs text-stone-500">Stock baixo</p><p class="mt-1 font-bold text-stone-900 dark:text-white">{{ $summary['lowStock'] }}</p></div>
+                </div>
+            @empty
+                <p class="p-6 text-sm text-stone-500">Não tens websites disponíveis para gerir.</p>
+            @endforelse
+        </section>
+    @else
 
     @if($site->plan && $site->plan->name === 'Free')
         <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-amber-500 to-orange-600 p-0.5 shadow-lg shadow-amber-500/20 animate-in fade-in slide-in-from-top-4">
@@ -11,8 +53,6 @@
             </div>
         </div>
     @endif
-
-    <div class="max-w-xs"><x-site-workspace-selector :current-site="$site" route-name="dashboard" /></div>
 
     <header class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
@@ -43,4 +83,5 @@
 
         <section class="rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><div class="flex items-center justify-between"><div><h2 class="text-lg font-black text-stone-950 dark:text-white">Stock a verificar</h2><p class="mt-1 text-sm text-stone-500">Produtos que atingiram o stock mínimo.</p></div><flux:button href="{{ route('products') }}" variant="ghost" size="sm">Ver produtos</flux:button></div><div class="mt-6 space-y-3">@forelse($lowStockProducts as $product)<div class="flex items-center justify-between rounded-2xl bg-stone-50 px-4 py-3 dark:bg-zinc-800/60"><div><p class="text-sm font-semibold text-stone-900 dark:text-white">{{ $product->name }}</p><p class="text-xs text-stone-500">Mínimo: {{ $product->minimum_stock }}</p></div><span class="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700 dark:bg-red-950/40 dark:text-red-300">{{ $product->stock }}</span></div>@empty<p class="rounded-2xl bg-stone-50 p-5 text-sm text-stone-500 dark:bg-zinc-800/60">O stock está controlado.</p>@endforelse</div></section>
     </div>
+    @endif
 </div>
