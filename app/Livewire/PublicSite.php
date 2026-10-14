@@ -204,12 +204,18 @@ class PublicSite extends Component
             'deliveryAddress' => ['required', 'string', 'max:1000'],
             'paymentMethod' => ['required', 'in:mbway,transferencia,cartao,entrega'],
         ]);
+        $cart = [];
+        foreach ($cart as $productId => $quantity) {
+            abort_unless(ctype_digit((string) $productId) && (int) $productId > 0, 422, 'O carrinho contém um produto inválido.');
+            $cart[(int) $productId] = (int) $quantity;
+        }
+
         $orderNumber = 'PED-'.now()->format('Ymd').'-'.strtoupper(Str::random(6));
 
-        DB::transaction(function () use ($validated, $orderNumber): void {
+        DB::transaction(function () use ($validated, $orderNumber, $cart): void {
             $site = $this->site;
             $customer = $site->customers()->updateOrCreate(['email' => $validated['customerEmail']], ['name' => $validated['customerName'], 'phone' => $validated['customerPhone']]);
-            $products = $site->products()->whereIn('id', array_keys($this->cart))->with('promotions')->lockForUpdate()->get()->keyBy('id');
+            $products = $site->products()->whereIn('id', array_keys($cart))->with('promotions')->lockForUpdate()->get()->keyBy('id');
             $subtotal = 0.0;
             foreach ($this->cart as $productId => $quantity) {
                 $product = $products->get($productId);
