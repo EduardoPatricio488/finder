@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Site;
 use App\Services\FinderNotificationService;
+use App\Support\SiteContext;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -32,7 +33,7 @@ class SiteSettings extends Component
 
     public function mount(): void
     {
-        $site = \App\Support\SiteContext::current();
+        $site = SiteContext::current();
         abort_unless($site instanceof Site && $site->isManageableBy(auth()->user()), 403);
 
         $this->site = $site;
