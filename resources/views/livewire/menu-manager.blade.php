@@ -178,16 +178,16 @@
             <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
         </div>
         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach($allPages as $sitePageOption)
+            @foreach($allPages as $pageRecord)
                 @php
-                    $pageMenuItem = $items->firstWhere('site_page_id', $sitePageOption->id);
-                    $pageInSidebar = in_array((string) $sitePageOption->id, $sidebarPageIds, true);
+                    $pageMenuItem = $items->firstWhere('site_page_id', $pageRecord->id);
+                    $pageInSidebar = in_array((string) $pageRecord->id, $sidebarPageIds, true);
                     $pageInAppliedHeader = $menuApplied && $pageMenuItem && $pageMenuItem->is_visible;
                 @endphp
-                <a href="{{ route('site.manage.pages.edit', $sitePageOption->id) }}" class="group rounded-2xl border border-zinc-200 p-4 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md">
+                <a href="{{ route('site.manage.pages.edit', $pageRecord->id) }}" class="group rounded-2xl border border-zinc-200 p-4 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md">
                     <div class="flex items-start justify-between gap-3">
-                        <div><p class="font-semibold text-zinc-900">{{ $sitePageOption->name }}</p><p class="mt-1 text-xs text-zinc-500">/ {{ $sitePageOption->slug }}</p></div>
-                        <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $sitePageOption->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $sitePageOption->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
+                        <div><p class="font-semibold text-zinc-900">{{ $pageRecord->name }}</p><p class="mt-1 text-xs text-zinc-500">/ {{ $pageRecord->slug }}</p></div>
+                        <span class="rounded-full px-2 py-1 text-[10px] font-semibold {{ $pageRecord->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $pageRecord->status === 'published' ? 'Publicada' : 'Rascunho' }}</span>
                     </div>
                     <div class="mt-3 flex flex-wrap gap-1.5">
                         @if($pageInAppliedHeader)
