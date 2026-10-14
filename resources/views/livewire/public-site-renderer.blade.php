@@ -221,7 +221,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const edits = new Map();
-    const nodes = Array.from(document.querySelectorAll('h1,h2,h3,p,a,button,span,img'));
+    const nodes = Array.from(document.querySelectorAll('h1,h2,h3,h4,p,a,button,span,img,section,header,footer,nav,main,article,li,small,strong,em,label,div'));
     nodes.forEach(function (el, index) {
         el.dataset.visualKey = 'v' + index;
         const saved = @json(data_get($page->theme, 'visual_edits', []));
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 el.contentEditable = 'true'; el.focus();
                 el.onblur = function () { el.contentEditable = 'false'; edits.set(el.dataset.visualKey, {...(edits.get(el.dataset.visualKey)||{}),key:el.dataset.visualKey,text:el.innerText}); };
             }
-        }, true);
+        }, false);
     });
     document.getElementById('visual-color').onclick = function () {
         if (!selected) return;
