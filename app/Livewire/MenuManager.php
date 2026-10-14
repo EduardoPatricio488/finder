@@ -141,8 +141,8 @@ class MenuManager extends Component
     {
         $page = $this->site->pages()->findOrFail($pageId);
 
-        if ($page->is_homepage) {
-            session()->flash('status', 'A página inicial não pode ser eliminada. Define outra página como inicial primeiro.');
+        if ($page->is_homepage || in_array($page->slug, ['home', 'about', 'contact'], true)) {
+            session()->flash('status', 'Esta é uma página obrigatória do website e não pode ser eliminada.');
             return;
         }
 
@@ -367,7 +367,7 @@ class MenuManager extends Component
 
         return view('livewire.menu-manager', [
             'pages' => $this->availablePages(),
-            'allPages' => $this->site->pages()->orderBy('sort_order')->get(['id', 'name', 'slug', 'status']),
+            'allPages' => $this->site->pages()->orderBy('sort_order')->get(['id', 'name', 'slug', 'status', 'is_homepage']),
             'items' => $menu?->items ?? collect(),
             'menus' => collect(),
         ]);
