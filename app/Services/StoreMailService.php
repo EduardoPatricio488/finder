@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Mail\StoreNotification;
 use App\Models\Order;
 use App\Models\Product;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class StoreMailService
 {
@@ -63,7 +63,7 @@ class StoreMailService
     {
         $email = config('mail.admin_address');
 
-        if (! is_string($email) || trim($email) === '') {
+        if (!is_string($email) || trim($email) === '') {
             return;
         }
 
