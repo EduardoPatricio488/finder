@@ -23,6 +23,8 @@ class PublicSite extends Component
 
     public bool $preview = false;
 
+    public bool $showLoginPage = false;
+
     public string $contactName = '';
 
     public string $contactEmail = '';
@@ -55,10 +57,14 @@ class PublicSite extends Component
         $this->cartOpen = request()->query('cart') === '1';
         $this->customerName = (string) (auth()->user()?->name ?? '');
         $this->customerEmail = (string) (auth()->user()?->email ?? '');
-        $this->page = $pageSlug
-            ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
-            : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
-                ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail());
+        $this->showLoginPage = $pageSlug === 'login';
+        $this->page = $this->showLoginPage
+            ? ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
+                ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail())
+            : ($pageSlug
+                ? $this->site->pages()->where('slug', $pageSlug)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->firstOrFail()
+                : ($this->site->pages()->where('is_homepage', true)->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->first()
+                    ?? $this->site->pages()->when(! $this->preview, fn ($query) => $query->where('status', 'published'))->orderBy('sort_order')->firstOrFail()));
 
         if (! $this->preview) {
             SiteAnalyticsEvent::create([
@@ -249,9 +255,11 @@ class PublicSite extends Component
 
     public function render(): mixed
     {
-        $view = $this->site->type === 'personal'
-            ? 'livewire.personal-site-renderer'
-            : 'livewire.public-site-renderer';
+        $view = $this->showLoginPage
+            ? 'livewire.site-login-page'
+            : ($this->site->type === 'personal'
+                ? 'livewire.personal-site-renderer'
+                : 'livewire.public-site-renderer');
 
         $media = $this->site->media
             ->filter(fn ($item) => filled($item->placement))
@@ -259,6 +267,7 @@ class PublicSite extends Component
 
         return view($view, [
             'mediaByPlacement' => $media,
+            'showLoginPage' => $this->showLoginPage,
         ])
             ->layout('layouts.public-site', [
                 'site' => $this->site,
