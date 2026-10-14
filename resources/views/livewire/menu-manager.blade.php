@@ -175,7 +175,13 @@
     <section class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div><h2 class="text-lg font-semibold text-zinc-950">Todas as páginas do website</h2><p class="mt-1 text-sm text-zinc-500">Seleciona qualquer página para editar textos, secções, imagens e widgets.</p></div>
-            <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600">{{ $allPages->count() }} páginas</span>
+                <button type="button" wire:click="$set('showCreatePageModal', true)" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <flux:icon name="plus" class="size-4" />
+                    Adicionar página
+                </button>
+            </div>
         </div>
         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($allPages as $page)
